@@ -539,6 +539,12 @@ body[data-aba=decks] .lado{display:none}
 .b-prev{position:fixed;width:250px;border-radius:12px;box-shadow:0 12px 40px rgba(0,0,0,.5);pointer-events:none;z-index:50}
 #b-toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--tinta);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:600;opacity:0;transition:.2s;pointer-events:none;z-index:60;max-width:calc(100vw - 32px)}
 #b-toast.on{opacity:1;transform:translate(-50%,0)}
+
+img.ms{background:none;border-radius:50%;width:1.05em;height:1.05em;padding:0;margin:0 1px 0 0;vertical-align:-.16em;box-shadow:-1px 1px 0 rgba(0,0,0,.55);object-fit:contain}
+.b-pips img.ms,.pips img.ms{margin:0}
+.b-mana{display:inline-flex;gap:1px;align-items:center}.b-mana img.ms{font-size:14px;margin:0}
+.b-mana img.ms{font-size:16px}
+.b-st .b-pips img.ms{font-size:22px}.b-tile .b-pips img.ms,.b-meta .b-pips img.ms{font-size:16px}
 </style>
 <header class="topo"><div class="topo-in">
   <div class="marca"><span class="pips5" aria-hidden="true"><i style="background:var(--w)"></i><i style="background:var(--u)"></i><i style="background:var(--b)"></i><i style="background:var(--r)"></i><i style="background:var(--g)"></i></span>Grimório Arena</div>
@@ -2180,7 +2186,7 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-const COTA=5.88;
+const COTA=5.87;
 /* fila única do Scryfall: no máximo 2 por segundo, espera e tenta de novo se vier 429 */
 let _sq=Promise.resolve(),_sUlt=0;
 function scryFetch(u,o){const p=_sq.then(async()=>{for(let k=0;k<3;k++){const w=_sUlt+550-Date.now();if(w>0)await new Promise(z=>setTimeout(z,w));_sUlt=Date.now();
@@ -2341,7 +2347,8 @@ async function traduz(en,r){const el=()=>$('#ficha').hidden?null:$('#ff-pt');
 }
 const slug=s=>norm(s).replace(/[^a-z]+/g,'-');
 const slugE=s=>norm(s.split(' // ')[0]).replace(/[^a-z0-9 -]/g,'').replace(/\s+/g,'-');
-const simb=s=>String(s||'').replace(/\{([^}]+)\}/g,(_,v)=>{const c=v.replace(/\//g,'');return `<i class="ms ms-${/^[WUBRG]$/.test(c)?c.toLowerCase():'n'}">${/^[WUBRG]$/.test(c)?'':h(v)}</i>`;});
+const SV=v=>`<img class="ms" src="https://svgs.scryfall.io/card-symbols/${encodeURIComponent(v.replace(/\//g,'').toUpperCase())}.svg" alt="{${h(v)}}" title="{${h(v)}}" loading="lazy">`;
+const simb=s=>String(s||'').replace(/\{([^}]+)\}/g,(_,v)=>SV(v));
 document.addEventListener('click',e=>{const c=e.target.closest('[data-carta]');if(c){abreFicha(c.dataset.carta);return;}
   if(e.target.id==='ficha'||e.target.id==='ficha-x')$('#ficha').hidden=true;});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')$('#ficha').hidden=true;});
@@ -2422,7 +2429,7 @@ function listaDeck(){
 }
 function linhaCarta(x){const u=parseFloat(x.m.usd)||0;
   return `<button class="lc" data-carta="${h(x.m.nome)}"><span class="q mono">${x.q}</span><span class="n">${h(x.m.frente)}${GC.has(x.m.nome)?' <span class="gc" title="Game changer">GC</span>':''}</span><span class="c mono">${simb(x.m.custoTxt)}</span><span class="p mono fraca">${u?brl(u*COTA*x.q):''}</span></button>`;}
-const pips=ci=>`<span class="pips">${[...(ci||'C')].map(c=>`<i class="ms ms-${c.toLowerCase()}"></i>`).join('')}</span>`;
+const pips=ci=>`<span class="pips">${[...(ci||'C')].map(c=>SV(c)).join('')}</span>`;
 
 /* ---------- OPONENTES ---------- */
 function pintaOps(){
@@ -3332,7 +3339,7 @@ function pintaDecks(){const id=(location.hash.split('/')[1]||'');if(id&&BK.lst.s
   const pubs=(typeof DECKS!=='undefined'?DECKS:[]).filter(d=>d.pub||d.meu);
   $('#b-pubs-box').hidden=!pubs.length;$('#b-pubs').innerHTML=pubs.map(d=>tile({id:d.id,nome:d.nome,cmd:d.cmd,fonte:d.fonte},1)).join('');
   bBusca(BK.lst.map(d=>d.cmd).concat(pubs.map(d=>d.cmd)).filter(Boolean)).then(()=>{if(!BK.cur&&document.body.dataset.aba==='decks')$$('.b-tile').forEach(el=>{const d=BK.lst.find(x=>x.id===el.dataset.bopen)||pubs.find(x=>x.id===el.dataset.bopen);const a=d&&d.cmd&&BK.info[d.cmd]&&BK.info[d.cmd].art;const s=el.querySelector('.b-art');if(a&&!s.style.backgroundImage)s.style.backgroundImage=`url(${a})`;});});}
-const bPips=cs=>{const o=(cs||[]).filter(c=>/[WUBRG]/.test(c));return `<span class="b-pips">${(o.length?o:['C']).map(c=>`<i class="ms ms-${c.toLowerCase()==='c'?'n':c.toLowerCase()}" title="${c}"></i>`).join('')}</span>`;};
+const bPips=cs=>{const o=(cs||[]).filter(c=>/[WUBRG]/.test(c));return `<span class="b-pips">${(o.length?o:['C']).map(c=>SV(c)).join('')}</span>`;};
 
 /* ---- editor ---- */
 function pintaEditor(){const d=bDeck();if(!d)return;const tot=bTotal(d),ci=bCI(d),art=d.cmd&&BK.info[d.cmd]&&BK.info[d.cmd].art;
