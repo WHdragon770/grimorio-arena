@@ -1954,20 +1954,39 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-const COTA=5.86;
+const COTA=5.87;
 const GC=new Set(['Drannith Magistrate','Enlightened Tutor','Humility',"Serra's Sanctum",'Smothering Tithe',"Teferi's Protection",'Consecrated Sphinx','Cyclonic Rift','Expropriate','Force of Will','Fierce Guardianship','Gifts Ungiven','Intuition','Jin-Gitaxias, Core Augur','Mystical Tutor','Narset, Parter of Veils','Rhystic Study','Sway of the Stars',"Thassa's Oracle",'Urza, Lord High Artificer','Ad Nauseam',"Bolas's Citadel",'Demonic Tutor','Imperial Seal','Opposition Agent','Tergrid, God of Fright','Vampiric Tutor','Orcish Bowmasters','Necropotence','Gamble',"Jeska's Will",'Underworld Breach','Crop Rotation','Food Chain',"Gaea's Cradle",'Natural Order','Seedborn Muse','Survival of the Fittest','Vorinclex, Voice of Hunger','Worldly Tutor','Aura Shards','Coalition Victory','Grand Arbiter Augustin IV','Kinnan, Bonder Prodigy',"Yuriko, the Tiger's Shadow",'Notion Thief','Winota, Joiner of Forces','Ancient Tomb','Chrome Mox','Field of the Dead','Glacial Chasm','Grim Monolith',"Lion's Eye Diamond",'Mana Vault',"Mishra's Workshop",'Mox Diamond','Panoptic Mirror','The One Ring','The Tabernacle at Pendrell Vale','Biorhythm','Braids, Cabal Minion','Mind Twist','Trouble in Pairs','Farewell']);
 
 let DB=null,IX=new Map(),ALIAS=new Map(),NX=new Map(),PT=new Map(),DECKS=[],OPD=new Map();
 let EU=null; /* meu deck montado */
 let IMG=null;const ROWS=[];
-function fundoFoto(nome){const f=IMG&&IMG[nome];if(!f)return '';const [sh,j]=f,rw=ROWS[sh]||1;
-  return `background-image:url(fotos/f${sh}.jpg);background-size:1000% ${rw*100}%;background-position:${(j%10)/9*100}% ${rw>1?Math.floor(j/10)/(rw-1)*100:0}%;`;}
+// Site (GitHub Pages): fotos direto do CDN do Scryfall, cache no navegador
+let SCRY={};try{SCRY=JSON.parse(localStorage.getItem('ga_scry')||'{}')}catch(e){}
+const _fila=new Set();let _tm=null,_rodando=false;const _frente=n=>String(n).split(' // ')[0];
+function scryUrl(n,g){const v=SCRY[_frente(n)];return v?(g?v[1]:v[0]):'';}
+function fundoFoto(nome){if(!nome)return '';const u=scryUrl(nome);
+  if(u)return `background-image:url(${u});background-size:cover;background-position:center;`;
+  if(SCRY[_frente(nome)]!==0){_fila.add(_frente(nome));clearTimeout(_tm);_tm=setTimeout(scryPega,120);}return '';}
+async function scryPega(){if(_rodando)return;_rodando=true;
+  try{while(_fila.size){const lote=[..._fila].slice(0,75);lote.forEach(n=>_fila.delete(n));
+    try{const r=await fetch('https://api.scryfall.com/cards/collection',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifiers:lote.map(name=>({name}))})});
+      if(!r.ok)break;const j=await r.json();
+      for(const c of j.data||[]){const iu=c.image_uris||(c.card_faces&&c.card_faces[0].image_uris);if(iu)SCRY[_frente(c.name)]=[iu.normal,iu.large||iu.normal];}
+      for(const nf of j.not_found||[])if(nf.name)SCRY[nf.name]=0;
+    }catch(e){break;}
+    await new Promise(r=>setTimeout(r,110));}
+    try{localStorage.setItem('ga_scry',JSON.stringify(SCRY))}catch(e){}
+    document.querySelectorAll('.foto[data-carta]').forEach(el=>{if(!el.style.backgroundImage){const u=scryUrl(el.dataset.carta);if(u)el.style.cssText+=';'+fundoFoto(el.dataset.carta);}});
+    if(typeof redesenhaMesa==='function')try{redesenhaMesa()}catch(e){}
+  }finally{_rodando=false;if(_fila.size)scryPega();}}
+async function scryUma(n){if(scryUrl(n,1)||SCRY[_frente(n)]===0)return;_fila.add(_frente(n));_rodando=false;await scryPega();}
+
 let RES=null;
 function acharDB(n){const k=norm(n);let r=IX.get(k);if(!r&&ALIAS.has(k))r=IX.get(norm(ALIAS.get(k)));if(!r&&NX.has(k))r=IX.get(norm(NX.get(k)));return r||null;}
 
 /* ---------- dados ---------- */
 async function carrega(){
-  const [a,b,c,d,e]=await Promise.all([fetch('cards.json'),fetch('names.tsv'),fetch('alias.json'),fetch('decks.json'),fetch('img.json').catch(()=>null)]);
+  const [a,b,c,d,e]=await Promise.all([fetch('cards.json'),fetch('names.tsv'),fetch('alias.json'),fetch('decks.json'),Promise.resolve(null)]);
   if(e&&e.ok){IMG=await e.json();for(const v of Object.values(IMG))ROWS[v[0]]=Math.max(ROWS[v[0]]||1,Math.floor(v[1]/10)+1);}
   if(!a.ok)throw new Error('sem banco de cartas');
   DB=await a.json();
@@ -2020,14 +2039,14 @@ addEventListener('hashchange',aba);
 
 /* ---------- ficha da carta ---------- */
 let GR=null,PTO=null,TRAD={};try{TRAD=JSON.parse(localStorage.getItem('ga_trad')||'{}');}catch(e){}
-async function carregaFicha(){if(GR)return;try{const [a,b]=await Promise.all([fetch('grande.json'),fetch('pt.json')]);GR=a.ok?await a.json():{};PTO=b.ok?await b.json():{};}catch(e){GR={};PTO={};}}
+async function carregaFicha(){if(GR)return;try{const [a,b]=await Promise.all([Promise.resolve({ok:false}),fetch('pt.json')]);GR=a.ok?await a.json():{};PTO=b.ok?await b.json():{};}catch(e){GR={};PTO={};}}
 const ptTxt=s=>h(s).replace(/\n/g,'<br>');
 async function abreFicha(nome){
-  const r=acharDB(nome);if(!r)return;await carregaFicha();
+  const r=acharDB(nome);if(!r)return;await carregaFicha();await scryUma(r[0]);
   const m=modelo(r),ro=rotulo(m),en=r[0],of=PTO[en];
   const ptn=(of&&of.n)||PT.get(en)||PT.get(en.split(' // ')[0]);const usd=parseFloat(r[8])||0;
   const q=encodeURIComponent(en.split(' // ')[0]);
-  const foto=GR[en]?`<img src="grande/${GR[en]}" alt="${h(en)}">`:(fundoFoto(en)?`<div class="ff-sprite" role="img" aria-label="${h(en)}" style="${fundoFoto(en)}"></div>`:`<div class="ff-vazia">${h(en)}<br><span class="fraca">sem foto</span></div>`);
+  const foto=scryUrl(en,1)?`<img src="${scryUrl(en,1)}" alt="${h(en)}">`:(fundoFoto(en)?`<div class="ff-sprite" role="img" aria-label="${h(en)}" style="${fundoFoto(en)}"></div>`:`<div class="ff-vazia">${h(en)}<br><span class="fraca">sem foto</span></div>`);
   const tem=of&&of.t,tr=TRAD[en];
   $('#ficha-in').innerHTML=`<div class="ff-foto">${foto}</div>
    <div class="ff-info">
