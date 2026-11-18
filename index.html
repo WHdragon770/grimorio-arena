@@ -505,7 +505,7 @@ body[data-aba=decks] .lado{display:none}
 .b-res:hover .b-acoes,.b-res:focus-within .b-acoes{opacity:1}
 .b-res .b-acoes button{flex:1;box-shadow:0 2px 8px rgba(0,0,0,.4)}
 @media(hover:none){.b-res .b-acoes{opacity:1}}
-.b-cartas.lista{columns:300px 3;column-gap:24px}
+.b-cartas.texto{columns:270px 3;column-gap:24px}.b-cartas.compacto{columns:210px 4;column-gap:18px}
 .b-grupo{break-inside:avoid;margin-bottom:18px}
 .b-grupo h4{display:flex;justify-content:space-between;border-bottom:1px solid var(--linha);padding-bottom:6px;margin-bottom:4px;text-transform:none;letter-spacing:0;font-size:13.5px;color:var(--tinta);font-family:'Instrument Sans',sans-serif}
 .b-grupo h4 span{color:var(--fraco);font-weight:500}
@@ -545,6 +545,59 @@ img.ms{background:none;border-radius:50%;width:1.05em;height:1.05em;padding:0;ma
 .b-mana{display:inline-flex;gap:1px;align-items:center}.b-mana img.ms{font-size:14px;margin:0}
 .b-mana img.ms{font-size:16px}
 .b-st .b-pips img.ms{font-size:22px}.b-tile .b-pips img.ms,.b-meta .b-pips img.ms{font-size:16px}
+/* barra da lista + painel da carta */
+.b-barra{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-bottom:16px}
+.b-barra h3{margin:0 auto 0 0}
+.b-barra label{display:flex;gap:6px;align-items:center;font-size:12.5px;color:var(--fraco)}
+.b-barra select{min-width:0;padding:6px 8px;font-size:13px}
+.b-lado{display:grid;gap:22px;grid-template-columns:minmax(0,1fr)}
+#b-foco{display:none}
+@media(min-width:900px){.b-lado{grid-template-columns:250px minmax(0,1fr)}#b-foco{display:grid;gap:10px;align-content:start;position:sticky;top:76px;align-self:start}}
+#b-foco img{width:100%;aspect-ratio:488/680;border-radius:4.75%/3.5%;box-shadow:0 10px 30px rgba(0,0,0,.35);background:var(--sup2);cursor:zoom-in;display:block}
+.b-fpreco{display:flex;gap:8px;align-items:baseline;justify-content:center;margin-top:4px}.b-fpreco b{font-size:17px}.b-fpreco small{color:var(--fraco);font-size:12px}
+.b-fmeta{font-size:12px;color:var(--fraco);text-align:center;margin:0;line-height:1.5}
+.b-fmeta .b-set{display:inline-block;vertical-align:-3px}
+.b-fbtn{display:flex;gap:8px;align-items:center;justify-content:center}.b-fbtn span{font-size:12.5px;color:var(--suave);min-width:64px;text-align:center}
+.b-fbtn button{min-width:34px;padding:4px 8px}
+.b-flinks{display:grid;gap:7px;margin-top:4px}
+.b-flinks a{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 12px;border:1px solid var(--ouro);border-radius:8px;color:var(--ouro);text-decoration:none;font-size:13px;font-weight:600;transition:.15s}
+.b-flinks a:first-child{background:var(--ouro);color:#fff}
+.b-flinks a:hover{background:var(--ouro);color:#fff}
+.b-flinks a b{font-weight:500;font-size:12px;opacity:.85}
+.b-linha{display:flex;gap:6px}.b-linha .b-q{flex:0 0 18px}.b-linha .b-n{flex:1;min-width:0}
+.b-linha.sel{background:var(--hover);box-shadow:inset 3px 0 0 var(--ouro)}
+.b-cartas.compacto .b-linha{min-height:21px;padding:0 4px}.b-cartas.compacto .b-n{font-size:12.5px}.b-cartas.compacto .b-p{min-width:48px;font-size:11px}
+.b-cartas.compacto .b-grupo{margin-bottom:12px}
+.b-set{width:15px;height:15px;flex:none;-webkit-mask:var(--si) center/contain no-repeat;mask:var(--si) center/contain no-repeat;background:var(--tinta)}
+.b-set.r-uncommon{background:linear-gradient(135deg,#5f7787,#c8d6df,#5f7787)}.b-set.r-rare{background:linear-gradient(135deg,#8a6b1f,#ecd27c,#8a6b1f)}.b-set.r-mythic{background:linear-gradient(135deg,#b3401b,#f7a24a,#b3401b)}
+.b-cartas.grade .b-grade{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.b-cartas.spoiler .b-grade{grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:12px}
+.b-cartaimg.sel img{outline:3px solid var(--ouro);outline-offset:1px}
+.b-cartaimg .b-pr{position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.78);color:#fff;font-size:11px;padding:2px 6px;border-radius:5px}
+.b-pilhas{display:grid;gap:18px 12px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));align-items:start}
+.b-pilha h4{display:flex;justify-content:space-between;border-bottom:1px solid var(--linha);padding-bottom:6px;margin:0 0 8px;font-size:13.5px;color:var(--tinta)}
+.b-pilha h4 span{color:var(--fraco);font-weight:500}
+.b-stack .b-cartaimg+.b-cartaimg{margin-top:-121%}
+.b-stack .b-cartaimg img{box-shadow:0 -2px 6px rgba(0,0,0,.4)}
+.b-stack .b-q{top:3px;left:auto;right:6px;font-size:11px}
+/* janela Personalizar */
+#b-cfg{border:0;border-radius:14px;padding:0;width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 40px);background:var(--sup);color:var(--tinta);box-shadow:0 20px 60px rgba(0,0,0,.5)}
+#b-cfg::backdrop{background:rgba(0,0,0,.55)}
+#b-cfg form{padding:20px 22px;display:grid;gap:10px}
+.b-cfgcab{display:flex;justify-content:space-between;align-items:center}.b-cfgcab h3{margin:0}
+.b-cfgcab button{background:none;border:0;font-size:24px;line-height:1;color:var(--fraco);cursor:pointer;padding:4px 8px}
+.b-cfginfo{background:var(--hover);border:1px solid var(--ouro);border-radius:8px;padding:10px 12px;font-size:13px;margin:4px 0}
+#b-cfg h4{margin:10px 0 0;font-size:14px;text-transform:none;letter-spacing:0;color:var(--tinta)}
+.b-chips{display:flex;flex-wrap:wrap;gap:8px}
+.b-chips label{display:flex;gap:7px;align-items:center;border:1px solid var(--linha);border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer}
+.b-chips label:has(input:checked){border-color:var(--ouro);background:var(--hover)}
+.b-chips input{accent-color:var(--ouro);margin:0}
+.b-cfgpe{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--linha);padding-top:14px;margin-top:10px}.b-cfgpe span{flex:1}
+body[data-aba=decks] .obra,body[data-aba=decks] .topo-in{max-width:1720px}
+@media(min-width:1150px){body[data-aba=decks] .b-corpo{grid-template-columns:minmax(0,1fr) 340px}}
+.b-cartas.texto{columns:250px 3}
+.b-chips label{display:inline-flex;flex-direction:row;white-space:nowrap;margin:0;width:auto}
+.b-pilha h4{text-transform:none;letter-spacing:0;font-family:inherit}
 </style>
 <header class="topo"><div class="topo-in">
   <div class="marca"><span class="pips5" aria-hidden="true"><i style="background:var(--w)"></i><i style="background:var(--u)"></i><i style="background:var(--b)"></i><i style="background:var(--r)"></i><i style="background:var(--g)"></i></span>Grimório Arena</div>
@@ -599,7 +652,7 @@ img.ms{background:none;border-radius:50%;width:1.05em;height:1.05em;padding:0;ma
       <select id="b-tipo" aria-label="Tipo"><option value="">Qualquer tipo</option><option value="t:creature">Criatura</option><option value="t:instant">Instantânea</option><option value="t:sorcery">Feitiço</option><option value="t:artifact">Artefato</option><option value="t:enchantment">Encantamento</option><option value="t:planeswalker">Planeswalker</option><option value="t:land">Terreno</option></select></div>
      <div id="b-res"></div>
     </div>
-    <div class="painel"><div class="linha entre"><h3>Lista</h3><div class="seg" id="b-vis"><button data-v="lista">Lista</button><button data-v="visual">Visual</button></div></div><div id="b-cartas"></div></div>
+    <div class="painel"><div class="b-barra"><h3>Lista</h3><label>Ver <select id="b-vsel"></select></label><label>Agrupar <select id="b-gsel"></select></label><label>Ordenar <select id="b-osel"></select></label><button id="b-cfgbtn" title="Personalizar visualização">⚙ Personalizar</button></div><div class="b-lado"><aside id="b-foco" aria-label="Carta selecionada"></aside><div id="b-cartas"></div></div></div>
    </div>
    <aside class="painel b-dir"><div class="linha entre"><h3>EDHREC</h3><button id="b-medio">Deck médio do EDHREC</button></div><p class="nota fraca">% = em quantos decks desse comandante a carta aparece. Sinergia = quanto mais que a média.</p><div id="b-edh"></div></aside>
   </div>
@@ -2186,7 +2239,7 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-const COTA=5.87;
+const COTA=5.88;
 /* fila única do Scryfall: no máximo 2 por segundo, espera e tenta de novo se vier 429 */
 let _sq=Promise.resolve(),_sUlt=0;
 function scryFetch(u,o){const p=_sq.then(async()=>{for(let k=0;k<3;k++){const w=_sUlt+550-Date.now();if(w>0)await new Promise(z=>setTimeout(z,w));_sUlt=Date.now();
@@ -3299,16 +3352,17 @@ $('#c-stop').onclick=()=>CTL&&CTL.abort();
 $('#c-limpar').onclick=()=>{if(CTL)CTL.abort();CHAT=[];$('#c-log').innerHTML='';$('#c-st').textContent='';};
 </script>
 <script>/* ---------- MEUS DECKS: construtor estilo Moxfield (Scryfall ao vivo + EDHREC) ---------- */
-const BK={lst:st.get('bdecks',[]),info:st.get('binfo',{}),cur:null,vis:st.get('bvis','lista'),edh:null,edhCat:0,busca:null,tm:null,pub:false};
+const BK={lst:st.get('bdecks',[]),info:st.get('binfo',{}),cur:null,vis:st.get('bvis','lista'),edh:null,edhCat:0,busca:null,tm:null,pub:false,tent:new Set(),sel:null};
+const bTem=n=>{const i=BK.info[n];return !!(i&&i.img&&i.r!=null);};
 const bSalva=()=>{st.set('bdecks',BK.lst);};
 const bInfoSalva=()=>{const k=Object.keys(BK.info);if(k.length>4000)for(const x of k.slice(0,k.length-3500))delete BK.info[x];st.set('binfo',BK.info);};
 const TIPOS=[['Comandante',null],['Criaturas',/Creature/],['Planeswalkers',/Planeswalker/],['Batalhas',/Battle/],['Instantâneas',/Instant/],['Feitiços',/Sorcery/],['Artefatos',/Artifact/],['Encantamentos',/Enchantment/],['Terrenos',/Land/],['Outras',/./]];
 function bInfo(n){const i=BK.info[n];if(i)return i;const r=acharDB(n);return r?{t:r[3]||'',m:r[1]||'',v:r[2]||0,p:r[8]?+r[8]:0,ci:r[7]||''}:{t:'',m:'',v:0,p:0,ci:''};}
 function bGuarda(c){const f=c.card_faces||[],iu=c.image_uris||(f[0]&&f[0].image_uris)||{};
-  BK.info[c.name]={t:c.type_line||'',m:c.mana_cost||(f[0]&&f[0].mana_cost)||'',v:c.cmc||0,p:+((c.prices&&(c.prices.usd||c.prices.usd_foil))||0),ci:(c.color_identity||[]).join(''),img:iu.normal||'',art:iu.art_crop||'',leg:!c.legalities||c.legalities.commander!=='banned'};
+  BK.info[c.name]={t:c.type_line||'',m:c.mana_cost||(f[0]&&f[0].mana_cost)||'',v:c.cmc||0,p:+((c.prices&&(c.prices.usd||c.prices.usd_foil))||0),ci:(c.color_identity||[]).join(''),img:iu.normal||'',art:iu.art_crop||'',leg:!c.legalities||c.legalities.commander!=='banned',r:c.rarity||'',s:c.set||'',sn:c.set_name||'',a:c.artist||(f[0]&&f[0].artist)||'',co:(c.colors||(f[0]&&f[0].colors)||[]).join('')};
   if(typeof addRow==='function'&&typeof scryRow==='function')try{addRow(scryRow(c));}catch(e){}
   if(typeof SCRY!=='undefined'&&iu.normal&&!SCRY[c.name.split(' // ')[0]])SCRY[c.name.split(' // ')[0]]=[iu.normal,iu.large||iu.normal];}
-async function bBusca(nomes){const f=[...new Set(nomes)].filter(n=>n&&!(BK.info[n]&&BK.info[n].img));
+async function bBusca(nomes){const f=[...new Set(nomes)].filter(n=>n&&!bTem(n)&&!BK.tent.has(n));f.forEach(n=>BK.tent.add(n));
   for(let i=0;i<f.length;i+=75){try{const r=await scryFetch('https://api.scryfall.com/cards/collection',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifiers:f.slice(i,i+75).map(n=>({name:n.split(' // ')[0]}))})});
     if(!r.ok)break;const j=await r.json();for(const c of j.data||[]){bGuarda(c);for(const o of f)if(o!==c.name&&norm(o.split(' // ')[0])===norm(c.name.split(' // ')[0]))BK.info[o]=BK.info[c.name];}}catch(e){break;}
   }
@@ -3322,7 +3376,7 @@ function bTexto(d){return (d.cmd?`Commander\n1 ${d.cmd}\n\nDeck\n`:'')+d.c.map(x
 function bNovo(dados){const d=Object.assign({id:'b'+Date.now().toString(36),nome:'Deck novo',cmd:'',c:[],t:Date.now()},dados||{});BK.lst.unshift(d);bSalva();return d;}
 function bMexe(fn){const d=bDeck();if(!d)return;fn(d);d.t=Date.now();bSalva();pintaEditor();}
 function bAdd(n,q=1){bMexe(d=>{if(n===d.cmd)return;const x=d.c.find(y=>y[0]===n);const bas=/Basic Land/.test(bInfo(n).t);if(x){if(bas)x[1]+=q;}else d.c.push([n,q]);});
-  bToast(`+ ${n}`);if(!(BK.info[n]&&BK.info[n].img))bBusca([n]).then(()=>pintaEditor());}
+  bToast(`+ ${n}`);if(!bTem(n))bBusca([n]).then(()=>pintaEditor());}
 function bToast(t){let e=$('#b-toast');if(!e){e=document.createElement('div');e.id='b-toast';document.body.appendChild(e);}e.textContent=t;e.className='on';clearTimeout(bToast.t);bToast.t=setTimeout(()=>e.className='',1400);}
 function bDoTexto(txt,nome){const its=parseLista(txt);let cmd='';const c=[];
   for(const it of its){const r=acharDB(it.nome),n=r?r[0]:it.nome;if(it.cmd&&!cmd){cmd=n;continue;}const x=c.find(y=>y[0]===n);if(x)x[1]+=it.q;else c.push([n,it.q]);}
@@ -3356,17 +3410,74 @@ function pintaEditor(){const d=bDeck();if(!d)return;const tot=bTotal(d),ci=bCI(d
     <div class="b-curva" title="Curva de mana (sem terrenos)">${curva.map((v,k)=>`<span><i style="height:${Math.round(v/mx*100)}%"></i><em>${v||''}</em><small>${k===7?'7+':k}</small></span>`).join('')}</div>`;
   $('#b-avisos').innerHTML=[fora.length?`⚠ Fora da identidade de cor: ${fora.map(x=>h(x[0])).join(', ')}`:'',tot>100?`⚠ ${tot-100} carta${tot-100>1?'s':''} a mais`:'',
     d.c.filter(x=>x[1]>1&&!/Basic Land/.test(bInfo(x[0]).t)&&!/any number of cards named/i.test((acharDB(x[0])||[])[6]||'')).map(x=>`⚠ ${h(x[0])} repetida (${x[1]}x)`).join(' · ')].filter(Boolean).map(t=>`<p class="ruim">${t}</p>`).join('');
-  const gr={};for(const x of its){const g=bTipo(x[0],x[2]);(gr[g]=gr[g]||[]).push(x);}
-  const ord=TIPOS.map(t=>t[0]).filter(g=>gr[g]);for(const g of ord)gr[g].sort((a,b)=>(bInfo(a[0]).v-bInfo(b[0]).v)||a[0].localeCompare(b[0]));
-  const q=g=>gr[g].reduce((s,x)=>s+x[1],0);
-  $$('#b-vis button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===BK.vis));
-  $('#b-cartas').className='b-cartas '+BK.vis;
-  $('#b-cartas').innerHTML=!its.length?'<p class="nota">Deck vazio. Busque cartas acima ou puxe o deck médio do EDHREC.</p>':ord.map(g=>`<section class="b-grupo"><h4>${g} <span>${q(g)}</span></h4>${
-    BK.vis==='visual'?`<div class="b-grade">${gr[g].map(x=>`<div class="b-cartaimg" data-bprev="${h(x[0])}"><img loading="lazy" src="${h(bImg(x[0]))}" alt="${h(x[0])}" data-carta="${h(x[0])}">${x[1]>1?`<span class="b-q">${x[1]}x</span>`:''}${x[2]?'':`<span class="b-acoes"><button data-bmenos="${h(x[0])}" aria-label="Tirar uma">−</button><button data-bmais="${h(x[0])}" aria-label="Pôr mais uma">+</button></span>`}</div>`).join('')}</div>`
-    :gr[g].map(x=>`<div class="b-linha" data-bprev="${h(x[0])}"><span class="b-q">${x[1]}</span><button class="b-n" data-carta="${h(x[0])}">${h(x[0])}</button><span class="b-mana">${simb(bInfo(x[0]).m.split(' // ')[0])}</span><span class="b-p">${bInfo(x[0]).p?brl(bInfo(x[0]).p*COTA*x[1]):''}</span>${x[2]?'<span class="b-acoes"><button data-bsemcmd="1" title="Tirar do comando">×</button></span>':`<span class="b-acoes"><button data-bmenos="${h(x[0])}" aria-label="Tirar uma">−</button><button data-bmais="${h(x[0])}" aria-label="Pôr mais uma">+</button><button data-bcmd="${h(x[0])}" title="Virar comandante">♛</button></span>`}</div>`).join('')}</section>`).join('');
-  const sem=its.filter(x=>!(BK.info[x[0]]&&BK.info[x[0]].img)).map(x=>x[0]);if(sem.length&&!pintaEditor.busy){pintaEditor.busy=1;bBusca(sem).then(()=>{pintaEditor.busy=0;if(bDeck()===d)pintaEditor();});}
+  bPintaLista(d,its);
+  const sem=its.filter(x=>!bTem(x[0])&&!BK.tent.has(x[0])).map(x=>x[0]);if(sem.length&&!pintaEditor.busy){pintaEditor.busy=1;bBusca(sem).then(()=>{pintaEditor.busy=0;if(bDeck()===d)pintaEditor();});}
   $('#b-pub').hidden=typeof GA_PUB==='undefined'||!GA_PUB;
   if(d.cmd&&(!BK.edh||BK.edh.cmd!==d.cmd))bEdh(d.cmd);else bPintaEdh();}
+
+/* ---- visualização estilo Moxfield: estilos, agrupar, ordenar, painel da carta ---- */
+const VPAD={vis:'texto',grp:'tipo',ord:'nome',xm:1,xp:1,xs:0};
+BK.cfgPad=Object.assign({},VPAD,st.get('bcfg',{}));if(BK.vis==='visual'&&!st.get('bcfg',null))BK.cfgPad.vis='grade';
+const bCfg=d=>Object.assign({},BK.cfgPad,(d&&d.cfg)||{});
+const VIS=[['texto','Texto'],['compacto','Texto compacto'],['grade','Grade visual'],['pilhas','Pilhas visuais'],['pilhas2','Pilhas (separadas)'],['spoiler','Spoiler visual']];
+const GRP=[['tipo','Tipo'],['sub','Subtipo'],['cor','Cor'],['ci','Identidade de cor'],['mv','Valor de mana'],['rar','Raridade'],['set','Coleção'],['art','Artista'],['nada','Sem agrupar']];
+const ORD=[['nome','Nome'],['mv','Valor de mana'],['preco','Preço'],['rar','Raridade'],['cor','Cor']];
+const RAR={mythic:['Mítica',0],rare:['Rara',1],uncommon:['Incomum',2],common:['Comum',3],special:['Especial',4],bonus:['Bônus',5]};
+const BCORN={W:'Branco',U:'Azul',B:'Preto',R:'Vermelho',G:'Verde'};
+const bCores=i=>i.co!=null?i.co:[...new Set((i.m||'').match(/[WUBRG]/g)||[])].join('');
+function bChave(x,g){const i=bInfo(x[0]),t=(i.t||'').split(' // ')[0];
+  if(g==='tipo'){const n=bTipo(x[0]);return [n,TIPOS.findIndex(y=>y[0]===n)];}
+  if(g==='sub'){const s=((t.split('—')[1]||'').trim().split(' ')[0]);return s?[s,0]:['Sem subtipo',1];}
+  if(g==='cor'||g==='ci'){const c=g==='cor'?bCores(i):(i.ci||'');return c.length>1?['Multicolor',5]:c?[BCORN[c],'WUBRG'.indexOf(c)]:['Incolor',6];}
+  if(g==='mv'){if(/Land/.test(t))return ['Terrenos',99];const v=Math.floor(i.v||0);return [`Valor ${v}`,v];}
+  if(g==='rar')return RAR[i.r]||['Sem dado',9];
+  if(g==='set')return i.sn?[i.sn,0]:['Sem dado',1];
+  if(g==='art')return i.a?[i.a,0]:['Sem dado',1];
+  return ['Cartas',0];}
+function bOrdena(l,o){const k={mv:x=>bInfo(x[0]).v||0,preco:x=>-(bInfo(x[0]).p||0),rar:x=>(RAR[bInfo(x[0]).r]||[0,9])[1],
+  cor:x=>{const c=bCores(bInfo(x[0]));return c.length>1?5+c.length:c?'WUBRG'.indexOf(c):12;}}[o]||(()=>0);
+  return l.sort((a,b)=>(k(a)-k(b))||a[0].localeCompare(b[0]));}
+const bSet=n=>{const i=bInfo(n);return i.s?`<span class="b-set r-${h(i.r||'common')}" style="--si:url(https://svgs.scryfall.io/sets/${h(i.s)}.svg)" title="${h(i.sn||i.s)} · ${(RAR[i.r]||[''])[0]}"></span>`:'';};
+const bAcoes=x=>x[2]?'<span class="b-acoes"><button data-bsemcmd="1" title="Tirar do comando">×</button></span>'
+  :`<span class="b-acoes"><button data-bmenos="${h(x[0])}" aria-label="Tirar uma">−</button><button data-bmais="${h(x[0])}" aria-label="Pôr mais uma">+</button><button data-bcmd="${h(x[0])}" title="Virar comandante">♛</button></span>`;
+const bLinhaH=(x,c)=>{const i=bInfo(x[0]);return `<div class="b-linha${BK.sel===x[0]?' sel':''}" data-bprev="${h(x[0])}"><span class="b-q">${x[1]}</span><button class="b-n" data-carta="${h(x[0])}">${h(x[0])}</button>${c.xs?bSet(x[0]):''}${c.xm?`<span class="b-mana">${simb((i.m||'').split(' // ')[0])}</span>`:''}${c.xp?`<span class="b-p">${i.p?brl(i.p*COTA*x[1]):''}</span>`:''}${bAcoes(x)}</div>`;};
+const bImgH=(x,c,pr)=>{const i=bInfo(x[0]);return `<div class="b-cartaimg${BK.sel===x[0]?' sel':''}" data-bprev="${h(x[0])}"><img loading="lazy" src="${h(bImg(x[0]))}" alt="${h(x[0])}" data-carta="${h(x[0])}">${x[1]>1?`<span class="b-q">${x[1]}x</span>`:''}${pr&&c.xp&&i.p?`<span class="b-pr">${brl(i.p*COTA)}</span>`:''}${x[2]?'':`<span class="b-acoes"><button data-bmenos="${h(x[0])}" aria-label="Tirar uma">−</button><button data-bmais="${h(x[0])}" aria-label="Pôr mais uma">+</button></span>`}</div>`;};
+function bSelects(c){for(const [id,k,l] of [['#b-vsel','vis',VIS],['#b-gsel','grp',GRP],['#b-osel','ord',ORD]]){const s=$(id);if(!s)continue;
+  if(!s.options.length)s.innerHTML=l.map(([v,t])=>`<option value="${v}">${t}</option>`).join('');s.value=c[k];
+  s.onchange=()=>bMexe(d=>{d.cfg=Object.assign(bCfg(d),{[k]:s.value});});}}
+function bPintaLista(d,its){const c=bCfg(d),e=$('#b-cartas');bSelects(c);e.className='b-cartas '+c.vis;
+  if(!its.length){e.innerHTML='<p class="nota">Deck vazio. Busque cartas acima ou puxe o deck médio do EDHREC.</p>';bFoco();return;}
+  const gr=new Map();if(d.cmd)gr.set('Comandante',{k:-1,l:[its[0]]});
+  for(const x of its){if(x[2])continue;const [g,k]=bChave(x,c.grp);if(!gr.has(g))gr.set(g,{k,l:[]});gr.get(g).l.push(x);}
+  const gs=[...gr.entries()].sort((a,b)=>(a[1].k-b[1].k)||a[0].localeCompare(b[0]));for(const [,o] of gs)if(o.k!==-1)bOrdena(o.l,c.ord);
+  const q=l=>l.reduce((s,x)=>s+x[1],0),cab=(g,l)=>`<h4>${h(g)} <span>${q(l)}</span></h4>`;
+  if(c.vis==='texto'||c.vis==='compacto')e.innerHTML=gs.map(([g,o])=>`<section class="b-grupo">${cab(g,o.l)}${o.l.map(x=>bLinhaH(x,c)).join('')}</section>`).join('');
+  else if(c.vis==='grade'||c.vis==='spoiler')e.innerHTML=gs.map(([g,o])=>`<section class="b-grupo">${cab(g,o.l)}<div class="b-grade">${o.l.map(x=>bImgH(x,c,1)).join('')}</div></section>`).join('');
+  else{const cols=[];for(const [g,o] of gs){if(c.vis==='pilhas2'&&o.l.length>6)for(let i=0;i<o.l.length;i+=6)cols.push([i?'<h4 class="cont">&nbsp;</h4>':cab(g,o.l),o.l.slice(i,i+6)]);else cols.push([cab(g,o.l),o.l]);}
+    e.innerHTML=`<div class="b-pilhas">${cols.map(([hd,l])=>`<section class="b-pilha">${hd}<div class="b-stack">${l.map(x=>bImgH(x,c)).join('')}</div></section>`).join('')}</div>`;}
+  bFoco();}
+function bFoco(n){const e=$('#b-foco'),d=bDeck();if(!e||!d)return;n=n||BK.sel;if(!n||!(n===d.cmd||d.c.some(y=>y[0]===n)))n=d.cmd||(d.c[0]||[])[0];if(!n){e.innerHTML='';return;}
+  BK.sel=n;const i=bInfo(n),q=n===d.cmd?1:((d.c.find(y=>y[0]===n)||[])[1]||0),u=encodeURIComponent(n.split(' // ')[0]);
+  const lk=(t,href,v)=>`<a target="_blank" rel="noopener" href="${href}"><span>${t}</span><b>${v||''}</b></a>`;
+  e.innerHTML=`<img src="${h(bImg(n,1))}" alt="${h(n)}" data-carta="${h(n)}" title="Abrir a ficha">
+    <div class="b-fpreco"><b>${i.p?brl(i.p*COTA):'sem preço'}</b>${i.p?`<small>US$ ${i.p.toFixed(2)}</small>`:''}</div>
+    <p class="b-fmeta">${i.sn?`${bSet(n)} ${h(i.sn)} · ${(RAR[i.r]||[''])[0]}`:''}${i.a?`<br>Arte: ${h(i.a)}`:''}</p>
+    ${n===d.cmd?'<p class="b-fmeta"><b>Comandante</b></p>':`<div class="b-fbtn"><button data-bmenos="${h(n)}" aria-label="Tirar uma">−</button><span>${q} no deck</span><button data-bmais="${h(n)}" aria-label="Pôr mais uma">+</button><button data-bcmd="${h(n)}" title="Virar comandante">♛</button></div>`}
+    <div class="b-flinks">${lk('Comprar na LigaMagic','https://www.ligamagic.com.br/?view=cards/card&card='+u)}${lk('Card Kingdom','https://www.cardkingdom.com/catalog/search?search=header&filter%5Bname%5D='+u,i.p?'US$ '+i.p.toFixed(2):'')}${lk('TCGplayer','https://www.tcgplayer.com/search/magic/product?q='+u)}${lk('Ver no Scryfall','https://scryfall.com/search?q=!%22'+u+'%22')}${lk('Ver no EDHREC','https://edhrec.com/cards/'+edhSlug(n))}</div>`;}
+function bFocoSel(t){const n=t.dataset.bprev;if(BK.sel===n)return;$$('#b-cartas .sel').forEach(x=>x.classList.remove('sel'));t.classList.add('sel');bFoco(n);}
+document.addEventListener('click',e=>{const t=e.target.closest('#b-cartas [data-bprev]');if(t&&!e.target.closest('button,[data-carta]'))bFocoSel(t);});
+function bCfgAbre(){const d=bDeck();if(!d)return;const c=bCfg(d);let m=$('#b-cfg');if(!m){m=document.createElement('dialog');m.id='b-cfg';document.body.appendChild(m);}
+  const rad=(nm,l)=>`<div class="b-chips">${l.map(([v,t])=>`<label><input type="radio" name="${nm}" value="${v}"${c[nm]===v?' checked':''}> ${t}</label>`).join('')}</div>`;
+  m.innerHTML=`<form method="dialog"><div class="b-cfgcab"><h3>Personalizar visualização</h3><button value="x" aria-label="Fechar">×</button></div>
+    <p class="b-cfginfo">ⓘ Vale só pra este deck. Pra levar pros outros decks, clique em <b>Usar como padrão</b>.</p>
+    <h4>Estilo</h4>${rad('vis',VIS)}<h4>Agrupar por</h4>${rad('grp',GRP)}<h4>Ordenar por</h4>${rad('ord',ORD)}
+    <h4>Mostrar também</h4><div class="b-chips">${[['xm','Custo de mana'],['xp','Preço'],['xs','Símbolo da coleção']].map(([k,t])=>`<label><input type="checkbox" name="${k}"${c[k]?' checked':''}> ${t}</label>`).join('')}</div>
+    <div class="b-cfgpe"><button value="reset">Restaurar</button><button value="pad">Usar como padrão</button><span></span><button value="x">Cancelar</button><button value="ok" class="prim">Salvar</button></div></form>`;
+  const f=m.querySelector('form'),ler=()=>{const o={};for(const k of ['vis','grp','ord'])o[k]=(f.querySelector(`[name=${k}]:checked`)||{}).value||c[k];for(const k of ['xm','xp','xs'])o[k]=f.querySelector(`[name=${k}]`).checked?1:0;return o;};
+  m.onclose=()=>{const v=m.returnValue;if(v==='ok')bMexe(dd=>{dd.cfg=ler();});
+    else if(v==='pad'){BK.cfgPad=ler();st.set('bcfg',BK.cfgPad);for(const x of BK.lst)delete x.cfg;bSalva();pintaEditor();bToast('Virou o padrão de todos os decks');}
+    else if(v==='reset'){BK.cfgPad={...VPAD};st.set('bcfg',BK.cfgPad);bMexe(dd=>{delete dd.cfg;});}};
+  m.returnValue='';m.showModal();}
 
 /* ---- busca Scryfall ao vivo ---- */
 function bBuscar(){clearTimeout(BK.tm);const t=$('#b-q').value.trim(),modo=$('#b-modo').value,d=bDeck();if(t.length<2&&modo!=='cmd'){$('#b-res').innerHTML='';return;}
@@ -3404,7 +3515,7 @@ async function bMedio(){const d=bDeck();if(!d||!d.cmd)return;if(d.c.length>5&&!c
   $('#b-medio').disabled=false;$('#b-medio').textContent='Deck médio do EDHREC';}
 
 /* ---- prévia ao passar o mouse ---- */
-document.addEventListener('mouseover',e=>{const t=e.target.closest('[data-bprev]'),p=$('#b-prev');if(!p)return;if(!t||matchMedia('(hover:none)').matches||t.classList.contains('b-cartaimg')||t.classList.contains('b-res')){p.hidden=true;return;}
+document.addEventListener('mouseover',e=>{const t=e.target.closest('[data-bprev]'),p=$('#b-prev');if(!p)return;if(t&&t.closest('#b-cartas')){p.hidden=true;if(!matchMedia('(hover:none)').matches)bFocoSel(t);return;}if(!t||matchMedia('(hover:none)').matches||t.classList.contains('b-cartaimg')||t.classList.contains('b-res')){p.hidden=true;return;}
   const n=t.dataset.bprev;if(p.dataset.n!==n){p.dataset.n=n;p.src=bImg(n,1);}p.hidden=false;const r=t.getBoundingClientRect();
   p.style.top=Math.max(8,Math.min(innerHeight-360,r.top-60))+'px';p.style.left=(r.right+260<innerWidth?r.right+12:Math.max(8,r.left-262))+'px';});
 
@@ -3428,7 +3539,7 @@ function bLiga(){
   $('#b-nome').oninput=()=>{const d=bDeck();if(d){d.nome=$('#b-nome').value||'Sem nome';bSalva();}};
   $('#b-q').oninput=bBuscar;$('#b-modo').onchange=bBuscar;$('#b-tipo').onchange=bBuscar;
   $('#b-q').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const f=$('#b-res [data-bmais],#b-res [data-bcmd]');if(f)f.click();}};
-  $('#b-medio').onclick=bMedio;
+  $('#b-medio').onclick=bMedio;$('#b-cfgbtn').onclick=bCfgAbre;
   $('#b-usar').onclick=()=>{const d=bDeck();if(!d)return;$('#lista').value=bTexto(d);$('#cmd').value=d.cmd||'';location.hash='#deck';carregaDeck();};
   $('#b-copiar').onclick=async()=>{const d=bDeck();if(!d)return;try{await navigator.clipboard.writeText(bTexto(d));bToast('Lista copiada');}catch(e){$('#b-txt').hidden=false;$('#b-txt').value=bTexto(d);$('#b-txt').select();}};
   $('#b-dup').onclick=()=>{const d=bDeck();if(!d)return;const n=bNovo({nome:d.nome+' (cópia)',cmd:d.cmd,c:d.c.map(x=>[...x])});location.hash='#decks/'+n.id;};
