@@ -963,12 +963,12 @@ Grimório Arena</div>
   <div id="t-saida" class="tira"></div>
   <div class="painel chat" id="t-chat">
     <div class="linha entre"><h3>Discutir as trocas</h3><button id="c-limpar" class="lnk">Começar de novo</button></div>
-    <p class="nota">Discorda de alguma troca? Fale aqui. Por padrão quem responde é o próprio Grimório, lendo o estudo e rodando o motor, sem gastar token. Virando a chave pra "Claude" a IA vê o estudo, o conceito do deck e o texto das cartas, e pode rodar um teste no motor quando você propuser outra troca (leva uns 20 s por teste).</p>
+    <p class="nota">Discorda de alguma troca? Fale aqui. Quem responde é o próprio Grimório, lendo o estudo e rodando o motor quando você propõe outra troca.</p>
     <div class="chat-log" id="c-log" aria-live="polite"></div>
     <details class="guia" id="c-guia"><summary>&#128214; Perguntas que eu entendo <span class="nota">clique pra usar · escreva o nome da carta em inglês ou português</span></summary><div id="c-guia-l"></div></details>
     <div class="linha chips" id="c-atalhos"></div>
     <form id="c-form" class="chat-form"><label for="c-box" class="sr">Mensagem</label><div class="ac-wrap"><textarea id="c-box" autocomplete="off" aria-autocomplete="list" aria-controls="c-ac" rows="3" placeholder="Ex.: discordo da troca 2, o Knockout Maneuver é minha única remoção barata. E se eu tirar o Boros Signet?"></textarea><ul class="ac" id="c-ac" role="listbox" hidden></ul></div>
-      <div class="linha"><button class="prim" id="c-env" type="submit">Enviar</button><button id="c-stop" type="button" hidden>Parar</button><label class="ia-tog" title="Quem responde: o Grimório (lê o estudo e roda o motor, grátis) ou a IA do Claude (gasta token)"><input type="checkbox" id="c-ia" aria-label="Usar IA do Claude (gasta token)"><span class="ia-op ia-g">&#9881; Grimório <small>grátis</small></span><span class="ia-op ia-c">&#10022; Claude <small>gasta token</small></span></label><span class="nota" id="c-st"></span></div></form>
+      <div class="linha"><button class="prim" id="c-env" type="submit">Enviar</button><span class="nota" id="c-st"></span></div></form>
   </div>
 </section>
 
@@ -3146,7 +3146,7 @@ $('#t-rodar').onclick=estudar;
 
 
 /* ===== conversa com a IA sobre as trocas ===== */
-let CHAT=[],SAMPLE,CTL=null;
+let CHAT=[],CTL=null;
 const f1c=x=>(Math.round(x*10)/10).toFixed(1).replace('.',',');
 function ctxEstudo(){const E=EST;if(!E)return 'Ainda não há estudo.';const C=E.cartas,nm=i=>C[i]?C[i].frente:'?',vM={};for(const x of E.valor)vM[x.i]=x;
   const K=E.conc||{},L=[];
@@ -3165,22 +3165,6 @@ function ctxEstudo(){const E=EST;if(!E)return 'Ainda não há estudo.';const C=E
   L.push('Candidatas testadas: '+E.cs.map(nm).join(', '));
   if(EU)L.push('Lista atual do deck (sem terrenos básicos): '+[...new Set(EU.base.map(i=>EU.M[i]).filter(m=>!/Basic/.test(m.tl)).map(m=>m.frente))].join(', '));
   return L.join('\n');}
-function regras(){return `Você é um jogador experiente de Magic Commander (EDH) conversando em português do Brasil, informal e direto, com um jogador que está revisando as trocas sugeridas por um simulador para o deck dele. Ele pode discordar de algumas.
-
-Como agir:
-- Leve a opinião dele a sério. Pese o que o simulador mediu contra o que o motor não enxerga (sinergia fina, política de mesa, combos, efeitos específicos). Diga com franqueza quando ele tem razão e quando os números apontam o contrário.
-- O motor é um simulador de mesão casual: joga terreno, mana, criaturas, remoção, wipe, contra-mágica, combo e ataque, mas não lê toda carta com perfeição. Diferença menor que o ruído (±) é empate.
-- Respeite o conceito do deck que ele escreveu.
-- Quando ele propuser outra troca concreta (ou você quiser checar uma alternativa), use a ferramenta testar_troca em vez de chutar, e informe o resultado com o ruído. Use carta para ler o texto de uma carta antes de opinar sobre ela, se não tiver certeza.
-- Como escrever cada resposta (texto bem construído, fácil de ler na tela):
-  1. Primeira linha: o veredito em negrito, numa frase só (ex.: **Você tem razão: o Knockout Maneuver fica.** ou **Aqui eu manteria a troca.**).
-  2. Depois 2 a 4 tópicos curtos com "- ", cada um com um argumento e o número que sustenta (pts, ±ruído, % de partidas). Separe o que o simulador mediu do que é leitura de jogo.
-  3. Se rodou testar_troca, um tópico próprio com o resultado: **Teste:** sai X, entra Y, +N pts (±R), melhora / piora / empate.
-  4. Fechar com uma linha **Sugestão:** dizendo o que fazer (manter, trocar por qual carta, ou testar qual alternativa).
-  Frases completas e naturais, sem abreviação, sem jargão de programação, sem repetir os dados que ele já está vendo. No máximo uns 120 palavras. Sem travessão longo. Nomes de carta em inglês como estão.
-
-Dados do estudo:
-${ctxEstudo()}`;}
 const ferr=()=>[
  {name:'carta',description:'Lê uma carta pelo nome (inglês ou português): custo, tipo, texto oracle, preço em US$, a função que o motor dá a ela, se está no deck e se encaixa no conceito. Retorna texto.',
   inputSchema:{type:'object',properties:{nome:{type:'string'}},required:['nome']},
@@ -3211,21 +3195,8 @@ function atalhos(){montaGuia();const box=$('#c-atalhos');if(!box||!EST)return;co
   const at=[...EST.esc.map((t,k)=>`Por que tirar ${nm(t.sai)}?`),'Alguma dessas trocas foge do conceito do deck?','O que o motor pode estar errando nessas trocas?'];
   box.innerHTML=at.map(a=>`<button class="chip" type="button">${h(a)}</button>`).join('');box.querySelectorAll('button').forEach(b=>b.onclick=()=>{$('#c-box').value=b.textContent;$('#c-box').focus();});}
 async function enviar(ev){ev.preventDefault();const txt=$('#c-box').value.trim();if(!txt||CTL)return;
-  if(!$('#c-ia').checked){bolha('eu',txt);$('#c-box').value='';const d=bolha('ia','');d.innerHTML='<p class="fraca">Olhando o estudo…</p>';CTL={abort(){}};$('#c-env').disabled=true;
-    try{d.innerHTML=mdLeve(await responderLocal(txt));}catch(e){d.innerHTML=mdLeve('**Deu erro aqui:** '+(e.message||e));}CTL=null;$('#c-env').disabled=false;d.scrollIntoView({block:'nearest'});return;}
-  if(SAMPLE===undefined)SAMPLE=window.claude&&claude.use?await claude.use('sample').catch(()=>null):null;
-  if(!SAMPLE){$('#c-st').textContent='A IA só funciona com a página aberta no Claude (claude.ai).';return;}
-  bolha('eu',txt);$('#c-box').value='';CHAT.push({role:'user',content:txt});
-  const d=bolha('ia','');d.innerHTML='<p class="fraca">Pensando…</p>';CTL=new AbortController();$('#c-stop').hidden=false;$('#c-env').disabled=true;
-  try{const lim=await SAMPLE.limits().catch(()=>null);const usa=lim&&lim.tools;
-    const {text}=await SAMPLE([{role:'user',content:regras()},...CHAT.slice(-16)],{cache:false,signal:CTL.signal,onText:({text})=>{d.innerHTML=mdLeve(text);},...(usa?{tools:ferr()}:{})});
-    d.innerHTML=mdLeve(text);CHAT.push({role:'assistant',content:text});
-  }catch(e){const c=e&&e.code;if(e&&e.text){d.innerHTML=mdLeve(e.text);CHAT.push({role:'assistant',content:e.text});}else d.remove();
-    if(c==='not_granted'||c==='sampling_disabled'){$('#c-st').textContent='A IA não foi liberada nesta página.';$('#c-form').hidden=true;}
-    else if(c==='rate_limited')$('#c-st').textContent='Muitas perguntas seguidas ou limite de uso. Tente daqui a pouco.';
-    else if(c!=='cancelled')$('#c-st').textContent='Não deu certo agora ('+(c||'erro')+'). Pode mandar de novo.';
-    if(!e||!e.text)CHAT.pop();}
-  CTL=null;$('#c-stop').hidden=true;$('#c-env').disabled=false;}
+  bolha('eu',txt);$('#c-box').value='';const d=bolha('ia','');d.innerHTML='<p class="fraca">Olhando o estudo…</p>';CTL={abort(){}};$('#c-env').disabled=true;
+  try{d.innerHTML=mdLeve(await responderLocal(txt));}catch(e){d.innerHTML=mdLeve('**Deu erro aqui:** '+(e.message||e));}CTL=null;$('#c-env').disabled=false;d.scrollIntoView({block:'nearest'});}
 
 /* ===== responde sem IA (grátis): lê o estudo e o motor ===== */
 const pc=x=>Math.round(x*100)+'%',sg=x=>(x>=0?'+':'')+f1c(x);
@@ -3482,8 +3453,6 @@ async function responderLocal0(txt){const E=EST;garanteCmd(E);if(!E)return '**Ai
   return `**Não entendi essa, mas sei responder** (pode escrever com erro que eu corrijo):\n- "O que o deck tem de cemitério?" ou "O que falta no deck?"\n- "O que o EDHREC recomenda?" ou "Como fica a mão inicial?"\n- "Por que tirar X?" ou "X fica?"\n- "Troca 2" ou "discordo da troca 2"\n- "E se eu tirar X e colocar Y?" (roda o motor, uns 20 s)\n- "Testa tirar X" (quanto ela vale)\n- "O que faz X?"\n- "Quais as melhores / piores?", "chance de vitória", "foge do conceito?", "o motor erra onde?"\n- Pra conversa livre, marque "Usar IA do Claude".`;}
 
 $('#c-form').onsubmit=enviar;$('#c-env').onclick=e=>{fechaAC();enviar(e);};
-try{$('#c-ia').checked=localStorage.getItem('ga_chat_ia')==='1';}catch(e){}
-$('#c-ia').onchange=()=>{try{localStorage.setItem('ga_chat_ia',$('#c-ia').checked?'1':'0');}catch(e){}};
 /* ---- guia de perguntas + autocompletar (sem IA) ---- */
 const GUIA=[
  {g:'Uma carta',it:[
@@ -3587,7 +3556,6 @@ $('#c-box').onkeydown=e=>{const aberto=!$('#c-ac').hidden&&AC.it.length;
   if(aberto&&(e.key==='Tab'||(e.key==='Enter'&&!e.shiftKey))){e.preventDefault();aceitaAC(AC.sel);return;}
   if(aberto&&e.key==='Escape'){e.preventDefault();fechaAC();return;}
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();fechaAC();enviar(e);}};
-$('#c-stop').onclick=()=>CTL&&CTL.abort();
 $('#c-limpar').onclick=()=>{if(CTL)CTL.abort();CHAT=[];$('#c-log').innerHTML='';$('#c-st').textContent='';};
 </script>
 <script>/* ---------- MEUS DECKS: construtor estilo Moxfield (Scryfall ao vivo + EDHREC) ---------- */
