@@ -2616,7 +2616,7 @@ async function abreFicha(nome){
     <div class="linha entre ff-topo"><div><h3>${h(en)}</h3>${ptn&&ptn!==en?`<p class="nota">${h(ptn)}</p>`:''}</div><button id="ficha-x" aria-label="Fechar">✕</button></div>
     <p class="mono custo">${simb(r[1])} <span class="fraca">MV ${r[2]||0}</span></p>
     <div class="ff-bloco"><span class="rot">Texto original</span><p class="nota">${h(r[3])}${r[4]!=null&&r[4]!==''?` · ${h(r[4])}/${h(r[5])}`:''}</p><p class="texto">${ptTxt(r[6])||'<span class="fraca">sem texto</span>'}</p></div>
-    <div class="ff-bloco pt"><span class="rot">Em português <span class="fraca" id="ff-orig">${tem?'· texto oficial impresso':tr?'· tradução da IA':''}</span></span>
+    <div class="ff-bloco pt"><span class="rot">Em português <span class="fraca" id="ff-orig">${tem?'· texto oficial impresso':tr?'· tradução automática':''}</span></span>
      ${tem&&of.l?`<p class="nota">${h(of.l)}</p>`:''}<p class="texto" id="ff-pt">${tem?ptTxt(of.t):tr?ptTxt(tr):r[6]?'<span class="fraca">Traduzindo…</span>':'<span class="fraca">sem texto</span>'}</p></div>
     <div class="linha"><span class="chip-f f-${slug(ro.k)}">${h(ro.k)}</span><span class="nota">${h(ro.d)}</span></div>
     <p class="nota">${usd?`${brl(usd*COTA)} <span class="fraca">(US$ ${usd.toFixed(2)} no Scryfall)</span>`:'sem preço'}</p>
@@ -2625,14 +2625,12 @@ async function abreFicha(nome){
   $('#ficha').hidden=false;$('#ficha-x').focus();
   if(!tem&&!tr&&r[6])traduz(en,r);
 }
-let SMP;
 async function traduz(en,r){const el=()=>$('#ficha').hidden?null:$('#ff-pt');
-  if(SMP===undefined)SMP=window.claude&&claude.use?await claude.use('sample').catch(()=>null):null;
-  if(!SMP){const e=el();if(e)e.innerHTML='<span class="fraca">Sem texto oficial em português. A tradução automática só funciona com a página aberta no claude.ai.</span>';return;}
-  try{const {text}=await SMP(`Traduza para português do Brasil o texto de regras desta carta de Magic: The Gathering, usando a terminologia oficial das cartas impressas em português (ex.: "tap" = "vire", "draw a card" = "compre um card", "battlefield" = "campo de batalha", "graveyard" = "cemitério", "counter" = "marcador", "spell" = "mágica", "creature" = "criatura"). Mantenha os símbolos de mana como {W}, {1}, {T} exatamente como estão e as quebras de linha. Responda só com o texto traduzido, sem comentários.\n\nCarta: ${en}\nTipo: ${r[3]}\nTexto:\n${r[6]}`,{modelTier:'quick'});
-    const t=text.trim();TRAD[en]=t;try{localStorage.setItem('ga_trad',JSON.stringify(TRAD));}catch(e){}
-    const e=el();if(e&&$('#ficha h3')?.textContent===en){e.innerHTML=ptTxt(t);$('#ff-orig').textContent='· tradução da IA';}
-  }catch(x){const e=el();if(e)e.innerHTML='<span class="fraca">'+(x&&x.code==='rate_limited'?'Limite de uso da IA, tente daqui a pouco.':x&&x.code==='not_granted'?'Tradução desligada (permissão da IA negada).':'Não deu pra traduzir agora.')+'</span>';}
+  const poe=(t,o)=>{TRAD[en]=t;try{localStorage.setItem('ga_trad',JSON.stringify(TRAD));}catch(e){}const e=el();if(e&&$('#ficha h3')?.textContent===en){e.innerHTML=ptTxt(t);$('#ff-orig').textContent='· '+o;}};
+  const gg=async()=>{try{const r2=await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt&dt=t&q='+encodeURIComponent(r[6]));const j=await r2.json();
+      const t=(j[0]||[]).map(x=>x[0]||'').join('').trim();if(!t)throw 0;poe(t,'tradução do Google');}
+    catch(x){const e=el();if(e)e.innerHTML='<span class="fraca">Não deu pra traduzir agora.</span>';}};
+  gg();
 }
 const slug=s=>norm(s).replace(/[^a-z]+/g,'-');
 const slugE=s=>norm(s.split(' // ')[0]).replace(/[^a-z0-9 -]/g,'').replace(/\s+/g,'-');
