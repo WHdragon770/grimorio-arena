@@ -632,6 +632,49 @@ body[data-aba=decks] .obra,body[data-aba=decks] .topo-in{max-width:1720px}
 .b-sinfo .b-flinks a{background:none!important;color:var(--ouro)!important;border:0!important;padding:0!important;font-weight:600;min-height:0}
 .b-scarta>img{aspect-ratio:488/680;background:var(--sup2)}
 .b-spop{display:flex;gap:8px;align-items:center;font-size:13.5px;cursor:pointer}
+/* ---------- celular ---------- */
+@media(max-width:999px){
+ .lado h3{cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px}
+ .lado h3::after{content:'fechar ▴';font:600 12px 'JetBrains Mono',monospace;color:var(--ouro);letter-spacing:.04em}
+ .lado.fechado h3::after{content:'trocar lista ▾'}
+ .lado.fechado .painel{padding:12px 16px;gap:4px}
+ .lado.fechado .painel>:not(h3):not(#contagem){display:none}
+}
+@media(max-width:700px){
+ .topo-in{gap:6px 10px;padding-block:8px 0}
+ .marca{font-size:1.15rem;order:1}
+ .modo{order:2;flex:1 1 0;min-width:0;margin-left:0;font-size:.72rem;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .tema{order:3}
+ .painel>*,.tira>*{min-width:0}
+ nav{order:4;flex:1 0 100%;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px 6px;-webkit-overflow-scrolling:touch}
+ nav::-webkit-scrollbar{display:none}
+ nav a{white-space:nowrap;padding:8px 12px;flex:0 0 auto}
+ .obra{gap:18px;padding-block:16px 56px}
+ .painel{padding:16px}
+ h2{font-size:23px}
+ .tira{gap:18px}
+ .kpis{gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .kpi{padding:12px 14px}.kpi b{font-size:22px}.kpi.destaque b{font-size:28px}
+ label.inline{flex-wrap:wrap}
+ label.inline select{max-width:100%;min-width:0}
+ #v-mesa .painel>.linha:first-child label.inline{display:flex;flex-wrap:nowrap;width:100%}
+ #v-mesa .painel>.linha:first-child label.inline>span,#v-mesa .painel>.linha:first-child label.inline{white-space:nowrap}
+ #v-mesa .painel>.linha:first-child select{flex:1 1 0;width:auto}
+ .b-nome{font-size:21px}
+ .b-banner-in{padding:16px}
+ .b-linha .b-p{display:none}
+ .b-linha .b-acoes button{min-height:26px;min-width:26px;padding:0 6px}
+ .rola{margin:0 -4px;padding-bottom:4px}
+}
+@media(max-width:700px){
+ #m-ctl{position:fixed;top:auto;bottom:0;left:0;right:0;z-index:6;border-radius:14px 14px 0 0;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px));gap:6px;box-shadow:0 -8px 24px rgba(0,0,0,.28)}
+ #m-ctl .linha{gap:6px}
+ #m-ctl button{min-height:34px;padding:4px 8px;flex:1 0 auto}
+ #m-ctl label.inline{font-size:.78rem;flex-wrap:nowrap}
+ #m-ctl select{padding:4px 6px;font-size:.8rem}
+ #v-mesa{padding-bottom:190px}
+}
+@media(max-width:700px){#m-ctl label.inline:has(select){flex:1 1 40%}#m-ctl label.inline select{flex:1 1 0;width:auto}}
 </style>
 <header class="topo"><div class="topo-in">
   <div class="marca"><span class="pips5" aria-hidden="true"><i style="background:var(--w)"></i><i style="background:var(--u)"></i><i style="background:var(--b)"></i><i style="background:var(--r)"></i><i style="background:var(--g)"></i></span>Grimório Arena</div>
@@ -2478,7 +2521,9 @@ async function carregaDeck(){
   $('#contagem').innerHTML=`${tot} cartas${EU.cmd?' · comandante '+h(cmdNome(EU)):' · <b>sem comandante</b>'}${EU.falta.length?` · <span class="ruim">${EU.falta.length} não achadas nem no Scryfall: ${h(EU.falta.map(f=>f.nome).slice(0,5).join(', '))}</span>`:''}${(carregaDeck.av||[]).map(x=>` · <span class="bom">${h(x)}</span>`).join('')}`;carregaDeck.av=[];
   $('#lendarias').innerHTML=EU.leg.map(n=>`<option value="${h(n)}">`).join('');
   pintaDeck();
+  if(matchMedia('(max-width:999px)').matches)$('.lado').classList.add('fechado');
 }
+$('.lado h3').addEventListener('click',()=>{if(matchMedia('(max-width:999px)').matches)$('.lado').classList.toggle('fechado')});
 function pintaDeck(){
   const D=EU;if(!D){$('#d-sub').textContent='Carregue um deck na lateral.';return;}
   const pf=D.pf,M=D.M;
