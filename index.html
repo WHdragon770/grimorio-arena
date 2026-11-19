@@ -477,6 +477,8 @@ body[data-aba=decks] .lado{display:none}
 .b-voltar:hover{color:var(--ouro)}
 .b-nome{font:700 28px 'Instrument Sans',sans-serif;background:transparent;border:1px solid transparent;padding:2px 6px;margin-left:-7px}
 .b-nome:hover{border-color:var(--linha)}
+.b-cont{display:inline-flex;align-items:center;white-space:nowrap;font:600 13px 'JetBrains Mono',monospace;padding:4px 10px;border-radius:999px;background:var(--fundo2,rgba(127,127,127,.12));color:var(--texto2,inherit);margin:0 8px;vertical-align:middle}
+.b-cont.bom{background:rgba(34,160,90,.16);color:#1d8a4e}.b-cont.ruim{background:rgba(220,60,60,.16);color:#c03030}
 .b-cmd{color:var(--suave)}.b-cmd .lnk{font-weight:700}
 .b-botoes{gap:8px}
 .b-stats{display:flex;flex-wrap:wrap;gap:12px;align-items:stretch}
@@ -819,7 +821,7 @@ Grimório Arena</div>
  <div id="b-editor" class="tira" hidden>
   <div class="b-banner" id="b-banner"><div class="b-banner-in">
    <button id="b-voltar" class="b-voltar">← Meus decks</button>
-   <input id="b-nome" class="b-nome" aria-label="Nome do deck" spellcheck="false">
+   <input id="b-nome" class="b-nome" aria-label="Nome do deck" spellcheck="false"><span class="b-cont" aria-live="polite"></span>
    <div class="b-cmd">Comandante: <span id="b-cmdnome"></span></div>
    <div class="linha b-botoes"><button class="prim" id="b-usar">Analisar no Grimório</button><button id="b-copiar">Copiar lista</button><button id="b-sorte-ed">🎲 Sortear comandante</button><button id="b-dup">Duplicar</button><button id="b-pub" hidden>Publicar no site</button><button id="b-del" class="perigo">Apagar</button></div>
   </div></div>
@@ -830,7 +832,7 @@ Grimório Arena</div>
    <div class="b-esq">
     <div class="painel">
      <div class="linha entre"><h3>Adicionar cartas</h3><span class="nota fraca">Scryfall ao vivo</span></div>
-     <div class="b-busca"><input id="b-q" type="search" placeholder="Nome da carta (inglês ou português) ou t:dragon cmc<=3" autocomplete="off" spellcheck="false">
+     <div class="b-busca"><span class="b-cont"></span><input id="b-q" type="search" placeholder="Nome da carta (inglês ou português) ou t:dragon cmc<=3" autocomplete="off" spellcheck="false">
       <select id="b-modo" aria-label="Filtro"><option value="ci">Na cor do comandante</option><option value="cmd">Comandante</option><option value="tudo">Todas</option></select>
       <select id="b-tipo" aria-label="Tipo"><option value="">Qualquer tipo</option><option value="t:creature">Criatura</option><option value="t:instant">Instantânea</option><option value="t:sorcery">Feitiço</option><option value="t:artifact">Artefato</option><option value="t:enchantment">Encantamento</option><option value="t:planeswalker">Planeswalker</option><option value="t:land">Terreno</option></select></div>
      <div id="b-res"></div>
@@ -2440,7 +2442,7 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-const COTA=5.88;
+const COTA=5.89;
 /* fila única do Scryfall: no máximo 2 por segundo, espera e tenta de novo se vier 429 */
 let _sq=Promise.resolve(),_sUlt=0;
 function scryFetch(u,o){const p=_sq.then(async()=>{for(let k=0;k<3;k++){const w=_sUlt+550-Date.now();if(w>0)await new Promise(z=>setTimeout(z,w));_sUlt=Date.now();
@@ -3583,7 +3585,7 @@ const bCI=d=>{const s=(d.cmd?bInfo(d.cmd).ci:'')+(d.cmd2?bInfo(d.cmd2).ci:'');re
 function bTexto(d){return (d.cmd?`Commander\n1 ${d.cmd}\n${d.cmd2?`1 ${d.cmd2}\n`:''}\nDeck\n`:'')+d.c.map(x=>`${x[1]} ${x[0]}`).join('\n');}
 function bNovo(dados){const d=Object.assign({id:'b'+Date.now().toString(36),nome:'Deck novo',cmd:'',c:[],t:Date.now()},dados||{});BK.lst.unshift(d);bSalva();return d;}
 function bMexe(fn){const d=bDeck();if(!d)return;fn(d);d.t=Date.now();bSalva();pintaEditor();}
-function bAdd(n,q=1){bMexe(d=>{if(n===d.cmd||n===d.cmd2)return;const x=d.c.find(y=>y[0]===n);const bas=/Basic Land/.test(bInfo(n).t);if(x){if(bas)x[1]+=q;}else d.c.push([n,q]);});
+function bAdd(n,q=1){const d0=bDeck();if(d0&&n!==d0.cmd&&n!==d0.cmd2&&bTotal(d0)+q>100){bToast('Deck já tem 100 cartas. Tire uma antes de colocar outra.');return;}bMexe(d=>{if(n===d.cmd||n===d.cmd2)return;const x=d.c.find(y=>y[0]===n);const bas=/Basic Land/.test(bInfo(n).t);if(x){if(bas)x[1]+=q;}else d.c.push([n,q]);});
   bToast(`+ ${n}`);if(!bTem(n))bBusca([n]).then(()=>pintaEditor());}
 function bToast(t){let e=$('#b-toast');if(!e){e=document.createElement('div');e.id='b-toast';document.body.appendChild(e);}e.textContent=t;e.className='on';clearTimeout(bToast.t);bToast.t=setTimeout(()=>e.className='',1400);}
 function bDoTexto(txt,nome){const its=parseLista(txt);let cmd='',cmd2='';const c=[];
@@ -3607,6 +3609,7 @@ const bPips=cs=>{const o=(cs||[]).filter(c=>/[WUBRG]/.test(c));return `<span cla
 function pintaEditor(){const d=bDeck();if(!d)return;const tot=bTotal(d),ci=bCI(d),art=d.cmd&&BK.info[d.cmd]&&BK.info[d.cmd].art;
   const bn=$('#b-banner').style;bn.backgroundImage=art?`linear-gradient(90deg,var(--banner-a) 35%,var(--banner-b)),url(${art})`:'';bn.backgroundSize=art?'100% 100%,65% auto':'';bn.backgroundPosition=art?'left,right 22%':'';
   if(document.activeElement!==$('#b-nome'))$('#b-nome').value=d.nome;
+  $$('.b-cont').forEach(e=>{e.textContent=tot>=100?`${tot}/100 · cheio`:`${tot}/100 cartas`;e.className='b-cont'+(tot===100?' bom':tot>100?' ruim':'');e.title=tot>=100?'Deck completo: pra colocar outra carta, tire uma antes':`Faltam ${100-tot} cartas`;});
   $('#b-cmdnome').innerHTML=d.cmd?`<button class="lnk" data-carta="${h(d.cmd)}">${h(d.cmd)}</button>${d.cmd2?` + <button class="lnk" data-carta="${h(d.cmd2)}">${h(d.cmd2)}</button>`:''}`:'<span class="ruim">Escolha o comandante na busca (filtro "Comandante")</span>';
   const its=[...(d.cmd?[[d.cmd,1,1]]:[]),...(d.cmd2?[[d.cmd2,1,2]]:[]),...d.c],usd=its.reduce((s,x)=>s+(bInfo(x[0]).p||0)*x[1],0);
   const fora=ci?d.c.filter(x=>{const c=bInfo(x[0]).ci;return c&&[...c].some(k=>!ci.includes(k));}):[];
