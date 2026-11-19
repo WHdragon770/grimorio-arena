@@ -675,6 +675,10 @@ body[data-aba=decks] .obra,body[data-aba=decks] .topo-in{max-width:1720px}
  #v-mesa{padding-bottom:190px}
 }
 @media(max-width:700px){#m-ctl label.inline:has(select){flex:1 1 40%}#m-ctl label.inline select{flex:1 1 0;width:auto}}
+.b-scarta.dupla{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.b-sdupla{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.b-sdupla img{width:100%;border-radius:4.75%/3.5%;box-shadow:var(--sombra2);cursor:pointer;aspect-ratio:488/680;background:var(--sup2)}
+@media(max-width:520px){.b-scarta.dupla{grid-template-columns:1fr}}
 </style>
 <header class="topo"><div class="topo-in">
   <div class="marca"><span class="pips5" aria-hidden="true"><i style="background:var(--w)"></i><i style="background:var(--u)"></i><i style="background:var(--b)"></i><i style="background:var(--r)"></i><i style="background:var(--g)"></i></span>Grimório Arena</div>
@@ -3450,25 +3454,25 @@ async function bBusca(nomes){const f=[...new Set(nomes)].filter(n=>n&&!bTem(n)&&
 const bImg=(n,um)=>(BK.info[n]&&BK.info[n].img)||(typeof scryUrl==='function'&&scryUrl(n))||(um?'https://api.scryfall.com/cards/named?format=image&version=normal&exact='+encodeURIComponent(n):'data:image/gif;base64,R0lGODlhAQABAAAAACw=');
 const bTipo=(n,cmd)=>{if(cmd)return 'Comandante';const t=bInfo(n).t;for(const [g,re] of TIPOS)if(re&&re.test(t.split(' // ')[0]))return g;return 'Outras';};
 const bDeck=()=>BK.lst.find(d=>d.id===BK.cur);
-const bTotal=d=>d.c.reduce((s,x)=>s+x[1],0)+(d.cmd?1:0);
-const bCI=d=>d.cmd?bInfo(d.cmd).ci:'';
-function bTexto(d){return (d.cmd?`Commander\n1 ${d.cmd}\n\nDeck\n`:'')+d.c.map(x=>`${x[1]} ${x[0]}`).join('\n');}
+const bTotal=d=>d.c.reduce((s,x)=>s+x[1],0)+(d.cmd?1:0)+(d.cmd2?1:0);
+const bCI=d=>{const s=(d.cmd?bInfo(d.cmd).ci:'')+(d.cmd2?bInfo(d.cmd2).ci:'');return 'WUBRG'.split('').filter(k=>s.includes(k)).join('');};
+function bTexto(d){return (d.cmd?`Commander\n1 ${d.cmd}\n${d.cmd2?`1 ${d.cmd2}\n`:''}\nDeck\n`:'')+d.c.map(x=>`${x[1]} ${x[0]}`).join('\n');}
 function bNovo(dados){const d=Object.assign({id:'b'+Date.now().toString(36),nome:'Deck novo',cmd:'',c:[],t:Date.now()},dados||{});BK.lst.unshift(d);bSalva();return d;}
 function bMexe(fn){const d=bDeck();if(!d)return;fn(d);d.t=Date.now();bSalva();pintaEditor();}
-function bAdd(n,q=1){bMexe(d=>{if(n===d.cmd)return;const x=d.c.find(y=>y[0]===n);const bas=/Basic Land/.test(bInfo(n).t);if(x){if(bas)x[1]+=q;}else d.c.push([n,q]);});
+function bAdd(n,q=1){bMexe(d=>{if(n===d.cmd||n===d.cmd2)return;const x=d.c.find(y=>y[0]===n);const bas=/Basic Land/.test(bInfo(n).t);if(x){if(bas)x[1]+=q;}else d.c.push([n,q]);});
   bToast(`+ ${n}`);if(!bTem(n))bBusca([n]).then(()=>pintaEditor());}
 function bToast(t){let e=$('#b-toast');if(!e){e=document.createElement('div');e.id='b-toast';document.body.appendChild(e);}e.textContent=t;e.className='on';clearTimeout(bToast.t);bToast.t=setTimeout(()=>e.className='',1400);}
-function bDoTexto(txt,nome){const its=parseLista(txt);let cmd='';const c=[];
-  for(const it of its){const r=acharDB(it.nome),n=r?r[0]:it.nome;if(it.cmd&&!cmd){cmd=n;continue;}const x=c.find(y=>y[0]===n);if(x)x[1]+=it.q;else c.push([n,it.q]);}
+function bDoTexto(txt,nome){const its=parseLista(txt);let cmd='',cmd2='';const c=[];
+  for(const it of its){const r=acharDB(it.nome),n=r?r[0]:it.nome;if(it.cmd&&!cmd){cmd=n;continue;}if(it.cmd&&!cmd2){cmd2=n;continue;}const x=c.find(y=>y[0]===n);if(x)x[1]+=it.q;else c.push([n,it.q]);}
   if(!cmd){const l=c.find(x=>/Legendary/.test(bInfo(x[0]).t)&&/Creature/.test(bInfo(x[0]).t));if(l&&!its.some(i=>i.cmd)){}}
-  return bNovo({nome:nome||'Deck importado',cmd,c});}
+  return bNovo({nome:nome||'Deck importado',cmd,cmd2,c});}
 
 /* ---- lista de decks ---- */
 function pintaDecks(){const id=(location.hash.split('/')[1]||'');if(id&&BK.lst.some(d=>d.id===id)){BK.cur=id;$('#b-lista').hidden=true;$('#b-editor').hidden=false;pintaEditor();return;}
   BK.cur=null;$('#b-lista').hidden=false;$('#b-editor').hidden=true;
   const tile=(d,pub)=>{const ci=d.cmd?bInfo(d.cmd).ci:'',art=d.cmd&&BK.info[d.cmd]&&BK.info[d.cmd].art;
     return `<button class="b-tile" data-bopen="${h(d.id)}"${pub?' data-bpub="1"':''}><span class="b-art"${art?` style="background-image:url(${h(art)})"`:''}></span>
-      <span class="b-tinfo"><b>${h(d.nome)}</b><small>${h(d.cmd||'sem comandante')}</small><span class="b-meta">${bPips(ci.split(''))}<span>${pub?h(d.fonte||'Do site'):bTotal(d)+' cartas'}</span></span></span></button>`;};
+      <span class="b-tinfo"><b>${h(d.nome)}</b><small>${h(d.cmd?d.cmd+(d.cmd2?' + '+d.cmd2:''):'sem comandante')}</small><span class="b-meta">${bPips(ci.split(''))}<span>${pub?h(d.fonte||'Do site'):bTotal(d)+' cartas'}</span></span></span></button>`;};
   $('#b-meus').innerHTML=BK.lst.length?BK.lst.map(d=>tile(d)).join(''):'<p class="nota">Nenhum deck ainda. Clique em <b>Novo deck</b> ou importe a lista que está na lateral.</p>';
   const pubs=(typeof DECKS!=='undefined'?DECKS:[]).filter(d=>d.pub||d.meu);
   $('#b-pubs-box').hidden=!pubs.length;$('#b-pubs').innerHTML=pubs.map(d=>tile({id:d.id,nome:d.nome,cmd:d.cmd,fonte:d.fonte},1)).join('');
@@ -3479,8 +3483,8 @@ const bPips=cs=>{const o=(cs||[]).filter(c=>/[WUBRG]/.test(c));return `<span cla
 function pintaEditor(){const d=bDeck();if(!d)return;const tot=bTotal(d),ci=bCI(d),art=d.cmd&&BK.info[d.cmd]&&BK.info[d.cmd].art;
   const bn=$('#b-banner').style;bn.backgroundImage=art?`linear-gradient(90deg,var(--banner-a) 35%,var(--banner-b)),url(${art})`:'';bn.backgroundSize=art?'100% 100%,65% auto':'';bn.backgroundPosition=art?'left,right 22%':'';
   if(document.activeElement!==$('#b-nome'))$('#b-nome').value=d.nome;
-  $('#b-cmdnome').innerHTML=d.cmd?`<button class="lnk" data-carta="${h(d.cmd)}">${h(d.cmd)}</button>`:'<span class="ruim">Escolha o comandante na busca (filtro "Comandante")</span>';
-  const its=[...(d.cmd?[[d.cmd,1,1]]:[]),...d.c],usd=its.reduce((s,x)=>s+(bInfo(x[0]).p||0)*x[1],0);
+  $('#b-cmdnome').innerHTML=d.cmd?`<button class="lnk" data-carta="${h(d.cmd)}">${h(d.cmd)}</button>${d.cmd2?` + <button class="lnk" data-carta="${h(d.cmd2)}">${h(d.cmd2)}</button>`:''}`:'<span class="ruim">Escolha o comandante na busca (filtro "Comandante")</span>';
+  const its=[...(d.cmd?[[d.cmd,1,1]]:[]),...(d.cmd2?[[d.cmd2,1,2]]:[]),...d.c],usd=its.reduce((s,x)=>s+(bInfo(x[0]).p||0)*x[1],0);
   const fora=ci?d.c.filter(x=>{const c=bInfo(x[0]).ci;return c&&[...c].some(k=>!ci.includes(k));}):[];
   const curva=Array(8).fill(0);for(const x of d.c)if(!/Land/.test(bInfo(x[0]).t))curva[Math.min(7,Math.floor(bInfo(x[0]).v||0))]+=x[1];const mx=Math.max(1,...curva);
   $('#b-stats').innerHTML=`<div class="b-st ${tot===100?'bom':tot>100?'ruim':''}"><b>${tot}</b><small>/100 cartas</small></div>
@@ -3518,7 +3522,7 @@ function bOrdena(l,o){const k={mv:x=>bInfo(x[0]).v||0,preco:x=>-(bInfo(x[0]).p||
   cor:x=>{const c=bCores(bInfo(x[0]));return c.length>1?5+c.length:c?'WUBRG'.indexOf(c):12;}}[o]||(()=>0);
   return l.sort((a,b)=>(k(a)-k(b))||a[0].localeCompare(b[0]));}
 const bSet=n=>{const i=bInfo(n);return i.s?`<span class="b-set r-${h(i.r||'common')}" style="--si:url(https://svgs.scryfall.io/sets/${h(i.s)}.svg)" title="${h(i.sn||i.s)} · ${(RAR[i.r]||[''])[0]}"></span>`:'';};
-const bAcoes=x=>x[2]?'<span class="b-acoes"><button data-bsemcmd="1" title="Tirar do comando">×</button></span>'
+const bAcoes=x=>x[2]?`<span class="b-acoes"><button data-bsemcmd="${x[2]}" title="Tirar do comando">×</button></span>`
   :`<span class="b-acoes"><button data-bmenos="${h(x[0])}" aria-label="Tirar uma">−</button><button data-bmais="${h(x[0])}" aria-label="Pôr mais uma">+</button><button data-bcmd="${h(x[0])}" title="Virar comandante">♛</button></span>`;
 const bLinhaH=(x,c)=>{const i=bInfo(x[0]);return `<div class="b-linha${BK.sel===x[0]?' sel':''}" data-bprev="${h(x[0])}"><span class="b-q">${x[1]}</span><button class="b-n" data-carta="${h(x[0])}">${h(x[0])}</button>${c.xs?bSet(x[0]):''}${c.xm?`<span class="b-mana">${simb((i.m||'').split(' // ')[0])}</span>`:''}${c.xp?`<span class="b-p">${i.p?brl(i.p*COTA*x[1]):''}</span>`:''}${bAcoes(x)}</div>`;};
 const bImgH=(x,c,pr)=>{const i=bInfo(x[0]);return `<div class="b-cartaimg${BK.sel===x[0]?' sel':''}" data-bprev="${h(x[0])}"><img loading="lazy" src="${h(bImg(x[0]))}" alt="${h(x[0])}" data-carta="${h(x[0])}">${x[1]>1?`<span class="b-q">${x[1]}x</span>`:''}${pr&&c.xp&&i.p?`<span class="b-pr">${brl(i.p*COTA)}</span>`:''}${x[2]?'':`<span class="b-acoes"><button data-bmenos="${h(x[0])}" aria-label="Tirar uma">−</button><button data-bmais="${h(x[0])}" aria-label="Pôr mais uma">+</button></span>`}</div>`;};
@@ -3527,7 +3531,7 @@ function bSelects(c){for(const [id,k,l] of [['#b-vsel','vis',VIS],['#b-gsel','gr
   s.onchange=()=>bMexe(d=>{d.cfg=Object.assign(bCfg(d),{[k]:s.value});});}}
 function bPintaLista(d,its){const c=bCfg(d),e=$('#b-cartas');bSelects(c);e.className='b-cartas '+c.vis;
   if(!its.length){e.innerHTML='<p class="nota">Deck vazio. Busque cartas acima ou puxe o deck médio do EDHREC.</p>';bFoco();return;}
-  const gr=new Map();if(d.cmd)gr.set('Comandante',{k:-1,l:[its[0]]});
+  const gr=new Map();if(d.cmd)gr.set(d.cmd2?'Comandantes':'Comandante',{k:-1,l:its.filter(x=>x[2])});
   for(const x of its){if(x[2])continue;const [g,k]=bChave(x,c.grp);if(!gr.has(g))gr.set(g,{k,l:[]});gr.get(g).l.push(x);}
   const gs=[...gr.entries()].sort((a,b)=>(a[1].k-b[1].k)||a[0].localeCompare(b[0]));for(const [,o] of gs)if(o.k!==-1)bOrdena(o.l,c.ord);
   const q=l=>l.reduce((s,x)=>s+x[1],0),cab=(g,l)=>`<h4>${h(g)} <span>${q(l)}</span></h4>`;
@@ -3536,13 +3540,13 @@ function bPintaLista(d,its){const c=bCfg(d),e=$('#b-cartas');bSelects(c);e.class
   else{const cols=[];for(const [g,o] of gs){if(c.vis==='pilhas2'&&o.l.length>6)for(let i=0;i<o.l.length;i+=6)cols.push([i?'<h4 class="cont">&nbsp;</h4>':cab(g,o.l),o.l.slice(i,i+6)]);else cols.push([cab(g,o.l),o.l]);}
     e.innerHTML=`<div class="b-pilhas">${cols.map(([hd,l])=>`<section class="b-pilha">${hd}<div class="b-stack">${l.map(x=>bImgH(x,c)).join('')}</div></section>`).join('')}</div>`;}
   bFoco();}
-function bFoco(n){const e=$('#b-foco'),d=bDeck();if(!e||!d)return;n=n||BK.sel;if(!n||!(n===d.cmd||d.c.some(y=>y[0]===n)))n=d.cmd||(d.c[0]||[])[0];if(!n){e.innerHTML='';return;}
-  BK.sel=n;const i=bInfo(n),q=n===d.cmd?1:((d.c.find(y=>y[0]===n)||[])[1]||0),u=encodeURIComponent(n.split(' // ')[0]);
+function bFoco(n){const e=$('#b-foco'),d=bDeck();if(!e||!d)return;n=n||BK.sel;if(!n||!(n===d.cmd||n===d.cmd2||d.c.some(y=>y[0]===n)))n=d.cmd||(d.c[0]||[])[0];if(!n){e.innerHTML='';return;}
+  BK.sel=n;const i=bInfo(n),q=n===d.cmd||n===d.cmd2?1:((d.c.find(y=>y[0]===n)||[])[1]||0),u=encodeURIComponent(n.split(' // ')[0]);
   const lk=(t,href,v)=>`<a target="_blank" rel="noopener" href="${href}"><span>${t}</span><b>${v||''}</b></a>`;
   e.innerHTML=`<img src="${h(bImg(n,1))}" alt="${h(n)}" data-carta="${h(n)}" title="Abrir a ficha">
     <div class="b-fpreco"><b>${i.p?brl(i.p*COTA):'sem preço'}</b>${i.p?`<small>US$ ${i.p.toFixed(2)}</small>`:''}</div>
     <p class="b-fmeta">${i.sn?`${bSet(n)} ${h(i.sn)} · ${(RAR[i.r]||[''])[0]}`:''}${i.a?`<br>Arte: ${h(i.a)}`:''}</p>
-    ${n===d.cmd?'<p class="b-fmeta"><b>Comandante</b></p>':`<div class="b-fbtn"><button data-bmenos="${h(n)}" aria-label="Tirar uma">−</button><span>${q} no deck</span><button data-bmais="${h(n)}" aria-label="Pôr mais uma">+</button><button data-bcmd="${h(n)}" title="Virar comandante">♛</button></div>`}
+    ${n===d.cmd||n===d.cmd2?'<p class="b-fmeta"><b>Comandante</b></p>':`<div class="b-fbtn"><button data-bmenos="${h(n)}" aria-label="Tirar uma">−</button><span>${q} no deck</span><button data-bmais="${h(n)}" aria-label="Pôr mais uma">+</button><button data-bcmd="${h(n)}" title="Virar comandante">♛</button></div>`}
     <div class="b-flinks">${lk('Comprar na LigaMagic','https://www.ligamagic.com.br/?view=cards/card&card='+u)}${lk('Card Kingdom','https://www.cardkingdom.com/catalog/search?search=header&filter%5Bname%5D='+u,i.p?'US$ '+i.p.toFixed(2):'')}${lk('TCGplayer','https://www.tcgplayer.com/search/magic/product?q='+u)}${lk('Ver no Scryfall','https://scryfall.com/search?q=!%22'+u+'%22')}${lk('Ver no EDHREC','https://edhrec.com/cards/'+edhSlug(n))}</div>`;}
 function bFocoSel(t){const n=t.dataset.bprev;if(BK.sel===n)return;$$('#b-cartas .sel').forEach(x=>x.classList.remove('sel'));t.classList.add('sel');bFoco(n);}
 document.addEventListener('click',e=>{const t=e.target.closest('#b-cartas [data-bprev]');if(t&&!e.target.closest('button,[data-carta]'))bFocoSel(t);});
@@ -3584,13 +3588,13 @@ function bPintaEdh(){bPintaEdhTudo();const e=BK.edh,el=$('#b-edh');if(!el)return
   if(!d||!d.cmd){el.innerHTML='<p class="nota">Escolha um comandante pra ver o que a comunidade joga com ele.</p>';return;}
   if(!e||e.load){el.innerHTML='<p class="nota">Puxando o EDHREC...</p>';return;}
   if(e.erro||!e.listas.length){el.innerHTML='<p class="nota">O EDHREC não tem página pra esse comandante (ou está sem internet).</p>';return;}
-  const L=e.listas[BK.edhCat]||e.listas[0],tem=new Set(d.c.map(x=>x[0]).concat([d.cmd]));
+  const L=e.listas[BK.edhCat]||e.listas[0],tem=new Set(d.c.map(x=>x[0]).concat([d.cmd,d.cmd2]));
   el.innerHTML=`<div class="b-cats">${e.listas.map((l,k)=>`<button class="chip${k===BK.edhCat?' on':''}" data-bcat="${k}">${h(CATPT[l.h]||l.h)}</button>`).join('')}</div>
     <div class="b-edhl">${L.c.map(c=>`<div class="b-edhr${tem.has(c.n)?' tem':''}" data-bprev="${h(c.n)}"><button class="b-n" data-carta="${h(c.n)}">${h(c.n)}</button><span class="b-inc" title="em ${Math.round(c.inc*100)}% dos decks"><i style="width:${Math.round(c.inc*100)}%"></i><em>${Math.round(c.inc*100)}%</em></span><span class="b-sin ${c.sin>0?'bom':''}" title="sinergia: quanto mais que a média esse comandante usa">${c.sin>0?'+':''}${Math.round(c.sin*100)}%</span>${tem.has(c.n)?'<span class="b-ok">✓</span>':`<button class="b-add" data-bmais="${h(c.n)}" aria-label="Adicionar">+</button>`}</div>`).join('')}</div>`;}
 async function bMedio(){const d=bDeck();if(!d||!d.cmd)return;if(d.c.length>5&&!confirm('Trocar a lista atual pelo deck médio do EDHREC?'))return;
   $('#b-medio').disabled=true;$('#b-medio').textContent='Puxando...';
   try{const r=await fetch(`https://json.edhrec.com/pages/average-decks/${edhSlug(d.cmd)}.json`);const j=await r.json();const c=[];
-    for(const lst of Object.values((j.deck&&j.deck.cards)||{}))for(const [n,q] of lst)if(n!==d.cmd)c.push([n,q]);
+    for(const lst of Object.values((j.deck&&j.deck.cards)||{}))for(const [n,q] of lst)if(n!==d.cmd&&n!==d.cmd2)c.push([n,q]);
     if(!c.length)throw 0;bMexe(x=>{x.c=c;});bToast(`${c.length} cartas do deck médio`);}catch(e){bToast('Não deu pra puxar o deck médio');}
   $('#b-medio').disabled=false;$('#b-medio').textContent='Deck médio do EDHREC';}
 
@@ -3607,8 +3611,8 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-bope
   e.stopPropagation();
   if(b.dataset.bmais)return bAdd(b.dataset.bmais);
   if(b.dataset.bmenos)return bMexe(d=>{const x=d.c.find(y=>y[0]===b.dataset.bmenos);if(x&&--x[1]<=0)d.c=d.c.filter(y=>y!==x);});
-  if(b.dataset.bcmd){const n=b.dataset.bcmd;bMexe(d=>{if(d.cmd)d.c.push([d.cmd,1]);d.c=d.c.filter(y=>y[0]!==n);d.cmd=n;if(d.nome==='Deck novo')d.nome=n.split(',')[0].split(' // ')[0];});$('#b-modo').value='ci';bBuscar();bToast('Comandante: '+n);return;}
-  if(b.dataset.bsemcmd)return bMexe(d=>{d.c.unshift([d.cmd,1]);d.cmd='';});},true);
+  if(b.dataset.bcmd){const n=b.dataset.bcmd;if(/Background/.test(bInfo(n).t)&&bDeck()&&bDeck().cmd){bMexe(d=>{if(d.cmd2)d.c.push([d.cmd2,1]);d.c=d.c.filter(y=>y[0]!==n);d.cmd2=n;});bToast('Antecedente: '+n);return;}bMexe(d=>{if(d.cmd)d.c.push([d.cmd,1]);d.c=d.c.filter(y=>y[0]!==n);d.cmd=n;if(d.nome==='Deck novo')d.nome=n.split(',')[0].split(' // ')[0];});$('#b-modo').value='ci';bBuscar();bToast('Comandante: '+n);return;}
+  if(b.dataset.bsemcmd==='2')return bMexe(d=>{d.c.unshift([d.cmd2,1]);d.cmd2='';});if(b.dataset.bsemcmd)return bMexe(d=>{d.c.unshift([d.cmd,1]);d.cmd=d.cmd2||'';d.cmd2='';});},true);
 
 /* ---- botões fixos ---- */
 function bLiga(){
@@ -3622,7 +3626,7 @@ function bLiga(){
   $('#b-medio').onclick=bMedio;$('#b-cfgbtn').onclick=bCfgAbre;
   $('#b-usar').onclick=()=>{const d=bDeck();if(!d)return;$('#lista').value=bTexto(d);$('#cmd').value=d.cmd||'';location.hash='#deck';carregaDeck();};
   $('#b-copiar').onclick=async()=>{const d=bDeck();if(!d)return;try{await navigator.clipboard.writeText(bTexto(d));bToast('Lista copiada');}catch(e){$('#b-txt').hidden=false;$('#b-txt').value=bTexto(d);$('#b-txt').select();}};
-  $('#b-dup').onclick=()=>{const d=bDeck();if(!d)return;const n=bNovo({nome:d.nome+' (cópia)',cmd:d.cmd,c:d.c.map(x=>[...x])});location.hash='#decks/'+n.id;};
+  $('#b-dup').onclick=()=>{const d=bDeck();if(!d)return;const n=bNovo({nome:d.nome+' (cópia)',cmd:d.cmd,cmd2:d.cmd2,c:d.c.map(x=>[...x])});location.hash='#decks/'+n.id;};
   $('#b-del').onclick=()=>{const d=bDeck();if(!d||!confirm(`Apagar "${d.nome}"?`))return;BK.lst=BK.lst.filter(x=>x!==d);bSalva();location.hash='#decks';};
   $('#b-pub').onclick=async()=>{const d=bDeck();if(!d||typeof pubDeck!=='function')return;if(bTotal(d)<60){bToast('Deck muito curto pra publicar');return;}
     $('#b-pub').disabled=true;const x={id:'meu-'+Date.now(),nome:d.nome,cmd:d.cmd,fonte:'Colado por você',lista:bTexto(d),meu:1};const ok=await pubDeck(x);$('#b-pub').disabled=false;
@@ -3642,7 +3646,7 @@ const edhImg=c=>(BK.info[c.n]&&BK.info[c.n].img)||(c.id?`https://cards.scryfall.
 const nBR=n=>Number(n||0).toLocaleString('pt-BR');
 function bPintaEdhTudo(){const box=$('#b-edhtudo-box'),el=$('#b-edhtudo');if(!el)return;const e=BK.edh,d=bDeck();
   if(!d||!d.cmd||!e||e.load||e.erro||!e.listas.length){box.hidden=true;return;}box.hidden=false;
-  const tem=new Set(d.c.map(x=>x[0]).concat([d.cmd])),pot=Math.max(0,...e.listas.flatMap(l=>l.c.map(c=>c.pot)));
+  const tem=new Set(d.c.map(x=>x[0]).concat([d.cmd,d.cmd2])),pot=Math.max(0,...e.listas.flatMap(l=>l.c.map(c=>c.pot)));
   $('#b-edhn').textContent=pot?`base: ${nBR(pot)} decks com ${d.cmd.split(' // ')[0]}`:'';
   $$('#b-edhvis button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.edhvis===BK.edhVis));
   const pct=c=>{const p=Math.round(c.inc*100),s=Math.round(c.sin*100);return `<span class="b-inc" title="${nBR(c.num)} de ${nBR(c.pot)} decks"><i style="width:${p}%"></i><em>${p}%</em></span><span class="b-sin ${s>0?'bom':''}" title="sinergia">${s>0?'+':''}${s}%</span>`;};
@@ -3653,19 +3657,32 @@ function bPintaEdhTudo(){const box=$('#b-edhtudo-box'),el=$('#b-edhtudo');if(!el
     :`<div class="b-edhcols">${l.c.map(c=>{const t=tem.has(c.n);return `<div class="b-edhr${t?' tem':''}" data-bprev="${h(c.n)}"><button class="b-n" data-carta="${h(c.n)}">${h(c.n)}</button>${pct(c)}${add(c,t)}</div>`;}).join('')}</div>`)+'</section>';}).join('');}
 
 /* ---- comandante aleatório por cor ---- */
-BK.sor={c:new Set(st.get('sorcor',[])),modo:st.get('sormodo','exato'),pop:st.get('sorpop',true),carta:null,cache:{}};
+BK.sor={bg:st.get('sorbg',false),carta2:null,c:new Set(st.get('sorcor',[])),modo:st.get('sormodo','exato'),pop:st.get('sorpop',true),carta:null,cache:{}};
 function bSorteAbre(){let dl=$('#b-sorte');if(!dl){dl=document.createElement('dialog');dl.id='b-sorte';dl.className='b-dlg';document.body.appendChild(dl);dl.addEventListener('click',bSorteClique);}
   bSortePinta();dl.showModal();if(!BK.sor.carta)bSortear();}
 function bSortePinta(){const s=BK.sor,c=s.carta,dl=$('#b-sorte');if(!dl)return;const d=bDeck();
   const cor=k=>`<button type="button" class="b-scor" data-scor="${k}" aria-pressed="${s.c.has(k)}" title="${{W:'Branco',U:'Azul',B:'Preto',R:'Vermelho',G:'Verde',C:'Incolor'}[k]}">${SV(k)}</button>`;
   dl.innerHTML=`<div class="b-sorte-in"><div class="linha entre"><h3>🎲 Comandante aleatório</h3><button type="button" data-sfecha="1" aria-label="Fechar">×</button></div>
    <p class="nota">Marque as cores que você quer (nenhuma = qualquer cor) e sorteie quantas vezes quiser.</p>
+   <div class="seg" role="group" aria-label="Tipo de sorteio"><button type="button" data-sbg="0" aria-pressed="${!s.bg}">Só comandante</button><button type="button" data-sbg="1" aria-pressed="${!!s.bg}">Com antecedente</button></div>
    <div class="b-scores">${['W','U','B','R','G','C'].map(cor).join('')}</div>
    <div class="seg" role="group" aria-label="Como usar as cores"><button type="button" data-smodo="exato" aria-pressed="${s.modo==='exato'}">Exatamente essas</button><button type="button" data-smodo="dentro" aria-pressed="${s.modo==='dentro'}">Dentro dessas</button><button type="button" data-smodo="tem" aria-pressed="${s.modo==='tem'}">Pelo menos essas</button></div>
-   <label class="b-spop"><input type="checkbox" data-spop="1"${s.pop?' checked':''}> Só os populares (top 100 do EDHREC nessas cores)</label>
-   <div class="b-scarta">${s.load?'<p class="nota">Sorteando...</p>':s.erro?`<p class="nota">${h(s.erro)}</p>`:c?`<img src="${h(c.img)}" alt="${h(c.n)}" data-carta="${h(c.n)}"><div class="b-sinfo"><b>${h(c.n)}</b><p>${simb(c.mc)}</p><p class="nota">${h(c.tl)}</p>${c.rank?`<p class="nota fraca">#${nBR(c.rank)} mais jogado no EDHREC</p>`:''}<p class="b-flinks"><a href="https://edhrec.com/commanders/${edhSlug(c.n)}" target="_blank" rel="noopener">Ver no EDHREC</a></p></div>`:''}</div>
+   <label class="b-spop"><input type="checkbox" data-spop="1"${s.pop?' checked':''}> ${s.bg?'Só os populares (top 40 comandantes e top 25 antecedentes do EDHREC)':'Só os populares (top 100 do EDHREC nessas cores)'}</label>
+   <div class="b-scarta${s.bg&&c&&s.carta2?' dupla':''}">${s.load?'<p class="nota">Sorteando...</p>':s.bg&&c&&s.carta2&&!s.erro?bSorteDupla(c,s.carta2):s.load?'<p class="nota">Sorteando...</p>':s.erro?`<p class="nota">${h(s.erro)}</p>`:c?`<img src="${h(c.img)}" alt="${h(c.n)}" data-carta="${h(c.n)}"><div class="b-sinfo"><b>${h(c.n)}</b><p>${simb(c.mc)}</p><p class="nota">${h(c.tl)}</p>${c.rank?`<p class="nota fraca">#${nBR(c.rank)} mais jogado no EDHREC</p>`:''}<p class="b-flinks"><a href="https://edhrec.com/commanders/${edhSlug(c.n)}" target="_blank" rel="noopener">Ver no EDHREC</a></p></div>`:''}</div>
    <div class="linha entre"><button type="button" data-ssort="1">🎲 Sortear outro</button><span class="linha">${d?`<button type="button" data-susar="novo"${c?'':' disabled'}>Criar deck novo</button>`:''}<button type="button" class="prim" data-susar="${d?'aqui':'novo'}"${c?'':' disabled'}>${d?'Usar neste deck':'Criar deck com ele'}</button></span></div></div>`;}
+const bSorteFicha=j=>{const f=j.card_faces||[],iu=j.image_uris||(f[0]&&f[0].image_uris)||{};bGuarda(j);return {n:j.name,img:iu.normal||bImg(j.name,1),mc:j.mana_cost||(f[0]&&f[0].mana_cost)||'',tl:j.type_line||'',rank:j.edhrec_rank||0};};
+const bSorteDupla=(a,b)=>`<div class="b-sdupla">${[a,b].map(c=>`<img src="${h(c.img)}" alt="${h(c.n)}" data-carta="${h(c.n)}">`).join('')}</div><div class="b-sinfo"><b>${h(a.n)}</b><p class="nota">${simb(a.mc)} ${h(a.tl)}</p><b>+ ${h(b.n)}</b><p class="nota">${simb(b.mc)} ${h(b.tl)}</p><p class="b-flinks"><a href="https://edhrec.com/commanders/${edhSlug(a.n)}" target="_blank" rel="noopener">${h(a.n.split(',')[0])} no EDHREC</a></p></div>`;
+async function bSorteiaBg(){const s=BK.sor;
+  const pega=async q=>{if(s.cache[q])return s.cache[q];let l=[],u='https://api.scryfall.com/cards/search?order=edhrec&q='+encodeURIComponent(q);while(u&&l.length<500){const x=await (await fetch(u)).json();l=l.concat(x.data||[]);u=x.has_more?x.next_page:null;}return s.cache[q]=l;};
+  let cs=await pega('is:commander legal:commander game:paper o:"choose a background"'),bs=await pega('t:background legal:commander game:paper');
+  if(s.pop){cs=cs.slice(0,40);bs=bs.slice(0,25);}
+  const S=[...s.c].filter(k=>k!=='C'),ok=u=>s.c.has('C')?!u.length:!S.length?true:s.modo==='exato'?u.length===S.length&&S.every(k=>u.includes(k)):s.modo==='dentro'?u.every(k=>S.includes(k)):S.every(k=>u.includes(k));
+  let ps=[];for(const a of cs)for(const b of bs)if(ok([...new Set([...(a.color_identity||[]),...(b.color_identity||[])])]))ps.push([a,b]);
+  if(!ps.length)throw 0;const ant=s.carta&&s.carta.n,ant2=s.carta2&&s.carta2.n,p2=ps.filter(p=>p[0].name!==ant||p[1].name!==ant2);if(p2.length)ps=p2;
+  const [a,b]=ps[Math.floor(Math.random()*ps.length)];s.carta=bSorteFicha(a);s.carta2=bSorteFicha(b);}
 async function bSortear(){const s=BK.sor;s.load=1;s.erro='';bSortePinta();
+  if(s.bg){try{await bSorteiaBg();}catch(e){s.carta=s.carta2=null;s.erro='Nenhuma dupla comandante + antecedente nessas cores (antecedentes não são incolores). Mude as cores e tente de novo.';}s.load=0;return bSortePinta();}
+  s.carta2=null;
   const cs=[...s.c].join('').toLowerCase(),op={exato:'=',dentro:'<=',tem:'>='}[s.modo];
   const q='is:commander legal:commander game:paper'+(s.c.has('C')?' id=c':cs?` id${op}${cs}`:'');
   try{let j;if(s.pop){let l=s.cache[q];if(!l){const r=await fetch('https://api.scryfall.com/cards/search?order=edhrec&q='+encodeURIComponent(q));const x=await r.json();l=s.cache[q]=(x.data||[]).slice(0,100);}
@@ -3678,13 +3695,14 @@ async function bSortear(){const s=BK.sor;s.load=1;s.erro='';bSortePinta();
 function bSorteClique(e){const s=BK.sor,cb=e.target.closest('[data-spop]');if(cb){s.pop=cb.checked;st.set('sorpop',s.pop);return bSortear();}const b=e.target.closest('button');if(!b)return;
   if(b.dataset.sfecha)return $('#b-sorte').close();
   if(b.dataset.scor){const k=b.dataset.scor;if(s.c.has(k))s.c.delete(k);else{if(k==='C')s.c.clear();else s.c.delete('C');s.c.add(k);}st.set('sorcor',[...s.c]);return bSortear();}
+  if(b.dataset.sbg){s.bg=b.dataset.sbg==='1';st.set('sorbg',s.bg);s.carta=s.carta2=null;return bSortear();}
   if(b.dataset.smodo){s.modo=b.dataset.smodo;st.set('sormodo',s.modo);return bSortear();}
   if(b.dataset.ssort)return bSortear();
-  if(b.dataset.susar&&s.carta){const n=s.carta.n,nm=n.split(',')[0].split(' // ')[0];
+  if(b.dataset.susar&&s.carta){const n=s.carta.n,n2=s.bg&&s.carta2?s.carta2.n:'',nm=n.split(',')[0].split(' // ')[0];
     if(b.dataset.susar==='aqui'&&bDeck()){const dd=bDeck();if(dd.cmd&&dd.c.length>5&&!confirm(`Trocar ${dd.cmd.split(' // ')[0]} por ${n}? O comandante atual vai pra lista.`))return;}
-    if(b.dataset.susar==='aqui'&&bDeck())bMexe(d=>{if(d.cmd)d.c.push([d.cmd,1]);d.c=d.c.filter(y=>y[0]!==n);d.cmd=n;if(d.nome==='Deck novo')d.nome=nm;});
-    else{const d=bNovo({nome:nm,cmd:n});location.hash='#decks/'+d.id;}
-    $('#b-sorte').close();s.carta=null;bToast('Comandante: '+n);}}
+    if(b.dataset.susar==='aqui'&&bDeck())bMexe(d=>{if(d.cmd)d.c.push([d.cmd,1]);if(d.cmd2)d.c.push([d.cmd2,1]);d.c=d.c.filter(y=>y[0]!==n&&y[0]!==n2);d.cmd=n;d.cmd2=n2;if(d.nome==='Deck novo')d.nome=nm;});
+    else{const d=bNovo({nome:nm,cmd:n,cmd2:n2});location.hash='#decks/'+d.id;}
+    $('#b-sorte').close();s.carta=s.carta2=null;bToast('Comandante: '+n+(n2?' + '+n2:''));}}
 document.addEventListener('click',e=>{const b=e.target.closest('#b-sorte-btn,#b-sorte-ed,[data-bpula],[data-edhvis],#b-edhver');if(!b)return;
   if(b.id==='b-sorte-btn'||b.id==='b-sorte-ed')return bSorteAbre();
   if(b.id==='b-edhver')return $('#b-edhtudo-box').scrollIntoView({behavior:'smooth'});
