@@ -2440,7 +2440,7 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-const COTA=5.93;
+const COTA=5.87;
 /* fila única do Scryfall: no máximo 2 por segundo, espera e tenta de novo se vier 429 */
 let _sq=Promise.resolve(),_sUlt=0;
 function scryFetch(u,o){const p=_sq.then(async()=>{for(let k=0;k<3;k++){const w=_sUlt+550-Date.now();if(w>0)await new Promise(z=>setTimeout(z,w));_sUlt=Date.now();
@@ -3948,7 +3948,7 @@ function bEdClique(e){const b=e.target.closest('button');if(!b)return;const p=BK
   if(b.dataset.edbarata!=null){const v=p.l.filter(c=>c.pn>0).sort((a,b)=>a.pn-b.pn)[0];if(!v)return bToast('Nenhuma edição com preço');bEdUsa(v,false);}}
 </script>
 <script>// Conta: Firebase (Google ou e-mail/senha). Decks em usuarios/{uid}, regra do Firestore deixa só o dono ler/escrever.
-const GA_FB=null; // colar aqui o firebaseConfig do console do Firebase ({apiKey,authDomain,projectId,appId})
+const GA_FB={apiKey:"AIzaSyDgW3bCOUpX_yXUt3RyiWAfTGC4kYl-Fmc",authDomain:"grimorio-arena.firebaseapp.com",projectId:"grimorio-arena",storageBucket:"grimorio-arena.firebasestorage.app",messagingSenderId:"662026107254",appId:"1:662026107254:web:ed7d3c14ce9403cff6e257"};
 const CT={u:null,db:null,auth:null,tm:null,modo:'entrar',estado:''};
 const ctErro=e=>({'auth/invalid-credential':'E-mail ou senha errados.','auth/wrong-password':'E-mail ou senha errados.','auth/user-not-found':'Não achei conta com esse e-mail.',
   'auth/email-already-in-use':'Já existe conta com esse e-mail. Use Entrar.','auth/weak-password':'A senha precisa de pelo menos 6 caracteres.','auth/invalid-email':'Esse e-mail não parece certo.',
