@@ -2440,7 +2440,7 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-const COTA=5.87;
+const COTA=5.88;
 /* fila única do Scryfall: no máximo 2 por segundo, espera e tenta de novo se vier 429 */
 let _sq=Promise.resolve(),_sUlt=0;
 function scryFetch(u,o){const p=_sq.then(async()=>{for(let k=0;k<3;k++){const w=_sUlt+550-Date.now();if(w>0)await new Promise(z=>setTimeout(z,w));_sUlt=Date.now();
@@ -2452,7 +2452,7 @@ let EU=null; /* meu deck montado */
 let IMG=null;const ROWS=[];
 // Site (GitHub Pages): fotos direto do CDN do Scryfall, cache no navegador
 let SCRY={};try{SCRY=JSON.parse(localStorage.getItem('ga_scry')||'{}')}catch(e){}
-const _fila=new Set();let _tm=null,_rodando=false;const _frente=n=>String(n).split(' // ')[0];
+const _fila=new Set();let _tm=null,_rodando=false,_falhou=0;const _frente=n=>String(n).split(' // ')[0];
 function scryUrl(n,g){const v=SCRY[_frente(n)];return v?(g?v[1]:v[0]):'';}
 function fundoFoto(nome){if(!nome)return '';const u=scryUrl(nome);
   if(u)return `background-image:url(${u});background-size:cover;background-position:center;`;
@@ -2460,15 +2460,15 @@ function fundoFoto(nome){if(!nome)return '';const u=scryUrl(nome);
 async function scryPega(){if(_rodando)return;_rodando=true;
   try{while(_fila.size){const lote=[..._fila].slice(0,75);lote.forEach(n=>_fila.delete(n));
     try{const r=await scryFetch('https://api.scryfall.com/cards/collection',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({identifiers:lote.map(name=>({name}))})});
-      if(!r.ok)break;const j=await r.json();
+      if(!r.ok){lote.forEach(n=>_fila.add(n));_falhou=1;break;}const j=await r.json();
       for(const c of j.data||[]){const iu=c.image_uris||(c.card_faces&&c.card_faces[0].image_uris);if(iu)SCRY[_frente(c.name)]=[iu.normal,iu.large||iu.normal];}
       for(const nf of j.not_found||[])if(nf.name)SCRY[nf.name]=0;
-    }catch(e){break;}
+    }catch(e){lote.forEach(n=>_fila.add(n));_falhou=1;break;}
     }
     try{localStorage.setItem('ga_scry',JSON.stringify(SCRY))}catch(e){}
     document.querySelectorAll('.foto[data-carta]').forEach(el=>{if(!el.style.backgroundImage){const u=scryUrl(el.dataset.carta);if(u)el.style.cssText+=';'+fundoFoto(el.dataset.carta);}});
     if(typeof redesenhaMesa==='function')try{redesenhaMesa()}catch(e){}
-  }finally{_rodando=false;if(_fila.size)scryPega();}}
+  }finally{_rodando=false;if(_fila.size){const f=_falhou;_falhou=0;setTimeout(scryPega,f?4000:0);}}}
 async function scryUma(n){if(scryUrl(n,1)||SCRY[_frente(n)]===0)return;_fila.add(_frente(n));_rodando=false;await scryPega();}
 // Decks compartilhados (Apps Script + planilha "Grimório decks")
 const GA_PUB='';
@@ -2941,6 +2941,9 @@ addEventListener('keydown',e=>{if(!JOGO||$('#v-mesa').hidden||/INPUT|SELECT|TEXT
   $('#lista').value=st.get('lista','')||$('#lista-padrao').textContent.trim();$('#cmd').value=st.get('cmd','');
   carregaDeck();aba();
 })();
+
+// fotos chegaram depois do desenho: redesenha o quadro atual da mesa sem animação
+function redesenhaMesa(){if(JOGO&&JOGO.quadros)vaiPara(PASSO);}
 </script>
 <script>/* ---------- aba Trocas: estudo no formato do PDF (valor, grade, confirmação, ficha de cada troca) ---------- */
 let EST=null,EST_DE='';
