@@ -2510,7 +2510,7 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-const COTA=5.92;
+const COTA=5.95;
 /* fila única do Scryfall: no máximo 2 por segundo, espera e tenta de novo se vier 429 */
 let _sq=Promise.resolve(),_sUlt=0;
 function scryFetch(u,o){const p=_sq.then(async()=>{for(let k=0;k<3;k++){const w=_sUlt+550-Date.now();if(w>0)await new Promise(z=>setTimeout(z,w));_sUlt=Date.now();
@@ -2632,7 +2632,7 @@ const limpo=D=>({M:D.M,base:D.base,cmd:D.cmd,nome:D.nome||'',cand:D.cand,vazio:D
 function aba(){const a=(location.hash||'#deck').slice(1).split('/')[0];const ok=['decks','deck','oponentes','analise','trocas','mesa','x1'].includes(a)?a:'deck';
   for(const s of $$('main > section'))s.hidden=s.id!=='v-'+ok;document.body.dataset.aba=ok;if(ok!=='mesa'&&TIMER)play();
   for(const n of $$('nav a'))n.dataset.aba===ok?n.setAttribute('aria-current','page'):n.removeAttribute('aria-current');
-  if(ok==='oponentes')pintaOps();if(ok==='decks'&&typeof pintaDecks==='function')pintaDecks();if(ok!=='decks'&&$('#b-prev'))$('#b-prev').hidden=true;if(ok==='mesa')prepMesa();if(ok==='trocas'&&typeof pintaTrocas==='function')pintaTrocas();if(ok==='x1'&&typeof pintaX1==='function')pintaX1();}
+  if(ok==='oponentes')pintaOps();if(ok==='decks'&&typeof pintaDecks==='function')pintaDecks();if(ok!=='decks'&&$('#b-prev'))$('#b-prev').hidden=true;if(ok!=='decks'&&typeof BK!=='undefined'&&BK.sujo&&DB&&DB.length){BK.sujo=0;carregaDeck();}if(ok==='mesa')prepMesa();if(ok==='trocas'&&typeof pintaTrocas==='function')pintaTrocas();if(ok==='x1'&&typeof pintaX1==='function')pintaX1();}
 addEventListener('hashchange',aba);
 
 /* ---------- ficha da carta ---------- */
@@ -3035,7 +3035,8 @@ addEventListener('keydown',e=>{if(!JOGO||$('#v-mesa').hidden||/INPUT|SELECT|TEXT
   try{await carrega();}catch(e){$('#modo').textContent='Não consegui carregar o banco de cartas: '+e.message;return;}
   $('#modo').textContent=`${DB.length.toLocaleString('pt-BR')} cartas · ${DECKS.length} decks de oponente`;
   $('#lista').value=st.get('lista','')||$('#lista-padrao').textContent.trim();$('#cmd').value=st.get('cmd','');
-  carregaDeck();aba();
+  {const b=typeof BK!=='undefined'&&BK.lst.find(x=>x.id===st.get('bid',''));if(b){$('#lista').value=bTexto(b);$('#cmd').value=b.cmd||'';}}
+  if(typeof BK!=='undefined')BK.sujo=0;carregaDeck();aba();
 })();
 
 // fotos chegaram depois do desenho: redesenha o quadro atual da mesa sem animação
@@ -3624,7 +3625,10 @@ $('#c-limpar').onclick=()=>{if(CTL)CTL.abort();CHAT=[];$('#c-log').innerHTML='';
 <script>/* ---------- MEUS DECKS: construtor estilo Moxfield (Scryfall ao vivo + EDHREC) ---------- */
 const BK={lst:st.get('bdecks',[]),info:st.get('binfo',{}),cur:null,vis:st.get('bvis','lista'),edh:null,edhCat:0,busca:null,tm:null,pub:false,tent:new Set(),sel:null};
 const bTem=n=>{const i=BK.info[n];return !!(i&&i.img&&i.r!=null);};
-const bSalva=()=>{st.set(BK.chave||'bdecks',BK.lst);if(typeof ctSobe==='function')ctSobe();};
+const bSalva=()=>{st.set(BK.chave||'bdecks',BK.lst);if(typeof ctSobe==='function')ctSobe();if(BK.cur&&BK.cur===st.get('bid',''))bAtiva(bDeck(),1);};
+/* deck aberto = deck ativo: a lista da lateral e o comandante seguem o deck sozinhos */
+function bAtiva(d,adia){if(!d)return;st.set('bid',d.id);const t=bTexto(d),c=d.cmd||'';if($('#lista').value===t&&$('#cmd').value===c)return;
+  $('#lista').value=t;$('#cmd').value=c;st.set('lista',t);st.set('cmd',c);if(adia)BK.sujo=1;else{BK.sujo=0;if(typeof carregaDeck==='function'&&DB&&DB.length)carregaDeck();else BK.sujo=1;}}
 const bInfoSalva=()=>{const k=Object.keys(BK.info);if(k.length>4000)for(const x of k.slice(0,k.length-3500))delete BK.info[x];st.set('binfo',BK.info);};
 const TIPOS=[['Comandante',null],['Criaturas',/Creature/],['Planeswalkers',/Planeswalker/],['Batalhas',/Battle/],['Instantâneas',/Instant/],['Feitiços',/Sorcery/],['Artefatos',/Artifact/],['Encantamentos',/Enchantment/],['Terrenos',/Land/],['Outras',/./]];
 function bInfo(n){const i=bInfo0(n),e=bEd(n);return e?Object.assign({},i,{p:e.p||0,s:e.s,sn:e.sn,r:e.r||i.r,a:e.a||i.a}):i;}
@@ -3656,7 +3660,7 @@ function bDoTexto(txt,nome){const its=parseLista(txt);let cmd='',cmd2='';const c
   return bNovo({nome:nome||'Deck importado',cmd,cmd2,c});}
 
 /* ---- lista de decks ---- */
-function pintaDecks(){const id=(location.hash.split('/')[1]||'');if(id&&BK.lst.some(d=>d.id===id)){BK.cur=id;$('#b-lista').hidden=true;$('#b-editor').hidden=false;pintaEditor();return;}
+function pintaDecks(){const id=(location.hash.split('/')[1]||'');if(id&&BK.lst.some(d=>d.id===id)){BK.cur=id;bAtiva(bDeck(),1);$('#b-lista').hidden=true;$('#b-editor').hidden=false;pintaEditor();return;}
   BK.cur=null;$('#b-lista').hidden=false;$('#b-editor').hidden=true;
   const tile=(d,pub)=>{const ci=d.cmd?bInfo(d.cmd).ci:'',art=d.cmd&&BK.info[d.cmd]&&BK.info[d.cmd].art;
     return `<button class="b-tile" data-bopen="${h(d.id)}"${pub?' data-bpub="1"':''}><span class="b-art"${art?` style="background-image:url(${h(art)})"`:''}></span>
@@ -3823,7 +3827,7 @@ function bLiga(){
   $('#b-q').oninput=bBuscar;$('#b-modo').onchange=bBuscar;$('#b-tipo').onchange=bBuscar;
   $('#b-q').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const f=$('#b-res [data-bmais],#b-res [data-bcmd]');if(f)f.click();}};
   $('#b-medio').onclick=bMedio;$('#b-cfgbtn').onclick=bCfgAbre;
-  $('#b-usar').onclick=()=>{const d=bDeck();if(!d)return;st.set('bid',d.id);$('#lista').value=bTexto(d);$('#cmd').value=d.cmd||'';location.hash='#deck';carregaDeck();};
+  $('#b-usar').onclick=()=>{const d=bDeck();if(!d)return;bAtiva(d,1);location.hash='#deck';};
   $('#b-copiar').onclick=async()=>{const d=bDeck();if(!d)return;try{await navigator.clipboard.writeText(bTexto(d));bToast('Lista copiada');}catch(e){$('#b-txt').hidden=false;$('#b-txt').value=bTexto(d);$('#b-txt').select();}};
   $('#b-dup').onclick=()=>{const d=bDeck();if(!d)return;const n=bNovo({nome:d.nome+' (cópia)',cmd:d.cmd,cmd2:d.cmd2,c:d.c.map(x=>[...x])});location.hash='#decks/'+n.id;};
   $('#b-del').onclick=()=>{const d=bDeck();if(!d||!confirm(`Apagar "${d.nome}"?`))return;BK.lst=BK.lst.filter(x=>x!==d);bSalva();location.hash='#decks';};
