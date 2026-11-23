@@ -5802,14 +5802,17 @@ if(location.hash.startsWith('#x1'))aba();
 /* segurar a carta = ampliar em alta (solta = fecha) */
 (()=>{let tm=0,zo=0,ov=null;const fecha=()=>{clearTimeout(tm);if(ov)ov.hidden=true;};
   const hq=u=>String(u||'').replace('/normal/','/large/').replace('version=normal','version=large').replace('/small/','/large/');
-  document.addEventListener('pointerdown',ev=>{const c=ev.target.closest('#x1 [data-xc],#x1 [data-xf],#x1-dlg [data-xc]');if(!c||ev.button>0)return;const im=c.querySelector('img');if(!im)return;
-    zo=0;clearTimeout(tm);tm=setTimeout(()=>{if(!ov){ov=document.createElement('div');ov.id='x1-zoom';ov.innerHTML='<img alt="">';document.body.appendChild(ov);}
+  let rc=0;const abre=im=>{if(!ov){ov=document.createElement('div');ov.id='x1-zoom';ov.innerHTML='<img alt="">';document.body.appendChild(ov);}
       const g=ov.querySelector('img');g.src=im.currentSrc||im.src;const u=hq(im.currentSrc||im.src);if(u!==g.src){const p=new Image();p.onload=()=>{if(!ov.hidden)g.src=u;};p.src=u;}
-      ov.hidden=false;zo=1;},380);});
-  for(const t of ['pointerup','pointercancel','dragstart'])document.addEventListener(t,fecha);
+      ov.hidden=false;};
+  const SEL='#x1 [data-xc],#x1 [data-xf],#x1-dlg [data-xc]';
+  document.addEventListener('pointerdown',ev=>{if(rc&&ov&&!ov.hidden){rc=0;fecha();if(ev.button===0)zo=1;return;}const c=ev.target.closest(SEL);if(!c||ev.button>0)return;const im=c.querySelector('img');if(!im)return;
+    zo=0;clearTimeout(tm);tm=setTimeout(()=>{abre(im);zo=1;},380);});
+  for(const t of ['pointerup','pointercancel','dragstart'])document.addEventListener(t,ev=>{if(!rc)fecha();});
+  document.addEventListener('keydown',ev=>{if(ev.key==='Escape'&&rc){rc=0;fecha();}});addEventListener('wheel',()=>{if(rc){rc=0;fecha();}},{passive:true});
   document.addEventListener('pointermove',ev=>{if(!zo&&tm&&(Math.abs(ev.movementX)+Math.abs(ev.movementY))>6)clearTimeout(tm);});
   document.addEventListener('click',ev=>{if(zo){zo=0;ev.stopPropagation();ev.preventDefault();}},true);
-  document.addEventListener('contextmenu',ev=>{if(ev.target.closest('#x1 [data-xc],#x1 [data-xf]'))ev.preventDefault();});})();
+  document.addEventListener('contextmenu',ev=>{const c=ev.target.closest(SEL);if(!c)return;ev.preventDefault();const im=c.querySelector('img');if(!im||ev.pointerType==='touch'||zo)return;clearTimeout(tm);abre(im);rc=1;});})();
 
 /* jogar de lado (paisagem) no celular */
 const xMQL=matchMedia('(orientation:landscape) and (max-height:520px)');
