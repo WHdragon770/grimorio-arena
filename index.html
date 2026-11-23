@@ -815,6 +815,7 @@ kbd{display:inline-block;padding:0 5px;border:1px solid var(--linha);border-bott
 .b-terrg fieldset{border:1px solid var(--linha);border-radius:10px;padding:8px 12px;display:grid;gap:6px}.b-terrg legend{font-size:13px;padding:0 4px}
 @media (max-width:700px){.b-terrg{grid-template-columns:1fr}}
 .ff-acoes{flex-wrap:wrap;gap:8px;margin:4px 0 8px}.ff-acoes button{font-size:13px}
+.ff-acoes a.ff-liga{font-size:13px;display:inline-flex;align-items:center;padding:6px 12px;border:1px solid var(--ouro,#e8b24a);border-radius:6px;color:var(--ouro,#e8b24a);text-decoration:none;font-weight:600}.ff-acoes a.ff-liga:hover{background:color-mix(in srgb,var(--ouro,#e8b24a) 15%,transparent)}
 /* X1 online */
 #x1{display:grid;gap:14px}
 .x1-ent{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;align-items:start}.x1-ent>.nota{grid-column:1/-1}
@@ -891,7 +892,7 @@ Grimório Arena</div>
    <button id="b-voltar" class="b-voltar">← Meus decks</button>
    <input id="b-nome" class="b-nome" aria-label="Nome do deck" spellcheck="false"><span class="b-cont" aria-live="polite"></span>
    <div class="b-cmd">Comandante: <span id="b-cmdnome"></span></div>
-   <div class="linha b-botoes"><button class="prim" id="b-usar">Analisar no Grimório</button><button id="b-massabt">✎ Editar em massa</button><button id="b-sorte-ed">🎲 Sortear comandante</button><button id="b-printbt">🖨 Imprimir</button><button id="b-maisbt" aria-haspopup="menu">⋮ Mais</button><span hidden><button id="b-copiar"></button><button id="b-dup"></button><button id="b-pub" hidden></button><button id="b-del"></button></span></div>
+   <div class="linha b-botoes"><button class="prim" id="b-usar">Analisar no Grimório</button><button id="b-massabt">✎ Editar em massa</button><button id="b-sorte-ed">🎲 Sortear comandante</button><button id="b-printbt">🖨 Imprimir</button><button id="b-liga" title="Copia a lista e abre a Liga Magic pra cotar nas lojas">💲 Cotar na Liga</button><button id="b-maisbt" aria-haspopup="menu">⋮ Mais</button><span hidden><button id="b-copiar"></button><button id="b-dup"></button><button id="b-pub" hidden></button><button id="b-del"></button></span></div>
   </div></div>
   <textarea id="b-txt" rows="6" hidden></textarea>
   <div class="b-stats" id="b-stats"></div>
@@ -2510,7 +2511,13 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-const COTA=5.95;
+let COTA=5.95;
+/* dólar ao vivo (AwesomeAPI); 5.95 = do dia da publicação, só se falhar */
+(async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
+  try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
+    const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
+    if(mud&&typeof aba==='function'){try{aba();}catch(e){}}}catch(e){}})();
+const ligaURL=n=>'https://www.ligamagic.com.br/?view=cards/card&card='+encodeURIComponent(String(n).split(' // ')[0]);
 /* fila única do Scryfall: no máximo 2 por segundo, espera e tenta de novo se vier 429 */
 let _sq=Promise.resolve(),_sUlt=0;
 function scryFetch(u,o){const p=_sq.then(async()=>{for(let k=0;k<3;k++){const w=_sUlt+550-Date.now();if(w>0)await new Promise(z=>setTimeout(z,w));_sUlt=Date.now();
@@ -3989,7 +3996,7 @@ async function bVira(n){const i=BK.info[n];
 async function bFicha(n){await abreFicha(n);const f=$('#ficha');if(!f||f.hidden)return;const fi=$('#ficha-in');
   const im=bImg(n,1);const ft=fi.querySelector('.ff-foto');if(ft&&(bEd(n)||BK.vira.has(n)))ft.innerHTML=`<img src="${h(im)}" alt="${h(n)}">`;
   const top=fi.querySelector('.ff-topo');if(!top)return;const a=document.createElement('div');a.className='linha ff-acoes';
-  a.innerHTML=`<button data-fop="ed">🖼 Trocar edição</button>${bDupla(n)?'<button data-fop="vira">⟲ Ver o outro lado</button>':''}${bBasico(n)&&bDeck()&&bDeck().c.some(x=>x[0]===n)?'<button data-fop="terr">🎲 Edições dos terrenos</button>':''}`;
+  a.innerHTML=`<a class="ff-liga" href="${h(ligaURL(n))}" target="_blank" rel="noopener">💲 Ver na Liga</a><button data-fop="ed">🖼 Trocar edição</button>${bDupla(n)?'<button data-fop="vira">⟲ Ver o outro lado</button>':''}${bBasico(n)&&bDeck()&&bDeck().c.some(x=>x[0]===n)?'<button data-fop="terr">🎲 Edições dos terrenos</button>':''}`;
   a.onclick=e=>{const b=e.target.closest('button');if(!b)return;const o=b.dataset.fop;
     if(o==='vira'){bVira(n);if(ft)ft.innerHTML=`<img src="${h(bImg(n,1))}" alt="${h(n)}">`;return;}
     f.hidden=true;if(o==='ed')bEdAbre(n);else if(o==='terr')bTerrenos();};
@@ -4140,6 +4147,9 @@ function bMais(btn){let m=$('#b-mais');if(!m){m=document.createElement('div');m.
   m.innerHTML=`<div class="b-maisg"><div><button data-mm="imp">Importar</button><button data-mm="exp">Exportar</button><button data-mm="copia">Copiar lista</button><button data-mm="dup">Duplicar</button><hr><button data-mm="sb">Sideboard <small>${bQt(d&&d.sb)}</small></button><button data-mm="tv">Talvez <small>${bQt(d&&d.tv)}</small></button></div>
     <div><button data-mm="cmd">Trocar comandante</button><button data-mm="print">Imprimir proxies</button><button data-mm="terr">Edições dos terrenos</button><button data-mm="barata">Usar a mais barata em todas</button>${pub?'<button data-mm="pub">Publicar no site</button>':''}<hr><button data-mm="del" class="perigo">Apagar deck</button></div></div>`;
   m.hidden=false;const r=btn.getBoundingClientRect(),w=m.offsetWidth;m.style.left=Math.max(8,Math.min(innerWidth-w-8,r.left))+'px';m.style.top=(r.bottom+6)+'px';}
+$('#b-liga').onclick=async()=>{const d=bDeck();if(!d)return;const l=[d.cmd,d.cmd2].filter(Boolean).map(n=>'1 '+n).concat(d.c.map(x=>x[1]+' '+x[0])).join('\n');
+  let ok=false;try{await navigator.clipboard.writeText(l);ok=true;}catch(e){}window.open('https://www.ligamagic.com.br/','_blank','noopener');
+  bToast(ok?'Lista copiada: na Liga, cole em Decks › Importar ou na Lista de compras':'Não consegui copiar; use ⋮ Mais › Copiar lista');};
 $('#b-massabt').onclick=()=>bMassa();$('#b-printbt').onclick=()=>bImprime();$('#b-maisbt').onclick=e=>{const m=$('#b-mais');if(m&&!m.hidden){m.hidden=true;return;}bMais(e.currentTarget);};
 addEventListener('hashchange',()=>{const m=$('#b-mais');if(m)m.hidden=true;});
 // ===== Imprimir proxies (A4/Carta, 63x88 mm, linhas de corte, verso, fichas) =====
