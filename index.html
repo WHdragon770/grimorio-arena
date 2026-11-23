@@ -2586,8 +2586,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.98;
-/* dólar ao vivo (AwesomeAPI); 5.98 = do dia da publicação, só se falhar */
+let COTA=5.97;
+/* dólar ao vivo (AwesomeAPI); 5.97 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -4335,7 +4335,7 @@ const ygTipoTxt=c=>{const f=c[2];if(f==='spell')return 'Magia '+(c[3]||'');if(f=
   const k={normal:'Normal',effect:'Efeito',ritual:'Ritual',fusion:'Fusão',synchro:'Sincro',xyz:'Xyz',link:'Link'}[f.split('_')[0]]||f;
   return `${k}${/pendulum/.test(f)?' Pêndulo':''} · ${c[3]} · ${c[4]}${c[5]?(f.startsWith('xyz')?' · Rank ':f.startsWith('link')?' · Link ':' · Nv ')+c[5]:''}`;};
 const ygGrupo=c=>c[2]==='spell'?1:c[2]==='trap'?2:0;
-async function ygCarrega(){if(YG.db)return;const r=await fetch('ygo.json');YG.db=await r.json();for(const c of YG.db)YG.ix.set(c[0],c);}
+async function ygCarrega(){if(YG.db)return;const r=await fetch('ygo.json');YG.db=await r.json();for(const c of YG.db){if(c[12]){const pt=c[12];c[12]=c[1];c[1]=pt;}else c[12]=c[1];YG.ix.set(c[0],c);}}
 
 /* ---- chave por conta: conta.js chama ygConta(uid) e ygDaNuvem(json) ---- */
 function ygConta(uid){YG.chave=uid?'ygdecks_'+uid:'ygdecks';YG.lst=st.get(YG.chave,[]);}
@@ -4394,7 +4394,7 @@ function ygEditor(){const d=ygDeck(),y=$('#y-box');if(!d)return;const av=ygAviso
     <div class="linha"><a class="prim y-btn" href="#decks/ygo/${h(d.id)}/teste">🃏 Testar mão</a><a class="y-btn" href="#decks/ygo/${h(d.id)}/mesa">⚔ Mesa solo</a><button id="y-exp">Exportar .ydk</button><button id="y-copia">Copiar lista</button><button id="y-imp2">Importar</button><button id="y-del">Apagar</button></div></div>
     <div class="y-stats linha"><span>Monstros <b>${g[0]}</b></span><span>Magias <b>${g[1]}</b></span><span>Armadilhas <b>${g[2]}</b></span><span>Extra <b>${n('x')}</b></span><span>Side <b>${n('s')}</b></span><span>Preço <b>${ygPreco(d)||'–'}</b> <small class="nota">TCGplayer em R$</small></span></div>
     ${av.length?`<p class="ruim">⚠ ${av.map(h).join(' · ')}</p>`:'<p class="bom">✓ Deck válido na '+d.ban.toUpperCase()+'</p>'}
-    <div class="y-lados"><div class="y-busca"><div class="linha"><input id="y-q" placeholder="Buscar carta ou arquétipo (em inglês)" value="${h(YG.q)}" autocomplete="off">
+    <div class="y-lados"><div class="y-busca"><div class="linha"><input id="y-q" placeholder="Buscar carta ou arquétipo (português ou inglês)" value="${h(YG.q)}" autocomplete="off">
         <select id="y-tipo"><option value="">Tudo</option><option value="mon">Monstros</option><option value="spell">Magias</option><option value="trap">Armadilhas</option><option value="extra">Extra Deck</option></select></div>
         <p class="nota">Clique soma no Main (ou Extra). Shift+clique vai pro Side.</p><div id="y-res" class="y-res"></div></div>
       <div class="y-deck">${zona('m','Main Deck')}${zona('x','Extra Deck')}${zona('s','Side Deck')}</div></div>`;
@@ -4410,26 +4410,26 @@ function ygEditor(){const d=ygDeck(),y=$('#y-box');if(!d)return;const av=ygAviso
   ygBusca();}
 function ygBusca(){const el=$('#y-res');if(!el)return;const q=YG.q.trim().toLowerCase(),t=YG.tipo,d=ygDeck();
   if(q.length<2&&!t){el.innerHTML='<p class="nota">Digite pelo menos 2 letras.</p>';return;}
-  const ok=c=>(!t||(t==='spell'||t==='trap'?c[2]===t:t==='extra'?YEXTRA.test(c[2]):c[2]!=='spell'&&c[2]!=='trap'))&&(!q||c[1].toLowerCase().includes(q)||c[11].toLowerCase().includes(q));
-  const pe=c=>{const n=c[1].toLowerCase();return n===q?0:n.startsWith(q)?1:n.includes(q)?2:3;};
+  const ok=c=>(!t||(t==='spell'||t==='trap'?c[2]===t:t==='extra'?YEXTRA.test(c[2]):c[2]!=='spell'&&c[2]!=='trap'))&&(!q||c[1].toLowerCase().includes(q)||c[12].toLowerCase().includes(q)||c[11].toLowerCase().includes(q));
+  const pe=c=>{const n=c[1].toLowerCase(),e=c[12].toLowerCase();return n===q||e===q?0:n.startsWith(q)||e.startsWith(q)?1:n.includes(q)?2:3;};
   const r=YG.db.filter(ok).sort((a,b)=>q?pe(a)-pe(b)||a[1].length-b[1].length:0).slice(0,60);
-  el.innerHTML=r.length?r.map(c=>{const l=ygLim(c,d),tem=d?ygCopias(d,c[0]):0;return `<button class="y-rc" data-yadd="${c[0]}" title="${h(c[1])}"><img loading="lazy" src="${ygImg(c[0])}" alt=""><span><b>${h(c[1])}</b><small>${h(ygTipoTxt(c))}${c[6]>=0?` · ${c[6]}/${c[2].startsWith('link')?'–':c[7]}`:''}</small>${l<3?`<small class="ruim">${ygBanTxt[l]} na ${d.ban.toUpperCase()}</small>`:''}${tem?`<small class="bom">${tem} no deck</small>`:''}</span></button>`;}).join(''):'<p class="nota">Nada encontrado.</p>';}
+  el.innerHTML=r.length?r.map(c=>{const l=ygLim(c,d),tem=d?ygCopias(d,c[0]):0;return `<button class="y-rc" data-yadd="${c[0]}" title="${h(c[1])}"><img loading="lazy" src="${ygImg(c[0])}" alt=""><span><b>${h(c[1])}</b>${c[12]!==c[1]?`<small>${h(c[12])}</small>`:''}<small>${h(ygTipoTxt(c))}${c[6]>=0?` · ${c[6]}/${c[2].startsWith('link')?'–':c[7]}`:''}</small>${l<3?`<small class="ruim">${ygBanTxt[l]} na ${d.ban.toUpperCase()}</small>`:''}${tem?`<small class="bom">${tem} no deck</small>`:''}</span></button>`;}).join(''):'<p class="nota">Nada encontrado.</p>';}
 
 /* ---- ficha ---- */
 async function ygFicha(id){const c=ygC(id);if(!c)return;let dl=$('#y-ficha');if(!dl){dl=document.createElement('dialog');dl.id='y-ficha';dl.className='y-ficha';document.body.appendChild(dl);dl.onclick=e=>{if(e.target===dl||e.target.closest('[data-yfx]'))dl.close();};}
-  const corpo=t=>`<div class="y-fin"><img src="${ygImg(id,1)}" alt="${h(c[1])}"><div><div class="linha entre"><h3>${h(c[1])}</h3><button class="ct-x" data-yfx aria-label="Fechar">×</button></div>
+  const corpo=t=>`<div class="y-fin"><img src="${ygImg(id,1)}" alt="${h(c[1])}"><div><div class="linha entre"><h3>${h(c[1])}</h3>${c[12]!==c[1]?`<small class="nota">${h(c[12])}</small>`:''}<button class="ct-x" data-yfx aria-label="Fechar">×</button></div>
     <p class="nota">${h(ygTipoTxt(c))}${c[6]>=0?` · ATK ${c[6]}${c[2].startsWith('link')?'':' / DEF '+c[7]}`:''}${c[11]?' · '+h(c[11]):''}</p>
     <p class="y-desc">${t==null?'Carregando o texto…':h(t).replace(/\n/g,'<br>')}</p>
     <p class="nota">TCG: ${ygBanTxt[c[8]]||'livre'} · OCG: ${ygBanTxt[c[9]]||'livre'}${c[10]?' · US$ '+c[10].toFixed(2)+' (R$ '+(c[10]*COTA).toFixed(2).replace('.',',')+')':''}</p>
-    <div class="linha links"><a href="https://ygoprodeck.com/card-database/?name=${encodeURIComponent(c[1])}" target="_blank" rel="noopener">YGOPRODeck</a><a href="https://www.ligayugioh.com.br/?view=cards/card&card=${encodeURIComponent(c[1])}" target="_blank" rel="noopener">Liga Yu-Gi-Oh!</a></div></div></div>`;
+    <div class="linha links"><a href="https://ygoprodeck.com/card-database/?name=${encodeURIComponent(c[12])}" target="_blank" rel="noopener">YGOPRODeck</a><a href="https://www.ligayugioh.com.br/?view=cards/card&card=${encodeURIComponent(c[12])}" target="_blank" rel="noopener">Liga Yu-Gi-Oh!</a></div></div></div>`;
   dl.innerHTML=corpo(YG.txt[id]);dl.showModal();
-  if(YG.txt[id]==null){try{const r=await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?id='+id),j=await r.json();YG.txt[id]=j.data[0].desc||'';}catch(e){YG.txt[id]='(não consegui buscar o texto agora)';}if(dl.open)dl.innerHTML=corpo(YG.txt[id]);}}
+  if(YG.txt[id]==null){try{let r=await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?language=pt&id='+id);if(!r.ok)r=await fetch('https://db.ygoprodeck.com/api/v7/cardinfo.php?id='+id);const j=await r.json();YG.txt[id]=j.data[0].desc||'';}catch(e){YG.txt[id]='(não consegui buscar o texto agora)';}if(dl.open)dl.innerHTML=corpo(YG.txt[id]);}}
 
 /* ---- .ydk e texto ---- */
 function ygYdk(d){const L=l=>l.flatMap(([id,q])=>Array(q).fill(id));return ['#created by Grimório Arena','#main',...L(d.m),'#extra',...L(d.x),'!side',...L(d.s),''].join('\n');}
-function ygTexto(d){const L=(t,l)=>l.length?[t,...ygOrdena(l).map(([id,q])=>`${q} ${(ygC(id)||[0,'?'])[1]}`)]:[];return [...L('Main',d.m),'',...L('Extra',d.x),'',...L('Side',d.s)].join('\n').trim();}
+function ygTexto(d){const L=(t,l)=>l.length?[t,...ygOrdena(l).map(([id,q])=>`${q} ${(ygC(id)||[0,'?','','','','','','','','','','','?'])[12]}`)]:[];return [...L('Main',d.m),'',...L('Extra',d.x),'',...L('Side',d.s)].join('\n').trim();}
 function ygExporta(d){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ygYdk(d)],{type:'text/plain'}));a.download=(d.nome||'deck').replace(/[\\/:*?"<>|]/g,'')+'.ydk';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);}
-function ygLeTexto(t){const r={m:[],x:[],s:[]},falta=[];let z='m';const nomes=new Map(YG.db.map(c=>[c[1].toLowerCase(),c[0]]));
+function ygLeTexto(t){const r={m:[],x:[],s:[]},falta=[];let z='m';const nomes=new Map(YG.db.flatMap(c=>[[c[12].toLowerCase(),c[0]],[c[1].toLowerCase(),c[0]]]));
   const poe=(id,q,zz)=>{const c=ygC(id);if(!c){falta.push(String(id));return;}if(YEXTRA.test(c[2])&&zz==='m')zz='x';const x=r[zz].find(y=>y[0]===c[0]);if(x)x[1]+=q;else r[zz].push([c[0],q]);};
   for(let l of t.split(/\r?\n/)){l=l.trim();if(!l)continue;const k=l.toLowerCase();
     if(/^#main|^main/.test(k)){z='m';continue;}if(/^#extra|^extra/.test(k)){z='x';continue;}if(/^!side|^side/.test(k)){z='s';continue;}if(l[0]==='#')continue;
@@ -4440,7 +4440,7 @@ function ygImporta(alvo){const inp=document.createElement('input');inp.type='fil
   const usa=t=>{if(!t||!t.trim())return;const{r,falta}=ygLeTexto(t);if(!ygQt(r.m)&&!ygQt(r.x)){bToast('Não reconheci nenhuma carta');return;}
     let d=alvo;if(d){d.m=r.m;d.x=r.x;d.s=r.s;d.t=Date.now();ygSalva();ygEditor();}else{d=ygNovo({nome:'Deck importado',...r});location.hash='#decks/ygo/'+d.id;}
     bToast(`${ygQt(r.m)} Main · ${ygQt(r.x)} Extra · ${ygQt(r.s)} Side${falta.length?` · ${falta.length} não achadas: ${falta.slice(0,3).join(', ')}`:''}`);};
-  if(confirm('OK = escolher arquivo .ydk\nCancelar = colar a lista (nomes em inglês ou IDs)')){inp.onchange=async()=>{const f=inp.files[0];if(f)usa(await f.text());};inp.click();}
+  if(confirm('OK = escolher arquivo .ydk\nCancelar = colar a lista (nomes em português, inglês ou IDs)')){inp.onchange=async()=>{const f=inp.files[0];if(f)usa(await f.text());};inp.click();}
   else usa(prompt('Cole a lista (.ydk, "3 Ash Blossom & Joyous Spring" ou um ID por linha)'));}
 
 /* ---- testar mão ---- */
@@ -4525,6 +4525,7 @@ function ymFrase(z,op,dest,n,vis){const de=z==='pil'?' do deck':z==='gy'?' do ce
   if(dest==='topo'||dest==='fundo')return `pôs ${z==='mao'||z==='pil'?'uma carta':nm} no ${dest} do deck`;return '';}
 function ymBotao(a){const E=YM.E;
   if(a==='d6')return ymLog('rolou um dado: '+(1+Math.floor(Math.random()*6)));if(a==='moeda')return ymLog('jogou a moeda: '+(Math.random()<.5?'cara':'coroa'));
+  if(a==='quem'){const ns=YM.cod&&YM.sala?Object.values(YM.sala.nomes||{}):['Você','Oponente'];if(ns.length<2)return bToast('Espere o outro jogador entrar');return ymLog(`sorteou quem começa: ${ns[Math.random()*ns.length|0]} começa (sem comprar no 1º turno)`);}
   if(a==='opgy'||a==='opban')return ymLista(a,a==='opgy'?'Cemitério do oponente':'Banidas do oponente');
   if(!E)return;
   if(a==='comprar'){if(!E.pil.length)return bToast('O deck acabou');E.mao.push(E.pil.shift());ymLog('comprou uma carta');}
@@ -4537,6 +4538,7 @@ function ymBotao(a){const E=YM.E;
   else if(a==='busca'){ymLog('está procurando no deck');return ymLista('pil','Deck inteiro',0,1);}
   else if(a==='gy')return ymLista('gy','Seu cemitério');else if(a==='ban')return ymLista('ban','Suas banidas');else if(a==='ext')return ymLista('ext','Seu Extra Deck');
   else if(a==='embfecha'){ygEmbaralha(E.pil).forEach((c,i)=>E.pil[i]=c);ymLog('terminou de procurar e embaralhou o deck');$('#ym-dlg').close();}
+  else if(a==='mull'){if(!confirm('Mão nova: a mão volta pro deck, embaralha e você compra 5 de novo.'))return;E.pil.push(...E.mao);E.mao=[];ygEmbaralha(E.pil).forEach((c,i)=>E.pil[i]=c);E.mao=E.pil.splice(0,5);E.mull=(E.mull||0)+1;ymLog(`trocou a mão (mulligan nº ${E.mull}) e comprou 5`);}
   else if(a==='reinicia'){if(!confirm('Começar de novo com o deck embaralhado?'))return;YM.E=ymMonta(ygDeck(),'Você');YM.log=[];ymLog('nova partida: comprou 5');}
   else return;
   ymMudou();}
@@ -4560,7 +4562,7 @@ function ymZonasExtra(){const E=YM.E,o=YM.op;return `<div class="ym-ze-fila"><sp
 function ymPlacar(E,meu){return `<div class="ym-plac"><div class="ym-quem"><b>${h(E.nome)}</b><small>${h(E.deck||'')}</small></div><span class="ym-lp">${meu?'<button data-yb="lp-" title="Menos 1000">−1000</button>':''}<b>${E.lp}</b><small>PV</small>${meu?'<button data-yb="lp" title="Mudar PV">± PV</button>':''}</span>${E.nm!=null?`<span class="nota">✋ ${E.nm} na mão</span>`:''}</div>`;}
 function ymPintaEu(){const E=YM.E,el=$('#ym-eu');if(!el||!E)return;
   el.innerHTML=`${ymZonasExtra()}${ymCampo(E,1)}<div class="ym-barra">${ymPlacar(E,1)}<div class="ym-bts">
-    <button class="prim" data-yb="comprar">📥 Comprar</button><button data-yb="turno">⏭ Passar a vez · T${E.turno||1}</button><button data-yb="emb">🔀 Embaralhar</button><button data-yb="topo">👁 Olhar topo</button><button data-yb="busca">🔎 Procurar no deck</button><button data-yb="gy">🪦 Cemitério ${E.gy.length}</button><button data-yb="ban">✖ Banidas ${E.ban.length}</button><button data-yb="ext">⭐ Extra ${E.ext.length}</button>${YM.cod?'':'<button data-yb="reinicia">↻ Nova partida</button>'}</div></div>
+    <button class="prim" data-yb="comprar">📥 Comprar</button><button data-yb="turno">⏭ Passar a vez · T${E.turno||1}</button><button data-yb="emb">🔀 Embaralhar</button><button data-yb="topo">👁 Olhar topo</button><button data-yb="busca">🔎 Procurar no deck</button><button data-yb="gy">🪦 Cemitério ${E.gy.length}</button><button data-yb="ban">✖ Banidas ${E.ban.length}</button><button data-yb="ext">⭐ Extra ${E.ext.length}</button>${(E.turno||1)<=1?'<button data-yb="mull">↻ Mão nova</button>':''}${YM.cod?'':'<button data-yb="reinicia">↻ Nova partida</button>'}</div></div>
    <div class="ym-maot"><small>Sua mão (${E.mao.length})${YM.cod?' · só você vê':''}</small><div class="ym-mao">${E.mao.map(c=>`<button class="ym-c" data-ym="mao" data-k="${h(c.k)}" title="${h(ymNome(c.id))}"><img src="${ygImg(c.id)}" alt="${h(ymNome(c.id))}"></button>`).join('')||'<p class="nota">Mão vazia</p>'}</div></div>`;}
 function ymPintaOp(){const el=$('#ym-op');if(!el)return;const o=YM.op;
   if(!o){const ns=YM.sala?Object.entries(YM.sala.nomes||{}).filter(([u])=>u!==xUid()).map(([,n])=>n):[];
@@ -4638,7 +4640,7 @@ async function ymEntra(cod){ymSai();YM.solo=null;YM.E=null;YM.cod=cod;ymX1('Entr
   catch(e){YM.cod='';ymX1('Não deu pra entrar ('+(e.code||e)+')');}}
 function ymComeca(){const d=YG.lst.find(x=>x.id===($('#ym-deck')||{}).value);if(!d)return;YM.E=ymMonta(d,ctNome(CT.u));ymLog(`entrou com ${d.nome} (${ygQt(d.m)} no deck, ${ygQt(d.x)} no Extra) e comprou 5`);ymSobe();ymX1();}
 function ymX1(msg){const y=$('#y-box');if(!y)return;const m=msg?`<p class="ct-msg">${h(msg)}</p>`:'';
-  const cab=`<div class="linha entre cab"><div class="linha"><a class="y-btn" href="#decks/ygo">← Decks</a><h2>X1 online · Yu-Gi-Oh!</h2></div>${YM.cod?`<div class="linha"><span>Sala <b class="mono">${YM.cod}</b></span><button data-yb2="link">🔗 Copiar link</button><button data-yb="d6">🎲 Dado</button><button data-yb="moeda">🪙 Moeda</button><a class="y-btn" href="#decks/ygo/x1">Sair da sala</a></div>`:''}</div>`;
+  const cab=`<div class="linha entre cab"><div class="linha"><a class="y-btn" href="#decks/ygo">← Decks</a><h2>X1 online · Yu-Gi-Oh!</h2></div>${YM.cod?`<div class="linha"><span>Sala <b class="mono">${YM.cod}</b></span><button data-yb2="link">🔗 Copiar link</button><button data-yb="quem">🎯 Quem começa</button><button data-yb="d6">🎲 Dado</button><button data-yb="moeda">🪙 Moeda</button><a class="y-btn" href="#decks/ygo/x1">Sair da sala</a></div>`:''}</div>`;
   if(typeof CT==='undefined'||!CT.auth){y.innerHTML=cab+'<p class="nota">O X1 online só funciona no site (precisa da conta). Carregando…</p>';return;}
   if(!CT.u){y.innerHTML=cab+'<div class="painel x1-ent"><p>Pra jogar online, os dois jogadores precisam estar com conta (é de graça).</p><button class="prim" data-ctabre>Entrar ou criar conta</button></div>';return;}
   if(!YM.cod){y.innerHTML=cab+`<div class="x1-ent"><div class="painel"><h3>Chamar alguém</h3><p class="nota">Cria a sala e manda o código ou o link.</p><button class="prim" data-yb2="criar">Criar sala</button></div>
