@@ -2756,8 +2756,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.97;
-/* dólar ao vivo (AwesomeAPI); 5.97 = do dia da publicação, só se falhar */
+let COTA=5.96;
+/* dólar ao vivo (AwesomeAPI); 5.96 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5716,25 +5716,57 @@ if(location.hash.startsWith('#x1'))aba();
   window.firebase=window.firebase||{firestore:{FieldValue:{arrayUnion:(...a)=>({__au:a})}}};
   window.prompt=()=>null;window.confirm=()=>true;window.alert=()=>{};
   const DECK=new URLSearchParams(location.search).get('deck');let ocupado=0,mal=0;
-  const pt=c=>xPT(c),txt=c=>String(xInfo(c).tx||'');
+  const pt=c=>xPT(c),txt=c=>String(xInfo(c).tx||'');let pref='',stAlvo='',dmgN=0;
+  const qd=(tx,n)=>{try{const d=xEfeitos(tx,n).find(s=>s.op==='dano');return d?(+d.n||0):0;}catch(e){return 0;}};
+  const MAL=new Set(['destroi','exila','dano','vira','volta','anula','perde','mill']),BOM=new Set(['pump','cnt','desvira','ganha','compra','ficha','busca','scry','vida','todos']);
+  const ops=(tx,n)=>{try{return xEfeitos(tx,n).map(s=>s.op);}catch(e){return [];}};
+  const ehMal=(tx,n)=>{const o=ops(tx,n);return o.length?o.some(x=>MAL.has(x)):ruim(tx);};
+  const tem=(c,op)=>ops(xInfo(c).tx,c.n).includes(op);
+  const inst=c=>{const i=xInfo(c);return i.inst&&!i.land;};
   const ruim=t=>/destroy|exile|damage to|can't (attack|block)|gets -\d|-\d+\/-\d+|tap target|return target [^.]* to (its|their) owner|counter target/i.test(t);
   // escolher alvo: magia "ruim" mira o oponente (a maior criatura dele ou ele), "boa" mira o próprio bot
-  xEscolhe=async(tit,l)=>{if(!l.length)return '';const val=x=>x.c?Math.max(0,pt(x.c).p)+pt(x.c).t+(xInfo(x.c).pw?4:0):0;
+  xEscolhe=async(tit,l)=>{if(!l.length)return '';
+    if(pref){const x=l.find(x=>x.c&&x.c.k===pref);if(x)return x.c.k;}
+    const sts=l.filter(x=>x.st);if(sts.length){const x=sts.find(x=>x.st.id===stAlvo)||sts.find(x=>x.st.de!=='bot');return x?'S:'+x.st.id:'';}const val=x=>x.c?Math.max(0,pt(x.c).p)+pt(x.c).t+(xInfo(x.c).pw?4:0):0;
     const meu=x=>x.jog!=null?x.jog==='bot':x.st?false:x.lado==='Seu';
     let c=l.filter(x=>mal?!meu(x):meu(x));if(!c.length)c=l;
-    if(mal){const cri=c.filter(x=>x.c&&xInfo(x.c).cri);if(cri.length)c=cri;}
+    if(mal&&dmgN){const mata=c.filter(x=>x.c&&xInfo(x.c).cri&&pt(x.c).t-(x.c.dn||0)<=dmgN&&!pt(x.c).kw.has('indestructible'));
+      if(mata.length)c=mata;else{const pl=c.filter(x=>x.jog!=null);if(pl.length)c=pl;}}
+    else if(mal){const cri=c.filter(x=>x.c&&xInfo(x.c).cri);if(cri.length)c=cri;}
     c.sort((a,b)=>val(b)-val(a));const x=c[0];return x.jog!=null?'P:'+x.jog:x.st?'S:'+x.st.id:x.c.k;};
   const custoT=c=>{const k=xCusto(xInfo(c).custo);return k.g+k.pips.length;};
   const pode=(e,c,z)=>{const i=xInfo(c);if(xPode(i))return false;const cs=xCusto(i.custo);if(cs.x)return false;return xPaga(e,cs,z==='cmdz'?e.imp*2:0).ok;};
+  async function solta(z,c,o={}){const e=X.eu,n=e[z].length;mal=o.mal!=null?o.mal:ehMal(xInfo(c).tx,c.n);pref=o.pref||'';stAlvo=o.st||'';dmgN=qd(xInfo(c).tx,c.n);
+    try{await xConjura(z,c.k);}finally{mal=0;pref='';stAlvo='';dmgN=0;}return e[z].length<n;}
+  const mao=()=>{const e=X.eu;return [...e.mao.map(c=>['mao',c]),...e.cmdz.map(c=>['cmdz',c])];};
+  // resposta na pilha: anular o que vale a pena, salvar criatura alvo de remoção
+  async function responde(top){const e=X.eu;if(top.de==='bot')return 0;
+    const meuAlvo=(top.al||[]).map(a=>String(a)).find(a=>e.campo.some(c=>c.k===a));
+    const doi=top.tipo==='mag'?(custoT(top.c||{n:top.nm})>=3||ehMal(xInfo(top.c||{n:top.nm}).tx,top.nm)&&!!meuAlvo):!!meuAlvo&&ehMal(top.tx||'',top.nm);
+    if(doi&&top.tipo==='mag')for(const [z,c] of mao())if(inst(c)&&tem(c,'anula')&&pode(e,c,z)&&await solta(z,c,{mal:1,st:top.id})){return 1;}
+    if(meuAlvo&&ehMal(top.tx||xInfo(top.c||{n:top.nm}).tx,top.nm))for(const [z,c] of mao())if(inst(c)&&tem(c,'pump')&&pode(e,c,z)&&await solta(z,c,{mal:0,pref:meuAlvo}))return 1;
+    return 0;}
+  // habilidades ativadas e planeswalker (turno do bot, fase principal)
+  async function habilita(){const e=X.eu,s=X.sala;
+    for(const c of e.campo.slice()){const hs=xHabs(c);
+      const pw=hs.map((hb,j)=>[hb,j]).filter(([hb])=>hb.pw);
+      if(pw.length&&c.lt!==s.turno){const L=(c.mk||{}).lealdade||0,opc=X.op&&(X.op.campo||[]).some(q=>xCri(q));
+        const ok=pw.filter(([hb])=>L+hb.cu>0||(L+hb.cu===0&&hb.cu<0&&opc)).filter(([hb])=>!(hb.cu<0&&ehMal(hb.tx,c.n)&&!opc));
+        ok.sort((a,b)=>(a[0].cu<0&&ehMal(a[0].tx,c.n)&&opc&&L+a[0].cu>=1?-99:-a[0].cu)-(b[0].cu<0&&ehMal(b[0].tx,c.n)&&opc&&L+b[0].cu>=1?-99:-b[0].cu));
+        if(ok.length){const [hb,j]=ok[0];mal=ehMal(hb.tx,c.n);try{await xAtiva(c.k,j);}finally{mal=0;}if(c.lt===s.turno)return 1;}}
+      for(const [hb,j] of hs.map((hb,j)=>[hb,j])){if(hb.pw||hb.sac||!xHabOk(c,hb))continue;const o=ops(hb.tx,c.n);if(!o.length||o.every(x=>x==='pump'))continue;
+        if(!xPaga(e,xCusto(hb.mana||''),0).ok)continue;mal=o.some(x=>MAL.has(x));
+        if(mal&&!(X.op&&(X.op.campo||[]).some(q=>xCri(q)))&&!/any target|player/.test(hb.tx))continue;
+        dmgN=qd(hb.tx,c.n);const n=(X.sala.pilha||[]).length;try{await xAtiva(c.k,j);}finally{mal=0;dmgN=0;}if(c.tap||(X.sala.pilha||[]).length>n)return 1;}}
+    return 0;}
   async function joga(){const e=X.eu;
     if(e.ter<1){const ts=e.mao.filter(c=>{const i=xInfo(c);return i.land&&!i.cri;});if(ts.length){await xConjura('mao',ts[0].k);return 1;}}
-    const l=[...e.mao.map(c=>['mao',c]),...e.cmdz.map(c=>['cmdz',c])].filter(([z,c])=>!xInfo(c).land&&pode(e,c,z)).sort((a,b)=>custoT(b[1])-custoT(a[1]));
-    for(const [z,c] of l){const i=xInfo(c);mal=ruim(i.tx);if(i.aura)mal=ruim(i.tx)||/enchanted creature (can't|gets -)/i.test(i.tx);
-      const n=e[z].length;await xConjura(z,c.k);mal=0;if(e[z].length<n)return 1;}
+    const l=[...e.mao.map(c=>['mao',c]),...e.cmdz.map(c=>['cmdz',c])].filter(([z,c])=>!xInfo(c).land&&pode(e,c,z)&&!(inst(c)&&(tem(c,'anula')||tem(c,'pump')))&&!(ehMal(xInfo(c).tx,c.n)&&!((X.op||{}).campo||[]).length&&!/any target|player/i.test(xInfo(c).tx))).sort((a,b)=>custoT(b[1])-custoT(a[1]));
+    for(const [z,c] of l){const i=xInfo(c);if(await solta(z,c,{mal:i.aura?(ruim(i.tx)||/enchanted creature (can't|gets -)/i.test(i.tx)):ehMal(i.tx,c.n)}))return 1;}
     // equipar o que estiver solto na criatura mais forte
     const cri=e.campo.filter(c=>xCri(c));if(cri.length)for(const c of e.campo){const i=xInfo(c);if(!i.eq||(c.an&&xExiste(c.an)))continue;
       if(!xPaga(e,xCusto(i.eq),0).ok)continue;mal=0;await xEquipa(c.k);if(c.an)return 1;}
-    return 0;}
+    return await habilita();}
   function ataca(){const e=X.eu,o=X.op||{},bl=(o.campo||[]).filter(c=>xCri(c)&&!c.tap);let tot=0;const at=[];
     for(const c of e.campo){if(!xPodeAtk(c))continue;const a=pt(c);if(a.p<=0)continue;
       const voa=a.kw.has('flying'),pb=bl.filter(b=>!voa||pt(b).kw.has('flying')||pt(b).kw.has('reach'));
@@ -5760,9 +5792,16 @@ if(location.hash.startsWith('#x1'))aba();
     if(e.vida<=0||(e.dc||0)>=21||(e.ven||0)>=10){X.fim=1;xLog('🏳 perdeu. Boa! Pra jogar de novo: Sair da sala › Jogar contra o bot.');return;}
     if(X.op&&(X.op.vida<=0||(X.op.dc||0)>=21||(X.op.ven||0)>=10)){X.fim=1;xLog('🏆 ganhou a partida. Pra revanche: Sair da sala › Jogar contra o bot.');return;}
     const P=s.pilha||[];
-    if(P.length){if(s.pri==='bot'&&!s.rz)xPassaPri();return;}
+    if(P.length){if(s.pri==='bot'&&!s.rz){const top=P[P.length-1],ch=top.id+'.'+P.length;if(X.rp!==ch){X.rp=ch;if(await responde(top))return;}xPassaPri();}return;}
+    if(s.vez!=='bot'&&s.cb==='blq'&&X.bi!==s.turno){X.bi=s.turno;   // remoção instantânea no maior atacante
+      const at=((X.op||{}).campo||[]).filter(c=>c.atk).sort((a,b)=>pt(b).p-pt(a).p)[0];
+      if(at)for(const [z,c] of mao())if(inst(c)&&pode(e,c,z)&&ops(xInfo(c).tx,c.n).some(o=>o==='destroi'||o==='exila'||o==='dano'||o==='volta')&&await solta(z,c,{mal:1,pref:at.k}))return;}
     if(s.vez!=='bot'){if(s.cb==='blq'&&X.bq!==s.turno){X.bq=s.turno;bloqueia();setTimeout(()=>xBotao('blqok'),700);}return;}
-    if(s.cb==='dano'){xBotao('dano');return;}if(s.cb)return;
+    if(s.cb==='dano'){if(X.tq!==s.turno){X.tq=s.turno;   // truque: salvar/fazer vencer atacante bloqueado
+        const bl=(X.op&&X.op.campo||[]).filter(c=>c.bl);for(const a of e.campo.filter(c=>c.atk)){const bs=bl.filter(b=>b.bl===a.k);if(!bs.length)continue;
+          const dano=bs.reduce((t,b)=>t+Math.max(0,pt(b).p),0);if(dano<pt(a).t)continue;
+          let foi=0;for(const [z,c] of mao())if(inst(c)&&tem(c,'pump')&&pode(e,c,z)&&await solta(z,c,{mal:0,pref:a.k})){foi=1;break;}if(foi)return;}}
+      xBotao('dano');return;}if(s.cb)return;
     const f=s.fase||0;
     if(f===0)return xBotao('fase');
     if(f===1||f===3){if(await joga())return;return xBotao('fase');}
