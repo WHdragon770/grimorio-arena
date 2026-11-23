@@ -459,8 +459,8 @@ button.perigo{color:var(--mau)}button.perigo:hover{border-color:var(--mau)}
 code{font:13px 'JetBrains Mono',monospace;background:var(--sup2);padding:1px 5px;border-radius:4px}
 
 /* ===== Meus decks ===== */
-@media(min-width:1000px){body[data-aba=decks] .obra{grid-template-columns:minmax(0,1fr)}}
-body[data-aba=decks] .lado{display:none}
+@media(min-width:1000px){body[data-aba=decks] .obra,body[data-aba=bulk] .obra{grid-template-columns:minmax(0,1fr)}}
+body[data-aba=decks] .lado,body[data-aba=bulk] .lado{display:none}
 .b-sec{margin:28px 0 12px;display:flex;gap:10px;align-items:baseline}
 .b-tiles{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
 .b-tile{display:grid;grid-template-rows:120px auto;padding:0;overflow:hidden;text-align:left;border-radius:12px;background:var(--sup);border:1px solid var(--linha);box-shadow:var(--sombra2);min-height:0}
@@ -595,7 +595,7 @@ img.ms{background:none;border-radius:50%;width:1.05em;height:1.05em;padding:0;ma
 .b-chips label:has(input:checked){border-color:var(--ouro);background:var(--hover)}
 .b-chips input{accent-color:var(--ouro);margin:0}
 .b-cfgpe{display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--linha);padding-top:14px;margin-top:10px}.b-cfgpe span{flex:1}
-body[data-aba=decks] .obra,body[data-aba=decks] .topo-in{max-width:1720px}
+body[data-aba=decks] .obra,body[data-aba=decks] .topo-in,body[data-aba=bulk] .obra,body[data-aba=bulk] .topo-in{max-width:1720px}
 @media(min-width:1150px){body[data-aba=decks] .b-corpo{grid-template-columns:minmax(0,1fr) 340px}}
 .b-cartas.texto{columns:250px 3}
 .b-chips label{display:inline-flex;flex-direction:row;white-space:nowrap;margin:0;width:auto}
@@ -969,42 +969,46 @@ kbd{display:inline-block;padding:0 5px;border:1px solid var(--linha);border-bott
 .b-stack .b-cartaimg:not(:last-child) .bu-av{top:3px;bottom:auto;left:auto;right:30px;padding:1px 5px}
 .b-stack .b-cartaimg:not(:last-child) .bu-av button{display:none}
 .b-stack .b-cartaimg:not(:last-child) .bu-av span{font-size:0}.b-stack .b-cartaimg:not(:last-child) .bu-av span::before{content:'📦';font-size:12px}
-/* bulk em tela grande */
-.bu-tela{width:calc(100vw - 32px);max-width:1500px;height:calc(100vh - 32px);max-height:none;padding:0;overflow:hidden}
-.bu-in{display:flex;flex-direction:column;height:100%}
-.bu-topo{flex-wrap:wrap;gap:12px;padding:16px 22px;border-bottom:1px solid var(--linha)}.bu-topo h3{margin:0}.bu-esp{flex:1}
-.bu-corpo{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);overflow:hidden}
-.bu-esq{overflow:auto;padding:16px 22px 28px;display:grid;gap:14px;align-content:start}
+/* área Bulk (#bulk) */
+.bu-corpo{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;margin-top:14px}
+.bu-esq{display:grid;gap:14px;align-content:start;min-width:0}
 .bu-abas{justify-self:start}
-.bu-esq .b-busca input{width:100%}
-#bu-foco{display:none}
-@media(min-width:900px){.bu-corpo{grid-template-columns:minmax(0,1fr) 300px}
- #bu-foco{display:grid;gap:10px;align-content:start;overflow:auto;padding:16px 20px;border-left:1px solid var(--linha)}}
-#bu-foco img{width:100%;aspect-ratio:488/680;object-fit:cover;border-radius:4.75%/3.5%;box-shadow:0 10px 30px rgba(0,0,0,.35);background:var(--sup2)}
-#bu-foco img[data-yficha]{cursor:zoom-in}.bu-fn{font-size:16px}
+.bu-esq .b-busca{max-width:none;width:100%;grid-template-columns:minmax(0,1fr)!important}.bu-esq .b-busca input{width:100%}
+.bu-fl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bu-fl select,.bu-fl input{width:auto;min-width:0}.bu-fl #bu-set{width:150px}.bu-mv{display:inline-flex;gap:4px}.bu-mv input{width:64px}
+.bu-cores{display:inline-flex;gap:4px}.bu-cores button{min-height:0;padding:5px;border-radius:999px;line-height:0;opacity:.45}.bu-cores button[aria-pressed=true]{opacity:1;outline:2px solid var(--ouro)}
+.bu-cores button .ms,.bu-cores button i,.bu-cores button img{width:20px;height:20px}
+.bu-chk{display:inline-flex;gap:6px;align-items:center;font-size:14px}
+#bu-foco{display:grid;gap:10px;align-content:start;justify-items:stretch;max-width:320px}
+#bu-foco .b-fimg img{width:100%;aspect-ratio:488/680;object-fit:cover;border-radius:4.75%/3.5%;box-shadow:0 10px 30px rgba(0,0,0,.35);background:var(--sup2);display:block}
+#bu-foco img[data-yficha]{cursor:zoom-in}.bu-fn{font-size:17px}
 #bu-foco .b-fbtn{display:flex;align-items:center;gap:8px}#bu-foco .b-fbtn span{flex:1;text-align:center;font-weight:600}
-.bu-res{max-height:min(46vh,620px);overflow:auto;padding:2px}
+.bu-dk{display:flex;gap:6px}.bu-dk select{flex:1;min-width:0}
+@media(min-width:900px){.bu-corpo{grid-template-columns:minmax(0,1fr) 300px}#bu-foco{position:sticky;top:76px;align-self:start;max-height:calc(100vh - 92px);overflow:auto;padding-left:20px;border-left:1px solid var(--linha)}}
+@media(max-width:899px){#bu-foco{order:-1;max-width:none;grid-template-columns:140px 1fr}#bu-foco .b-fimg{grid-row:span 6}#bu-foco>*:not(.b-fimg){grid-column:2}}
+.bu-res{max-height:min(70vh,900px);overflow:auto;padding:2px;display:grid;gap:10px}
 .bu-g{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
 .bu-g.gigante{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
-.bu-g.bu-rg{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
-.bu-c{position:relative;display:grid;gap:6px;padding:5px;border-radius:12px;border:2px solid transparent;cursor:pointer;transition:border-color .12s}
+.bu-g.bu-rg{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.bu-c{position:relative;display:grid;gap:6px;padding:5px;border-radius:12px;border:2px solid transparent;cursor:pointer;transition:border-color .12s;align-content:start}
 .bu-c:hover{border-color:var(--linha)}.bu-c.sel,.bu-li.sel{border-color:var(--ouro)}
 .bu-c img{width:100%;aspect-ratio:488/680;object-fit:cover;border-radius:4.75%/3.5%;background:var(--sup2);display:block}
 .bu-c.tem img{outline:2px solid var(--ouro);outline-offset:-2px}
 .bu-c .b-resn{font-size:12px;text-align:center;line-height:1.2}
+.bu-c .b-foil{position:absolute;top:10px;left:10px}
+.bu-ed{display:inline-flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--tinta2,inherit);opacity:.85}.bu-ed.ok{color:var(--ouro);opacity:1;font-weight:700}
+.bu-ed i.b-set,.b-fmeta i.b-set{display:inline-block;vertical-align:middle}
 .bu-li{display:flex;align-items:center;gap:10px;padding:6px 10px;border-radius:8px;border:2px solid transparent;cursor:pointer}
-.bu-li:hover{background:var(--sup2)}.bu-li b{min-width:28px}.bu-li span:not(.bu-bts){flex:1}
-.bu-cab h4{margin:0}
-@media(max-width:600px){.bu-tela{width:100vw;height:100vh;max-width:none;border-radius:0}.bu-topo,.bu-esq{padding-left:16px;padding-right:16px}.bu-g{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}.bu-cab input{width:140px}}
-.bu-esq .b-busca{max-width:none;width:100%}
-.bu-cab .linha{flex-wrap:nowrap;gap:8px}.bu-cab select{width:auto;min-width:0}.bu-cab input{width:200px}
-.bu-res{max-height:min(58vh,760px)}
+.bu-li:hover{background:var(--sup2)}.bu-li b{min-width:28px}.bu-li>span:nth-of-type(1){flex:1}
+.bu-cab{flex-wrap:wrap;gap:8px}.bu-cab h3{margin:0}.bu-cab .linha{flex-wrap:nowrap;gap:8px}.bu-cab select{width:auto;min-width:0}.bu-cab input{width:200px}
+@media(max-width:600px){.bu-g{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}.bu-cab input{width:130px}.bu-cab .linha{flex-wrap:wrap}}
 </style>
 <header class="topo"><div class="topo-in">
   <div class="marca"><img class="logo" alt="" src="data:image/png;base64,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">
 Grimório Arena</div>
   <nav aria-label="Áreas">
     <a href="#decks" data-aba="decks">Meus decks</a>
+    <a href="#bulk" data-aba="bulk">📦 Bulk</a>
     <a href="#deck" data-aba="deck">Deck</a>
     <a href="#oponentes" data-aba="oponentes">Oponentes</a>
     <a href="#analise" data-aba="analise">Análise</a>
@@ -1028,6 +1032,7 @@ Grimório Arena</div>
 <main class="tira">
 
 <!-- MEUS DECKS -->
+<section id="v-bulk" class="tira" hidden></section>
 <section id="v-decks" class="tira" hidden>
  <div id="b-lista" class="tira">
   <div class="cab linha entre"><div><h2>Meus decks</h2><p class="nota">Monte, veja e edite seus decks. Fica salvo neste navegador. Busca ao vivo no Scryfall e sugestões do EDHREC.</p></div>
@@ -2659,8 +2664,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.99;
-/* dólar ao vivo (AwesomeAPI); 5.99 = do dia da publicação, só se falhar */
+let COTA=5.98;
+/* dólar ao vivo (AwesomeAPI); 5.98 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -2784,10 +2789,10 @@ function roda(tipo,msg,prog){
 const limpo=D=>({M:D.M,base:D.base,cmd:D.cmd,nome:D.nome||'',cand:D.cand,vazio:D.vazio,extras:D.extras||[]});
 
 /* ---------- abas ---------- */
-function aba(){const a=(location.hash||'#deck').slice(1).split('/')[0];const ok=['decks','deck','oponentes','analise','trocas','mesa','x1'].includes(a)?a:'deck';
+function aba(){const a=(location.hash||'#deck').slice(1).split('/')[0];const ok=['decks','bulk','deck','oponentes','analise','trocas','mesa','x1'].includes(a)?a:'deck';
   for(const s of $$('main > section'))s.hidden=s.id!=='v-'+ok;document.body.dataset.aba=ok;if(ok!=='mesa'&&TIMER)play();
   for(const n of $$('nav a'))n.dataset.aba===ok?n.setAttribute('aria-current','page'):n.removeAttribute('aria-current');
-  if(ok==='oponentes')pintaOps();if(ok==='decks'&&typeof pintaDecks==='function')pintaDecks();if(ok!=='decks'&&$('#b-prev'))$('#b-prev').hidden=true;if(ok!=='decks'&&typeof BK!=='undefined'&&BK.sujo&&DB&&DB.length){BK.sujo=0;carregaDeck();}if(ok==='mesa')prepMesa();if(ok==='trocas'&&typeof pintaTrocas==='function')pintaTrocas();if(ok==='x1'&&typeof pintaX1==='function')pintaX1();}
+  if(ok==='oponentes')pintaOps();if(ok==='decks'&&typeof pintaDecks==='function')pintaDecks();if(ok!=='decks'&&$('#b-prev'))$('#b-prev').hidden=true;if(ok!=='decks'&&typeof BK!=='undefined'&&BK.sujo&&DB&&DB.length){BK.sujo=0;carregaDeck();}if(ok==='mesa')prepMesa();if(ok==='trocas'&&typeof pintaTrocas==='function')pintaTrocas();if(ok==='x1'&&typeof pintaX1==='function')pintaX1();if(ok==='bulk'&&typeof buArea==='function')buArea();}
 addEventListener('hashchange',aba);
 
 /* ---------- ficha da carta ---------- */
@@ -4200,7 +4205,7 @@ async function bEdAbre(n){let dl=$('#b-ed');if(!dl){dl=document.createElement('d
           ano:(c.released_at||'').slice(0,4),pn:fi.includes('nonfoil')?+(pr.usd||0):null,pf:fi.includes('foil')?+(pr.usd_foil||0):fi.includes('etched')?+(pr.usd_etched||0):null});}
       u=j.has_more&&j.next_page;}}catch(e){}
   if(!dl.open||BK.edp.n!==n)return;BK.edp.l=l;bEdPinta();}
-function bEdPinta(){const p=BK.edp,el=$('#b-edl');if(!el)return;const e=bEd(p.n);$('#b-ed [data-edpad]').hidden=!e;
+function bEdPinta(){const p=BK.edp,el=$('#b-edl');if(!el)return;const e=p.bu?(BU.d.me||{})[p.n]:bEd(p.n);$('#b-ed [data-edpad]').hidden=!e;
   if(!p.l.length){el.innerHTML='<p class="nota">Não achei edições no Scryfall agora. Tenta de novo daqui a pouco.</p>';return;}
   const pr=v=>v?`US$ ${v.toFixed(2)} <small>(${brl(v*COTA)})</small>`:'sem preço';
   el.innerHTML=p.l.map((c,k)=>{const sel=e&&e.id===c.id;return `<div class="b-edit${sel?' sel':''}" data-edk="${k}" data-edbusca="${h(norm(c.sn+' '+c.s+' '+c.ano))}">
@@ -4211,11 +4216,11 @@ function bEdPinta(){const p=BK.edp,el=$('#b-edl');if(!el)return;const e=bEd(p.n)
       <div class="linha">${c.pn!=null?`<button class="prim" data-edsel="${k}"${sel&&!e.foil?' disabled':''}>Escolher</button>`:''}${c.pf!=null?`<button class="b-edfoil" data-edsel="${k}" data-foil="1"${sel&&e.foil?' disabled':''}>Escolher foil</button>`:''}</div></div></div>`;}).join('');
   bEdFiltra();}
 function bEdFiltra(){const q=norm(($('#b-edf')||{}).value||'');$$('#b-edl .b-edit').forEach(x=>x.hidden=!!q&&!x.dataset.edbusca.includes(q));}
-function bEdUsa(c,foil){const n=BK.edp.n;bMexe(d=>{d.ed=d.ed||{};d.ed[n]={id:c.id,img:c.img,img2:c.img2,art:c.art,s:c.s,sn:c.sn,cn:c.cn,r:c.r,a:c.a,p:(foil?c.pf:c.pn)||0,foil:foil?1:0};});
+function bEdUsa(c,foil){const n=BK.edp.n;if(BK.edp.bu)return buEdUsa(n,c,foil);bMexe(d=>{d.ed=d.ed||{};d.ed[n]={id:c.id,img:c.img,img2:c.img2,art:c.art,s:c.s,sn:c.sn,cn:c.cn,r:c.r,a:c.a,p:(foil?c.pf:c.pn)||0,foil:foil?1:0};});
   BK.vira.delete(n);$('#b-ed').close();bToast(`${c.sn}${foil?' (foil)':''} escolhida`);}
 function bEdClique(e){const b=e.target.closest('button');if(!b)return;const p=BK.edp;
   if(b.dataset.edx!=null)return $('#b-ed').close();
-  if(b.dataset.edpad!=null){bMexe(d=>{if(d.ed)delete d.ed[p.n];});BK.vira.delete(p.n);$('#b-ed').close();bToast('Voltou pra edição padrão');return;}
+  if(b.dataset.edpad!=null&&p.bu)return buEdUsa(p.n,null);if(b.dataset.edpad!=null){bMexe(d=>{if(d.ed)delete d.ed[p.n];});BK.vira.delete(p.n);$('#b-ed').close();bToast('Voltou pra edição padrão');return;}
   if(!p.l)return;
   if(b.dataset.edsel!=null)return bEdUsa(p.l[+b.dataset.edsel],!!b.dataset.foil);
   if(b.dataset.edbarata!=null){const v=p.l.filter(c=>c.pn>0).sort((a,b)=>a.pn-b.pn)[0];if(!v)return bToast('Nenhuma edição com preço');bEdUsa(v,false);}}
@@ -4791,11 +4796,11 @@ addEventListener('load',()=>{if(typeof ctRepinta==='function'){const r0=ctRepint
 /* ---------- Meu bulk: coleção solta da pessoa (Magic por nome, Yu-Gi-Oh! por nome em inglês) ----------
    BU.d = {m:{nome:qtd}, y:{nomeEN:qtd}}; sobe pra conta no campo bulk (conta.js chama buConta(uid) e buDaNuvem(json)).
    No editor (Magic e YGO), carta da lista que está no bulk ganha aviso embaixo + botão Remover do bulk. */
-const BU={chave:'bulk',d:st.get('bulk',{m:{},y:{}}),jogo:'m',f:''};
+const BU={chave:'bulk',d:st.get('bulk',{m:{},y:{}}),jogo:'m',f:''};BU.d.me=BU.d.me||{};
 const buVazio=o=>!o||(!Object.keys(o.m||{}).length&&!Object.keys(o.y||{}).length);
-function buConta(uid){const vis=st.get('bulk',{m:{},y:{}});BU.chave=uid?'bulk_'+uid:'bulk';BU.d=st.get(BU.chave,{m:{},y:{}});
+function buConta(uid){const vis=st.get('bulk',{m:{},y:{}});BU.chave=uid?'bulk_'+uid:'bulk';BU.d=st.get(BU.chave,{m:{},y:{}});BU.d.me=BU.d.me||{};
   BU.mig=null;if(uid&&buVazio(BU.d)&&!buVazio(vis)){BU.d=vis;BU.mig=vis;st.set(BU.chave,vis);st.set('bulk',{m:{},y:{}});}}
-function buDaNuvem(j){try{const o=JSON.parse(j||'{}');if(o&&o.m&&!buVazio(o)){const d={m:o.m||{},y:o.y||{}},v=BU.mig;
+function buDaNuvem(j){try{const o=JSON.parse(j||'{}');if(o&&o.m&&!buVazio(o)){const d={m:o.m||{},y:o.y||{},me:o.me||{}},v=BU.mig;if(v&&v.me)for(const n in v.me)if(!d.me[n])d.me[n]=v.me[n];
     if(v)for(const k of ['m','y'])for(const n in v[k]||{})d[k][n]=Math.max(d[k][n]||0,v[k][n]);// junta o bulk de visitante sem contar duas vezes
     BU.d=d;st.set(BU.chave,d);if(v){BU.mig=null;if(typeof ctSobe==='function')ctSobe();}}}catch(e){}}
 const buSalva=()=>{st.set(BU.chave,BU.d);if(typeof ctSobe==='function')ctSobe();};
@@ -4813,82 +4818,124 @@ function buLe(txt,jogo){const ok=[],ruim=[];
     else{const c=buYAcha(n);c?ok.push([c[12],q]):ruim.push(l);}}
   return {ok,ruim};}
 
-/* ---- janela do bulk (tela grande: busca + grade + carta em foco) ---- */
-BU.q='';BU.sel='';BU.vis=st.get('bu_vis','grande');BU.ab=st.get('bu_ab','busca');BU.rn=0;
-async function buAbre(jogo){BU.jogo=jogo||BU.jogo;let dl=$('#bu-dlg');
-  if(!dl){dl=document.createElement('dialog');dl.id='bu-dlg';dl.className='b-dlg bu-tela';document.body.appendChild(dl);dl.addEventListener('click',buClique);
-    dl.addEventListener('input',e=>{const id=e.target.id;if(id==='bu-f'){BU.f=e.target.value;buGrade();}else if(id==='bu-q'){BU.q=e.target.value;clearTimeout(BU.tm);BU.tm=setTimeout(buBusca,BU.jogo==='m'?350:150);}});
-    dl.addEventListener('change',e=>{if(e.target.id==='bu-vis'){BU.vis=e.target.value;st.set('bu_vis',BU.vis);buGrade();}});}
-  if(BU.jogo==='y'&&!YG.db){dl.innerHTML='<p class="nota">Carregando as cartas de Yu-Gi-Oh!…</p>';if(!dl.open)dl.showModal();try{await ygCarrega();}catch(e){}}
-  buPinta();if(!dl.open)dl.showModal();}
+/* ---- área Bulk (#bulk, #bulk/ygo): busca estilo Scryfall + grade grande + carta em foco + edição ---- */
+BU.q='';BU.sel='';BU.vis=st.get('bu_vis','grande');BU.ab='busca';BU.rn=0;BU.rs=[];BU.nx=null;
+BU.fl=Object.assign({cor:'',tipo:'',op:'<=',mv:'',rar:'',set:'',ord:'edhrec',pr:0,yt:''},st.get('bu_fl',{}));
+function buArea(){const j=location.hash.split('/')[1]==='ygo'?'y':'m',el=$('#v-bulk');if(!el)return;
+  if(!el.dataset.ok){el.dataset.ok=1;el.addEventListener('click',buClique);
+    el.addEventListener('input',e=>{const id=e.target.id;if(id==='bu-f'){BU.f=e.target.value;buGrade();}else if(id==='bu-q'){BU.q=e.target.value;clearTimeout(BU.tm);BU.tm=setTimeout(buBusca,BU.jogo==='m'?400:150);}else if(id==='bu-set'||id==='bu-mv'){BU.fl[id.slice(3)]=e.target.value.trim();buFlSalva();clearTimeout(BU.tm);BU.tm=setTimeout(buBusca,500);}});
+    el.addEventListener('change',e=>{const t=e.target;if(t.id==='bu-vis'){BU.vis=t.value;st.set('bu_vis',BU.vis);buGrade();}
+      else if(t.dataset.bufl){BU.fl[t.dataset.bufl]=t.type==='checkbox'?(t.checked?1:0):t.value;buFlSalva();buBusca();}});
+    el.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='bu-q'){clearTimeout(BU.tm);buBusca();}});}
+  const novo=j!==BU.jogo||!el.firstChild;if(j!==BU.jogo){BU.jogo=j;BU.f='';BU.q='';BU.sel='';BU.rs=[];}
+  if(j==='y'&&!YG.db){el.innerHTML='<p class="nota">Carregando as cartas de Yu-Gi-Oh!…</p>';ygCarrega().then(()=>{if(location.hash.startsWith('#bulk'))buPinta();}).catch(()=>{});return;}
+  if(novo)buPinta();else buGrade();}
+const buAbre=j=>{location.hash=j==='y'?'#bulk/ygo':'#bulk';};
+const buFlSalva=()=>st.set('bu_fl',BU.fl);
 const buNomeV=n=>BU.jogo==='y'&&(buYAcha(n)||[])[1]||n;
-function buDeckAqui(){const hs=location.hash;if(BU.jogo==='m'){const d=typeof bDeck==='function'&&bDeck();return d&&hs.includes(d.id)?d:null;}const d=typeof ygDeck==='function'&&ygDeck();return d&&hs.includes(d.id)?d:null;}
-function buPinta(){const dl=$('#bu-dlg'),o=BU.d[BU.jogo],m=BU.jogo==='m',dk=buDeckAqui();
-  dl.innerHTML=`<div class="bu-in"><div class="linha entre bu-topo"><h3>📦 Meu bulk</h3>
-     <div class="seg" role="tablist"><button type="button" data-bujogo="m" aria-pressed="${m}">Magic <span class="fraca">${buTot(BU.d.m)}</span></button><button type="button" data-bujogo="y" aria-pressed="${!m}">Yu-Gi-Oh! <span class="fraca">${buTot(BU.d.y)}</span></button></div>
-     <span class="bu-esp"></span>${dk?`<span class="nota">Deck aberto: <b>${h(dk.nome||'sem nome')}</b></span>`:''}<button type="button" data-bufecha="1" aria-label="Fechar">×</button></div>
+const buEd=n=>BU.jogo==='m'&&(BU.d.me||{})[n];
+function buImgG(n){if(BU.jogo==='m'){const e=buEd(n);return e&&e.img||bImg0(n,1);}const c=buYAcha(n);return c?ygImg(c[0]):'';}
+const buSel=(id,k,l)=>`<select id="${id}" data-bufl="${k}">${l.map(([v,t])=>`<option value="${v}"${String(BU.fl[k])===v?' selected':''}>${t}</option>`).join('')}</select>`;
+function buFiltrosH(){if(BU.jogo==='y')return `<div class="bu-fl">${buSel('bu-yt','yt',[['','Todos os tipos'],['monstro','Monstros'],['spell','Magias'],['trap','Armadilhas'],['extra','Extra Deck']])}</div>`;
+  const f=BU.fl;return `<div class="bu-fl"><span class="bu-cores" role="group" aria-label="Cores">${[...'WUBRGC'].map(c=>`<button type="button" data-bucor="${c}" aria-pressed="${f.cor.includes(c)}" title="${{W:'Branco',U:'Azul',B:'Preto',R:'Vermelho',G:'Verde',C:'Incolor'}[c]}">${simb('{'+c+'}')}</button>`).join('')}</span>
+   ${buSel('bu-tipo','tipo',[['','Qualquer tipo'],['creature','Criatura'],['instant','Instantânea'],['sorcery','Feitiço'],['artifact','Artefato'],['enchantment','Encantamento'],['planeswalker','Planeswalker'],['land','Terreno'],['legendary','Lendária'],['battle','Batalha']])}
+   <span class="bu-mv">${buSel('bu-op','op',[['<=','Custo ≤'],['=','Custo ='],['>=','Custo ≥']])}<input id="bu-mv" type="number" min="0" max="20" inputmode="numeric" placeholder="—" value="${h(f.mv)}" aria-label="Custo de mana"></span>
+   ${buSel('bu-rar','rar',[['','Qualquer raridade'],['common','Comum'],['uncommon','Incomum'],['rare','Rara'],['mythic','Mítica']])}
+   <input id="bu-set" type="search" placeholder="Coleção (ex.: mh3)" value="${h(f.set)}" autocomplete="off" aria-label="Código da coleção">
+   ${buSel('bu-ord','ord',[['edhrec','Mais jogadas'],['name','Nome'],['usd','Preço'],['cmc','Custo'],['released','Mais novas']])}
+   <label class="bu-chk"><input type="checkbox" data-bufl="pr"${f.pr?' checked':''}> Todas as edições</label></div>`;}
+function buPinta(){const el=$('#v-bulk'),o=BU.d[BU.jogo],m=BU.jogo==='m';
+  el.innerHTML=`<div class="cab linha entre"><div><h2>📦 Meu bulk</h2><p class="nota">Suas cartas soltas. Busque como no Scryfall, ponha no bulk, escolha a edição e mande pros seus decks. Carta do bulk ganha o aviso <b>📦 No seu bulk</b> no editor.</p></div>
+     <div class="seg" role="tablist"><button type="button" data-bujogo="m" aria-pressed="${m}">Magic <span class="fraca">${buTot(BU.d.m)}</span></button><button type="button" data-bujogo="y" aria-pressed="${!m}">Yu-Gi-Oh! <span class="fraca">${buTot(BU.d.y)}</span></button></div></div>
    <div class="bu-corpo"><div class="bu-esq">
     <div class="seg bu-abas"><button type="button" data-buab="busca" aria-pressed="${BU.ab==='busca'}">🔍 Buscar cartas</button><button type="button" data-buab="colar" aria-pressed="${BU.ab==='colar'}">📋 Colar lista</button></div>
-    ${BU.ab==='busca'?`<div class="b-busca"><input id="bu-q" type="search" placeholder="${m?'Nome da carta (português ou inglês) ou sintaxe do Scryfall, tipo t:dragon':'Nome da carta (português ou inglês) ou arquétipo'}" value="${h(BU.q)}" autocomplete="off" spellcheck="false"></div><div id="bu-res" class="bu-res"></div>`
+    ${BU.ab==='busca'?`<div class="b-busca"><input id="bu-q" type="search" placeholder="${m?'Nome (português ou inglês), texto da carta ou sintaxe do Scryfall: t:dragon o:flying':'Nome da carta (português ou inglês) ou arquétipo'}" value="${h(BU.q)}" autocomplete="off" spellcheck="false"></div>${buFiltrosH()}<div id="bu-res" class="bu-res"></div>`
     :`<p class="nota">Cole as cartas que você tem soltas, uma por linha (ex.: <code>4 ${m?'Sol Ring':'Ash Blossom &amp; Joyous Spring'}</code>). Nome em inglês ou português.</p>
-     <textarea id="bu-txt" rows="5" placeholder="1 ${m?'Arcane Signet\n3 Swords to Plowshares':'Pot of Greed\n3 Dark Magician'}" spellcheck="false"></textarea>
+     <textarea id="bu-txt" rows="6" placeholder="1 ${m?'Arcane Signet\n3 Swords to Plowshares':'Pot of Greed\n3 Dark Magician'}" spellcheck="false"></textarea>
      <div class="linha entre"><span class="linha"><button type="button" class="prim" data-buadd="1">Adicionar ao bulk</button><button type="button" data-buadd="troca">Substituir tudo</button></span><span id="bu-msg" class="nota"></span></div>`}
-    <div class="linha entre bu-cab"><h4>No seu bulk · <span id="bu-cont"></span></h4>
+    <div class="linha entre bu-cab"><h3>No seu bulk · <span id="bu-cont"></span></h3>
      <span class="linha"><input id="bu-f" type="search" placeholder="Filtrar o bulk" value="${h(BU.f)}" autocomplete="off">
       <select id="bu-vis" aria-label="Visualização">${[['grande','Grade grande'],['gigante','Grade gigante'],['lista','Lista']].map(([v,t])=>`<option value="${v}"${BU.vis===v?' selected':''}>${t}</option>`).join('')}</select>
-      ${Object.keys(o).length?'<button type="button" data-bulimpa="1">Limpar</button>':''}</span></div>
+      <button type="button" data-bulimpa="1"${Object.keys(o).length?'':' hidden'}>Limpar</button></span></div>
     <div id="bu-grade"></div></div>
-   <aside id="bu-foco"></aside></div></div>`;
-  buGrade();if(BU.ab==='busca'){buBusca();setTimeout(()=>{const q=$('#bu-q');q&&q.focus();},30);}}
-function buImgG(n){if(BU.jogo==='m')return bImg(n,1);const c=buYAcha(n);return c?ygImg(c[0]):'';}
+   <aside id="bu-foco"></aside></div>`;
+  buGrade();if(BU.ab==='busca'){if(BU.rs.length)buResPinta();else buBusca();}}
+const buEdTxt=e=>e?`${h(e.sn||e.s.toUpperCase())} · ${h(e.s.toUpperCase())} nº ${h(e.cn)}${e.foil?' · ✦ foil':''}`:'Edição padrão';
 function buGrade(){const el=$('#bu-grade'),o=BU.d[BU.jogo];if(!el)return;const f=norm(BU.f||'');
   const ct=$('#bu-cont');if(ct)ct.textContent=`${buTot(o)} carta${buTot(o)===1?'':'s'} · ${Object.keys(o).length} diferente${Object.keys(o).length===1?'':'s'}`;
-  const l=Object.keys(o).filter(n=>!f||norm(n).includes(f)||(BU.jogo==='y'&&norm(buNomeV(n)).includes(f))).sort((a,b)=>buNomeV(a).localeCompare(buNomeV(b)));
+  const lp=$('#v-bulk [data-bulimpa]');if(lp)lp.hidden=!Object.keys(o).length;
+  const l=Object.keys(o).filter(n=>!f||norm(n).includes(f)||norm(buNomeV(n)).includes(f)||(buEd(n)&&norm(buEd(n).sn+' '+buEd(n).s).includes(f))).sort((a,b)=>buNomeV(a).localeCompare(buNomeV(b)));
   if(!l.length){el.innerHTML=`<p class="nota">${Object.keys(o).length?'Nada com esse filtro.':'Bulk vazio. Busque cartas acima e clique em + Bulk, ou cole sua lista.'}</p>`;buFoco();return;}
   const bts=n=>`<span class="bu-bts"><button type="button" data-bumenos="${h(n)}" aria-label="Tirar uma">−</button><button type="button" data-bumais="${h(n)}" aria-label="Pôr mais uma">+</button></span>`;
-  el.innerHTML=BU.vis==='lista'?`<div class="bu-lista">${l.map(n=>`<div class="bu-li${BU.sel===n?' sel':''}" data-busel="${h(n)}"><b>${o[n]}</b><span>${h(buNomeV(n))}</span>${bts(n)}</div>`).join('')}</div>`
-   :`<div class="bu-g ${BU.vis}">${l.slice(0,400).map(n=>`<div class="bu-c${BU.sel===n?' sel':''}" data-busel="${h(n)}" title="${h(buNomeV(n))}"><img loading="lazy" src="${h(buImgG(n))}" alt="${h(buNomeV(n))}"><b class="bu-q">${o[n]}x</b>${bts(n)}</div>`).join('')}</div>${l.length>400?'<p class="nota">Mostrando 400. Use o filtro pra achar o resto.</p>':''}`;
+  const edl=n=>{const e=buEd(n);return e?`<span class="bu-ed" title="${h(e.sn)}"><i class="b-set r-${h(e.r||'common')}" style="--si:url(https://svgs.scryfall.io/sets/${h(e.s)}.svg)"></i>${h(e.s.toUpperCase())} ${h(e.cn)}${e.foil?' ✦':''}</span>`:'';};
+  el.innerHTML=BU.vis==='lista'?`<div class="bu-lista">${l.map(n=>`<div class="bu-li${BU.sel===n?' sel':''}" data-busel="${h(n)}"><b>${o[n]}</b><span>${h(buNomeV(n))}</span>${edl(n)}${bts(n)}</div>`).join('')}</div>`
+   :`<div class="bu-g ${BU.vis}">${l.slice(0,400).map(n=>`<div class="bu-c${BU.sel===n?' sel':''}" data-busel="${h(n)}" title="${h(buNomeV(n))}"><img loading="lazy" src="${h(buImgG(n))}" alt="${h(buNomeV(n))}"><b class="bu-q">${o[n]}x</b>${buEd(n)&&buEd(n).foil?'<span class="b-foil">foil</span>':''}${edl(n)}${bts(n)}</div>`).join('')}</div>${l.length>400?'<p class="nota">Mostrando 400. Use o filtro pra achar o resto.</p>':''}`;
   buFoco();}
+function buDecks(){return BU.jogo==='m'?BK.lst:(YG.lst||[]);}
 function buFoco(){const e=$('#bu-foco'),o=BU.d[BU.jogo];if(!e)return;let n=BU.sel;if(!n||(!o[n]&&!BU.selFora))n=BU.sel=Object.keys(o).sort((a,b)=>buNomeV(a).localeCompare(buNomeV(b)))[0]||'';
   if(!n){e.innerHTML='<p class="nota">Clique numa carta pra ver ela grande aqui.</p>';return;}
-  const q=o[n]||0,m=BU.jogo==='m',c=!m&&buYAcha(n),dk=buDeckAqui(),u=encodeURIComponent(n.split(' // ')[0]);
-  e.innerHTML=`<img src="${h(buImgG(n))}" alt="${h(buNomeV(n))}"${c?` data-yficha="${c[0]}" title="Ler o texto"`:''}>
+  const q=o[n]||0,m=BU.jogo==='m',c=!m&&buYAcha(n),ed=buEd(n),u=encodeURIComponent(n.split(' // ')[0]),ds=buDecks(),cur=m?BK.cur:YG.cur;
+  e.innerHTML=`<div class="b-fimg"><img src="${h(buImgG(n))}" alt="${h(buNomeV(n))}"${c?` data-yficha="${c[0]}" title="Ler o texto"`:''}></div>
    <b class="bu-fn">${h(buNomeV(n))}</b>${c&&c[12]!==c[1]?`<span class="nota">${h(c[12])}</span>`:''}
+   ${m?`<p class="b-fmeta">${ed?`<i class="b-set r-${h(ed.r||'common')}" style="--si:url(https://svgs.scryfall.io/sets/${h(ed.s)}.svg)"></i> `:''}${buEdTxt(ed)}${ed&&ed.p?` · US$ ${(+ed.p).toFixed(2)}`:''}</p><button type="button" data-bued="${h(n)}">🖼️ Ver e trocar edição</button>`:''}
    <div class="b-fbtn"><button type="button" data-bumenos="${h(n)}" aria-label="Tirar uma"${q?'':' disabled'}>−</button><span>${q} no bulk</span><button type="button" data-bumais="${h(n)}" aria-label="Pôr mais uma">+</button></div>
    ${q>1?`<button type="button" data-butudo="${h(n)}">Tirar todas (${q})</button>`:''}
-   ${dk?`<button type="button" class="prim" data-budeck="${h(n)}">→ Pôr no deck ${h(dk.nome||'')}</button>`:''}
+   ${ds.length?`<div class="bu-dk"><select id="bu-dk" aria-label="Deck">${ds.map(d=>`<option value="${h(d.id)}"${d.id===cur?' selected':''}>${h(d.nome||'Deck sem nome')}</option>`).join('')}</select><button type="button" class="prim" data-budeck="${h(n)}">→ Pôr no deck</button></div>`:''}
    ${m?`<div class="b-flinks"><a target="_blank" rel="noopener" href="https://www.ligamagic.com.br/?view=cards/card&card=${u}"><span>Ver na LigaMagic</span></a><a target="_blank" rel="noopener" href="https://scryfall.com/search?q=!%22${u}%22"><span>Ver no Scryfall</span></a></div>`:`<button type="button" data-yficha="${c?c[0]:''}">Ler o texto da carta</button>`}`;}
-function buResH(n,img,nv){const q=BU.d[BU.jogo][n]||0;return `<div class="bu-c bu-r${q?' tem':''}${BU.sel===n?' sel':''}" data-busel="${h(n)}" data-bufora="1" title="${h(nv)}"><img loading="lazy" src="${h(img)}" alt="${h(nv)}">${q?`<b class="bu-q">${q}x</b>`:''}<span class="b-resn">${h(nv)}</span><span class="bu-bts"><button type="button" class="prim" data-bumais="${h(n)}">${q?'+1':'+ Bulk'}</button>${q?`<button type="button" data-bumenos="${h(n)}" aria-label="Tirar uma">−</button>`:''}</span></div>`;}
-async function buBusca(){const el=$('#bu-res');if(!el)return;const t=BU.q.trim(),meu=++BU.rn;
-  if(BU.jogo==='y'){const q=t.toLowerCase();let r=YG.db||[];
+function buQuery(){const f=BU.fl,t=BU.q.trim();let q=t;const r0=t&&!/[:<>=]/.test(t)&&acharDB(t);if(r0&&norm(r0[0])!==norm(t))q=`!"${r0[0]}"`;
+  if(f.cor)q+=f.cor==='C'?' c:c':' c>='+f.cor.replace('C','').toLowerCase();if(f.tipo)q+=' t:'+f.tipo;if(f.mv!=='')q+=` mv${f.op}${+f.mv}`;if(f.rar)q+=' r:'+f.rar;if(f.set)q+=' s:'+f.set.toLowerCase();
+  return (q.trim()||'game:paper')+(f.pr?' game:paper':'');}
+const buCartaR=c=>{const f=c.card_faces||[],iu=c.image_uris||(f[0]&&f[0].image_uris)||{},fi=c.finishes||['nonfoil'],pr=c.prices||{};
+  return {n:c.name,nv:c.printed_name&&c.lang==='pt'?c.printed_name:c.name,img:iu.normal||'',img2:(!c.image_uris&&f[1]&&f[1].image_uris&&f[1].image_uris.normal)||'',id:c.id,s:c.set,sn:c.set_name,cn:c.collector_number,r:c.rarity,p:+(fi.includes('nonfoil')?pr.usd:pr.usd_foil)||0};};
+async function buBusca(mais){const el=$('#bu-res');if(!el)return;const t=BU.q.trim(),meu=++BU.rn;
+  if(BU.jogo==='y'){const q=t.toLowerCase(),yt=BU.fl.yt;let r=YG.db||[];
+    if(yt)r=r.filter(c=>yt==='spell'||yt==='trap'?c[2]===yt:yt==='extra'?YEXTRA.test(c[2]):c[2]!=='spell'&&c[2]!=='trap');
     if(q){const pe=c=>{const n=c[1].toLowerCase(),e=c[12].toLowerCase();return n===q||e===q?0:n.startsWith(q)||e.startsWith(q)?1:n.includes(q)?2:3;};
       r=r.filter(c=>c[1].toLowerCase().includes(q)||c[12].toLowerCase().includes(q)||(c[11]||'').toLowerCase().includes(q)).sort((a,b)=>pe(a)-pe(b)||a[1].length-b[1].length);}
-    r=r.slice(0,60);BU.res=r.map(c=>c[12]);
-    el.innerHTML=r.length?`<p class="nota">${q?(r.length===60?'Mostrando as 60 primeiras':r.length+' resultado'+(r.length>1?'s':'')):'Algumas cartas pra começar. Digite o nome pra achar a sua.'}</p><div class="bu-g bu-rg">${r.map(c=>buResH(c[12],ygImg(c[0]),c[1])).join('')}</div>`:'<p class="nota">Nada encontrado. Tente o nome em inglês ou parte dele.</p>';return;}
-  let q=t||'game:paper';const r0=t&&acharDB(t);if(r0&&norm(r0[0])!==norm(t))q=`!"${r0[0]}"`;
-  el.innerHTML='<p class="nota">Buscando no Scryfall...</p>';
-  try{const r=await scryFetch('https://api.scryfall.com/cards/search?order=edhrec&unique=cards&q='+encodeURIComponent(q));if(meu!==BU.rn)return;
-    if(r.status===404){el.innerHTML='<p class="nota">Nada achado. Tente outro nome (inglês ou português) ou sintaxe do Scryfall, tipo <code>t:dragon cmc<=4</code>.</p>';return;}
-    const j=await r.json();if(meu!==BU.rn)return;const cs=(j.data||[]).slice(0,60);cs.forEach(bGuarda);bInfoSalva();BU.res=cs.map(c=>c.name);
-    el.innerHTML=`<p class="nota">${t?`${j.total_cards} resultado${j.total_cards>1?'s':''}${j.total_cards>60?' (mostrando 60)':''}`:'As mais jogadas pra começar. Digite o nome pra achar a sua.'}</p><div class="bu-g bu-rg">${cs.map(c=>buResH(c.name,bImg(c.name),c.name)).join('')}</div>`;
+    BU.tot=r.length;BU.rs=r.slice(0,mais?BU.rs.length+60:60).map(c=>({n:c[12],nv:c[1],img:ygImg(c[0])}));BU.nx=BU.rs.length<r.length?1:null;buResPinta();return;}
+  let u=mais&&BU.nx;if(!u){const q=buQuery(),o=BU.fl.ord;u='https://api.scryfall.com/cards/search?unique='+(BU.fl.pr?'prints':'cards')+'&order='+o+(o==='usd'||o==='released'?'&dir=desc':'')+'&q='+encodeURIComponent(q);BU.qv=q;}
+  if(!mais)el.innerHTML='<p class="nota">Buscando no Scryfall...</p>';
+  try{const r=await scryFetch(u);if(meu!==BU.rn)return;
+    if(r.status===404){BU.rs=[];BU.nx=null;el.innerHTML=`<p class="nota">Nada achado pra <code>${h(BU.qv)}</code>. Tente outro nome (inglês ou português) ou outra combinação de filtros.</p>`;return;}
+    const j=await r.json();if(meu!==BU.rn)return;const cs=j.data||[];cs.forEach(bGuarda);bInfoSalva();BU.tot=j.total_cards;BU.nx=j.has_more?j.next_page:null;
+    BU.rs=(mais?BU.rs:[]).concat(cs.map(buCartaR));buResPinta();
   }catch(e){if(meu===BU.rn)el.innerHTML='<p class="ruim">Sem conexão com o Scryfall agora.</p>';}}
-function buMexeu(){buSalva();const r=$('#bu-res');if(r&&BU.res){const g=r.querySelector('.bu-rg');if(g)g.innerHTML=BU.res.map(n=>{const c=BU.jogo==='y'&&buYAcha(n);return buResH(n,c?ygImg(c[0]):bImg(n),c?c[1]:n);}).join('');}
-  const t=$$('#bu-dlg .seg [data-bujogo] .fraca');if(t.length===2){t[0].textContent=buTot(BU.d.m);t[1].textContent=buTot(BU.d.y);}buGrade();buRepinta();}
+function buResH(x,k){const o=BU.d[BU.jogo],q=o[x.n]||0,pr=BU.jogo==='m'&&BU.fl.pr,ed=buEd(x.n),esta=pr&&ed&&ed.id===x.id;
+  return `<div class="bu-c bu-r${(pr?esta:q)?' tem':''}${BU.sel===x.n?' sel':''}" data-busel="${h(x.n)}" data-bufora="1" data-buk="${k}" title="${h(x.nv)}${x.sn?' · '+h(x.sn):''}"><img loading="lazy" src="${h(x.img||buImgG(x.n))}" alt="${h(x.nv)}">${q?`<b class="bu-q">${q}x</b>`:''}
+   <span class="b-resn">${h(x.nv)}</span>${pr?`<span class="bu-ed${esta?' ok':''}"><i class="b-set r-${h(x.r||'common')}" style="--si:url(https://svgs.scryfall.io/sets/${h(x.s)}.svg)"></i>${h(x.s.toUpperCase())} ${h(x.cn)}${x.p?` · US$ ${x.p.toFixed(2)}`:''}${esta?' ✓':''}</span>`:''}
+   <span class="bu-bts"><button type="button" class="prim" data-buradd="${k}">${q?'+1':'+ Bulk'}</button>${q?`<button type="button" data-bumenos="${h(x.n)}" aria-label="Tirar uma">−</button>`:''}</span></div>`;}
+function buResPinta(){const el=$('#bu-res');if(!el)return;if(!BU.rs.length){el.innerHTML='<p class="nota">Nada encontrado. Tente o nome em inglês ou parte dele.</p>';return;}
+  const m=BU.jogo==='m',t=BU.q.trim()||BU.fl.cor||BU.fl.tipo||BU.fl.mv||BU.fl.rar||BU.fl.set||BU.fl.yt;
+  el.innerHTML=`<p class="nota">${t||!m?`${BU.tot} resultado${BU.tot===1?'':'s'}${BU.tot>BU.rs.length?` · mostrando ${BU.rs.length}`:''}`:'As mais jogadas pra começar. Digite ou use os filtros.'}${m&&BU.fl.pr?' · cada edição aparece separada, o + Bulk guarda aquela edição':''}${m&&BU.qv?` · <a href="https://scryfall.com/search?q=${encodeURIComponent(BU.qv)}" target="_blank" rel="noopener">abrir no Scryfall</a>`:''}</p>
+   <div class="bu-g bu-rg">${BU.rs.map(buResH).join('')}</div>${BU.nx?'<div class="linha"><button type="button" data-bumaisres="1">Carregar mais</button></div>':''}`;}
+function buEdUsa(n,c,foil){const me=BU.d.me=BU.d.me||{};
+  if(c)me[n]={id:c.id,img:c.img,img2:c.img2||'',s:c.s,sn:c.sn,cn:c.cn,r:c.r,p:(foil?c.pf:c.pn)||c.p||0,foil:foil?1:0};else delete me[n];
+  const dl=$('#b-ed');if(dl&&dl.open)dl.close();bToast(c?`${c.sn}${foil?' (foil)':''} no bulk`:'Voltou pra edição padrão');buMexeu();}
+function buMexeu(){buSalva();if($('#bu-res')&&BU.rs.length)buResPinta();
+  const t=$$('#v-bulk [data-bujogo] .fraca');if(t.length===2){t[0].textContent=buTot(BU.d.m);t[1].textContent=buTot(BU.d.y);}buGrade();buRepinta();}
+function buPoeDeck(n){const id=($('#bu-dk')||{}).value;if(!id)return;const ed=buEd(n);
+  if(BU.jogo==='m'){BK.cur=id;bAdd(n);if(ed)bMexe(d=>{d.ed=d.ed||{};d.ed[n]=Object.assign({},ed);});}else{YG.cur=id;const c=buYAcha(n);if(c)ygAdd(c[0],'');}
+  const d=buDecks().find(x=>x.id===id);bToast(`${buNomeV(n)} foi pro ${d&&d.nome||'deck'}`);}
 function buClique(e){const b=e.target.closest('button'),o=BU.d[BU.jogo];
-  if(!b){const c=e.target.closest('[data-busel]');if(c&&!e.target.closest('[data-yficha]')){BU.sel=c.dataset.busel;BU.selFora=!!c.dataset.bufora;$$('#bu-dlg .sel').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');buFoco();}return;}
-  if(b.dataset.bufecha)return $('#bu-dlg').close();
-  if(b.dataset.bujogo){if(b.dataset.bujogo===BU.jogo)return;BU.f='';BU.q='';BU.sel='';BU.res=null;return buAbre(b.dataset.bujogo);}
-  if(b.dataset.buab){BU.ab=b.dataset.buab;st.set('bu_ab',BU.ab);return buPinta();}
+  if(!b){const c=e.target.closest('[data-busel]');if(c&&!e.target.closest('[data-yficha]')){BU.sel=c.dataset.busel;BU.selFora=!!c.dataset.bufora;$$('#v-bulk .sel').forEach(x=>x.classList.remove('sel'));c.classList.add('sel');buFoco();}return;}
+  if(b.dataset.bujogo){if(b.dataset.bujogo!==BU.jogo)buAbre(b.dataset.bujogo);return;}
+  if(b.dataset.buab){BU.ab=b.dataset.buab;return buPinta();}
+  if(b.dataset.bucor){const c=b.dataset.bucor;let v=BU.fl.cor;v=c==='C'?(v==='C'?'':'C'):(v.includes(c)?v.replace(c,''):v.replace('C','')+c);BU.fl.cor=[...'WUBRGC'].filter(x=>v.includes(x)).join('');buFlSalva();
+    $$('#v-bulk [data-bucor]').forEach(x=>x.setAttribute('aria-pressed',BU.fl.cor.includes(x.dataset.bucor)));buBusca();return;}
+  if(b.dataset.bumaisres){b.disabled=true;b.textContent='Carregando…';return buBusca(1);}
   if(b.dataset.buadd){const t=$('#bu-txt').value;if(!t.trim())return;const r=buLe(t,BU.jogo);
     if(!r.ok.length){$('#bu-msg').textContent='Não reconheci nenhuma carta.';return;}
     if(b.dataset.buadd==='troca'){if(!confirm('Trocar o bulk inteiro por essa lista?'))return;BU.d[BU.jogo]={};}
     const d=BU.d[BU.jogo];for(const[n,q]of r.ok)d[n]=(d[n]||0)+q;buMexeu();$('#bu-txt').value='';
     $('#bu-msg').textContent=`${r.ok.reduce((s,x)=>s+x[1],0)} carta(s) no bulk`+(r.ruim.length?` · não achei ${r.ruim.length}: ${r.ruim.slice(0,4).join(', ')}${r.ruim.length>4?'…':''}`:'');return;}
-  if(b.dataset.bulimpa){if(!confirm('Apagar todo o bulk de '+(BU.jogo==='m'?'Magic':'Yu-Gi-Oh!')+'?'))return;BU.d[BU.jogo]={};BU.sel='';buPinta();buMexeu();return;}
+  if(b.dataset.bulimpa){if(!confirm('Apagar todo o bulk de '+(BU.jogo==='m'?'Magic':'Yu-Gi-Oh!')+'?'))return;BU.d[BU.jogo]={};if(BU.jogo==='m')BU.d.me={};BU.sel='';buMexeu();return;}
+  if(b.dataset.buradd!=null){const x=BU.rs[+b.dataset.buradd];if(!x)return;o[x.n]=(o[x.n]||0)+1;BU.sel=x.n;BU.selFora=0;
+    if(BU.jogo==='m'&&BU.fl.pr&&x.s){BU.d.me=BU.d.me||{};BU.d.me[x.n]={id:x.id,img:x.img,img2:x.img2,s:x.s,sn:x.sn,cn:x.cn,r:x.r,p:x.p,foil:0};}buMexeu();return;}
   if(b.dataset.bumais){const n=b.dataset.bumais;o[n]=(o[n]||0)+1;BU.sel=n;buMexeu();return;}
-  if(b.dataset.bumenos){const n=b.dataset.bumenos;if(!o[n])return;if(--o[n]<=0)delete o[n];buMexeu();return;}
-  if(b.dataset.butudo){const n=b.dataset.butudo;if(!confirm(`Tirar todas as ${o[n]} cópias de ${buNomeV(n)} do bulk?`))return;delete o[n];buMexeu();return;}
-  if(b.dataset.budeck){const n=b.dataset.budeck;if(BU.jogo==='m')bAdd(n);else{const c=buYAcha(n);if(c)ygAdd(c[0],'');}bToast(`${buNomeV(n)} foi pro deck`);buFoco();return;}}
+  if(b.dataset.bumenos){const n=b.dataset.bumenos;if(!o[n])return;if(--o[n]<=0){delete o[n];if(BU.jogo==='m'&&BU.d.me)delete BU.d.me[n];}buMexeu();return;}
+  if(b.dataset.butudo){const n=b.dataset.butudo;if(!confirm(`Tirar todas as ${o[n]} cópias de ${buNomeV(n)} do bulk?`))return;delete o[n];if(BU.d.me)delete BU.d.me[n];buMexeu();return;}
+  if(b.dataset.bued){const n=b.dataset.bued;bEdAbre(n);BK.edp.bu=1;return;}
+  if(b.dataset.budeck)return buPoeDeck(b.dataset.budeck);}
 
 /* ---- aviso nas cartas do deck ---- */
 const buAv=(jogo,n,q,usa)=>`<div class="bu-av"><span>📦 No seu bulk${q>1?` (${q})`:''}</span><button type="button" data-burm="${jogo}" data-bun="${h(n)}" data-buusa="${usa}" title="Tira do bulk as cópias que este deck usa">Remover do bulk</button></div>`;
