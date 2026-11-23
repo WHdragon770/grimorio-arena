@@ -3768,7 +3768,7 @@ function bDoTexto(txt,nome){const its=parseLista(txt);let cmd='',cmd2='';const c
   return bNovo({nome:nome||'Deck importado',cmd,cmd2,c});}
 
 /* ---- lista de decks ---- */
-function pintaDecks(){const id=(location.hash.split('/')[1]||'');if(id&&BK.lst.some(d=>d.id===id)){BK.cur=id;bAtiva(bDeck(),1);$('#b-lista').hidden=true;$('#b-editor').hidden=false;pintaEditor();return;}
+function pintaDecks(){const id=(location.hash.split('/')[1]||'');if(id&&BK.lst.some(d=>d.id===id)){BK.cur=id;bAtiva(bDeck(),1);$('#b-lista').hidden=true;$('#b-editor').hidden=false;pintaEditor();if(BK.bqDeck!==id){const d=bDeck();if(!d.cmd)$('#b-modo').value='cmd';else if($('#b-modo').value==='cmd')$('#b-modo').value='ci';if(!$('#b-q').value.trim())bBuscar();}return;}
   BK.cur=null;$('#b-lista').hidden=false;$('#b-editor').hidden=true;
   const tile=(d,pub)=>{const ci=d.cmd?bInfo(d.cmd).ci:'',art=d.cmd&&BK.info[d.cmd]&&BK.info[d.cmd].art;
     return `<button class="b-tile" data-bopen="${h(d.id)}"${pub?' data-bpub="1"':''}><span class="b-art"${art?` style="background-image:url(${h(art)})"`:''}></span>
@@ -3875,7 +3875,7 @@ function bCfgAbre(){const d=bDeck();if(!d)return;const c=bCfg(d);let m=$('#b-cfg
   m.returnValue='';m.showModal();}
 
 /* ---- busca Scryfall ao vivo ---- */
-function bBuscar(){clearTimeout(BK.tm);const t=$('#b-q').value.trim(),modo=$('#b-modo').value,d=bDeck();if(t.length<2&&modo!=='cmd'){$('#b-res').innerHTML='';return;}
+function bBuscar(){clearTimeout(BK.tm);const t=$('#b-q').value.trim(),modo=$('#b-modo').value,d=bDeck();if(t.length===1&&modo!=='cmd'){$('#b-res').innerHTML='';return;}BK.bqDeck=BK.cur;
   BK.tm=setTimeout(async()=>{let q=t;const r0=t&&acharDB(t);if(r0&&norm(r0[0])!==norm(t))q=`!"${r0[0]}"`;
     if(modo==='cmd')q+=' is:commander';else{q+=' legal:commander';const ci=d&&bCI(d);if(ci&&modo!=='tudo')q+=` id<=${ci.toLowerCase()}`;else if(d&&d.cmd&&modo!=='tudo')q+=' id:c';}
     const tipo=$('#b-tipo').value;if(tipo)q+=' '+tipo;
@@ -4056,7 +4056,7 @@ function bSorteClique(e){const s=BK.sor,cb=e.target.closest('[data-spop]');if(cb
   if(b.dataset.saba){s.aba=b.dataset.saba;s.carta=s.carta2=null;bSortePinta();return s.aba==='busca'?bSqBusca():bSortear();}
   if(b.dataset.sesc){s.carta=s.res[+b.dataset.sesc];s.carta2=null;bSortePinta();const e=$('.b-sqc.on');if(e)e.scrollIntoView({block:'nearest'});return;}
   if(b.dataset.smais){s.mostra+=48;return bSqPinta();}
-  if(b.dataset.svazio){const d=bNovo();$('#b-sorte').close();location.hash='#decks/'+d.id;return setTimeout(()=>{$('#b-modo').value='cmd';$('#b-q').focus();},50);}
+  if(b.dataset.svazio){const d=bNovo();$('#b-sorte').close();location.hash='#decks/'+d.id;return setTimeout(()=>{$('#b-modo').value='cmd';$('#b-q').focus();bBuscar();},50);}
   if(b.dataset.scor){const k=b.dataset.scor;if(s.c.has(k))s.c.delete(k);else{if(k==='C')s.c.clear();else s.c.delete('C');s.c.add(k);}st.set('sorcor',[...s.c]);if(s.aba==='busca'){bSortePinta();return bSqBusca();}return bSortear();}
   if(b.dataset.sbg){s.bg=b.dataset.sbg==='1';st.set('sorbg',s.bg);s.carta=s.carta2=null;return bSortear();}
   if(b.dataset.smodo){s.modo=b.dataset.smodo;st.set('sormodo',s.modo);if(s.aba==='busca'){bSortePinta();return bSqBusca();}return bSortear();}
