@@ -847,6 +847,32 @@ kbd{display:inline-block;padding:0 5px;border:1px solid var(--linha);border-bott
 @media (max-width:640px){.x1-c{width:62px}.x1-mao .x1-c{width:78px}.x1-c.tap{margin:0 12px}.x1-pt b{font-size:1.1rem}}
 .x1-lado>*,.x1-barra>*{min-width:0;max-width:100%}.x1-barra{display:grid;grid-template-columns:minmax(0,1fr)}.x1-campo{overflow:hidden}
 @media (min-width:900px){.x1-barra{display:flex}}
+/* X1 com regras: faixa de turno, mana, P/R, anexos em leque, combate */
+#x1-fase{display:grid;gap:6px}
+.x1-fz{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 14px;background:var(--sup);border:1px solid var(--linha);border-radius:12px;border-left:4px solid var(--mau)}
+.x1-fz.eu{border-left-color:var(--ouro)}.x1-esp{flex:1}.x1-esp2{color:var(--suave);font-style:italic}
+.x1-fs{display:flex;flex-wrap:wrap;gap:4px;list-style:none;margin:0;padding:0}.x1-fs li{padding:3px 9px;border-radius:999px;background:var(--sup2);color:var(--fraco);font-size:.78rem}
+.x1-fs li.ja{opacity:.55}.x1-fs li.on{background:var(--ouro);color:var(--sobre-ouro);font-weight:700}
+.x1-dica{margin:0;padding:6px 14px;color:var(--suave);font-size:.88rem;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.x1-mag{cursor:pointer;padding:3px 10px;border-radius:999px;background:var(--sup2)}.x1-ruim{color:var(--mau)}
+.x1-pool{display:inline-flex;gap:4px;align-items:center;background:var(--sup2);border-radius:10px;padding:4px 8px;font-size:.85rem}.x1-pool small{color:var(--fraco);font-size:.7rem;margin-right:2px}
+.x1-pool img{width:18px;height:18px;vertical-align:middle}.x1-pool button{min-height:24px;width:24px;padding:0;border-radius:6px;font-size:.7rem}
+#x1-menu img,#x1-log img{width:15px;height:15px;vertical-align:-2px}
+.x1-ptb{position:absolute;bottom:4px;right:4px;background:rgb(0 0 0/.78);color:#fff;border-radius:6px;padding:1px 6px;font-size:.8rem}.x1-ptb.mod{color:#7fe08a}.x1-ptb.fer{box-shadow:0 0 0 2px var(--mau)}
+.x1-sk{position:absolute;top:4px;left:4px;font-style:normal;font-size:.85rem;filter:drop-shadow(0 1px 2px #000)}
+.x1-kd{position:absolute;left:3px;right:3px;bottom:26px;background:rgb(0 0 0/.7);color:#ffe9a8;border-radius:4px;font-size:.62rem;padding:1px 3px;text-align:center}
+.x1-mk{position:absolute;top:26px;right:3px;display:grid;gap:2px;justify-items:end}.x1-mk i{font-style:normal;background:#4b6bff;color:#fff;border-radius:999px;padding:0 6px;font-size:.66rem}
+.x1-st{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-style:normal;background:rgb(0 0 0/.75);color:#fff;border-radius:6px;padding:1px 6px;font-size:.7rem;max-width:90%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.x1-solto{position:absolute;top:4px;left:4px;font-style:normal;background:rgb(0 0 0/.7);color:#ccc;border-radius:4px;padding:0 4px;font-size:.62rem}
+.x1-c.atk img,.x1-c.atk .x1-tok{outline:3px solid var(--mau)}.x1-c.bl img,.x1-c.bl .x1-tok{outline:3px solid #4b9bff}.x1-c.pz{filter:grayscale(.6)}
+.x1-tok.art{border-style:solid;background:linear-gradient(160deg,var(--sup2),var(--bg))}.x1-tok{align-content:center;gap:2px}.x1-tok small{color:var(--fraco);font-size:.6rem}
+.x1-pil{position:relative;display:grid;flex:none;padding-top:calc(var(--n)*16px);margin-left:calc(var(--n)*10px)}
+.x1-ax{position:absolute;top:calc(var(--j)*16px);left:calc((var(--j) + 1)*-10px);z-index:0}.x1-hs{position:relative;z-index:1}
+.x1-ax .x1-c img{filter:brightness(.85)}
+.x1-fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin:10px 0}
+.x1-fg button{display:grid;gap:2px;text-align:left;padding:8px 10px;min-height:0}.x1-fg small{color:var(--fraco);font-size:.72rem}
+.x1-fq{display:flex;gap:8px;align-items:center}.x1-fq input{width:80px}
+.x1-ff{display:grid;gap:8px;border-top:1px solid var(--linha);padding-top:10px}.x1-ff h4{margin:0}.x1-fk{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem}
 /* faixa de preço do deck (Meus decks) */
 .b-fx button{margin-top:6px;padding:3px 10px;font-size:.8rem;justify-self:start}
 .t-deckval{margin:8px 0}
@@ -2696,8 +2722,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.96;
-/* dólar ao vivo (AwesomeAPI); 5.96 = do dia da publicação, só se falhar */
+let COTA=5.98;
+/* dólar ao vivo (AwesomeAPI); 5.98 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5069,29 +5095,100 @@ async function ctClique(e){const b=e.target.closest('button');if(!b)return;
   ctSDK().then(()=>{firebase.initializeApp(GA_FB);CT.auth=firebase.auth();CT.db=firebase.firestore();CT.auth.getRedirectResult().catch(()=>{});
     CT.auth.onAuthStateChanged(ctMuda);if($('#ct-dlg')&&$('#ct-dlg').open)ctPinta('');}).catch(()=>{CT.estado='não carregou o login (sem internet?)';ctBotao();});})();
 
-// X1 online: mesa livre 1 contra 1 sincronizada pelo Firestore.
-// x1/{cod} {dono,jog:[uid],nomes,ts} · x1/{cod}/pub/{uid} mesa visível · x1/{cod}/priv/{uid} grimório+mão (só o dono lê) · x1/{cod}/log
+// X1 online: 1 contra 1 com regras (turno, fases, mana, terreno por turno, combate, anexos, marcadores, fichas) pelo Firestore.
+// x1/{cod} {dono,jog,nomes,ts, vez,turno,fase,ini,cb,golpe,mag} · pub/{uid} mesa visível · priv/{uid} grimório+mão (só o dono lê) · log
 (function(){if($('#v-x1'))return;const n=$('nav[aria-label="Áreas"]');if(n)n.insertAdjacentHTML('beforeend','<a href="#x1" data-aba="x1">X1 online</a>');
-  const m=$('main');if(m)m.insertAdjacentHTML('beforeend','<section id="v-x1" class="tira" hidden><div class="cab"><h2>X1 online</h2><p class="nota">Chame alguém pra um 1 contra 1, cada um com o próprio deck.</p></div><div id="x1"></div></section>');})();
+  const m=$('main');if(m)m.insertAdjacentHTML('beforeend','<section id="v-x1" class="tira" hidden><div class="cab"><h2>X1 online</h2><p class="nota">Chame alguém pra um 1 contra 1, cada um com o próprio deck. Turno, mana e combate seguem as regras.</p></div><div id="x1"></div></section>');})();
 const X={cod:'',sala:null,eu:null,op:null,log:[],un:[],tm:null,lst:null,vt:{}};
 const xUid=()=>CT.u&&CT.u.uid;
 const xRef=()=>CT.db.collection('x1').doc(X.cod);
+const xId=()=>Math.random().toString(36).slice(2,10);
 const xEmb=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 const xImg=(n,e)=>(e&&e.img)||(typeof scryUrl==='function'&&scryUrl(n))||'https://api.scryfall.com/cards/named?format=image&version=normal&exact='+encodeURIComponent(n.split(' // ')[0]);
-function xCarta(n,e){const r=acharDB(n);return {k:Math.random().toString(36).slice(2,10),n,img:xImg(n,e),img2:(e&&e.img2)||(/ \/\/ /.test(n)?'https://api.scryfall.com/cards/named?format=image&version=normal&face=back&exact='+encodeURIComponent(n.split(' // ')[0]):''),ter:r&&/Land/.test(r[3]||'')?1:0,tap:0,cnt:0,face:0,tok:0,cmd:0};}
+function xCarta(n,e){const r=acharDB(n);return {k:xId(),n,img:xImg(n,e),img2:(e&&e.img2)||(/ \/\/ /.test(n)?'https://api.scryfall.com/cards/named?format=image&version=normal&face=back&exact='+encodeURIComponent(n.split(' // ')[0]):''),ter:r&&/Land/.test(r[3]||'')?1:0,tap:0,cnt:0,face:0,tok:0,cmd:0};}
 function xMonta(d){const cs=[];for(const [n,q] of d.c){const l=d.edv&&d.edv[n];for(let i=0;i<q;i++)cs.push(xCarta(n,(l&&l[i])||(d.ed&&d.ed[n])));}
   return {bib:xEmb(cs),cmd:[d.cmd,d.cmd2].filter(Boolean).map(n=>Object.assign(xCarta(n,d.ed&&d.ed[n]),{cmd:1}))};}
 const xLimpo=o=>JSON.parse(JSON.stringify(o));
+const xAv=t=>{bToast(t);clearTimeout(bToast.t);bToast.t=setTimeout(()=>{const e=$('#b-toast');if(e)e.className='';},3800);};
+const xSala=o=>xRef().update(o).catch(er=>xAv('Não sincronizou a mesa ('+(er.code||'erro')+')'));
+const xPool0=()=>({W:0,U:0,B:0,R:0,G:0,C:0});
+const xTotP=p=>Object.values(p||{}).reduce((a,b)=>a+(b||0),0);
+const xSym=s=>String(s||'').replace(/\{([^}]+)\}/g,(m,v)=>typeof SV==='function'?SV(v):m);
+/* tira tudo que é "de mesa" quando a carta sai do campo; chave nova solta anexos antigos */
+const xReset=c=>Object.assign(c,{k:xId(),tap:0,cnt:0,face:0,sk:0,atk:0,bl:'',an:'',dn:0,tp:0,tt:0,mk:null,kt:null});
+
+/* ---------- leitura da carta (custo, tipo, P/T, palavras-chave, mana, equipar, o que o anexo dá) ---------- */
+const FASES=['Início','Principal 1','Combate','Principal 2','Final'];
+const KWS=['flying','reach','vigilance','haste','deathtouch','lifelink','trample','first strike','double strike','menace','defender','indestructible','hexproof','flash'];
+const KPT={flying:'voar',reach:'alcance',vigilance:'vigilância',haste:'ímpeto',deathtouch:'toque mortífero',lifelink:'vínculo com a vida',trample:'atropelar','first strike':'iniciativa','double strike':'golpe duplo',menace:'ameaçar',defender:'defensor',indestructible:'indestrutível',hexproof:'resistência a magia',flash:'lampejo'};
+const BAS={Plains:'W',Island:'U',Swamp:'B',Mountain:'R',Forest:'G'};
+function xKwTx(tx){const s=new Set();for(let l of String(tx||'').split('\n')){l=l.replace(/\([^)]*\)/g,'').trim().toLowerCase().replace(/\.$/,'');if(!l)continue;
+  const ps=l.split(/,\s*|\s+and\s+/).map(p=>p.trim()).filter(Boolean);if(ps.length&&ps.every(p=>KWS.includes(p)))ps.forEach(p=>s.add(p));}return s;}
+function xManaTx(tipo,tx){const o=[];
+  for(const l of String(tx||'').split('\n')){const i=l.indexOf(':');if(i<0)continue;const cu=l.slice(0,i),ef=l.slice(i+1);
+    if(!/\{T\}/.test(cu)||/\{[0-9WUBRGCXS]/.test(cu.replace(/\{T\}/g,''))||!/\bAdd\b/.test(ef))continue;
+    if(/any (one )?colou?r|any type|combination of colors/i.test(ef)){o.push('W','U','B','R','G');continue;}
+    for(const p of ef.split(/\.(\s|$)/)[0].split(/\s+or\s+|,\s*/)){const s=(p.match(/\{[WUBRGC]\}/g)||[]).map(x=>x[1]).join('');if(s)o.push(s);}}
+  if(!o.length)for(const b in BAS)if(new RegExp('\\b'+b+'\\b').test(tipo))o.push(BAS[b]);
+  return o.length?[...new Set(o)]:null;}
+const XI=new Map();
+function xInfo(c){
+  if(c.tok&&!c.cp)return {tok:1,cri:c.p!=null&&c.p!=='',land:0,art:!!c.art,perm:1,inst:0,custo:'',p:+c.p||0,t:+c.t||0,kws:new Set(c.kw||[]),mana:c.mana?['W','U','B','R','G']:null,sacMana:!!c.mana,eq:'',aura:0,da:null};
+  let o=XI.get(c.n);if(o)return o;const r=acharDB(c.n)||[];
+  const tipo=String(r[3]||'').split(' // ')[0],tx=String(r[6]||'').split('\n//\n')[0];
+  o={tipo,tx,custo:String(r[1]||'').split(' // ')[0],land:/\bLand\b/.test(tipo),cri:/\bCreature\b/.test(tipo),aura:/\bAura\b/.test(tipo),equip:/\bEquipment\b/.test(tipo),perm:!/\b(Instant|Sorcery)\b/.test(tipo)};
+  o.kws=xKwTx(tx);o.inst=/\bInstant\b/.test(tipo)||o.kws.has('flash');
+  o.p=parseInt(r[4]);o.t=parseInt(r[5]);if(isNaN(o.p))o.p=0;if(isNaN(o.t))o.t=0;
+  o.mana=xManaTx(tipo,tx);
+  const em=tx.match(/\bEquip(?:\s+[a-z ]+?)?\s*((?:\{[^}]+\})+)/);o.eq=em?em[1]:(o.equip?'{0}':'');
+  const dm=tx.match(/(?:Equipped|Enchanted) creature gets ([+-]\d+)\/([+-]\d+)/),kg=new Set();
+  const km=tx.match(/(?:Equipped|Enchanted) creature (?:gets [+-]\d+\/[+-]\d+ and )?(?:has|gains) ([a-z ,]+?)(?:\.|\n|$| as long| and (?:is|can))/);
+  if(km)km[1].split(/,\s*|\s+and\s+/).map(x=>x.trim()).forEach(x=>{if(KWS.includes(x))kg.add(x);});
+  o.da=(dm||kg.size)?{p:dm?+dm[1]:0,t:dm?+dm[2]:0,kw:[...kg]}:null;
+  o.pz=/Enchanted creature can't attack/.test(tx)?(/can't attack or block/.test(tx)?2:1):0;
+  const en=tx.match(/^Enchant (creature|land|artifact|permanent|planeswalker|enchantment)/im);o.enc=en?en[1].toLowerCase():'creature';
+  XI.set(c.n,o);return o;}
+function xCusto(s){const o={g:0,x:0,pips:[]};for(const m of String(s||'').matchAll(/\{([^}]+)\}/g)){const v=m[1].toUpperCase();
+  if(/^\d+$/.test(v))o.g+=+v;else if(v==='X')o.x++;else if(v==='S')o.g++;
+  else if(/^[WUBRGC]$/.test(v))o.pips.push({c:v});
+  else if(/^[WUBRG]\/P$/.test(v))o.pips.push({c:v[0],fy:1});
+  else if(/^2\/[WUBRG]$/.test(v))o.pips.push({c:v[2],dois:1});
+  else if(/^[WUBRGC]\/[WUBRG]$/.test(v))o.pips.push({c:v[0]+v[2]});}
+  return o;}
+/* tudo que está preso numa carta, dos dois lados da mesa */
+function xAnx(k){const l=[];for(const [cp,z] of [[(X.eu||{}).campo||[],'campo'],[(X.op||{}).campo||[],'opcampo']])for(const c of cp)if(c.an===k)l.push([c,z]);return l;}
+const xExiste=k=>((X.eu||{}).campo||[]).some(c=>c.k===k)||((X.op||{}).campo||[]).some(c=>c.k===k);
+function xPT(c){const i=xInfo(c);let p=i.p+(c.cnt||0)+(c.tp||0),t=i.t+(c.cnt||0)+(c.tt||0);const kw=new Set(i.kws);(c.kt||[]).forEach(x=>kw.add(x));let pz=0;
+  for(const [a] of xAnx(c.k)){const j=xInfo(a);if(j.da){p+=j.da.p;t+=j.da.t;j.da.kw.forEach(x=>kw.add(x));}if(j.pz)pz=Math.max(pz,j.pz);}
+  return {p,t,kw,pz,mod:p!==i.p||t!==i.t};}
+const xCri=c=>xInfo(c).cri;
+
+/* ---------- mana ---------- */
+function xFontes(e){const f=[];for(const c of e.campo){if(c.tap)continue;const i=xInfo(c);if(!i.mana||i.sacMana)continue;if(i.cri&&c.sk&&!xPT(c).kw.has('haste'))continue;f.push({c,op:i.mana,cri:i.cri?1:0,land:i.land?1:0});}
+  return f.sort((a,b)=>(a.cri-b.cri)||(b.land-a.land)||(a.op.length-b.op.length));}
+/* paga com a mana solta primeiro e vira o que faltar (terreno antes de pedra, criatura por último). Não sacrifica Tesouro sozinho. */
+function xPaga(e,cs,extra){const pool=Object.assign(xPool0(),e.pool),tap=[],us=new Set(),F=xFontes(e);let vida=0,g=cs.g+(extra||0);const falta=[];
+  const tira=cor=>{if(pool[cor]>0){pool[cor]--;return true;}return false;};
+  const usa=pred=>{for(const s of F){if(us.has(s.c.k))continue;const o=s.op.find(o=>[...o].some(pred));if(!o)continue;us.add(s.c.k);tap.push([s.c,o]);for(const y of o)pool[y]++;return true;}return false;};
+  for(const p of cs.pips.slice().sort((a,b)=>a.c.length-b.c.length)){const ok=()=>[...p.c].some(tira);
+    if(ok())continue;if(usa(y=>p.c.includes(y))&&ok())continue;if(p.fy){vida+=2;continue;}if(p.dois){g+=2;continue;}falta.push('{'+[...p.c].join('/')+'}');}
+  while(g>0){const k=['C','W','U','B','R','G'].filter(k=>pool[k]>0).sort((a,b)=>(a==='C'?-1:b==='C'?1:pool[b]-pool[a]))[0];
+    if(k){pool[k]--;g--;continue;}if(!usa(()=>true))break;}
+  if(g>0)falta.push(g+' genérica');
+  return falta.length?{ok:false,falta}:{ok:true,pool,tap,vida};}
+function xAplica(e,r){e.pool=r.pool;r.tap.forEach(([c])=>c.tap=1);if(r.vida)e.vida-=r.vida;
+  const n=r.tap.map(([c])=>c.n);return (n.length?'virou '+n.join(', '):'')+(r.vida?(n.length?' e ':'')+`pagou ${r.vida} de vida`:'');}
 
 /* ---------- sincronizar ---------- */
 function xSobe(){clearTimeout(X.tm);X.tm=setTimeout(()=>{const e=X.eu;if(!e||!X.cod)return;const me=xUid(),r=xRef();
-  r.collection('pub').doc(me).set(xLimpo({nome:e.nome,deck:e.deck,vida:e.vida,ven:e.ven,dc:e.dc,imp:e.imp,mull:e.mull,nb:e.bib.length,nm:e.mao.length,campo:e.campo,cem:e.cem,exi:e.exi,cmdz:e.cmdz,ts:Date.now()})).catch(er=>bToast('Não sincronizou ('+(er.code||'erro')+')'));
+  r.collection('pub').doc(me).set(xLimpo({nome:e.nome,deck:e.deck,vida:e.vida,ven:e.ven,dc:e.dc,imp:e.imp,mull:e.mull,nb:e.bib.length,nm:e.mao.length,campo:e.campo,cem:e.cem,exi:e.exi,cmdz:e.cmdz,pool:e.pool,ter:e.ter,tv:e.tv,tl:e.tl,gv:e.gv,fv:e.fv,ts:Date.now()})).catch(er=>xAv('Não sincronizou ('+(er.code||'erro')+')'));
   r.collection('priv').doc(me).set(xLimpo({bib:e.bib,mao:e.mao,ts:Date.now()})).catch(()=>{});},200);}
 function xLog(t){if(!X.cod)return;xRef().collection('log').add({uid:xUid(),nome:X.eu?X.eu.nome:ctNome(CT.u),t:String(t).slice(0,300),ts:Date.now()}).catch(()=>{});}
 function xSaiLocal(){X.un.forEach(f=>{try{f();}catch(e){}});X.un=[];X.cod='';X.sala=null;X.eu=null;X.op=null;X.log=[];}
+function xTudo(){xPintaFase();xPintaOp();xPintaEu();}
 function xOuve(){const r=xRef(),me=xUid();
-  X.un.push(r.onSnapshot(s=>{X.sala=s.data()||null;if(!X.eu)xPinta();else xPintaOp();}));
-  X.un.push(r.collection('pub').onSnapshot(q=>{X.op=null;q.forEach(d=>{if(d.id!==me)X.op=d.data();});xPintaOp();if(X.lst&&X.lst.z.startsWith('op'))xListaPinta();},()=>{}));
+  X.un.push(r.onSnapshot(s=>{X.sala=s.data()||null;if(!X.eu)return xPinta();xTurno();xTudo();}));
+  X.un.push(r.collection('pub').onSnapshot(q=>{X.op=null;q.forEach(d=>{if(d.id!==me)X.op=d.data();});if(xVarre())xSobe();xTudo();if(X.lst&&X.lst.z.startsWith('op'))xListaPinta();},()=>{}));
   X.un.push(r.collection('log').orderBy('ts','desc').limit(80).onSnapshot(q=>{X.log=q.docs.map(d=>d.data()).reverse();xPintaLog();},()=>{}));}
 async function xCria(){const cs='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<6;i++)c+=cs[Math.random()*cs.length|0];const me=xUid();
   try{await CT.db.collection('x1').doc(c).set({dono:me,jog:[me],nomes:{[me]:ctNome(CT.u)},ts:Date.now()});location.hash='#x1/'+c;}
@@ -5101,72 +5198,219 @@ async function xEntra(cod){xSaiLocal();X.cod=cod;xPinta('Entrando na sala '+cod+
     const d=s.data();if(!d.jog.includes(me)){if(d.jog.length>=2){X.cod='';return xPinta('A sala '+cod+' já tem 2 jogadores.');}
       await r.update({jog:firebase.firestore.FieldValue.arrayUnion(me),['nomes.'+me]:ctNome(CT.u)});}
     const [p,q]=await Promise.all([r.collection('priv').doc(me).get(),r.collection('pub').doc(me).get()]);
-    if(p.exists&&q.exists){const a=q.data(),b=p.data();X.eu={nome:a.nome,deck:a.deck,vida:a.vida,ven:a.ven||0,dc:a.dc||0,imp:a.imp||0,mull:a.mull||0,campo:a.campo||[],cem:a.cem||[],exi:a.exi||[],cmdz:a.cmdz||[],bib:b.bib||[],mao:b.mao||[]};}
+    if(p.exists&&q.exists){const a=q.data(),b=p.data();X.eu={nome:a.nome,deck:a.deck,vida:a.vida,ven:a.ven||0,dc:a.dc||0,imp:a.imp||0,mull:a.mull||0,campo:a.campo||[],cem:a.cem||[],exi:a.exi||[],cmdz:a.cmdz||[],bib:b.bib||[],mao:b.mao||[],
+      pool:Object.assign(xPool0(),a.pool),ter:a.ter||0,tv:a.tv||0,tl:a.tl||0,gv:a.gv||'',fv:a.fv||''};}
     if(X.cod!==cod)return;xOuve();xPinta();}
   catch(e){X.cod='';xPinta('Não deu pra entrar ('+(e.code||e)+')');}}
 function xComeca(){const d=BK.lst.find(x=>x.id===($('#x1-deck')||{}).value);if(!d)return;const m=xMonta(d);
-  X.eu={nome:ctNome(CT.u),deck:d.nome||d.cmd||'Deck',vida:40,ven:0,dc:0,imp:0,mull:0,bib:m.bib,mao:[],campo:[],cem:[],exi:[],cmdz:m.cmd};
+  X.eu={nome:ctNome(CT.u),deck:d.nome||d.cmd||'Deck',vida:40,ven:0,dc:0,imp:0,mull:0,bib:m.bib,mao:[],campo:[],cem:[],exi:[],cmdz:m.cmd,pool:xPool0(),ter:0,tv:0,tl:0,gv:'',fv:''};
   X.eu.mao=X.eu.bib.splice(0,7);xLog(`entrou com o deck ${X.eu.deck} (${m.bib.length+7+m.cmd.length} cartas) e comprou 7`);xSobe();xPinta();}
+
+/* ---------- turno: desvirar, comprar, esvaziar mana, limpar "até o fim do turno", receber o golpe ---------- */
+function xTurno(){const s=X.sala,e=X.eu,me=xUid();if(!s||!e)return;let mud=0;
+  const fv=(s.turno||0)+'.'+(s.fase||0);if(e.fv!==fv){e.fv=fv;if(xTotP(e.pool)){e.pool=xPool0();mud=1;}}
+  if(s.turno&&e.tl!==s.turno){e.tl=s.turno;for(const c of e.campo)if(c.tp||c.tt||c.dn||c.atk||c.bl||c.kt){c.tp=0;c.tt=0;c.dn=0;c.atk=0;c.bl='';c.kt=null;}mud=1;}
+  if(s.turno&&s.vez===me&&e.tv!==s.turno){e.tv=s.turno;e.ter=0;e.campo.forEach(c=>{c.tap=0;c.sk=0;});
+    const cp=s.turno!==1;let t='';
+    if(cp){if(e.bib.length){e.mao.push(e.bib.shift());t=' e comprou 1';}else t=' e não tinha carta pra comprar (grimório vazio = derrota)';}else t=' (quem começa não compra no 1º turno)';
+    xLog(`começou o turno ${s.turno}: desvirou tudo${t}`);if(!(s.fase>0))xSala({fase:1});mud=1;}
+  const g=s.golpe;if(g&&g.para===me&&e.gv!==g.id){e.gv=g.id;e.vida+=(g.vg||0)-(g.dano||0);e.dc+=g.cmd||0;
+    for(const c of e.campo.slice()){if((g.mortos||[]).includes(c.k)){e.campo.splice(e.campo.indexOf(c),1);if(!c.tok)e.cem.push(xReset(c));}else{if(g.dn&&g.dn[c.k])c.dn=(c.dn||0)+g.dn[c.k];c.bl='';}}
+    xVarre();mud=1;}
+  if(mud)xSobe();}
+/* anexo cuja carta saiu: aura vai pro cemitério, equipamento fica solto */
+function xVarre(){const e=X.eu;if(!e||!X.op)return 0;let mud=0;
+  for(const c of e.campo.slice()){if(!c.an||xExiste(c.an))continue;mud=1;
+    if(xInfo(c).aura&&!c.tok){e.campo.splice(e.campo.indexOf(c),1);e.cem.push(xReset(c));xLog(c.n+' foi pro cemitério (o que ela encantava saiu do campo)');}else c.an='';}
+  return mud;}
+const xVez=()=>X.sala&&X.sala.turno&&X.sala.vez===xUid();
+const xNomeU=u=>u===xUid()?'você':((X.sala&&X.sala.nomes||{})[u]||'oponente');
+function xPode(i){const s=X.sala||{};if(!s.turno)return 'Sorteiem quem começa antes (botão 🎲 em cima da mesa).';
+  if(i.inst)return '';if(s.vez!==xUid())return 'Não é seu turno. Agora só instantânea ou carta com lampejo.';
+  if(s.cb)return 'Termine o combate antes.';if(s.fase!==1&&s.fase!==3)return `Só na fase principal (agora é ${FASES[s.fase||0]}).`;return '';}
+
+/* ---------- jogar carta ---------- */
+async function xConjura(z,k){const e=X.eu,c=e[z].find(q=>q.k===k);if(!c)return;const i=xInfo(c);
+  if(i.land&&!i.cri){const er=xPode({inst:0});if(er)return xAv(er);if(e.ter>=1)return xAv('Você já jogou um terreno neste turno.');
+    e[z].splice(e[z].indexOf(c),1);xReset(c);e.campo.push(c);e.ter++;xLog('jogou o terreno '+c.n);xSobe();return xPintaEu();}
+  const er=xPode(i);if(er)return xAv(er);
+  const cs=xCusto(i.custo);let x=0;if(cs.x){x=parseInt(prompt(`Valor de X pra ${c.n}?`,'1'),10);if(isNaN(x)||x<0)return;}
+  const imp=z==='cmdz'?e.imp*2:0,r=xPaga(e,cs,cs.x*x+imp);
+  if(!r.ok)return xAv(`Falta mana pra ${c.n}: ${r.falta.join(', ')}.`+(e.campo.some(q=>q.tok&&q.mana&&!q.tap)?' Dá pra sacrificar um Tesouro antes.':''));
+  let alvo='';if(i.aura){alvo=await xEscolhe(`Encantar o quê com ${c.n}?`,xAlvos(i.enc,''));if(!alvo)return;}
+  if(!e[z].includes(c))return;const pg=xAplica(e,r);e[z].splice(e[z].indexOf(c),1);xReset(c);
+  if(!i.perm){e.cem.push(c);xSala({mag:{de:xUid(),n:c.n,img:c.img,ts:Date.now()}});}else{c.sk=i.cri?1:0;c.an=alvo;e.campo.push(c);}
+  if(z==='cmdz')e.imp++;
+  const al=alvo?' em '+((xAchaK(alvo)||{}).n||'?'):'';
+  xLog(`conjurou ${c.n}${x?` (X=${x})`:''}${al}${imp?` com imposto +${imp}`:''}${pg?' · '+pg:''}`);xSobe();xPintaEu();}
+function xAchaK(k){return [...((X.eu||{}).campo||[]),...((X.op||{}).campo||[])].find(c=>c.k===k);}
+function xAlvos(tp,menos){const l=[];for(const [cp,lado] of [[(X.eu||{}).campo||[],'Seu'],[(X.op||{}).campo||[],'Oponente']])for(const c of cp){if(c.k===menos||c.an)continue;const i=xInfo(c);
+  const ok=tp==='creature'?i.cri:tp==='land'?i.land:tp==='artifact'?/Artifact/.test(i.tipo||'')||c.art:tp==='enchantment'?/Enchantment/.test(i.tipo||''):true;if(ok)l.push({c,lado});}return l;}
+function xEscolhe(tit,l){return new Promise(res=>{const dl=bDlg('x1-esc');let ok=0;
+  dl.innerHTML=`<div class="b-dlgtop"><h3>${h(tit)}</h3><button class="b-x" data-xfecha aria-label="Fechar">✕</button></div>
+   <div class="x1-lg">${l.map(({c,lado})=>`<div class="x1-li"><button class="x1-c" data-ek="${h(c.k)}">${xFace(c)}</button><small class="fraca">${lado} · ${h(c.n)}</small></div>`).join('')||'<p class="nota">Nada no campo serve de alvo.</p>'}</div>
+   <div class="b-edpe"><button data-xfecha>Cancelar</button></div>`;
+  dl.onclick=ev=>{const b=ev.target.closest('[data-ek]');if(b){ok=1;dl.close();res(b.dataset.ek);}else if(ev.target.closest('[data-xfecha]'))dl.close();};
+  dl.onclose=()=>{if(!ok)res('');};dl.showModal();});}
+async function xEquipa(k){const e=X.eu,c=e.campo.find(q=>q.k===k);if(!c)return;const i=xInfo(c);
+  const er=xPode({inst:0});if(er)return xAv('Equipar é velocidade de feitiço. '+er);
+  const l=e.campo.filter(q=>q.k!==k&&xCri(q)).map(q=>({c:q,lado:'Seu'}));if(!l.length)return xAv('Você não tem criatura pra equipar.');
+  const cs=xCusto(i.eq),r=xPaga(e,cs,0);if(!r.ok)return xAv(`Falta mana pra equipar: ${r.falta.join(', ')}.`);
+  const a=await xEscolhe(`Equipar ${c.n} em qual criatura?`,l);if(!a||!e.campo.includes(c))return;const pg=xAplica(e,r);c.an=a;
+  xLog(`equipou ${c.n} em ${(xAchaK(a)||{}).n} (${i.eq})${pg?' · '+pg:''}`);xSobe();xPintaEu();}
+
+/* ---------- combate ---------- */
+function xPodeAtk(c){const s=X.sala||{};if(!xVez()||s.fase!==2||s.cb)return false;const v=xPT(c);return xCri(c)&&!c.tap&&!c.atk&&!(c.sk&&!v.kw.has('haste'))&&!v.kw.has('defender')&&!v.pz;}
+function xBloqueia(c,ak){const a=((X.op||{}).campo||[]).find(q=>q.k===ak);if(!a)return;const va=xPT(a),vb=xPT(c);
+  if(va.kw.has('flying')&&!vb.kw.has('flying')&&!vb.kw.has('reach'))return xAv(a.n+' voa: só bloqueia quem tem voar ou alcance.');c.bl=ak;}
+function xDano(){const e=X.eu,o=X.op,s=X.sala,me=xUid();if(!o||!s)return;const para=s.jog.find(u=>u!==me);
+  const mk=c=>{const v=xPT(c);return {c,P:Math.max(0,v.p),T:v.t,kw:v.kw,dmg:c.dn||0,dt:0,morto:0};};
+  const A=e.campo.filter(c=>c.atk).map(mk),B=(o.campo||[]).filter(c=>c.bl&&A.some(a=>a.c.k===c.bl)).map(mk);
+  let dano=0,cmd=0,vgA=0,vgB=0;
+  for(const pas of [1,2]){const fere=x=>pas===1?(x.kw.has('first strike')||x.kw.has('double strike')):(!x.kw.has('first strike')||x.kw.has('double strike'));const hit=[];
+    for(const a of A){if(a.morto||!fere(a))continue;const bs=B.filter(b=>b.c.bl===a.c.k),vv=bs.filter(b=>!b.morto);let r=a.P,deu=0;
+      if(!bs.length){dano+=r;if(a.c.cmd)cmd+=r;deu=r;}
+      else{for(let j=0;j<vv.length&&r>0;j++){const b=vv[j],need=a.kw.has('deathtouch')?1:Math.max(0,b.T-b.dmg),d=(j===vv.length-1&&!a.kw.has('trample'))?r:Math.min(r,need);hit.push([b,d,a]);r-=d;deu+=d;}
+        if(r>0&&a.kw.has('trample')){dano+=r;if(a.c.cmd)cmd+=r;deu+=r;}}
+      if(a.kw.has('lifelink'))vgA+=deu;}
+    for(const b of B){if(b.morto||!fere(b))continue;const a=A.find(x=>x.c.k===b.c.bl);if(a&&!a.morto&&b.P>0){hit.push([a,b.P,b]);if(b.kw.has('lifelink'))vgB+=b.P;}}
+    for(const [t,n,f] of hit)if(n>0){t.dmg+=n;if(f.kw.has('deathtouch'))t.dt=1;}
+    for(const x of [...A,...B])if(!x.morto&&!x.kw.has('indestructible')&&(x.dmg>=x.T||(x.dt&&x.dmg>0)))x.morto=1;}
+  for(const a of A){a.c.atk=0;if(a.morto){e.campo.splice(e.campo.indexOf(a.c),1);if(!a.c.tok)e.cem.push(xReset(a.c));}else a.c.dn=a.dmg;}
+  e.vida+=vgA;const dn={};B.forEach(b=>{if(!b.morto&&b.dmg>(b.c.dn||0))dn[b.c.k]=b.dmg-(b.c.dn||0);});
+  xSala({cb:'',fase:3,golpe:{id:xId(),de:me,para,dano,cmd,vg:vgB,mortos:B.filter(b=>b.morto).map(b=>b.c.k),dn}});
+  const mo=[...A,...B].filter(x=>x.morto).map(x=>x.c.n);
+  xLog(`combate: ${o.nome} tomou ${dano}${cmd?` (${cmd} de comandante)`:''}${vgA?`, ganhou ${vgA} de vida`:''}${vgB?`, ${o.nome} ganhou ${vgB}`:''}${mo.length?' · morreram: '+mo.join(', '):''}`);
+  xVarre();xSobe();xTudo();}
+
+/* ---------- fichas ---------- */
+const FICH=[['Tesouro',null,null,[],1,1],['Pista',null,null,[],1],['Comida',null,null,[],1],['Soldado',1,1],['Goblin',1,1],['Zumbi',2,2],['Espírito',1,1,['flying']],['Elfo Guerreiro',1,1],['Saprolita',1,1],['Lobo',2,2],['Besta',3,3],['Anjo',4,4,['flying']],['Dragão',5,5,['flying']]];
+function xFicha(n,p,t,kw,art,mana,q){const e=X.eu;q=Math.max(1,Math.min(50,q|0||1));
+  for(let j=0;j<q;j++)e.campo.push({k:xId(),n:String(n).slice(0,40),img:'',img2:'',ter:0,tap:0,cnt:0,face:0,tok:1,cmd:0,p:p==null?null:p,t:t==null?null:t,kw:kw||[],art:art?1:0,mana:mana?1:0,sk:p==null?0:1});
+  xLog(`criou ${q>1?q+' fichas':'a ficha'} ${n}${p!=null?` ${p}/${t}`:''}${(kw||[]).length?' com '+kw.map(k=>KPT[k]).join(', '):''}`);xSobe();xPintaEu();}
+function xFichas(){const dl=bDlg('x1-fic');
+  dl.innerHTML=`<div class="b-dlgtop"><h3>Criar ficha</h3><button class="b-x" data-xfecha aria-label="Fechar">✕</button></div>
+   <label class="x1-fq">Quantas <input id="x1-fq" type="number" min="1" max="50" value="1"></label>
+   <div class="x1-fg">${FICH.map((f,j)=>`<button data-fi="${j}"><b>${f[0]}</b><small>${f[1]!=null?f[1]+'/'+f[2]:'artefato'}${(f[3]||[]).length?' · '+f[3].map(k=>KPT[k]).join(', '):''}</small></button>`).join('')}</div>
+   <form id="x1-ff" class="x1-ff"><h4>Outra ficha</h4><input id="x1-fn" placeholder="Nome (ex.: Cavaleiro)" maxlength="40" required><input id="x1-fpt" placeholder="P/R (ex.: 2/2) ou vazio" maxlength="7">
+    <div class="x1-fk">${['flying','reach','haste','vigilance','deathtouch','lifelink','trample','first strike','menace'].map(k=>`<label><input type="checkbox" value="${k}"> ${KPT[k]}</label>`).join('')}</div><button class="prim">Criar</button></form>`;
+  dl.onclick=ev=>{if(ev.target.closest('[data-xfecha]'))return dl.close();const b=ev.target.closest('[data-fi]');if(!b)return;const f=FICH[+b.dataset.fi];xFicha(f[0],f[1],f[2],f[3],f[4],f[5],+$('#x1-fq').value);dl.close();};
+  dl.onsubmit=ev=>{ev.preventDefault();const m=($('#x1-fpt').value||'').match(/(-?\d+)\s*\/\s*(-?\d+)/);xFicha($('#x1-fn').value.trim(),m?+m[1]:null,m?+m[2]:null,[...dl.querySelectorAll('.x1-fk input:checked')].map(i=>i.value),!m,0,+$('#x1-fq').value);dl.close();};
+  dl.showModal();}
 
 /* ---------- ações ---------- */
 function xFrase(z,op,n){const top=op==='topo'?'no topo':'no fundo';
-  if(op==='campo')return z==='mao'?'jogou '+n:z==='cmdz'?`conjurou o comandante ${n} (imposto agora +${X.eu.imp*2})`:z==='bib'?`pôs ${n} do grimório no campo`:`pôs ${n} no campo`;
+  if(op==='campo')return z==='mao'?`pôs ${n} no campo sem pagar`:z==='cmdz'?`pôs o comandante ${n} no campo sem pagar`:z==='bib'?`pôs ${n} do grimório no campo`:`pôs ${n} no campo`;
   if(op==='cem')return z==='mao'?'descartou '+n:z==='bib'?`pôs ${n} do grimório no cemitério`:`pôs ${n} no cemitério`;
   if(op==='exi')return 'exilou '+n;if(op==='mao')return z==='bib'?'pôs uma carta do grimório na mão':`voltou ${n} pra mão`;
   if(op==='topo'||op==='fundo')return z==='mao'||z==='bib'?`pôs uma carta ${top} do grimório`:`pôs ${n} ${top} do grimório`;
   if(op==='cmdz')return n+' voltou pra zona de comando';return '';}
-function xAcao(z,k,op){const e=X.eu;if(!e)return;const i=e[z].findIndex(x=>x.k===k);if(i<0)return;const c=e[z][i],n=c.n;
+async function xAcao(z,k,op){const e=X.eu;if(!e)return;const i=e[z]?e[z].findIndex(x=>x.k===k):-1;if(i<0)return;const c=e[z][i],n=c.n,s=X.sala||{};
   if(op==='txt')return abreFicha(n);if(op==='rev')return xLog('revelou '+n);
-  if(op==='tap')c.tap=c.tap?0:1;else if(op==='c+')c.cnt=(c.cnt||0)+1;else if(op==='c-')c.cnt=(c.cnt||0)-1;else if(op==='face')c.face=c.face?0:1;
+  if(op==='cast')return xConjura(z,k);if(op==='eq')return xEquipa(k);
+  if(op.startsWith('mn:')){const o=op.slice(3);c.tap=1;for(const y of o)e.pool[y]=(e.pool[y]||0)+1;xLog(`virou ${n}: +${o.split('').map(y=>'{'+y+'}').join('')}`);}
+  else if(op.startsWith('sac:')){const y=op.slice(4);e.campo.splice(i,1);e.pool[y]++;xLog(`sacrificou ${n}: +{${y}}`);}
+  else if(op==='pista'||op==='comida'){const r=xPaga(e,xCusto('{2}'),0);if(!r.ok)return xAv('Falta mana: '+r.falta.join(', '));const pg=xAplica(e,r);e.campo.splice(e.campo.indexOf(c),1);
+    if(op==='pista'){if(e.bib.length)e.mao.push(e.bib.shift());xLog(`sacrificou ${n} e comprou 1 · ${pg||'pagou com a mana solta'}`);}else{e.vida+=3;xLog(`sacrificou ${n} e ganhou 3 de vida · ${pg||'pagou com a mana solta'}`);}}
+  else if(op==='atk'){const v=xPT(c);c.atk=v.kw.has('vigilance')?1:2;if(c.atk===2)c.tap=1;}
+  else if(op==='atkx'){if(c.atk===2)c.tap=0;c.atk=0;}
+  else if(op.startsWith('bl:'))xBloqueia(c,op.slice(3));else if(op==='blx')c.bl='';
+  else if(op==='tap'){c.tap=c.tap?0:1;xLog(`${c.tap?'virou':'desvirou'} ${n}`);}
+  else if(op==='c+'||op==='c-'){c.cnt=(c.cnt||0)+(op==='c+'?1:-1);xLog(`${n}: ${op==='c+'?'+1/+1':'−1/−1'} (agora ${c.cnt>0?'+':''}${c.cnt})`);}
+  else if(op==='mk'){const t=(prompt('Que marcador? (ex.: lealdade, carga, veneno, tempo)','carga')||'').trim().toLowerCase().slice(0,20);if(!t)return;c.mk=c.mk||{};c.mk[t]=(c.mk[t]||0)+1;xLog(`${n}: marcador de ${t} (${c.mk[t]})`);}
+  else if(op.startsWith('mk+:')||op.startsWith('mk-:')){const t=op.slice(4);c.mk=c.mk||{};c.mk[t]=(c.mk[t]||0)+(op[2]==='+'?1:-1);if(c.mk[t]<=0)delete c.mk[t];xLog(`${n}: ${t} ${c.mk[t]||0}`);}
+  else if(op==='pump'){const m=(prompt('Até o fim do turno (ex.: +2/+2, -3/-3, +1/+0):','+2/+2')||'').match(/([+-]?\d+)\s*\/\s*([+-]?\d+)/);if(!m)return;c.tp=(c.tp||0)+ +m[1];c.tt=(c.tt||0)+ +m[2];xLog(`${n} ganhou ${m[1]}/${m[2]} até o fim do turno`);}
+  else if(op==='kwt'){const t=(prompt('Que habilidade até o fim do turno? ('+Object.values(KPT).slice(0,9).join(', ')+')','voar')||'').trim().toLowerCase();const kk=Object.keys(KPT).find(k=>KPT[k]===t||k===t);if(!kk)return xAv('Não conheço essa habilidade.');c.kt=[...(c.kt||[]),kk];xLog(`${n} ganhou ${KPT[kk]} até o fim do turno`);}
+  else if(op==='copia'){const q=Object.assign(xLimpo(c),{k:xId(),tok:1,cp:1,cmd:0,an:'',atk:0,bl:'',tap:0,sk:xCri(c)?1:0,cnt:0,mk:null,dn:0});e.campo.push(q);xLog('criou uma ficha cópia de '+n);}
+  else if(op==='anx'){const a=await xEscolhe(`Prender ${n} em quê?`,xAlvos('permanent',c.k));if(!a)return;c.an=a;xLog(`prendeu ${n} em ${(xAchaK(a)||{}).n}`);}
+  else if(op==='solta'){c.an='';xLog(`soltou ${n}`);}
+  else if(op==='face')c.face=c.face?0:1;
   else if(op==='del'){e[z].splice(i,1);xLog('removeu a ficha '+n);}
-  else{e[z].splice(i,1);if(c.tok){xLog(`a ficha ${n} sumiu`);}else{c.tap=0;c.cnt=0;c.face=0;if(op==='topo')e.bib.unshift(c);else if(op==='fundo')e.bib.push(c);else e[op].push(c);
+  else{e[z].splice(i,1);if(c.tok){xLog(`a ficha ${n} sumiu`);}else{xReset(c);if(op==='topo')e.bib.unshift(c);else if(op==='fundo')e.bib.push(c);else{if(op==='campo'&&xCri(c))c.sk=1;e[op].push(c);}
       if(z==='cmdz'&&op==='campo')e.imp++;if(z==='bib'&&X.lst&&X.lst.n)X.lst.n=Math.max(0,X.lst.n-1);xLog(xFrase(z,op,n));}}
-  xSobe();xPintaEu();if(X.lst)xListaPinta();}
+  xVarre();xSobe();xPintaEu();xPintaOp();if(X.lst)xListaPinta();}
 function xVida(campo,d){const e=X.eu;const de=X.vt[campo]?X.vt[campo].de:e[campo];e[campo]=Math.max(0,e[campo]+d);clearTimeout((X.vt[campo]||{}).tm);
   const rot={vida:'vida',ven:'veneno',dc:'dano de comandante recebido'}[campo];
   X.vt[campo]={de,tm:setTimeout(()=>{const a=e[campo];delete X.vt[campo];if(a!==de)xLog(`${rot}: ${de} → ${a}`);},1500)};xSobe();xPintaEu();}
-function xBotao(a){const e=X.eu;
+function xBotao(a){const e=X.eu,s=X.sala||{},me=xUid();
   if(a==='criar')return xCria();if(a==='comecar')return xComeca();
   if(a==='link'){const u=location.origin+location.pathname+'#x1/'+X.cod;navigator.clipboard.writeText(u).then(()=>bToast('Link copiado: '+u),()=>prompt('Copie o link:',u));return;}
   if(a==='sair'){location.hash='#x1';return;}
   if(a==='d20')return xLog('rolou um d20: '+(1+Math.floor(Math.random()*20)));if(a==='d6')return xLog('rolou um d6: '+(1+Math.floor(Math.random()*6)));
   if(a==='moeda')return xLog('jogou a moeda: '+(Math.random()<.5?'cara':'coroa'));
   if(a==='opcem'||a==='opexi'||a==='opcmdz')return xLista(a,a==='opcem'?'Cemitério do oponente':'Exílio do oponente');
+  if(a==='sorteia'){if(s.turno)return;const v=s.jog[Math.random()*s.jog.length|0];xSala({vez:v,turno:1,fase:0,ini:v,cb:'',golpe:null});return xLog(`sorteou quem começa: ${(s.nomes||{})[v]||'?'}`);}
   if(!e)return;
-  if(a==='comprar'){if(!e.bib.length)return bToast('O grimório acabou');e.mao.push(e.bib.shift());xLog('comprou uma carta');}
+  if(a==='fase'){if(!xVez()||s.cb)return;if((s.fase||0)>=4)return;return xSala({fase:(s.fase||0)+1});}
+  if(a==='passa'){if(!xVez())return;if(s.cb)return xAv('Termine o combate antes de passar.');if(e.mao.length>7)return xAv(`Você está com ${e.mao.length} cartas. Descarte até ficar com 7 (toque na carta › Descartar).`);
+    xLog('passou o turno');return xSala({vez:s.jog.find(u=>u!==me)||me,turno:(s.turno||0)+1,fase:0,cb:''});}
+  if(a==='atkok'){if(!xVez()||s.fase!==2||s.cb)return;const at=e.campo.filter(c=>c.atk);if(!at.length)return xSala({fase:3});
+    xLog(`atacou com ${at.map(c=>c.n+' '+xPT(c).p+'/'+xPT(c).t).join(', ')} (total ${at.reduce((t,c)=>t+Math.max(0,xPT(c).p),0)})`);xSala({cb:'blq'});return;}
+  if(a==='blqok'){if(xVez()||s.cb!=='blq')return;const at=((X.op||{}).campo||[]).filter(c=>c.atk);
+    for(const q of at)if(xPT(q).kw.has('menace')&&e.campo.filter(c=>c.bl===q.k).length===1)return xAv(q.n+' tem ameaçar: precisa de 2 ou mais bloqueadores, ou nenhum.');
+    const bs=e.campo.filter(c=>c.bl);xLog(bs.length?'bloqueou: '+bs.map(c=>`${c.n} → ${(at.find(q=>q.k===c.bl)||{}).n}`).join(', '):'não bloqueou');xSala({cb:'dano'});return;}
+  if(a==='dano'){if(!xVez()||s.cb!=='dano')return;return xDano();}
+  if(a==='livre')return;
+  if(a==='comprar'){if(!e.bib.length)return xAv('O grimório acabou');e.mao.push(e.bib.shift());xLog('comprou uma carta (efeito)');}
   else if(a==='emb'){xEmb(e.bib);xLog('embaralhou o grimório');}
-  else if(a==='desvira'){e.campo.forEach(c=>c.tap=0);xLog('desvirou tudo');}
-  else if(a==='mull'){if(!confirm('Mulligan: a mão volta pro grimório, embaralha e compra 7. Depois ponha no fundo uma carta por mulligan.'))return;
+  else if(a==='desvira'){e.campo.forEach(c=>c.tap=0);xLog('desvirou tudo (efeito)');}
+  else if(a==='limpa'){e.pool=xPool0();xLog('esvaziou a mana');}
+  else if(a==='mull'){if(s.turno)return xAv('Mulligan só antes do jogo começar.');if(!confirm('Mulligan: a mão volta pro grimório, embaralha e compra 7. Depois ponha no fundo uma carta por mulligan.'))return;
     e.bib.push(...e.mao);e.mao=[];xEmb(e.bib);e.mao=e.bib.splice(0,7);e.mull++;xLog(`fez mulligan nº ${e.mull}: comprou 7 e vai pôr ${e.mull} no fundo`);}
   else if(a==='topo'){const n=parseInt(prompt('Olhar quantas cartas do topo?','3'),10);if(!n||n<1)return;xLog(`está olhando as ${n} do topo do grimório`);return xLista('bib','Topo do grimório',n);}
   else if(a==='busca'){xLog('está procurando no grimório');return xLista('bib','Grimório inteiro',0,1);}
   else if(a==='cem')return xLista('cem','Seu cemitério');else if(a==='exi')return xLista('exi','Seu exílio');
-  else if(a==='ficha'){const n=(prompt('Nome da ficha (ex.: Goblin 1/1 vermelho)','')||'').trim();if(!n)return;e.campo.push({k:Math.random().toString(36).slice(2,10),n:n.slice(0,60),img:'',img2:'',ter:0,tap:0,cnt:0,face:0,tok:1,cmd:0});xLog('criou a ficha '+n);}
+  else if(a==='ficha')return xFichas();
   else if(a==='embfecha'){xEmb(e.bib);xLog('terminou de procurar e embaralhou o grimório');$('#x1-dlg').close();}
   else return;
   xSobe();xPintaEu();}
 
 /* ---------- desenhar ---------- */
-const xC=(c,z,op)=>`<button class="x1-c${c.tap?' tap':''}" data-xc="${z}" data-k="${h(c.k)}" title="${h(c.n)}">${c.tok?`<span class="x1-tok">${h(c.n)}</span>`:`<img loading="lazy" src="${h(c.face&&c.img2?c.img2:c.img)}" alt="${h(c.n)}">`}${c.cnt?`<b class="x1-cnt">${c.cnt>0?'+':''}${c.cnt}</b>`:''}</button>`;
-function xCampo(l,z,op){const t=l.filter(c=>c.ter),o=l.filter(c=>!c.ter);const f=(a,cl)=>`<div class="x1-fila${cl}">${a.map(c=>xC(c,z,op)).join('')}</div>`;
-  return op?f(t,' ter')+f(o,''):f(o,'')+f(t,' ter');}
+const xFace=c=>c.tok&&!c.cp?`<span class="x1-tok${c.art?' art':''}"><b>${h(c.n)}</b><small>${c.p!=null?'Ficha de criatura':'Ficha de artefato'}</small>${(c.kw||[]).length?`<small>${c.kw.map(k=>KPT[k]).join(', ')}</small>`:''}</span>`:`<img loading="lazy" src="${h(c.face&&c.img2?c.img2:c.img)}" alt="${h(c.n)}">`;
+function xC(c,z){const cp=z==='campo'||z==='opcampo';let b='',cl='';
+  if(cp){const i=xInfo(c);
+    if(i.cri){const v=xPT(c);b+=`<b class="x1-ptb${v.mod?' mod':''}${c.dn?' fer':''}" title="${[...v.kw].map(k=>KPT[k]).join(', ')}">${v.p}/${v.t-(c.dn||0)}</b>`;if(c.sk&&!v.kw.has('haste'))b+='<i class="x1-sk" title="Entrou neste turno (enjoo de invocação)">💤</i>';
+      const kd=[...v.kw].filter(k=>!i.kws.has(k));if(kd.length)b+=`<small class="x1-kd">${kd.map(k=>KPT[k]).join(' · ')}</small>`;if(v.pz)cl+=' pz';}
+    if(c.cnt)b+=`<b class="x1-cnt">${c.cnt>0?'+'+c.cnt+'/+'+c.cnt:c.cnt+'/'+c.cnt}</b>`;
+    const mk=Object.entries(c.mk||{});if(mk.length)b+=`<span class="x1-mk">${mk.map(([t,n])=>`<i>${h(t)} ${n}</i>`).join('')}</span>`;
+    if(c.atk)cl+=' atk';if(c.bl)cl+=' bl';if(c.atk)b+='<i class="x1-st">⚔</i>';if(c.bl)b+=`<i class="x1-st">🛡 ${h((xAchaK(c.bl)||{}).n||'')}</i>`;
+    if(i.equip&&!c.an)b+='<i class="x1-solto">solto</i>';}
+  return `<button class="x1-c${c.tap?' tap':''}${cl}" data-xc="${z}" data-k="${h(c.k)}" title="${h(c.n)}">${xFace(c)}${b}</button>`;}
+function xCampo(l,z,op){const top=l.filter(c=>!(c.an&&xExiste(c.an)));
+  const pil=c=>{const a=xAnx(c.k);if(!a.length)return xC(c,z);return `<div class="x1-pil" style="--n:${a.length}">${a.map(([q,zz],j)=>`<div class="x1-ax" style="--j:${j}">${xC(q,zz)}</div>`).join('')}<div class="x1-hs">${xC(c,z)}</div></div>`;};
+  const ter=top.filter(c=>{const i=xInfo(c);return i.land&&!i.cri;}),cri=top.filter(c=>xCri(c)),ou=top.filter(c=>!ter.includes(c)&&!cri.includes(c));
+  const f=(a,cl,t)=>a.length?`<div class="x1-fila${cl}" aria-label="${t}">${a.map(pil).join('')}</div>`:'';
+  const r=[f(cri,' cri','Criaturas'),f(ou,' ou','Outras permanentes'),f(ter,' ter','Terrenos')];return (op?r.reverse():r).join('')||'<p class="nota">Campo vazio.</p>';}
+function xPoolH(p,meu){const l=['W','U','B','R','G','C'].filter(k=>(p||{})[k]>0);return `<span class="x1-pool" title="Mana solta (some ao mudar de fase)"><small>Mana</small>${l.map(k=>`<span>${SV(k)}${p[k]>1?'×'+p[k]:''}</span>`).join('')||'<span class="fraca">0</span>'}${meu&&l.length?'<button data-x="limpa" title="Esvaziar">✕</button>':''}</span>`;}
 function xPlacar(e,meu){const v=(k,rot,cl)=>`<span class="x1-pt ${cl}" title="${rot}">${meu?`<button data-xv="${k}:-1" aria-label="Menos ${rot}">−</button>`:''}<b>${e[k]||0}</b>${meu?`<button data-xv="${k}:1" aria-label="Mais ${rot}">+</button>`:''}<small>${rot}</small></span>`;
-  return `<div class="x1-plac"><div class="x1-quem"><b>${h(e.nome)}</b><small>${h(e.deck||'')}</small></div>${v('vida','vida','vd')}${v('ven','veneno','vn')}${v('dc','dano cmd','dcm')}</div>`;}
+  return `<div class="x1-plac"><div class="x1-quem"><b>${h(e.nome)}</b><small>${h(e.deck||'')}</small></div>${v('vida','vida','vd')}${v('ven','veneno','vn')}${v('dc','dano cmd','dcm')}${xPoolH(e.pool,meu)}</div>`;}
+function xPintaFase(){const el=$('#x1-fase');if(!el)return;const s=X.sala||{},me=xUid(),eu=s.vez===me,f=s.fase||0,e=X.eu||{},o=X.op;
+  if(!s.turno){el.innerHTML=`<div class="x1-fz"><span>${X.eu&&o?'Os dois estão na mesa. Quem quiser, faz mulligan agora.':'Esperando os dois escolherem o deck.'}</span><span class="x1-esp"></span>${X.eu&&o?'<button class="prim" data-x="sorteia">🎲 Sortear quem começa</button>':''}</div>`;return;}
+  let ac='',dica='';
+  if(eu){if(s.cb==='blq'){ac='<span class="x1-esp2">Esperando os bloqueios…</span>';dica=`${h(xNomeU(s.jog.find(u=>u!==me)))} está escolhendo quem bloqueia.`;}
+    else if(s.cb==='dano'){ac='<button class="prim" data-x="dano">💥 Causar dano</button>';dica='Bloqueios prontos. Clique em Causar dano.';}
+    else if(f===2){ac='<button class="prim" data-x="atkok">⚔ Atacantes prontos</button>';dica='Toque nas suas criaturas e escolha ⚔ Atacar. Sem atacante, o botão pula o combate.';}
+    else{ac=(f<4?'<button data-x="fase">Próxima fase ▶</button>':'')+'<button class="prim" data-x="passa">Passar turno ⏭</button>';
+      if(f===1||f===3)dica=`Fase principal: ${e.ter?'já jogou terreno':'pode jogar 1 terreno'}, conjurar mágicas e equipar. Toque na carta.`;}}
+  else{if(s.cb==='blq'){const at=(o&&o.campo||[]).filter(c=>c.atk);ac='<button class="prim" data-x="blqok">🛡 Bloqueios prontos</button>';
+      dica=`<b>${h(o?o.nome:'')} atacou</b> com ${at.map(c=>h(c.n)+' '+xPT(c).p+'/'+xPT(c).t).join(', ')} (total ${at.reduce((t,c)=>t+Math.max(0,xPT(c).p),0)}). Toque nas suas criaturas desviradas pra bloquear.`;}
+    else dica='Vez do oponente. Você pode responder com instantânea ou lampejo.';}
+  const mg=s.mag&&Date.now()-s.mag.ts<120000?`<span class="x1-mag" data-xf="${h(s.mag.n)}">✨ ${h(xNomeU(s.mag.de))} conjurou <b>${h(s.mag.n)}</b></span>`:'';
+  el.innerHTML=`<div class="x1-fz${eu?' eu':''}"><b>Turno ${s.turno} · ${eu?'Sua vez':'vez de '+h(xNomeU(s.vez))}</b><ol class="x1-fs">${FASES.map((n,j)=>`<li class="${j===f?'on':j<f?'ja':''}">${n}</li>`).join('')}</ol><span class="x1-esp"></span>${ac}</div>${dica||mg?`<p class="x1-dica">${dica}${mg}</p>`:''}`;}
 function xPintaOp(){const el=$('#x1-op');if(!el)return;const o=X.op;
   if(!o){const ns=X.sala?Object.entries(X.sala.nomes||{}).filter(([u])=>u!==xUid()).map(([,n])=>n):[];
     el.innerHTML=`<p class="nota">${ns.length?h(ns[0])+' entrou e está escolhendo o deck…':`Esperando o outro jogador. Mande o código <b class="mono">${X.cod}</b> ou o link da sala.`}</p>`;return;}
   el.innerHTML=`<div class="x1-barra">${xPlacar(o)}<div class="x1-zonas"><span>✋ Mão <b>${o.nm}</b></span><span>📚 Grimório <b>${o.nb}</b></span><button data-x="opcem">🪦 Cemitério <b>${(o.cem||[]).length}</b></button><button data-x="opexi">✖ Exílio <b>${(o.exi||[]).length}</b></button></div></div>
-   ${(o.cmdz||[]).length?`<div class="x1-cmd"><small>Zona de comando · imposto +${(o.imp||0)*2}</small>${o.cmdz.map(c=>xC(c,'opcmdz',1)).join('')}</div>`:''}<div class="x1-campo">${xCampo(o.campo||[],'opcampo',1)}</div>`;}
+   ${(o.cmdz||[]).length?`<div class="x1-cmd"><small>Zona de comando · imposto +${(o.imp||0)*2}</small>${o.cmdz.map(c=>xC(c,'opcmdz')).join('')}</div>`:''}<div class="x1-campo">${xCampo(o.campo||[],'opcampo',1)}</div>`;}
 function xPintaLog(){const el=$('#x1-log');if(!el)return;const me=xUid();
-  el.innerHTML=X.log.map(l=>`<p class="${l.uid===me?'eu':''}"><b>${h(l.nome)}</b> ${h(l.t)}</p>`).join('')||'<p class="fraca">Nada ainda. Tudo que vocês fizerem aparece aqui.</p>';el.scrollTop=el.scrollHeight;}
-function xPintaEu(){const e=X.eu,el=$('#x1-eu');if(!el||!e)return;
+  el.innerHTML=X.log.map(l=>`<p class="${l.uid===me?'eu':''}"><b>${h(l.nome)}</b> ${xSym(h(l.t))}</p>`).join('')||'<p class="fraca">Nada ainda. Tudo que vocês fizerem aparece aqui.</p>';el.scrollTop=el.scrollHeight;}
+function xPintaEu(){const e=X.eu,el=$('#x1-eu');if(!el||!e)return;const s=X.sala||{};
   el.innerHTML=`<div class="x1-campo">${xCampo(e.campo,'campo')}</div>
    <div class="x1-barra">${xPlacar(e,1)}<div class="x1-zonas">
-    <button class="prim" data-x="comprar">📥 Comprar <b>${e.bib.length}</b></button><button data-x="desvira">↺ Desvirar tudo</button><button data-x="emb">🔀 Embaralhar</button>
-    <button data-x="topo">👁 Olhar topo</button><button data-x="busca">🔎 Procurar</button><button data-x="cem">🪦 Cemitério <b>${e.cem.length}</b></button><button data-x="exi">✖ Exílio <b>${e.exi.length}</b></button>
-    <button data-x="ficha">✚ Ficha</button><button data-x="mull">↻ Mulligan</button></div></div>
+    <button data-x="ficha">✚ Ficha</button><button data-x="cem">🪦 Cemitério <b>${e.cem.length}</b></button><button data-x="exi">✖ Exílio <b>${e.exi.length}</b></button>
+    <span>📚 Grimório <b>${e.bib.length}</b></span>${s.turno?'':'<button data-x="mull">↻ Mulligan</button>'}<button data-x="livre" data-xl>⚙ Efeitos</button></div></div>
    ${e.cmdz.length?`<div class="x1-cmd"><small>Zona de comando · imposto +${e.imp*2}</small>${e.cmdz.map(c=>xC(c,'cmdz')).join('')}</div>`:''}
-   <div class="x1-maot"><small>Sua mão (${e.mao.length}) · só você vê</small><div class="x1-mao">${e.mao.map(c=>xC(c,'mao')).join('')||'<p class="nota">Mão vazia</p>'}</div></div>`;}
+   <div class="x1-maot"><small>Sua mão (${e.mao.length}) · só você vê${e.mao.length>7?' · <b class="x1-ruim">passou de 7, descarte antes de passar o turno</b>':''}</small><div class="x1-mao">${e.mao.map(c=>xC(c,'mao')).join('')||'<p class="nota">Mão vazia</p>'}</div></div>`;}
 function xPinta(msg){const el=$('#x1');if(!el)return;
   if(!CT.auth){el.innerHTML='<p class="nota">Carregando a conta…</p>';return;}
   if(!CT.u){el.innerHTML='<div class="painel x1-ent"><p>Pra jogar online, os dois jogadores precisam estar com conta (é de graça).</p><button class="prim" data-ctabre>Entrar ou criar conta</button></div>';return;}
@@ -5174,25 +5418,38 @@ function xPinta(msg){const el=$('#x1');if(!el)return;
   if(!X.cod){el.innerHTML=`<div class="x1-ent">
      <div class="painel"><h3>Chamar alguém</h3><p class="nota">Cria a sala e manda o código ou o link pro outro jogador.</p><button class="prim" data-x="criar">Criar sala</button></div>
      <div class="painel"><h3>Entrar numa sala</h3><p class="nota">Recebeu um código? Digite aqui.</p><form id="x1-fent" class="linha"><input id="x1-cod" placeholder="Ex.: K7M2QX" maxlength="8" autocomplete="off" required><button class="prim">Entrar</button></form></div>
-     <p class="nota">A mesa é livre, como numa mesa de verdade: cada um compra, joga, vira e mexe as próprias cartas, e vocês aplicam as regras. Tudo aparece no registro pros dois. Sua mão e seu grimório ficam escondidos do outro.</p></div>${m}`;return;}
+     <p class="nota">Jogo com regras: turno e fases, só passa quem está na vez, conjurar paga a mana (vira os terrenos sozinho), 1 terreno por turno, criatura nova fica com enjoo, combate com bloqueio e dano automático, equipar e encantar, marcadores e fichas. Efeito de carta (comprar 2, destruir, buscar) você faz pelo ⚙ Efeitos e pelo menu da carta. Sua mão e seu grimório ficam escondidos do outro.</p></div>${m}`;return;}
   const topo=`<div class="x1-topo"><span>Sala <b class="mono">${X.cod}</b></span><button data-x="link">🔗 Copiar link</button><button data-x="sair">Sair da sala</button><span class="x1-esp"></span><button data-x="d20">🎲 d20</button><button data-x="d6">🎲 d6</button><button data-x="moeda">🪙 Moeda</button></div>`;
   if(!X.eu){const ds=BK.lst.filter(d=>d.cmd&&d.c&&d.c.length);
     el.innerHTML=topo+(X.cod&&X.un.length?`<div class="painel"><h3>Escolha seu deck</h3>${ds.length?`<div class="linha"><select id="x1-deck">${ds.map(d=>`<option value="${h(d.id)}">${h(d.nome||d.cmd)} · ${h(d.cmd)} (${bTotal(d)})</option>`).join('')}</select><button class="prim" data-x="comecar">Começar com este deck</button></div><p class="nota">O grimório é embaralhado e você já compra 7. Vida começa em 40.</p>`:'<p class="nota">Você ainda não tem deck com comandante. Monte um em <a href="#decks">Meus decks</a>.</p>'}</div><div id="x1-op" class="x1-lado x1-opl"></div>`:'')+m;xPintaOp();return;}
-  el.innerHTML=topo+`<div id="x1-op" class="x1-lado x1-opl"></div><div class="x1-meio"><div id="x1-log" aria-live="polite"></div><form id="x1-fchat" class="linha"><input id="x1-msg" placeholder="Mensagem pro outro jogador" maxlength="200" autocomplete="off"><button>Enviar</button></form></div><div id="x1-eu" class="x1-lado x1-eul"></div>${m}`;
-  xPintaOp();xPintaLog();xPintaEu();}
+  el.innerHTML=topo+`<div id="x1-fase"></div><div id="x1-op" class="x1-lado x1-opl"></div><div class="x1-meio"><div id="x1-log" aria-live="polite"></div><form id="x1-fchat" class="linha"><input id="x1-msg" placeholder="Mensagem pro outro jogador" maxlength="200" autocomplete="off"><button>Enviar</button></form></div><div id="x1-eu" class="x1-lado x1-eul"></div>${m}`;
+  xTurno();xTudo();xPintaLog();}
 
 /* ---------- menus e listas ---------- */
-function xMenu(z,k,x,y){const e=X.eu,c=e&&e[z]&&e[z].find(q=>q.k===k);if(!c)return;const o=[];
-  if(z==='mao')o.push(['campo','▶ Jogar no campo'],['rev','👁 Revelar'],['cem','🪦 Descartar'],['exi','✖ Exilar'],['topo','⬆ Topo do grimório'],['fundo','⬇ Fundo do grimório']);
-  if(z==='campo'){o.push(['tap',c.tap?'↺ Desvirar':'↻ Virar'],['c+','＋ Marcador'],['c-','－ Marcador']);if(c.img2)o.push(['face','⟲ Outro lado']);
+function xOpcoes(z,c){const e=X.eu,s=X.sala||{},o=[],i=xInfo(c),me=xUid();
+  if(z==='mao'){if(i.land&&!i.cri)o.push(['cast','▶ Jogar terreno']);else o.push(['cast',`▶ Conjurar ${i.custo?xSym(h(i.custo)):''}`]);
+    o.push(['campo','⤴ Pôr no campo sem pagar'],['rev','👁 Revelar'],['cem','🪦 Descartar'],['exi','✖ Exilar'],['topo','⬆ Topo do grimório'],['fundo','⬇ Fundo do grimório']);}
+  if(z==='cmdz')o.push(['cast',`▶ Conjurar ${xSym(h(i.custo))} + imposto ${e.imp*2}`],['campo','⤴ Pôr no campo sem pagar']);
+  if(z==='campo'){const v=i.cri?xPT(c):null;
+    if(!c.tap&&i.mana&&!i.sacMana&&!(i.cri&&c.sk&&!v.kw.has('haste')))i.mana.forEach(m=>o.push(['mn:'+m,'💧 Virar pra mana '+xSym(m.split('').map(y=>'{'+y+'}').join(''))]));
+    if(i.sacMana)['W','U','B','R','G'].forEach(y=>o.push(['sac:'+y,'💰 Sacrificar: +'+SV(y)]));
+    if(c.tok&&c.n==='Pista')o.push(['pista','🔍 Pagar '+SV('2')+' e sacrificar: compre 1']);if(c.tok&&c.n==='Comida')o.push(['comida','🍗 Pagar '+SV('2')+' e sacrificar: ganhe 3']);
+    if(xPodeAtk(c))o.push(['atk','⚔ Atacar']);if(c.atk&&!s.cb)o.push(['atkx','✋ Cancelar ataque']);
+    if(s.cb==='blq'&&!xVez()&&i.cri&&!c.tap&&v.pz<2){for(const a of ((X.op||{}).campo||[]).filter(q=>q.atk))if(c.bl!==a.k)o.push(['bl:'+a.k,'🛡 Bloquear '+h(a.n)]);if(c.bl)o.push(['blx','✋ Tirar bloqueio']);}
+    if(i.eq)o.push(['eq',`🗡 Equipar ${xSym(h(i.eq))}`]);
+    o.push(['tap',c.tap?'↺ Desvirar':(i.mana?'↻ Virar sem gerar mana':'↻ Virar')]);
+    if(i.cri)o.push(['c+','＋ Marcador +1/+1'],['c-','－ Marcador −1/−1'],['pump','✨ +X/+X até o fim do turno'],['kwt','🪽 Ganha habilidade até o fim do turno']);
+    for(const t of Object.keys(c.mk||{}))o.push(['mk+:'+t,`＋ ${h(t)}`],['mk-:'+t,`－ ${h(t)}`]);o.push(['mk','✚ Outro marcador (lealdade, carga…)']);
+    if(c.img2)o.push(['face','⟲ Outro lado']);o.push(['copia','⧉ Criar ficha cópia']);
+    o.push(c.an?['solta','⛓ Soltar']:['anx','⛓ Prender em… (efeito)']);
     if(c.tok)o.push(['del','🗑 Remover ficha']);else o.push(['mao','✋ Voltar pra mão'],['cem','🪦 Cemitério'],['exi','✖ Exílio'],['topo','⬆ Topo do grimório'],['fundo','⬇ Fundo do grimório']);if(c.cmd)o.push(['cmdz','👑 Zona de comando']);}
-  if(z==='cmdz')o.push(['campo',`▶ Conjurar (imposto +${e.imp*2})`]);
-  if(!c.tok)o.push(['txt','📖 Ver texto']);
-  let m=$('#x1-menu');if(!m){m=document.createElement('div');m.id='x1-menu';m.setAttribute('role','menu');document.body.appendChild(m);
-    m.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;m.hidden=true;xAcao(m.dataset.z,m.dataset.k,b.dataset.op);});
-    document.addEventListener('click',ev=>{if(!ev.target.closest('#x1-menu,[data-xc]'))m.hidden=true;});document.addEventListener('keydown',ev=>{if(ev.key==='Escape')m.hidden=true;});}
-  m.dataset.z=z;m.dataset.k=k;m.innerHTML=`<b>${h(c.n)}</b>`+o.map(([a,t])=>`<button role="menuitem" data-op="${a}">${t}</button>`).join('');
+  if(!c.tok||c.cp)o.push(['txt','📖 Ver texto']);return o;}
+function xMenuAbre(tit,o,z,k,x,y){let m=$('#x1-menu');if(!m){m=document.createElement('div');m.id='x1-menu';m.setAttribute('role','menu');document.body.appendChild(m);
+    m.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;m.hidden=true;if(m.dataset.z==='livre')xBotao(b.dataset.op);else xAcao(m.dataset.z,m.dataset.k,b.dataset.op);});
+    document.addEventListener('click',ev=>{if(!ev.target.closest('#x1-menu,[data-xc],[data-xl]'))m.hidden=true;});document.addEventListener('keydown',ev=>{if(ev.key==='Escape')m.hidden=true;});}
+  m.dataset.z=z;m.dataset.k=k||'';m.innerHTML=`<b>${tit}</b>`+o.map(([a,t])=>`<button role="menuitem" data-op="${a}">${t}</button>`).join('');
   m.hidden=false;const w=m.offsetWidth,hh=m.offsetHeight;m.style.left=Math.max(8,Math.min(x,innerWidth-w-8))+'px';m.style.top=Math.max(8,Math.min(y,innerHeight-hh-8))+'px';}
+function xMenu(z,k,x,y){const e=X.eu,c=e&&e[z]&&e[z].find(q=>q.k===k);if(!c)return;xMenuAbre(h(c.n),xOpcoes(z,c),z,k,x,y);}
 function xLista(z,tit,n,busca){X.lst={z,tit,n:n||0,busca:!!busca};const dl=bDlg('x1-dlg');dl.classList.add('x1-dlgl');
   if(!dl.dataset.ok){dl.dataset.ok=1;dl.addEventListener('close',()=>{X.lst=null;});dl.addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;
     if(b.dataset.xfecha!=null)return dl.close();if(b.dataset.x)return xBotao(b.dataset.x);
@@ -5205,17 +5462,21 @@ function xListaPinta(){const L=X.lst,dl=$('#x1-dlg');if(!L||!dl)return;const op=
   const lista=L.busca?[...l].sort((a,b)=>a.n.localeCompare(b.n)):l;
   dl.innerHTML=`<div class="b-dlgtop"><h3>${h(L.tit)} <small class="fraca">(${l.length})</small></h3><button class="b-x" data-xfecha aria-label="Fechar">✕</button></div>
    ${L.n?'<p class="nota">A primeira é a do topo. Topo/Fundo põe de volta na ordem que você clicar.</p>':''}
-   <div class="x1-lg">${lista.map(c=>`<div class="x1-li"><button class="x1-c" data-xd="${L.z}|${h(c.k)}|txt" title="Ver texto">${c.tok?`<span class="x1-tok">${h(c.n)}</span>`:`<img loading="lazy" src="${h(c.img)}" alt="${h(c.n)}">`}</button>
+   <div class="x1-lg">${lista.map(c=>`<div class="x1-li"><button class="x1-c" data-xd="${L.z}|${h(c.k)}|txt" title="Ver texto">${xFace(c)}</button>
      ${op?'':`<div class="x1-ds">${ds.map(([o,t])=>`<button data-xd="${L.z}|${h(c.k)}|${o}">${t}</button>`).join('')}${c.cmd&&L.z!=='bib'?`<button data-xd="${L.z}|${h(c.k)}|cmdz">Comando</button>`:''}</div>`}</div>`).join('')||'<p class="nota">Vazio.</p>'}</div>
    <div class="b-edpe">${L.busca?'<button class="prim" data-x="embfecha">🔀 Embaralhar e fechar</button>':''}<button data-xfecha>Fechar</button></div>`;}
 
 /* ---------- eventos ---------- */
 (function(){const el=$('#x1');if(!el)return;
-  el.addEventListener('click',ev=>{const c=ev.target.closest('[data-xc]');if(c){const z=c.dataset.xc;if(z.startsWith('op')){const q=xAcha(z,c.dataset.k);if(q&&!q.tok)abreFicha(q.n);return;}
+  el.addEventListener('click',ev=>{const c=ev.target.closest('[data-xc]');if(c){const z=c.dataset.xc;if(z.startsWith('op')){const q=xAcha(z,c.dataset.k);if(q&&(!q.tok||q.cp))abreFicha(q.n);return;}
       ev.stopPropagation();const r=c.getBoundingClientRect();xMenu(z,c.dataset.k,ev.clientX||r.left,ev.clientY||r.bottom);return;}
+    const f=ev.target.closest('[data-xf]');if(f)return abreFicha(f.dataset.xf);
     const v=ev.target.closest('[data-xv]');if(v){const [k,d]=v.dataset.xv.split(':');return xVida(k,+d);}
+    const l=ev.target.closest('[data-xl]');if(l){ev.stopPropagation();const r=l.getBoundingClientRect();
+      return xMenuAbre('Efeitos de carta',[['comprar','📥 Comprar 1'],['topo','👁 Olhar o topo'],['busca','🔎 Procurar no grimório'],['emb','🔀 Embaralhar'],['desvira','↺ Desvirar tudo'],['limpa','✕ Esvaziar a mana']],'livre','',r.left,r.bottom+4);}
     const b=ev.target.closest('[data-x]');if(b)xBotao(b.dataset.x);});
-  el.addEventListener('dblclick',ev=>{const c=ev.target.closest('[data-xc="campo"]');if(c){$('#x1-menu')&&($('#x1-menu').hidden=true);xAcao('campo',c.dataset.k,'tap');}});
+  el.addEventListener('dblclick',ev=>{const c=ev.target.closest('[data-xc="campo"]');if(!c)return;$('#x1-menu')&&($('#x1-menu').hidden=true);const q=X.eu&&X.eu.campo.find(x=>x.k===c.dataset.k);if(!q)return;
+    const i=xInfo(q);if(!q.tap&&i.mana&&!i.sacMana&&i.mana.length===1&&!(i.cri&&q.sk))return xAcao('campo',q.k,'mn:'+i.mana[0]);xAcao('campo',q.k,'tap');});
   el.addEventListener('submit',ev=>{ev.preventDefault();if(ev.target.id==='x1-fent'){const c=($('#x1-cod').value||'').toUpperCase().replace(/[^A-Z0-9]/g,'');if(c)location.hash='#x1/'+c;}
     if(ev.target.id==='x1-fchat'){const i=$('#x1-msg'),t=i.value.trim();if(t){xLog('💬 '+t);i.value='';}}});
   const r0=ctRepinta;ctRepinta=function(){r0();if(document.body.dataset.aba==='x1')pintaX1();};})();
