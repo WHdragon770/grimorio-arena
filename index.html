@@ -814,6 +814,7 @@ kbd{display:inline-block;padding:0 5px;border:1px solid var(--linha);border-bott
 .b-terrd{width:min(560px,calc(100vw - 32px))}.b-terrg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:10px 0}
 .b-terrg fieldset{border:1px solid var(--linha);border-radius:10px;padding:8px 12px;display:grid;gap:6px}.b-terrg legend{font-size:13px;padding:0 4px}
 @media (max-width:700px){.b-terrg{grid-template-columns:1fr}}
+.b-test{border:1px solid var(--linha);border-radius:10px;padding:8px 12px;margin:0 0 10px;display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}.b-test legend{font-size:13px;padding:0 4px;grid-column:1/-1}@media (max-width:700px){.b-test{grid-template-columns:1fr}}
 .ff-acoes{flex-wrap:wrap;gap:8px;margin:4px 0 8px}.ff-acoes button{font-size:13px}
 .ff-acoes a.ff-liga{font-size:13px;display:inline-flex;align-items:center;padding:6px 12px;border:1px solid var(--ouro,#e8b24a);border-radius:6px;color:var(--ouro,#e8b24a);text-decoration:none;font-weight:600}.ff-acoes a.ff-liga:hover{background:color-mix(in srgb,var(--ouro,#e8b24a) 15%,transparent)}
 /* X1 online */
@@ -2727,8 +2728,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.98;
-/* dólar ao vivo (AwesomeAPI); 5.98 = do dia da publicação, só se falhar */
+let COTA=5.99;
+/* dólar ao vivo (AwesomeAPI); 5.99 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -4467,24 +4468,27 @@ function bVarFix(d){if(!d.edv)return;for(const n in d.edv){const x=d.c.find(y=>y
 function bSorteia(P,q,foil){const a=[...P].sort(()=>Math.random()-.5),o=[];for(let k=0;k<q;k++){const c=a[k%a.length];
   const f=foil==='sim'?1:foil==='nao'?0:(c.pn!=null&&c.pf!=null?(Math.random()<.5?1:0):c.pf!=null&&c.pn==null?1:0);
   o.push({id:c.id,img:c.img,img2:'',art:c.art,s:c.s,sn:c.sn,cn:c.cn,r:c.r,a:c.a,p:(f?c.pf:c.pn)||c.pn||c.pf||0,foil:f});}return o;}
-async function bPool(n,o){const k=n+'|'+o.foil+'|'+o.full;BK.poolk=BK.poolk||{};if(BK.poolk[k])return BK.poolk[k];
-  let u='https://api.scryfall.com/cards/search?q='+encodeURIComponent(`!"${n}" game:paper`+(o.full?' is:fullart':'')+(o.foil==='sim'?' is:foil':o.foil==='nao'?' is:nonfoil':''))+'&unique=prints&order=released&dir=desc';const l=[];
+const B_EST={todos:'',antigo:' (frame:1993 OR frame:1997)',full:' is:fullart',sld:' set:sld',normal:' frame:2015 -is:fullart -set:sld -is:promo',neve:''};
+const bEst=o=>o.est||(o.full?'full':'todos');
+async function bPool(n,o){const e=bEst(o),k=n+'|'+o.foil+'|'+e;BK.poolk=BK.poolk||{};if(BK.poolk[k])return BK.poolk[k];
+  const nb=e==='neve'?(/^Snow-Covered /.test(n)?n:/^(Plains|Island|Swamp|Mountain|Forest)$/.test(n)?'Snow-Covered '+n:''):n;if(!nb)return [];
+  let u='https://api.scryfall.com/cards/search?q='+encodeURIComponent(`!"${nb}" game:paper`+B_EST[e]+(o.foil==='sim'?' is:foil':o.foil==='nao'?' is:nonfoil':''))+'&unique=prints&order=released&dir=desc';const l=[];
   for(let pg=0;u&&pg<2;pg++){const r=await scryFetch(u);if(!r.ok)break;const j=await r.json();
     for(const c of j.data||[]){const iu=c.image_uris||{},fi=c.finishes||['nonfoil'],pr=c.prices||{};if(!iu.normal)continue;
       l.push({id:c.id,img:iu.normal,art:iu.art_crop||'',s:c.set,sn:c.set_name,cn:c.collector_number,r:c.rarity,a:c.artist||'',pn:fi.includes('nonfoil')?+(pr.usd||0):null,pf:fi.includes('foil')?+(pr.usd_foil||0):null});}
     u=j.has_more?j.next_page:null;}
   BK.poolk[k]=l;BK.pool=BK.pool||{};BK.pool[n]=l;return l;}
 function bTerrenos(){const d=bDeck();if(!d)return;const bas=d.c.filter(x=>bBasico(x[0]));if(!bas.length)return bToast('Esse deck não tem terreno básico');
-  const o=BK.to||(BK.to={modo:'dif',foil:'nao',full:0});const dl=bDlg('b-terr');dl.classList.add('b-terrd');
+  const o=BK.to||(BK.to={modo:'dif',foil:'nao',est:'todos'});const dl=bDlg('b-terr');dl.classList.add('b-terrd');
   const r=(k,v,l)=>`<label class="pr-ck"><input type="radio" name="t-${k}" value="${v}"${o[k]===v?' checked':''}> ${l}</label>`;
   const pinta=(msg='')=>{const dd=bDeck();dl.innerHTML=`<div class="b-dlgtop"><h3>Edições dos terrenos</h3><button class="b-x" data-tx aria-label="Fechar">✕</button></div>
    <p class="nota">${bas.map(x=>`${x[1]} ${h(x[0])}${dd.edv&&dd.edv[x[0]]?' · <b>cada uma diferente</b>':dd.ed&&dd.ed[x[0]]?` · ${h((dd.ed[x[0]].s||'').toUpperCase())} ${h(dd.ed[x[0]].cn||'')}`:' · padrão'}`).join('<br>')}</p>
    <div class="b-terrg"><fieldset><legend>Edições</legend>${r('modo','dif','Cada cópia de uma edição diferente')}${r('modo','igual','Todas iguais (uma edição por tipo)')}</fieldset>
    <fieldset><legend>Foil</legend>${r('foil','nao','Sem foil')}${r('foil','sim','Só foil')}${r('foil','mix','Misturar')}</fieldset></div>
-   <label class="pr-ck"><input type="checkbox" data-tfull${o.full?' checked':''}> Só arte completa (full art)</label>
+   <fieldset class="b-test"><legend>Estilo</legend>${[['todos','Qualquer'],['normal','Só normal'],['antigo','Só antigo (moldura velha)'],['full','Só full art'],['sld','Só Secret Lair (SLD)'],['neve','Só de neve']].map(([v,l])=>`<label class="pr-ck"><input type="radio" name="t-est" value="${v}"${bEst(o)===v?' checked':''}> ${l}</label>`).join('')}</fieldset>
    <p class="nota" id="b-tmsg">${msg}</p>
    <div class="b-edpe"><button data-tpad>Voltar pra padrão</button><button data-tigual>Deixar todas iguais</button><span class="b-edesp"></span><button class="prim" data-tsorte>🎲 Aleatorizar</button></div>`;};
-  dl.onchange=e=>{const t=e.target;if(t.name&&t.name.startsWith('t-'))o[t.name.slice(2)]=t.value;if(t.dataset.tfull!=null)o.full=t.checked?1:0;};
+  dl.onchange=e=>{const t=e.target;if(t.name&&t.name.startsWith('t-'))o[t.name.slice(2)]=t.value;if(t.name==='t-est')o.full=0;};
   dl.onclick=async e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tx!=null)return dl.close();
     if(b.dataset.tpad!=null){bMexe(dd=>{for(const [n] of bas){if(dd.ed)delete dd.ed[n];if(dd.edv)delete dd.edv[n];}});pinta('Voltou tudo pra edição padrão.');return;}
     if(b.dataset.tigual!=null){bMexe(dd=>{for(const [n] of bas){const l=dd.edv&&dd.edv[n];if(l){if(l[0])dd.ed[n]=l[0];delete dd.edv[n];}}});pinta('Agora cada tipo de terreno usa uma edição só.');return;}
