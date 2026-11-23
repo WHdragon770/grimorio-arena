@@ -5120,7 +5120,7 @@ const xPool0=()=>({W:0,U:0,B:0,R:0,G:0,C:0});
 const xTotP=p=>Object.values(p||{}).reduce((a,b)=>a+(b||0),0);
 const xSym=s=>String(s||'').replace(/\{([^}]+)\}/g,(m,v)=>typeof SV==='function'?SV(v):m);
 /* tira tudo que é "de mesa" quando a carta sai do campo; chave nova solta anexos antigos */
-const xReset=c=>Object.assign(c,{k:xId(),tap:0,cnt:0,face:0,sk:0,atk:0,bl:'',an:'',dn:0,tp:0,tt:0,mk:null,kt:null,alv:'',lt:0});
+const xReset=c=>Object.assign(c,{k:xId(),tap:0,cnt:0,face:0,sk:0,atk:0,bl:'',an:'',dn:0,tp:0,tt:0,mk:null,kt:null,alv:'',lt:0,cvf:0});
 
 /* ---------- leitura da carta (custo, tipo, P/T, palavras-chave, mana, equipar, o que o anexo dá) ---------- */
 const FASES=['Início','Principal 1','Combate','Principal 2','Final'];
@@ -5139,9 +5139,10 @@ function xManaTx(tipo,tx){const o=[];
 const XI=new Map();
 function xInfo(c){
   if(c.tok&&!c.cp)return {tok:1,cri:c.p!=null&&c.p!=='',land:0,art:!!c.art,perm:1,inst:0,custo:'',p:+c.p||0,t:+c.t||0,kws:new Set(c.kw||[]),mana:c.mana?['W','U','B','R','G']:null,sacMana:!!c.mana,eq:'',aura:0,da:null};
-  let o=XI.get(c.n);if(o)return o;const r=acharDB(c.n)||[];
-  const tipo=String(r[3]||'').split(' // ')[0],tx=String(r[6]||'').split('\n//\n')[0];
-  o={tipo,tx,custo:String(r[1]||'').split(' // ')[0],land:/\bLand\b/.test(tipo),cri:/\bCreature\b/.test(tipo),aura:/\bAura\b/.test(tipo),equip:/\bEquipment\b/.test(tipo),perm:!/\b(Instant|Sorcery)\b/.test(tipo)};
+  const ck=c.n+(c.face?'|v':'');let o=XI.get(ck);if(o)return o;const r0=acharDB(c.n)||[],vs=c.face&&Array.isArray(r0[10])?r0[10]:null;
+  const r=vs?[vs[0],vs[1],r0[2],vs[2],vs[3],vs[4],vs[5]]:r0;
+  const tipo=String(r[3]||'').split(' // ')[vs&&/ \/\/ /.test(String(r[3]))?1:0],tx=String(r[6]||'').split('\n//\n')[vs&&/\n\/\/\n/.test(String(r[6]))?1:0];
+  o={tipo,tx,custo:String(r[1]||'').split(' // ')[0],land:/\bLand\b/.test(tipo),cri:/\bCreature\b/.test(tipo)||/^Living metal/im.test(tx),lm:!/\bCreature\b/.test(tipo)&&/^Living metal/im.test(tx),aura:/\bAura\b/.test(tipo),equip:/\bEquipment\b/.test(tipo),perm:!/\b(Instant|Sorcery)\b/.test(tipo)};
   o.kws=xKwTx(tx);o.inst=/\bInstant\b/.test(tipo)||o.kws.has('flash');
   o.p=parseInt(r[4]);o.t=parseInt(r[5]);if(isNaN(o.p))o.p=0;if(isNaN(o.t))o.t=0;
   o.mana=xManaTx(tipo,tx);
@@ -5152,7 +5153,7 @@ function xInfo(c){
   o.da=(dm||kg.size)?{p:dm?+dm[1]:0,t:dm?+dm[2]:0,kw:[...kg]}:null;
   o.pw=/\bPlaneswalker\b/.test(tipo);o.pz=/Enchanted creature can't attack/.test(tx)?(/can't attack or block/.test(tx)?2:1):0;
   const en=tx.match(/^Enchant (creature|land|artifact|permanent|planeswalker|enchantment)/im);o.enc=en?en[1].toLowerCase():'creature';
-  XI.set(c.n,o);return o;}
+  XI.set(ck,o);return o;}
 function xCusto(s){const o={g:0,x:0,pips:[]};for(const m of String(s||'').matchAll(/\{([^}]+)\}/g)){const v=m[1].toUpperCase();
   if(/^\d+$/.test(v))o.g+=+v;else if(v==='X')o.x++;else if(v==='S')o.g++;
   else if(/^[WUBRGC]$/.test(v))o.pips.push({c:v});
@@ -5315,7 +5316,7 @@ function xAlvosEf(al){const me=xUid(),ou=xOutro(),l=[];
   for(const [cp,lado] of [[(X.eu||{}).campo||[],'Seu'],[(X.op||{}).campo||[],'Oponente']])for(const c of cp)if(!(c.an&&xExiste(c.an)&&!xInfo(c).cri)||al==='target artifact'||al==='target enchantment'||al==='target nonland permanent'||al==='target permanent'||al==='target artifact or enchantment')if(ok(c,lado))l.push({c,lado});
   if(/any target|player/.test(al)){if(ou)l.push({jog:ou,nome:xNomeU(ou)});l.push({jog:me,nome:'Você'});}
   return l;}
-function xAlvoNome(t){t=String(t||'');if(t.startsWith('P:'))return xNomeU(t.slice(2));if(t.startsWith('S:'))return ((X.sala&&X.sala.pilha||[]).find(p=>p.id===t.slice(2))||{}).nm||'mágica';return (xAchaK(t)||{}).n||'?';}
+function xAlvoNome(t){t=String(t||'');if(t.startsWith('M:'))return (xAchaK(t.slice(2))||{}).n||'?';if(t.startsWith('P:'))return xNomeU(t.slice(2));if(t.startsWith('S:'))return ((X.sala&&X.sala.pilha||[]).find(p=>p.id===t.slice(2))||{}).nm||'mágica';return (xAchaK(t)||{}).n||'?';}
 async function xPedeAlvos(st,nome){const al=[];for(const s of st){if(!xPrecisaAlvo(s))continue;
     const l=s.op==='anula'?((X.sala&&X.sala.pilha)||[]).filter(p=>p.tipo==='mag').map(p=>({st:p})):xAlvosEf(s.al);
     if(!l.length){xAv(`${nome}: sem alvo válido (${s.op==='anula'?'nenhuma mágica na pilha':s.al}).`);return null;}
@@ -5326,11 +5327,11 @@ function xPassaPri(){const s=X.sala,P=(s&&s.pilha)||[];if(!P.length||s.pri!==xUi
 function xTemResposta(){const e=X.eu;if(!e)return false;if([...e.mao,...e.cmdz].some(c=>{const i=xInfo(c);return i.inst&&!i.land;}))return true;
   return e.campo.some(c=>xHabs(c).some(hb=>!hb.pw&&xHabOk(c,hb)));}
 const XH=new Map();
-function xHabs(c){if(c.tok&&!c.cp)return [];if(XH.has(c.n))return XH.get(c.n);const i=xInfo(c),l=[];
+function xHabs(c){if(c.tok&&!c.cp)return [];const hk=c.n+(c.face?'|v':'');if(XH.has(hk))return XH.get(hk);const i=xInfo(c),l=[];
   for(const ln of xNorm(i.tx,c.n).split('\n')){let m=ln.match(/^([+−-]\d+|0): (.+)$/);if(m&&i.pw){l.push({pw:1,cu:+m[1].replace('−','-'),rot:m[1],tx:m[2]});continue;}
     m=ln.match(/^((?:\{[^}]+\}|, |sacrifice this card)+): (.+)$/i);if(!m||/\bAdd\b/.test(m[2])||/^Equip/i.test(ln))continue;
     l.push({cu:m[1],tx:m[2],t:/\{T\}/.test(m[1]),sac:/sacrifice/i.test(m[1]),mana:m[1].replace(/\{T\}|sacrifice this card|, /gi,'')});}
-  XH.set(c.n,l);return l;}
+  XH.set(hk,l);return l;}
 function xHabOk(c,hb){if(hb.pw)return false;if(hb.t){if(c.tap)return false;if(xInfo(c).cri&&c.sk&&!xPT(c).kw.has('haste'))return false;}return true;}
 async function xAtiva(k,j){const e=X.eu,c=e.campo.find(q=>q.k===k);if(!c)return;const hb=xHabs(c)[j];if(!hb)return;const s=X.sala||{};
   if(hb.pw){const er=xPode({inst:0});if(er)return xAv(er);if(c.lt===s.turno)return xAv('Esse planeswalker já usou uma habilidade neste turno.');const L=(c.mk||{}).lealdade||0;if(L+hb.cu<0)return xAv(`Lealdade ${L} não paga ${hb.rot}.`);}
@@ -5373,7 +5374,7 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='anulada')e.cem.push(v.c);
   else if(v.op==='mill'){for(let q=0;q<v.n&&e.bib.length;q++)e.cem.push(e.bib.shift());}
   xVarre();}
-function xResolve(it,rest,nv){const e=X.eu;
+function xResolve(it,rest,nv){const e=X.eu;if(it.tipo==='atq'&&xAtqResolve(it)){xVarre();return rest;}
   if(it.tipo==='mag'){const c=it.c,i=xInfo(c);
     if(i.perm){if(it.an&&!xExiste(it.an)){e.cem.push(c);xLog(`${c.n} não resolveu (o alvo saiu do campo)`);return rest;}
       c.sk=i.cri?1:0;c.an=it.an||'';e.campo.push(c);xLog(`${c.n} resolveu e entrou no campo`);if(i.pw)xLeal(c);setTimeout(()=>xGatilho(c),450);return rest;}
@@ -5406,6 +5407,27 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
       case 'mill':if(s.quem==='op')ev({op:'mill',n});else for(let q=0;q<n&&e.bib.length;q++)e.cem.push(e.bib.shift());feito.push(`moeu ${n}`);break;}}
   xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);xVarre();return rest;}
 
+const xAtqTx=c=>{const m=xNorm(xInfo(c).tx,c.n).match(/^(?:[A-Za-z ]+ — )?Whenever this card attacks, ([^\n]+)$/im);return m?m[1]:'';};
+async function xAtkOk(at){const e=X.eu;
+  xLog(`atacou com ${at.map(c=>xNomeF(c)+' '+xPT(c).p+'/'+xPT(c).t).join(', ')} (total ${at.reduce((t,c)=>t+Math.max(0,xPT(c).p),0)})`);
+  for(const c of at){const tx=xAtqTx(c);if(!tx)continue;let al=[];
+    if(/put an artifact creature card from your hand onto the battlefield tapped and attacking/i.test(tx)){const l=e.mao.filter(q=>{const i=xInfo(q);return i.cri&&/Artifact/.test(i.tipo);}).map(q=>({c:q,lado:'Mão'}));
+      if(l.length){const k=await xEscolhe(`${c.n}: pôr uma criatura artefato da mão atacando? (feche pra não pôr)`,l);if(k)al=['M:'+k];}}
+    else{const st=xEfeitos(tx,c.n);const a2=st.length?await xPedeAlvos(st,c.n):[];if(a2)al=a2;}
+    xLog(`gatilho de ataque de ${xNomeF(c)} foi pra pilha`);xEmpilha({id:xId(),de:xUid(),tipo:'atq',tx,nm:xNomeF(c),img:c.img||'',k:c.k,al});}
+  X.sala.cb='blq';xSala({cb:'blq'});xSobe();xPintaEu();}
+function xAtqResolve(it){const e=X.eu,src=e.campo.find(q=>q.k===it.k),tx=it.tx,f=[];let feito=0;
+  if(/put an artifact creature card from your hand onto the battlefield tapped and attacking/i.test(tx)){const mk=((it.al||[])[0]||'').slice(2),c=e.mao.find(q=>q.k===mk);
+    if(c){e.mao.splice(e.mao.indexOf(c),1);Object.assign(c,{tap:1,atk:1,sk:1});e.campo.push(c);f.push(`pôs ${c.n} virada e atacando`);feito=1;}else f.push('não pôs criatura');
+    if(feito&&src&&/convert this card at end of combat/i.test(tx)){src.cvf=1;f.push('converte no fim do combate');}
+    xLog(`${it.nm}: ${f.join(' · ')}`);return 1;}
+  if(/attacking creatures you control gain (\w+) until end of turn/i.test(tx)){const kw=tx.match(/attacking creatures you control gain (\w+)/i)[1].toLowerCase(),at=e.campo.filter(q=>q.atk);
+    at.forEach(q=>q.kt=[...(q.kt||[]),kw]);f.push(`atacantes ganharam ${kw}`);const m=tx.match(/total power (\d+) or greater, convert this card/i);
+    if(m&&src){const tot=at.reduce((t,q)=>t+Math.max(0,xPT(q).p),0);if(tot>=+m[1]){xConv(src);f.push(`poder total ${tot} ≥ ${m[1]}: converteu`);}else f.push(`poder total ${tot} < ${m[1]}: não converteu`);}
+    xLog(`${it.nm}: ${f.join(' · ')}`);return 1;}
+  return 0;}
+function xConv(c){c.face=c.face?0:1;c.cvf=0;xLog(`${xNomeF(c)} converteu`);}
+const xNomeF=c=>String(c.n).split(' // ')[c.face?1:0]||c.n;
 /* ---------- combate ---------- */
 function xPodeAtk(c){const s=X.sala||{};if(!xVez()||s.fase!==2||s.cb)return false;const v=xPT(c);return xCri(c)&&!c.tap&&!c.atk&&!(c.sk&&!v.kw.has('haste'))&&!v.kw.has('defender')&&!v.pz;}
 function xBloqueia(c,ak){const a=((X.op||{}).campo||[]).find(q=>q.k===ak);if(!a)return;const va=xPT(a),vb=xPT(c);
@@ -5423,7 +5445,7 @@ function xDano(){const e=X.eu,o=X.op,s=X.sala,me=xUid();if(!o||!s)return;const p
     for(const b of B){if(b.morto||!fere(b))continue;const a=A.find(x=>x.c.k===b.c.bl);if(a&&!a.morto&&b.P>0){hit.push([a,b.P,b]);if(b.kw.has('lifelink'))vgB+=b.P;}}
     for(const [t,n,f] of hit)if(n>0){t.dmg+=n;if(f.kw.has('deathtouch'))t.dt=1;}
     for(const x of [...A,...B])if(!x.morto&&!x.kw.has('indestructible')&&(x.dmg>=x.T||(x.dt&&x.dmg>0)))x.morto=1;}
-  for(const a of A){a.c.atk=0;a.c.alv='';if(a.morto){e.campo.splice(e.campo.indexOf(a.c),1);if(!a.c.tok)e.cem.push(xReset(a.c));}else a.c.dn=a.dmg;}
+  for(const a of A){a.c.atk=0;a.c.alv='';if(a.c.cvf&&!a.morto)xConv(a.c);if(a.morto){e.campo.splice(e.campo.indexOf(a.c),1);if(!a.c.tok)e.cem.push(xReset(a.c));}else a.c.dn=a.dmg;}
   e.vida+=vgA;const dn={};B.forEach(b=>{if(!b.morto&&b.dmg>(b.c.dn||0))dn[b.c.k]=b.dmg-(b.c.dn||0);});
   xSala({cb:'',fase:3,golpe:{id:xId(),de:me,para,dano,cmd,vg:vgB,mortos:B.filter(b=>b.morto).map(b=>b.c.k),dn,pw}});
   const mo=[...A,...B].filter(x=>x.morto).map(x=>x.c.n);
@@ -5493,7 +5515,7 @@ function xBotao(a){const e=X.eu,s=X.sala||{},me=xUid();
   if(a==='passa'){if(!xVez())return;if(s.cb)return xAv('Termine o combate antes de passar.');if(e.mao.length>7)return xAv(`Você está com ${e.mao.length} cartas. Descarte até ficar com 7 (toque na carta › Descartar).`);
     xLog('passou o turno');return xSala({vez:s.jog.find(u=>u!==me)||me,turno:(s.turno||0)+1,fase:0,cb:''});}
   if(a==='atkok'){if(!xVez()||s.fase!==2||s.cb)return;const at=e.campo.filter(c=>c.atk);if(!at.length)return xSala({fase:3});
-    xLog(`atacou com ${at.map(c=>c.n+' '+xPT(c).p+'/'+xPT(c).t).join(', ')} (total ${at.reduce((t,c)=>t+Math.max(0,xPT(c).p),0)})`);xSala({cb:'blq'});return;}
+    return xAtkOk(at);}
   if(a==='blqok'){if(xVez()||s.cb!=='blq')return;const at=((X.op||{}).campo||[]).filter(c=>c.atk);
     for(const q of at)if(xPT(q).kw.has('menace')&&e.campo.filter(c=>c.bl===q.k).length===1)return xAv(q.n+' tem ameaçar: precisa de 2 ou mais bloqueadores, ou nenhum.');
     const bs=e.campo.filter(c=>c.bl);xLog(bs.length?'bloqueou: '+bs.map(c=>`${c.n} → ${(at.find(q=>q.k===c.bl)||{}).n}`).join(', '):'não bloqueou');xSala({cb:'dano'});return;}
@@ -5547,7 +5569,7 @@ function xPintaFase(){const el=$('#x1-fase');if(!el)return;const s=X.sala||{},me
       dica=`<b>${h(o?o.nome:'')} atacou</b> com ${at.map(c=>h(c.n)+' '+xPT(c).p+'/'+xPT(c).t).join(', ')} (total ${at.reduce((t,c)=>t+Math.max(0,xPT(c).p),0)}). Toque nas suas criaturas desviradas pra bloquear.`;}
     else dica='Vez do oponente. Você pode responder com instantânea ou lampejo.';}
   const mg=s.mag&&Date.now()-s.mag.ts<120000?`<span class="x1-mag" data-xf="${h(s.mag.n)}">✨ ${h(xNomeU(s.mag.de))} conjurou <b>${h(s.mag.n)}</b></span>`:'';
-  el.innerHTML=`<div class="x1-fz${eu?' eu':''}"><b>Turno ${s.turno} · ${eu?'Sua vez':'vez de '+h(xNomeU(s.vez))}</b><ol class="x1-fs">${FASES.map((n,j)=>`<li class="${j===f?'on':j<f?'ja':''}">${n}</li>`).join('')}</ol><span class="x1-esp"></span>${ac}</div>${P.length?`<div class="x1-pilha"><small>Pilha (o último resolve primeiro)</small>${P.map(p=>`<span class="x1-pi${p.de===me?' eu':''}" data-xf="${h(p.nm)}">${p.img?`<img src="${h(p.img)}" alt="">`:''}<b>${h(p.nm)}</b><small>${p.tipo==='mag'?'mágica':p.tipo==='etb'?'gatilho':'habilidade'} de ${h(xNomeU(p.de))}${(p.al||[]).length?' → '+p.al.map(t=>h(xAlvoNome(t))).join(', '):''}</small></span>`).join('')}</div>`:''}${dica||mg?`<p class="x1-dica">${dica}${mg}</p>`:''}`;}
+  el.innerHTML=`<div class="x1-fz${eu?' eu':''}"><b>Turno ${s.turno} · ${eu?'Sua vez':'vez de '+h(xNomeU(s.vez))}</b><ol class="x1-fs">${FASES.map((n,j)=>`<li class="${j===f?'on':j<f?'ja':''}">${n}</li>`).join('')}</ol><span class="x1-esp"></span>${ac}</div>${P.length?`<div class="x1-pilha"><small>Pilha (o último resolve primeiro)</small>${P.map(p=>`<span class="x1-pi${p.de===me?' eu':''}" data-xf="${h(p.nm)}">${p.img?`<img src="${h(p.img)}" alt="">`:''}<b>${h(p.nm)}</b><small>${p.tipo==='mag'?'mágica':p.tipo==='etb'||p.tipo==='atq'?'gatilho':'habilidade'} de ${h(xNomeU(p.de))}${(p.al||[]).length?' → '+p.al.map(t=>h(xAlvoNome(t))).join(', '):''}</small></span>`).join('')}</div>`:''}${dica||mg?`<p class="x1-dica">${dica}${mg}</p>`:''}`;}
 function xPintaOp(){const el=$('#x1-op');if(!el)return;const o=X.op;
   if(!o){const ns=X.sala?Object.entries(X.sala.nomes||{}).filter(([u])=>u!==xUid()).map(([,n])=>n):[];
     el.innerHTML=`<p class="nota">${ns.length?h(ns[0])+' entrou e está escolhendo o deck…':`Esperando o outro jogador. Mande o código <b class="mono">${X.cod}</b> ou o link da sala.`}</p>`;return;}
@@ -5586,7 +5608,7 @@ function xOpcoes(z,c){const e=X.eu,s=X.sala||{},o=[],i=xInfo(c),me=xUid();
     if(i.sacMana)['W','U','B','R','G'].forEach(y=>o.push(['sac:'+y,'💰 Sacrificar: +'+SV(y)]));
     if(c.tok&&c.n==='Pista')o.push(['pista','🔍 Pagar '+SV('2')+' e sacrificar: compre 1']);if(c.tok&&c.n==='Comida')o.push(['comida','🍗 Pagar '+SV('2')+' e sacrificar: ganhe 3']);
     if(xPodeAtk(c)){o.push(['atk','⚔ Atacar '+h(X.op?X.op.nome:'o jogador')]);for(const p of ((X.op||{}).campo||[]).filter(q=>xInfo(q).pw))o.push(['atk:'+p.k,'⚔ Atacar '+h(p.n)]);}if(c.atk&&!s.cb)o.push(['atkx','✋ Cancelar ataque']);
-    if(s.cb==='blq'&&!xVez()&&i.cri&&!c.tap&&v.pz<2){for(const a of ((X.op||{}).campo||[]).filter(q=>q.atk))if(c.bl!==a.k)o.push(['bl:'+a.k,'🛡 Bloquear '+h(a.n)]);if(c.bl)o.push(['blx','✋ Tirar bloqueio']);}
+    if(s.cb==='blq'&&!xVez()&&i.cri&&!i.lm&&!c.tap&&v.pz<2){for(const a of ((X.op||{}).campo||[]).filter(q=>q.atk))if(c.bl!==a.k)o.push(['bl:'+a.k,'🛡 Bloquear '+h(a.n)]);if(c.bl)o.push(['blx','✋ Tirar bloqueio']);}
     xHabs(c).forEach((hb,j)=>o.push(['hab:'+j,(hb.pw?'◆ '+h(hb.rot):'⚡ '+xSym(h(hb.cu)))+': '+h(hb.tx.length>60?hb.tx.slice(0,58)+'…':hb.tx)]));
     if(i.eq)o.push(['eq',`🗡 Equipar ${xSym(h(i.eq))}`]);
     o.push(['tap',c.tap?'↺ Desvirar':(i.mana?'↻ Virar sem gerar mana':'↻ Virar')]);
