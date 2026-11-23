@@ -6,3 +6,6 @@ Site: https://whdragon770.github.io/grimorio-arena/
 
 Gerado a partir de `~/grimorio_mtg/arena` (`python3 build.py`, `local.html` vira `index.html`).
 Fotos das cartas: Scryfall. Magic: The Gathering é marca da Wizards of the Coast; projeto de fã sem fins comerciais.
+
+## Créditos
+Efeitos das cartas no X1 convertidos dos scripts do [Forge](https://github.com/Card-Forge/forge) (GPL-3.0), em `forge.json`.
