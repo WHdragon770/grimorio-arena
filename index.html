@@ -1232,6 +1232,33 @@ body.x1-L #x1-eu .x1-mao{padding-top:calc(var(--hw)*2.1);margin-top:calc(var(--h
 body.x1-L .x1-mao .x1-c:hover,body.x1-L .x1-mao .x1-c:focus-visible{transform:translateY(calc(var(--hw)*-1.9)) scale(1.85)}
 body.x1-L #x1-eu .x1-mao{padding-top:calc(var(--hw)*3.2);margin-top:calc(var(--hw)*-3.2)}
 body.x1-L:not(.x1-P) #x1-eu,body.x1-L #x1-eu{overflow:visible;position:relative;z-index:3}
+/* mesão 4 jogadores: 3 painéis de oponente em cima, cada um com o próprio tamanho de carta (xMede) */
+.x1-ops{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-width:0}
+.x1-ops.n2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.x1-o{position:relative;min-width:0;cursor:pointer;transition:box-shadow .2s,opacity .2s}
+.x1-o.foco{box-shadow:0 0 0 2px var(--ouro)}.x1-o.vez{box-shadow:0 0 0 2px var(--ouro),0 0 14px color-mix(in srgb,var(--ouro) 55%,transparent)}
+.x1-o.def{box-shadow:0 0 0 2px var(--mau),0 0 12px color-mix(in srgb,var(--mau) 60%,transparent)}
+.x1-o.morto{opacity:.42;filter:grayscale(.8)}.x1-o.vago{display:grid;place-items:center;border-style:dashed;opacity:.7;cursor:default}
+.x1-o.vez::after{content:'na vez';position:absolute;top:4px;right:6px;font-size:10px;font-weight:700;color:var(--ouro);letter-spacing:.04em;text-transform:uppercase}
+body.x1-L #x1-op.x1-ops{display:grid;grid-template-areas:none;grid-template-rows:minmax(0,1fr);padding:0;gap:4px;min-height:0;height:100%;background:none;border:0}
+body.x1-L .x1-ops>.x1-o{display:grid;grid-template-areas:"barra barra" "campo cmd";grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto minmax(0,1fr);min-height:0;overflow:hidden}
+body.x1-L .x1-o>.x1-barra{grid-area:barra;display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;font-size:12px}
+body.x1-L .x1-o>.x1-barra .x1-zonas{display:flex;flex-wrap:wrap;gap:3px}body.x1-L .x1-o>.x1-barra .x1-zonas>*{padding:2px 6px;font-size:11px}
+body.x1-L .x1-o>.x1-campo{grid-area:campo;min-height:0;align-self:stretch;max-height:none;flex-wrap:wrap-reverse}
+body.x1-L .x1-o>.x1-cmd{grid-area:cmd;align-self:start}body.x1-L .x1-o>.x1-cmd small{display:none}
+body.x1-L .x1-o .x1-quem small{display:none}
+body.x1-4.x1-L:not(.x1-P) .x1-tab{grid-template-rows:minmax(0,1.3fr) minmax(0,1fr)}
+body.x1-4.x1-L.x1-P .x1-tab{grid-template-rows:minmax(0,1.15fr) auto minmax(0,1fr)}
+body.x1-L .x1-o>.x1-barra{display:flex;flex-wrap:nowrap;gap:6px;padding:2px 4px}body.x1-L .x1-o .x1-plac{flex:0 0 auto;gap:4px}
+body.x1-L .x1-o .x1-av{width:30px;height:30px}body.x1-L .x1-o .x1-zonas{display:flex!important;flex-wrap:wrap;gap:2px;min-width:0;grid-template-columns:none}
+body.x1-L .x1-o .x1-zonas>*{padding:1px 5px!important;font-size:10.5px!important;min-height:0!important;border-radius:6px}
+/* em pé: os outros viram fichinhas, o do foco aparece inteiro */
+body.x1-L.x1-P #x1-op.x1-ops{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto minmax(0,1fr)}
+body.x1-L.x1-P .x1-ops>.x1-o:not(.foco){grid-row:1;grid-template-areas:"barra";grid-template-columns:minmax(0,1fr);grid-template-rows:auto}
+body.x1-L.x1-P .x1-ops>.x1-o:not(.foco)>.x1-campo,body.x1-L.x1-P .x1-ops>.x1-o:not(.foco)>.x1-cmd,body.x1-L.x1-P .x1-ops>.x1-o:not(.foco) .x1-zonas,body.x1-L.x1-P .x1-ops>.x1-o:not(.foco) .x1-pool{display:none!important}
+body.x1-L.x1-P .x1-ops>.x1-o.foco{grid-row:2;grid-column:1/-1}
+body.x1-L.x1-P .x1-ops>.x1-o.vago{grid-row:1;padding:2px}
+body.x1-L .x1-o>.x1-campo{overflow:hidden}
 </style>
 <header class="topo"><div class="topo-in">
   <div class="marca"><img class="logo" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAA1PklEQVR42rW9aZRl11Xn+dvn3HvfEHNG5JwpZVqTrcmybFmjLQmPZYNNG6fKtClDu8CGBazV7loUDV1eshbVTQHL7VX0qv5QsMpQ5aoCJVNDmUZQlCywLdmSkKwhNeY8RWTG/MY7nLP7w71vjBeRmXZX5HoZ8d59w3377LOH//7vfYXL/Xn4YQNfgkfEA9xwz29MVGTiPpT7FX+Hen+NCLMC4/kLFADRwbeRobfNj+sljve/fugBHfGageN6ieP99/USx0GhbpAlET2K2qfV6xNZK/nmt1/75VoupocNj8AjPOIvR6xyOc85dOhRc/jwQw7gtrv/zR3eymfE+48K5qAxAaoeVQfqiy9xJcLf5Iujm7xev0/hyw8s/Py4IGIwYnJ18A7UH0fk695n//7vnv+lpwEOHXrUHj78kB884StegIcNxUrefM//9S5r7K+gfMLYEupi1KeqihcREVRA5PvTfL0Mzf9BhL+Z5ssVCr84oKqqooKqCMZIKNZGOJcg8CdO419/4rlffmZYhle0AMUKuhtvfDgKZnb8S0G+YGwYuLSpqDgRtbnAB7VIBPCXK3y9TLPz30P4w5ovW7+/5I+p6ojjqqLiELWBrYrP0gzxX5mP1/7FkSOPJB1ZXvYCdF5w0z3/+prABF+ztnJXltZVVb1B7Og3yE8sSx1BYLFW8F43MStXYvOvQPi6yW66IrMjG15vreBSj8scQWi3/HxVdSKYKBiTLGs/pWn2E4+//M+PbrYIZviB++9/ODh8+CF38z1fuTuQ6JtGwrvStJYCcinhGxH27pvEWqFej7Gmf4tfufDz53oUzTXPK2j+d+c2eN8P3P/+bL72zlfAGqG+1iYsGXbsndx6cQEjYgUkTeupteFdJgq/+d6b/4+7Dx9+yN1//8PB8De0w5r/l3/5C+6We798l5XK3yBscy7ORCTc3KbnGucdbJvzfOozN/GZT99FrRbzypEFKpUg/2KXEH5HOIOC035Z/f9idkTksmy+iIAq9fU2H/7ELfz8r7yPZrXGmy+fw2YhmOGdN3TOItb7NDNiJ60N//H+7Q8+/sR3v3jq0KFH7ZEjh3XEAjxsjhz5BX/ru3/7oLHR3yIy413iRCTYSvidbaQeZqczMpoceMtOPv3j78YY4amnTlKKgsJbjBYMqlubHf77hJrSixk2CF+9ksQpP/vPH+Szv/genn7xDf7ysSfJVjNIyxvC4ZHnLGK8d86ILRtjP3btjvf/8V88/rnlh3nYPMET2r8AcujQzxs4FJpK/a+sLV3nXNuJGHsp4YvmDsp7mBwzVCsJtVZKdazCx374VsrlgG/93VGiKBh4vRZma4PmbWrz9QqFL5dndjqL0XlVsUGSOOULX/oQP/qp2/n7J1/lL/7qSc4fO0MpmcSnfQq1yflJL2w1XjMXmvKEI7v3XbM/8/sXH9ihR448CjySL0DHQey65t5/FZYmPplljVTEBJcj/M5Je6+UQmH7rNBOYoIwxBjL+9//NjzKt791gmo1xHsdNAkjha+XEe1on82+nDh/i50hvWNGDM1GzC/86vv4+EO38/wLJ3jy2Zf53rMvY9qKTaZwmXQXamvl6O40432aRuH4/pouVL7++OcfO3ToJnvkyGG1HHrUHjn8kL/5vn9zqxX7e94lKoqVoffaTPgD4SfCzu0WrymZ90SlgDCMePCB61laqvPcs2epjkWoG6W1OkLz9YrNjnaed0nhj4h2AsP6apNP/+xdfPqn7+GNN8/z0qvHee65IyycOs9EOIVrjnWjO0EuKfw+e2ScT7019u7rd7//z/78bz+3cOjQIWsOFU83Lvs1YyOrqnrFwgeMQKuttJpCNbK4doPlpRXmFxZZXKzxP/+zB7jnPQdYX20TWDMYHfVFHkUstxFy6H9G4TN0cL/0fmv/8/N/G3fW4GNBYKitNPnAx27kp37uPs6fX+H0uQWOHTvF4vkFSsYSMEaWat/O9Zv7tY1nL6KqViKbOn6t8yx75MhhvfXuf/0OseGXfZaoGYqMLkf4HTPknDJRCdi7JySwiojHq6dcqTA+VuHuew7w1LePs7zYJIwMqptpfv8j+gM43C3MQt8Raw3Neszb3r6LX/1XH6PdTjl9doEXXnyNk8dOUFtcZSwYx2YzNGoea4fNjmzy/kPfQTDeZ96KveHAzgf//L88/tvnTPEOP21NSdDBHPZyhd//wStrntBElKMA41Oa6+ucO3uO+QvLTE1V+N8e/iDlakCWeYxsFH7XQXd3x2C0dGXRztDu6nt9Z3eIyR3utrkKv/RrH8Fa4dz8RY4ePcnShYu0anVCCZidnCVtGUR0IGobDpdlxL4d/A74wJREsD8NYG+8/+Fx4yq/jeoUOBkFL1xS+MVxY6DVdlx7YILJKYO1EATFZvUexXL99buYma3wxN++TqlkKTL7SwtXCj/Tdxu4T//9XBJb74zckYpC5hy/9C8/wk237OPkqQXePHqC+fMLrCwuUV+pUzYVquEs5860sWaLcBoZrfkD6YEWZ+h27Z+993dMEG+7z0i4XzXVH0T4uSNWksRzYdExViphjWBR1CWsr64wP3+eM2eX+MhHb+JHD93C2noLY2W08KXPm36/8MKoxelz+tZAvdbmx//pndz7wPWcPLXAqVOnWV1eplWvEbeaiFdmp2Zo1y1Zmg1ETBvNjm4t/OJMvKZqJdhfCsbuMygP5pBybn6+X+Hn6X+u8W8er+EySxSGWCOId+BSWrUaFxYWWFyq8TM/ex8337qbZj3pQRbS0fRBt3rFmi8DCceGiEIETCDU19vc+d4DfOqzdzE/v8L58/OsLi+TtJvErSY+cZSDClPj01y80MQYKXbsVtiUbiH8rhvzVkJAHjQYuUPVk0PK37/wOy8LA+HicpuVVaVairDGYA0YPLiE+voq8/MLGCv84hceoFINcN4jpvMZgy6yg0JKR3DS+7sTfcnQbUDThxereCyNM7btGONz/+xB2u2Ec+fOs76yTJbExM0maTvGZ8rMxBRZHFJbj3NzWuxWpecLdIPZuQSEIiKqHvXuDoNyjeLI8fzvX/j90VCWOo6daFEplTFiMCK5w9V8JzTW1zh96jw3vG0Xn/6pd9FsJhgjufC7wtVBgUoBHfQ9KP0rURwXyd9HChs/aueIQJJkfPYX38Oefds4feocq0tLxK0madwiTWJ85rEE7Nm1g6XFlCx13Y/C5zftMzu6wexskXWrimqGINcYgdm8kiVXXEbciDgq3itRaHjtjRXaLVOYIZP7AwPqM1zSpl5b49zZC3z8x27jjruuotlIsIF0owrpV23TE3ZXyKbYDgbE9N0vpCSdx/sWBQFjoV6LeeDDN/DAh97G6VPnWV9bJUva+CzBZSk+y1AHE9VxAlPl5MlVwsiifrCGIYX4N9j/ywAPFY+gs0aEsXy18h1wqRrsVsLPjythYFhabXPyVItqKcpLeMZgBKzki5DFLRYvLpIkKT/1M3cxPhHhXEfrpffbCKZP8AOLsNnNmA2LJwaMEdLEs2P3OP/kc/eytlpneXGRtN3EZxkuS3Fpiks94i1zMzMszMesr7UIAinE1B92dvaAMqT4m0MUWoRLqiAyZrYuoF+58HvnpTz/0iJhUCpMUOeWLwI+w6Vtzp2d59rrdvDxT95Ks5lgA9MzLaYnUDH548Z07heL0zlmDCKmp/XF80XyXZLvCiFNMj712TvZvnOC82fnSeMWWZqQJm28c6RphjohsCHTk9OcOLaKtVJ8Z92Y7qrf0uF2zZKONkvmyoTPJYXfeU4pNJw4tc7iYka52AW5cEBEETz4jGZ9jfnzi3zsE2/nrTfuoN3OMEEuUNOnzZ1d1BN+T8sHhD/0nM6CWGtpNVLeeffVPPiht3H29DxxqwbqUZeh3pMmKT7zqBemJybxvsT58+uEoUH9oFYP2HyvA8LXrZLZURWxy2UvqPpLC7/4Z61Qa8S88voaY5UqqjnSaIzp7gRRj/iM5cVF2nGThz59O8YOaboIRoYEanKVnpgsUx0voSoYO7Qb+oQvksMelfGIT/6T21lfX6e2too6R5bE+GIBMpfhPeANu3Zu5+TxddrtFGNkhPbrIIyyVSK5QW796OslarBbU0cGF0/7do8WvuCFlxZxWUBgg0KYuXCNCAaPEcAlnDt1jmuum+ae9xyk2cywge0J0hqMsYjNhW8DS5op11w7xb5942QOjO0935i+3SKGILS0Whnv/8hb2X9gkgvnF/AuRtX1hJ9luNSDE8pRmSio8NprFwkDi2oH7dWBUFOHzY7qCPRQR1uU4ri5XPaC6tYFdh2KgRWIIsvpc2ucPFlnrFLK0ajCDBlDdxFQB5qytrLKB//RtUxvq+I8hSDtgOYbYzHWoBj276+wY2eEYooFsLngrRTaXyxW6tm1d5IPfPR6VpdWwWd4l+GzFNTjfV5wzyFqy+zMNPPnW1y8UM+jH+0iDcCgzVc2h811iwJQ5yVma+BNuzb90uyGIQhZFSuCyzzPfu8CUVDCiO2alNwcFYshSiDQrDeYmQ24/4cOEsd+k11gQAw2CNi5o8y22air/cbmt1zzbfd+lsGHf+QGxsag2WjmJsH7bvE+yzK896CClZDJiUlef325p/kyVPfQQQaGDptj3SwP0AHh93zA90UX1BFIfe++kXyTRqWAI68tUa8LpSjsJlBi6Jok21kEo9RWa9x9715275kkyzQX4sBOsIChWg2Zm6swPmEJI1s44Y4zzoVvA0uceK65YY6779vP6vI6og71GUUmihYL4ZziM2G8OobLAo4dXaJUDnpZfr+YRTcPNYeEr5tofs8HXIIOuKFgrrpJmaR/laX70jA0LC03ef2N3BmjpusYc19A1+kaUdIkplz2PPi+A6SOwV1Q2HZVYXIqYnKqzORkSLUaoJ0F6Jih4oYYPvTRa7HW4bMsj3q87wo+Nz8elyneKbt3bef8fEy9kWCt6e1uGQ41R1Vd9DLAw8GdYa6Msbah9jRS+CL9wJdgrOG7/3AeIxHW2CIz7QjeFP6gY4qU2nqdt79jjqsPTJOk/aYo12yPMDMTEYVQLhnGJ4MiEuoJ3gaWOPbcePMObrlllvXVGoIrcIRefcB5T5Y51EO1XKVaHeelF+cJQ9u1+yKj6lv9wtS+EF23cMgbF8NsZXZUdQvS1GjqyLDwFSiXA944tsyFCzHVSiV3dkYGwkRTkKCsBaNKGHre+8A+VGUourEohtnZEoEBa5WJySB3xH3RT8dPfOBDB1BNUedyoXTIXD63/66I+8Vbts/NsryccvLUCqVyOFDrHgD3+pHVLZKszcxO/2qYK7f5OlgPHdiSMiD8zskG1tBqZzz7/DwT4+OopwvSdaAGY/KbFcHgaNYa3HDDBAcOTpGmiu0LM0WEHTuqufnCMzEZdH0AHe1PlJtvmeP6G6Zo1FsFxK3dXEYB53LtR4VSWGHvnl289NKFIgLrkLhkw/cZQWza2iH3kwWGzJDZLM7XLYE5HcnD6UcbO5rTeb8osjz30gWSWKhUqhgJ8rC0Py8QwVohsAbvMqxk3HPvLqAneESwgWX7bISqEgWGbdNBn1/Jk7QwtNz/4F6yJO7R5jtQcuEDnPd4r6iD8fExVENeefVCXqljCHndRLMVtnbIl/YBujlVb8PiKP3lCOnW0HpOSvqxwq4ZEkrlkNPnahw7vs7UxARZluXmog9AMwW2Yw1EgRC3Y667bpwDBydJEsUGFiOGcskyNRXiNS+oT00FBJEtbL8hiZW33biNgwertFsJpj8/6YNUXOYRNURhhav27+GNN5dZXGp1SWS979APh4+oO4+yz7qRej+QF+hQIra58Ac/TDXfunh6CVUHtymcgPRR/Dpaa4zgVfjuc+eIwhLWBLnD7oMMujBFAV8LEAbKnXfOoZqz7+LEEwTC5ITtKna5VBRZUsUVkdN979mJd/1NI136Ml5z2Nw7j2CZGJtgcmKC554/hw36MKZObaGv7tBTmH7Kek5M69JdlMtGEoKRIdUmXE1VsIEwVgppNlPi1BffTwmsEJZsHyOagS8CQrkc8sIri6ysJkyMTdBo1zB9mqbkjhjJmdABSrvZ5pprK1x33RSLSzGVSsCunWWqlQDVDBQqFeEt106zvhpTr6e85eA4+/eXaTbahHYQPdauErlccE6YnJxgve44fnKVUiksErBcumoEfJ61i+Yha9J2+fkFBq+KCYVKNcS1Pd7ppYE47UWMwSiHq1sw1gIj3HrTHO+4fSftNOHU2XWWlzIW5lvMn6/TqOeQcrkS5nF0txgihIFleSXh5VcWee+9e2m0G/kaGUG9pyAkY7yixhAFEZVSlXKlwuc+vxMQKuUQEU/t4hnU5QtXLls+/3O3g1fiOEPEY8QjEuLTNvjcD3TeX70vdrEhMAE7dszyrW+fpd7IqJZtvjPEoNZj1OC8I26lqFPGJiJ2Xj3N2HRAqQq7dk9Sjcq8+cJFjr+8lH+A6GAapj0isA5xR4MraY4QII4zvvmtc5w50+CHP3wtn/zIXmqtOiv1No12wInjdV55eYkTx1eo1WIqlYhSJcyjFHLz8uwLF7j/3qsohWWcxvnnmEI6YjBRlTCqEEQlxsaqORoqPXfnnMvPpjAvYWCIrCEsWcbHSnivZM7jyhXarTatVhOftHBpHfUO5zzeQRiUmJyaIQginn9hniDIM2pr8xgvaWWk7ZSJiRIHbpjj6htmmNweELfrTFVK7N42x6nX1/nWXx9l4dw6tkByBzVftnDIEAzXAwYBJB1EnQq7HkbCsZMrfOX//i53vnMfn/qxm7hqbozF1WX23jXFAw/sYXHJ8dKLSzz77HnOnlnHWsvYWIlqNeS1Y6vMX2yybWactXqWA1wiOAlRibBhgFhLYC0uy/AiOVbTV28IqjOk7Tpj0xXmJqZxWUaWZbl2mZxejoC1eUTjTBkXWFwqZGkLwaBqmJ2d4czZdc6cq1OpRvg0o9lIAc/+g9u45V172H/dJKmrs3huAbfqufnag8QNy1/+4RFe+t5ZAmOIohy26Lf5OqIDZhh5sHv2ffhLomxJBx/1WBgaSlHAiVMrPPX0aWamJ7nt5gPEzZja6gqT43DzLdt5z/3XcO11O2jHjgsLddJMiVNlz+4xbrphO/VGoxB+CU8IksfqUgjdGlM4zRy78V5z+w2IjYgqVUQMzrkuWyE/rqRJRr3ZIssykjjGecVLCecMpI7QRly1bw9//+RpXnttmSxxGAO33rGXH/nUrdz5vn1ElRZnjx3n4vEFrt65m9tuuZHnn1ngP371O5w/s8rYWM786ACWMkRYFGRAeQcIDIDdu/fDX9rc7OgIrmYv9FSFSinH5p96+jTnzq9zx+1vYfeuOVZX16mvraNZi6uvnuA9730Lt9y2F+eVc2drrK0n3H/3frxCI3GosYBjgKRPbkq8y/DekSYpLstwzuG9w7lc69OsU9GKSbMMl2WkcUKapaRJjCBkaYZ3jiTNEBPhfMDOmWmMjfjPjx5BVbn3gQM89JPv4JY75lhbvcDr33uFiyfm2T65jXvveSeV8iS//7tP8fhfv0YUBUSR7Tpd2dBvUPxVdGPKUBptOiHqHe/+yhCtxQ8RYUeU4KT3d8eJGmuoN1J2ba/y+c++m3fevoeFxSXacR3nM2wYsm1ulurUNCdP1XjssaN88N69zMwGrLfaBIEpuEFgTMEPlhxO9l4xBlSl1xKlihHInO+CeZlTrDVkWYYi+MyhqiRJQpbljtcrxO2MJIHt42PUllKef3OFD37keqZnI1558U3ePHIM12ozNzPDVVft49prruKZ757kP/3+09TXY6rVEJe6AgwozI72bL7RAcAIM8Ag61JT8r87C9ALNUdRuBkBwvUninmoGQSGJMvf49DH38Yn/4dbabYb1Bo1vI9xagjHp5ienUaMYW25kdNBXIaqy2kr9MqJVkz+lYzBa07EscZ0oRdBcT4PGVVzKot3Ljc13uOcy51x8ViWpDQaCSKGKIoYHxtjemaCme0TuDTj2NGzvPTUS0QGdu7cwVvecjVTUxP80R8+y3997HWiMCAw5AvbiftH4P/iZaMZoi9H6quvyB3v/ooOFJsH+mBHse8Hd0JnAUzBybE2bx9utjLuuWMPn//sHVSqluW11ZyujsUZTxBVKY2NIWJI05S42cJlCeJdXtGSQm9MsVm10PLMdXEj5z3GGHzmiygq13LV/Ji1hjhO8ao0m02cV8KozOy2KSYnxgijCOcyGrUaF+cXaC1nNNcaTEyNc+21V9NqpHz13z3FkZcuMlYNUefwzudFeK8D4F4/RbGzAMLQ745p7auGybvf/RUdLfwRC1DQTaQfCRQGUM0OVcQGAY1WxsGrxvmFn76Dq66eYWVtlSTJaMZtorJBTYgJS5SrY9ggLJxlQZBK005jCVFoC2ELXk1Rj9WCWqMFryzPJRDBq5JlDhEhSVKcd4gJmJmeZny8irGWJI5pNRok7ToXF5ZYvZAyXqowOVXl6qt3c+L4Mr/31We4eLFFtWRwmUNdUUnzihSIamcBZKBfo2OGegswui8N7N69H/pSP/wglwibBuHmPnxE+hgMhTGvVAKW1zK++w/n2LurylsObMeRYzCr601KIYhmNOp10iTFWksYlcAG+GJfWpOzMTw57pH7As2hEEPxXy4M5woCvvPF/YwgDJicmmZmZppSKSJLU+rra7Tr6yStOqdOXWBxPmVmfJxts5McuHo3zzx9iq/+3nM0m55KKU/MBjVdezZfRwFvMiIa2tjOMbgAWzUW9NutvlcbGYQbTB8LTfKDRFFAkgnf+Yd5KhHcdMMOjA1ox57llRpePZXI4LOERqNB3E6Kfq0c93dZ7htyfKhwyJI7bFeEqeoLX9ChMJJDDWFUYmxigjAMSJOYZr1G3Kyjaczq6jqvvLHA+hrsnptj755tbJ+b4rHHXuWP//QNjLEEVgrh9zUkaq+Ysznq2S/kDqG3A+QNjg8JRrcFXVkfbg8VZYg/n48rCGxeJP/anx5jvZ7w4Hv3M1YtEwSGhcVV1hsxM1NlyoElTprU200kiAjCCBXBOU85MnlSBoRBvgtM4ZC9FvUC8ihHjKFULhNFES5JSLIU71IsStZuc/L8CucutClRZte2SaIwoN1O+ZP/9jJ//+15yuUQvMM73SCX/ge2ynC3pCcOELN+kMEXuqHS0LdzhvqmBCqVkD//r+d48/g6lZIlDCxzM+NoFnB6ocn5lSaglCyQtmnV10laLVpJhtOczmo7JCnp9SgaY/HO9eiDqhgjJHGLLG5hNMWo4/yFFZ55/QKnFjKqpsL0WJXAWqqVkFdeXeHvn7zA2Fg01EU5aDIGKgBbCL8P/duCJc0IMG6E8JVLrfIgZ380RybfvmOVMG9VJQ8zQxEmK5Z0zXN+KWGp1mb7eMh4pUQkQpK0SB00cGybniDNHI22o1Lg/9IJDIp8QTUne2kaYyXvAVtdq3P09BJnVlPSphK2UqqTVTQIkFKUwyTjpaJlqu8767DiD9JUdFOZ6Ij+59FlyoDv0+zQb3ZQskzz0l7FFlQ+2XAS6iEsCROVgAChZSwyNY2IYdwYbL1GrRVz9kKDklWmxquUSyW89xhKRTupZSwI8kjE5OfpnBJYi1pI04wsaYM61mtNTp9d5OiZRVZqGT5RvDfMzc2hkxOUd8wQqqNkDRPVEGuLlv/hmm9B8FUPaeIxfXSSrSe3XLpGHIwwbZc2OwwK3zvYsaNKqRxy6nQd5zylslIqh938QABXlBDbQcCLWqLhE77xJ49x+/vfT3l6BjsWs6e9CFlMK05QnxdfxstjTExOIMbksHVhYhCKqljO3TeSV8hSLEmrwfLyKsur6wQGZscC6hMlKjfdws6d20jiNo99+5vc/sCDrFpLKUoJrRC7nk8TEZwqSZzhUkcYCrv2jdOqp9RW2qOBNlVGdu2PED5opyBzBZo/bFYKbWg0Uu66ew+f+vEbeOnlZV4+ssqFC21a9ZQoUsqVECNKGFrORBHbtk3x2O98lVe/8zR3fuyHcd4TmwAbhVTLlsmJ8SLKAkxYUOo1x+lF8N51+0pMEZJ59UV/QkBmI7Ztm2Z6ehLnlVYzpR6UsW/Zw0QgxFnIv/2jP2Zhtc5Hf/oznL5QI7SGhAxVJW1neOcply27ry6z7+oyVx0Y58Sra7z49EWG+bqyeYf2psIXwO7vywOuyOwUSUOnqJ4mnpdfWsYa+OSPXcODD+7huuum2LlzDOehVkup1TImxiOuuXMfC+vr/NnvfJVPfOELTG+bpplk7DAJc8RoEdvnn2MJwry4IyZnOVvDQOjb2WHegw0CvHd41QK08ySJy52488xMTTBZCfFhiYkD1/DMX/wXrrvnHrSZsfj8Ber1lEolYPf+cd769kne+vYKb3/XGNvnKjzzjYt877sX8shllObrVnmADNgaGQhDR/aByYa2m81KbKr5VKkwtHzjibO8/sY6P/Hp67jtHbO89YZJ3vdDu1hYiHnpyCqL8y12GXjyhdcxacLk7Daa7ZgKjr0SY8QUTXsFRSWw3Q4Zil7kfJd3vlie/SpS1AHyaCiKQuLYdMlV1hrUeU6fOofbs48gcFRntlFbXOLoGyf5obldLO0IOHjzNNt3BKANhBpz0xOcP5ryrf92lvWVFuVKgBblzFGs6M2iHYZAzM6P3bf3Q1+6kg70TquPMf3tQz2nUCoHrNdSvvv0Rdotx+6dFayB6emA66+dYv+BcfZUK1TqdV49eZqxm2+jZAzX2RaRSzE254rm/VwBiO2SsTo7wEiv1Kl9EZb0+QU6O8B5VD1J6nAIcTul3khYtyVOLq2zduQV/qf77mRnKcRMp5SDOvXVZQKxTFWnOfJci29/Y4E0SSlFRem0D1KWDhtws1pA5/cIpy2A3PWuL+sA7XFgMQbb8lU9aebxmcdrUfERCiJszsMPQ0upHBBGlszBHe+c5QPv30W5UqWdBTjNCMSwfWKatXbK6y3PeJCxO3IkzuWhY6emKpYgCAp8qeB/St7sl6OgHYSgBw1khcDzaCgpSpJt4jglddD2AXEb/PQMU9OTXK2OqsC3XnodEwaMlSIkbkDmePnFBieO1QmM4lJPFru8HpHmMtDMdbtjjJGC2VeYRAXRPixIdGiJRuQBm44RK4C6KDJcffU4czvKTM+UmZgoUR0LqVQCSuWAUslSrgSUS5ZSyRBFBuc81gieiCBQjOboZz1pM1GucGdFsKFlqbZKZHJEy+OwNsiz2gJn6tn+ghZTgH+dzswcks4hC1dgN3nrocUGIaHPAbqSV7aNV3nr3jmSJAUTcfTUeZZrdbbPTmGNoTwxzZnjb7JrH1x1/USnrx5USOK8h8ylnizxxK2MpJnRqqXUV1LWFhN8piOat0c3tgSbZNl9ZkeKmi2oV1qtlGZDmBgXohCmp5SZGWFyKl+IMMwL8N5LAagJ3kd4b4EsRwqt0I6bVKIKbecIDYQ2pJ1k+fTRoiATBBbnFStKVC71ulL6+ToGbBAWmXCxMMbmHZdOCQJHlhk61FAyT2UspJ052pkjssobp87mia3zZElKUCqzY9cu1taWMUbyDkkybCBUKh7nlKTtaNYzkpYjSzPiZpbTVYY4VdLHFh9FfgiuZPZClinz51qcOdUsJl8pNlDKZZiYsszMBMzNldixs8zsXJltMyWicsCuHQcpV0OSzBWanINsmc+wxpImCUakW3Qx1pA5T2Q7nS+CMWBtiFdPIFHf8wtTWHhnMYYkSbrmM3Mdc5bTHQ0256q22lTKJZZX1llcW2dsrApOCUuG6YkqgWacOnUcIaBeS2jWHM31jGbN06o5kqbi4ry5RzQHH60VrDEbZLcV8yTYWvg9Z1MEHoShISr1HEvHRayvwcoKHDvaxgYJQVjD+4xbbt3GT/3kDVTLZdJ63J1QIqKkaUxYHstZD84RWosrWtADa/Gak1dVTVGO7BT4tGv7OySqzu713uOdyynnCGGYRy1REJBommfMhZM2xnBhaYV2nDBeKRNZw1i5xLbpcbI45cQR4fyZen4umaKp5P0NGKwoQWkQlh5FQR9wwDqqSW9I+GartkotyEWegtrXcdKKNUo5grGxoGh+gA984AZ+8ifvpFop5+0/He3I64lkLuv8WWD/tuis6ZmZXl9ZUW+VHP3saL90y9v0sfCUIAwIAlOUJfOdYAJbOEbpsi6WVtdAHdXIUo1CpifHKJUiyuWQj33yNm57136yJG/uiEqCDRVjfN+AEu2OLkC3oO2rjCjaQ9C1/NqHe2xoqxwaKaMMklSLDDVNHLX1hFtv28P/+BO3cP31k5w9d4aFi8q+PdeBFnyd4jXO5wyHrqP14HwesxsRnIJRDxRjAgItIIfOcADfbXOwVnBZVsDUNu98TOLu+3VONowCApvjVS5zNJpNImsohQFRaPM6hFdeP/oqNhQe/PA+3nbTHN/4f49y6ugipYJ+2a0JD+dOI0J6tmgDDi6VZG1mloaHUrRbKXPbx/nRT1zPO989zZkzJ/j9/3CcN99cpF6r8LOfn2R6JqQdJyC5w3QovuR7jDJjCPK+yVyQYkBzJlwQaDcq7vCGnPNdekxHAU0Q4JM0N19BhEnbpKqFYPLPqZRLiAitVkySxIQ2Z1C4zBO3Y5577iiPff0IQbnFtrmXue76/XzwH+/j+EszPPPEaZrrMUEoAyznUVC8bNaYPbAAlzVLuX8mgvRKctIjO9508zbeeec2Liye4tf/9++wsJCQJiVssAPvLX90+GV+9BMHMYEjLVgQxgRMVV0X+DIiqDWAL/qM811gbQCqOS/IZfnu8D6PllRx3mGKUDUSyLKUMDC0kqTocBeMtSCeMAhzaqNY0iylVq+TOUet3qAUhjQabZ58fIF4ZY7MOE6da3HixVOMT53i4PVz3HrfNCdfbnDxTGNDFWsjz1YG5mJu7JjsknN7I887Zmj0lPCNcztRiELD6mqLP/jaGzQbSrlcJYwmqZZz2y1GefWVZf7gP6Xc/s5xTNRkrbaG88r73jPLWLVa0L0N+AxESJ0HcXlWW8x28y7r1JCKUQaFL8DgC3Jvu9Xqjh2wgcWYLIfKvSe0Qe6HChOytt7gzLkzVKoVQmPIWoYTryWsXGgTRoo6JTRlcGXaFx3fO1OjVKkzOVXGWEEzHQ05cBm19cInBJvTp/sIal0AaZjxmx9KEs/5szFRGDI52Vm8DO+kwOzzpOzUyQbz803KlQaVapOLa2c4uO9abrv1RpzLEJtXtwQlDPLQLuj0E3dqsB3mgPckmcvD1KIs2Rk5jM8ZdmmSFUP2PL7Yu2GYczitCXjmH57lyW99i/vv+ijzy4b6UoMs8QQWNPO9geF4jIVKNQIHaxeSPOMd6grt+YHN4YfhTlSz+ThfGUGj0JFMABGIQuljJHTQQd8N+dR7whDUC7X1STS5mtmp3Tz5zPfI0iIakk7i5nM6uXboHzn0kLPbXD5WxrkeFUU9xuQhqCuQ0MBKwYTW7m42It0wNI4T/ubxJ9i//Vp8bRcr8/niWaPdFtYe94duYx94bCAbAUzdLNSUTStloxu1Nx0pzIZa6cYG5dySiQ6eOMWXyRfHE1rH2nrMRHk7p07Nc+ZcTg03YrtkXCkgB5dlOTXFOUw+2avbXKc+Xwx1WT7vJ01J04w4TnGpQ0TJXO4fXOYpl0sYayiXSzz/4oucOz/PgT030mjEBEGH89Pj/fR5/QLb6fP2OuhwzUCoKZfVJT+UB8imV47YMhoaahmWPv+gDM78zxllObMsSx1Jq0JgIr730msE1hadNkHeoahgTd6FkjmfRzequCylFFpEChZ0wZz2Lh+8YQ2UymUweThpi9E46pVyKaIUhaiDbz75HXZs24nVKVyWgus1b0v/+XaghQGOmm5ghQwLdrC9VXOilm7cF8HWGbD0hqhqb1ayDvuE4SlRnUK5dtqN+mKywlQIwtqaY2r7LCdOnqXVblOplAs7XvCtMHgJKFfKKEKjneDTFAo8PifiuoKDlIenYalKdaxKnGS0EoePU7I0LRr/AowxLK+s8caxY1y16wZajVwpOheJED9ENxzYycN4vvQ5337kcwt+FRsGNl1enD+aft3LjmW4kaNz0p7ulS66dtTnWtlqplg/znqtycXFFcIgzAlYNk/KKuUqLzz/Cr/921/jxNHjxay5JllneJJ6DL5HPxQlFMfxo8f5ypf/Hd/+u2cgDWjUYyyWSqlMFIWcPHWaJMmYruym3Uq7O0QGdmsfA65f+DpEwfIjzPGQ8LeKjoZ4QbIh1JQR7nhD48FwY58OzsvpLEbvkiM5jOCdo90IEA1YuLCMtTYn96qSZg6XZBw8sIPlixf5jd/6Ki+98Fqv473wESI5Yy5NUqwRXn/9JL/5m7/H66+8RmgEYmg14u7coCAIOHriJOOVSTQrF9OyFFHfuwyKL2j5fjPhF8LTjRZjYGSmjmbN9R83m0c/2ueQNwupZHMHPjAQvS+SKKKbjqNrNXLKyYXFpW6Ga42lUg6oNdYJA8sv/PxDXHtwJ//5D76O4KmUw27ZMuerClEY0m4l/MGjf8n+vdP8L1/4Saanp3jp1TdotdrFaGVDEqecm19gqjpL0tJutKVd/8RlCF/6hCtb86W2EP4WvCDd3CHrCGxo1HAWHX64b4SL9si9cSujmpVYXasRxyk2tGSZR8UTlUMWF9dZW6/zIz/8AGmSMjFRJUkcgS0KL0XTnrU5aPdjn3g/gTWcOLnA4mKNyckxypVxWu0UFFqtNsvLK4xHsyStPKrSPmGPtPkjhC+6oS292x15JRewCy5X+KZ/PGPXIfs+Q1VI1W+89l/uizthWO/SE2LywdkuCamtt2i2mozbMUBJ03xs2e6dO9i9awdBEFKKImqNBu12SlBA0DmBtueuDh7YT7PVJipVOXjQkWUZZMJ4pUw7Tjh77gJJO2XMTNDK0iJR6zeVlxA+Wwl/o72/1NUDjUKjgHB1MNoZsZ02zMSU0WZpOJfoG2fZnbpYhHnqPWnL0G5mLC6vkKRJUWbMR5llrpdMxUmck31DUxByDWnmSDNX1GKh3Y4RpUA3c1O1vFbn4tIKrUabi4uLiLfgoiKJI7f5lyt8PyxgGcR+NhX+QPuqFqzphhHVJYPZ0OWxqXBH7CnZQFaVgSkqo3xCZ9i3CCRNJW4oK6vrxHGbZrNZzOqERivGqyOO46KHwBAUrIw0y7shy+UQ7z1pMV44TTNc5vBZyupqgzR1WGtptmIWLlwklCoulmJ0Zn8b/eUKfygZFR0Q/mZKSd88JpN3AC0Z4Chi2PgWG1nQ0q/9MnT1Id1ISBpY0P5ErZtk5gOLktiTNAznzy/m4wpsQJKmtOP8YnCtZkyaOuIkj+mdU6wxBCZv/m61UtrtFClaU9uthHojZnGpRpbm/Vz1eoNWO+bs2XlKTJElLj9fJQ8/PVcsfNlE+OYSZiffKxaFowaVpwWDqOpIrR5BvetvOqM39XjoNZ22HUH8iOioL1fwztNaN8yfX6VWr9NoNUmSrJjlkJF5h3MpoLTbef3YOV9Mu/I59bCd0W6nrKw1abRikjglTVPa7YTVtRbNtufi4jKry+uYrIp3bhAyoc8P9BsYHSV8Ll/4Iy4YKqgWs5KeNio8rj5FZLPJKTKy0cAMXrNoU78xsAVHpO/qFWOUuA4XzzV45dWTlMulojE7T7LwHu8djWYLhPx3UYUrlQKyLGVptcF6vUWj0aLRaFNvNGm2YrLMY42lXCrzzD88h2taXNv0Od9R8IJ0HWTP4Q51vYhe4jsXPkFH1lmM0wxUHw9svP5NjcZPGxPu95pqN5G+1BDq4gO0cyJFbGn6O4p1sEok/QXgvhMzBpLYkayHPPvsazhNufnmg10TlDmHqsU5ISUhyxzeZ4gY1mstFhbXutcuqDdaJHFGmnmSJOuSph5/4m+5cO4C+6q3Uk8cxrJh/OSw8DfG+ZubHRnRNTS6yKVqJBTvs9OE2TftyYtPJAd2f+jaIKjcoS51bNgJm0Q72pf9dYsD/cIelapJn58Y7LESEbJEmZq1/N1T36HdXmfXzrk8W04ykiTJR8UkCUmSsLqyypFXT3D0+Dxraw2SuM3aWoNarc3qeiunI8Yp6+t1/vpvvs6Zs/Nct/dG4qVqkQQOQ8Q9LTd+oyGWfuFzCeEP5UVDFsVFpmycJv/x8GsP/1kAoI7fdRL/XD/FYKPmDxVjBjqUpOgeEfrHzJqh0R8ylEeI9E3fEkjbwukTZzl57jiLF88TBAFXX70LyCctxu0E7xzzFxZZXqqzvFynUikRlUooQhSVqJRKxLGjvp4SlSPOnT3LwsISU7MzNNcTTDI8BXEwO+2P8TcYn8vW/E2EX+hs5mP1qr8LIIcOHbKHDx9299/2W/9PGFQ/lqWtTKQ3ReVS/QM6qjAxzC9l2OyMoO5JTrpttGoceIdw34P7eP7ZYyyvJLT8MkFkcVlObWnU45ysS96WhEB1bAxBiEJLqVLGO8E1BWtjdu6Z4c3nl4nPjhMF5Y0T4Dt0nM2E302yfjDhi5JFphwkvvXnj77xxY8fOnTIdoejOQm/aFzy0QGDzmaXAR8cWTws4O7VaLRvXk73inaj3iOfSoVVJCtzYPYt3P7OvSycjjn2VI2mE+p+gUQaeJMSRoYwCvNZEsUQv1bTEdmIgBKRj9B6hdCVcDsXuOnWg7TGZjmWLXXBl2GUkg3RzCCb6pLC55LCV0Ek86kzYr4ICIfBHjlyRA8detT+1d/+0/kDO39oohSO3+dckpFfmHiDzR8Vag6UJ/ujI5GhY/1hWt/mHmr7zFzCwZtKvP7SIvPHlEowyaTsZtLsYUr2UPU7qaQ7KCdzVNI5Ku05Ss1tBPUZbH0K6hU0zcm0WbTM2ESZ+VcdWZo38JmhhHMwg5Ueqimj+9zNlWp+TrPJSsFYkPjW//noG1/82qFDj9rDRx5xHVWVQ4cOG15+2S6G498KgvK70qzpTIclu+kV4jZeLWjjuLMuYX80Y3iIyKpeiUqG6967ysWTIRdeHcMErutrNvSe6ObzLKyGNCdeYe81c6y/uJ0sTTcOYh2qUg1Pyd0AQY9MsrYWPl5daMs29e1nNMzu5chN7jAP+ZyuULzNjYdf1sNHHkky5SHn0wuBiayquk0uTLkBfpChrdkF3lR7Ix9HxEODV5nKWRRZInzziVdYXWwV5CwwKr0iT/fmurWFXt22dzNqSFtw8dwq2rkE7Qbh9664tJXwhc2mX21pdsCrsya0TrMLKjx0+MgjyY283NWa7ns+wiP+0KFH7d+/8EvHXZZ8HKhbCS2q2daX59t8EMWGE5Mhs6SDoWlnRxkJ0LhEs+byXuAN/Se9apWMtMfS5YCSRjSX3YYRAUYHL3U1zGUTLgPV1K2Fr0pmTWhR6rFvf/zw6188fohH7SM84kfuqM6F55948X99KklbHwTmw6ASoJpuSsMYdeJ9kdBIrem7HtiofQFKmVkkKw2N1JReJU77o3MZjNa71s0TMo5Nx/sC5t4lrQZtvAzydnQr4cslNV9V08iWAoX5zMcf/NM3H3nq/vsfDg7zkNsqewZ6V9h+8KbfvCYIg69ZW74rzeqKqhfEbs3+0k0HWQObj/MdIP8aHA0MIYYQuqRIvWRDXH9jiQBe4vyaNpRH13RH0TJ1Y0Vr0O+whfDVgZiSHZPUt59Sn/3EH775xaOHeNQOCx+Grh3c+Tly5LAeOvSo/fo3PrdU3nbXfxgzpmzF3hmYcuA1VVRcflXQntW8nA5x2WqW8sCMYMUS9Sfl3cijo8GmT5uH7+c09Q5iG2AI+uiAsmkZ0TA4smcjniWju0RRFRUnqISmYlCc9+mXXRh/5tHXHl7cTPibKmnn52EeNh179f6bf+NdYoNfEfhEYEo4n+A1VVW85BdHlJG5wyaEJBhxjZUt2/t160hDB0ujconOFBmK1jY/LiOwHS1a8DRvzpFQQonIfAzwJ2nmfv2Pj/2LZ4ZleMUL0HnOoUOPmsOH8xV8322/dUfg7WdU/EcFc9BKPuDCazY0p3lYOLrlltdLmjUuQ/ijr2wxSrgDQYJuFt1sBNaE3lAqg8FpBl6Pi9ive9y/f/T1X30aoNB6z1bt85e5AN3d0ImWAD52w29MpJXoPu/1fjS7Q9FrBGaB8c2FM1gQ2PKSr9+H8LfSfNmCtzM87WqrYooodZAlMRwF87SoPNES+eafv/bLtVFyutTP/wdf1iq4IHwqXAAAAABJRU5ErkJggg==">
@@ -5277,7 +5304,7 @@ async function ctClique(e){const b=e.target.closest('button');if(!b)return;
 const X={cod:'',sala:null,eu:null,op:null,log:[],un:[],tm:null,lst:null,vt:{}};
 const XBOT=new URLSearchParams(location.search).get('bot')||'';
 const xEsBot=c=>/^BOT/.test(c||'');
-if(XBOT){CT.u={uid:'bot',displayName:'Bot 🤖'};CT.auth={};try{window.__xmk=parent.__xmk;BK.lst=JSON.parse(parent.eval('JSON.stringify(BK.lst)'));}catch(e){}try{Storage.prototype.setItem=function(){};}catch(e){}}
+if(XBOT){CT.u={uid:new URLSearchParams(location.search).get('u')||'bot',displayName:'Bot 🤖'+((new URLSearchParams(location.search).get('u')||'').replace(/\D/g,'')||'')};CT.auth={};try{window.__xmk=parent.__xmk;BK.lst=JSON.parse(parent.eval('JSON.stringify(BK.lst)'));}catch(e){}try{Storage.prototype.setItem=function(){};}catch(e){}}
 const xEuU=()=>CT.u||(xEsBot(X.cod)||/^#x1\/BOT/i.test(location.hash)?{uid:'voce',displayName:'Você'}:null);
 const xUid=()=>(xEuU()||{}).uid;
 /* Firestore de mentira em memória pra partida contra o bot (fica na página principal; a janela do bot usa a mesma) */
@@ -5346,8 +5373,8 @@ function xCusto(s){const o={g:0,x:0,pips:[]};for(const m of String(s||'').matchA
   else if(/^[WUBRGC]\/[WUBRG]$/.test(v))o.pips.push({c:v[0]+v[2]});}
   return o;}
 /* tudo que está preso numa carta, dos dois lados da mesa */
-function xAnx(k){const l=[];for(const [cp,z] of [[(X.eu||{}).campo||[],'campo'],[(X.op||{}).campo||[],'opcampo']])for(const c of cp)if(c.an===k)l.push([c,z]);return l;}
-const xExiste=k=>((X.eu||{}).campo||[]).some(c=>c.k===k)||((X.op||{}).campo||[]).some(c=>c.k===k);
+function xAnx(k){const l=[];for(const [cp,z] of [[(X.eu||{}).campo||[],'campo'],...xOpCampos().map(([c])=>[c,'opcampo'])])for(const c of cp)if(c.an===k)l.push([c,z]);return l;}
+const xExiste=k=>((X.eu||{}).campo||[]).some(c=>c.k===k)||xOpCampos().some(([cp])=>cp.some(c=>c.k===k));
 function xPT(c){const i=xInfo(c);let p=i.p+(c.cnt||0)+(c.tp||0),t=i.t+(c.cnt||0)+(c.tt||0);const kw=new Set(i.kws);(c.kt||[]).forEach(x=>kw.add(x));let pz=0;
   for(const [a] of xAnx(c.k)){const j=xInfo(a);if(j.da){p+=j.da.p;t+=j.da.t;j.da.kw.forEach(x=>kw.add(x));}if(j.pz)pz=Math.max(pz,j.pz);}
   return {p,t,kw,pz,mod:p!==i.p||t!==i.t};}
@@ -5374,28 +5401,28 @@ function xSobe(){clearTimeout(X.tm);X.tm=setTimeout(()=>{const e=X.eu;if(!e||!X.
   r.collection('pub').doc(me).set(xLimpo({nome:e.nome,deck:e.deck,vida:e.vida,ven:e.ven,dc:e.dc,imp:e.imp,mull:e.mull,nb:e.bib.length,nm:e.mao.length,campo:e.campo,cem:e.cem,exi:e.exi,cmdz:e.cmdz,pool:e.pool,ter:e.ter,tv:e.tv,tl:e.tl,gv:e.gv,fv:e.fv,evs:e.evs,ts:Date.now()})).catch(er=>xAv('Não sincronizou ('+(er.code||'erro')+')'));
   r.collection('priv').doc(me).set(xLimpo({bib:e.bib,mao:e.mao,ts:Date.now()})).catch(()=>{});},200);}
 function xLog(t){if(!X.cod)return;xRef().collection('log').add({uid:xUid(),nome:X.eu?X.eu.nome:ctNome(xEuU()),t:String(t).slice(0,300),ts:Date.now()}).catch(()=>{});}
-function xSaiLocal(){if(!XBOT){const f=$('#x1-botf');if(f){f.remove();window.__xmk=null;}}X.un.forEach(f=>{try{f();}catch(e){}});X.un=[];X.cod='';X.sala=null;X.eu=null;X.op=null;X.log=[];}
+function xSaiLocal(){if(!XBOT){const fs=document.querySelectorAll('.x1-botfr');if(fs.length){fs.forEach(f=>f.remove());window.__xmk=null;}}X.un.forEach(f=>{try{f();}catch(e){}});X.un=[];X.cod='';X.sala=null;X.eu=null;X.ops={};X.foco='';X.log=[];}
 function xTudo(){xPintaFase();xPintaOp();xPintaEu();}
 function xOuve(){const r=xRef(),me=xUid();
   X.un.push(r.onSnapshot(s=>{X.sala=s.data()||null;if(!X.eu)return xPinta();xTurno();xTudo();}));
-  X.un.push(r.collection('pub').onSnapshot(q=>{X.op=null;q.forEach(d=>{if(d.id!==me)X.op=d.data();});if(xVarre())xSobe();xTudo();if(X.lst&&X.lst.z.startsWith('op'))xListaPinta();},()=>{}));
+  X.un.push(r.collection('pub').onSnapshot(q=>{X.ops={};q.forEach(d=>{if(d.id!==me)X.ops[d.id]=d.data();});if(xVarre())xSobe();xTudo();if(X.lst&&X.lst.z.startsWith('op'))xListaPinta();},()=>{}));
   X.un.push(r.collection('log').orderBy('ts','desc').limit(80).onSnapshot(q=>{X.log=q.docs.map(d=>d.data()).reverse();xPintaLog();},()=>{}));}
-async function xCriaBot(){const sel=$('#x1-botdeck'),ds=BK.lst.filter(d=>d.cmd&&d.c&&d.c.length);if(!ds.length)return xAv('Monte um deck com comandante primeiro (Meus decks).');
+async function xCriaBot(nb){nb=nb===3?3:1;const sel=$('#x1-botdeck'),ds=BK.lst.filter(d=>d.cmd&&d.c&&d.c.length);if(!ds.length)return xAv('Monte um deck com comandante primeiro (Meus decks).');
   let id=sel?sel.value:'';if(!id||id==='?')id=ds[Math.random()*ds.length|0].id;window.__xmk=xMock();const me=xUid()||(CT.u?CT.u.uid:'voce');
   const cs='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let c='BOT';for(let i=0;i<4;i++)c+=cs[Math.random()*cs.length|0];
-  const nm=CT.u?ctNome(CT.u):'Você';await window.__xmk.collection('x1').doc(c).set({dono:me,jog:[me],nomes:{[me]:nm},botDeck:id,ts:Date.now()});location.hash='#x1/'+c;}
-async function xCria(){const cs='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<6;i++)c+=cs[Math.random()*cs.length|0];const me=xUid();
-  try{await CT.db.collection('x1').doc(c).set({dono:me,jog:[me],nomes:{[me]:ctNome(xEuU())},ts:Date.now()});location.hash='#x1/'+c;}
+  const nm=CT.u?ctNome(CT.u):'Você';await window.__xmk.collection('x1').doc(c).set(Object.assign({dono:me,jog:[me],nomes:{[me]:nm},botDeck:id,ts:Date.now()},nb>1?{max:nb+1,nbot:nb}:{}));location.hash='#x1/'+c;}
+async function xCria(mx){mx=mx===4?4:2;const cs='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let c='';for(let i=0;i<6;i++)c+=cs[Math.random()*cs.length|0];const me=xUid();
+  try{await CT.db.collection('x1').doc(c).set(Object.assign({dono:me,jog:[me],nomes:{[me]:ctNome(xEuU())},ts:Date.now()},mx>2?{max:mx}:{}));location.hash='#x1/'+c;}
   catch(e){xPinta('Não deu pra criar a sala ('+(e.code||e)+')');}}
 async function xEntra(cod){xSaiLocal();if(xEsBot(cod)&&!window.__xmk)return xPinta('A partida contra o bot acabou (a página recarregou). Comece outra.');X.cod=cod;xPinta('Entrando na sala '+cod+'…');const r=xRef(),me=xUid();
   try{const s=await r.get();if(!s.exists){X.cod='';return xPinta('Não achei a sala '+cod+'. Confere o código.');}
-    const d=s.data();if(!d.jog.includes(me)){if(d.jog.length>=2){X.cod='';return xPinta('A sala '+cod+' já tem 2 jogadores.');}
+    const d=s.data();if(!d.jog.includes(me)){if(d.jog.length>=(d.max||2)){X.cod='';return xPinta('A sala '+cod+' já está cheia ('+(d.max||2)+' jogadores).');}
       await r.update({jog:xEsBot(cod)?window.__xmk.au(me):firebase.firestore.FieldValue.arrayUnion(me),['nomes.'+me]:ctNome(xEuU())});}
     const [p,q]=await Promise.all([r.collection('priv').doc(me).get(),r.collection('pub').doc(me).get()]);
     if(p.exists&&q.exists){const a=q.data(),b=p.data();X.eu={nome:a.nome,deck:a.deck,vida:a.vida,ven:a.ven||0,dc:a.dc||0,imp:a.imp||0,mull:a.mull||0,campo:a.campo||[],cem:a.cem||[],exi:a.exi||[],cmdz:a.cmdz||[],bib:b.bib||[],mao:b.mao||[],
       pool:Object.assign(xPool0(),a.pool),ter:a.ter||0,tv:a.tv||0,tl:a.tl||0,gv:a.gv||'',fv:a.fv||'',evs:a.evs||[]};}
-    if(X.cod!==cod)return;xOuve();xPinta();if(xEsBot(cod)&&!XBOT&&!$('#x1-botf')){const f=document.createElement('iframe');f.id='x1-botf';f.hidden=true;f.title='bot';
-      f.src=location.pathname+'?bot='+cod+'&deck='+encodeURIComponent(d.botDeck||'')+'#x1/'+cod;document.body.appendChild(f);}}
+    if(X.cod!==cod)return;xOuve();xPinta();if(xEsBot(cod)&&!XBOT&&!$('#x1-botf')){const ds=BK.lst.filter(x=>x.cmd&&x.c&&x.c.length);for(let b=0;b<(d.nbot||1);b++){const f=document.createElement('iframe');f.id=b?'x1-botf'+b:'x1-botf';f.className='x1-botfr';f.hidden=true;f.title='bot';
+      const dk=b?ds[Math.random()*ds.length|0].id:(d.botDeck||'');f.src=location.pathname+'?bot='+cod+(b?'&u=bot'+(b+1):'')+'&deck='+encodeURIComponent(dk)+'#x1/'+cod;setTimeout(()=>document.body.appendChild(f),b*700);}}}
   catch(e){X.cod='';xPinta('Não deu pra entrar ('+(e.code||e)+')');}}
 function xComeca(id){const d=BK.lst.find(x=>x.id===(id||($('#x1-deck')||{}).value));if(!d)return;const m=xMonta(d);
   X.eu={nome:ctNome(xEuU()),deck:d.nome||d.cmd||'Deck',vida:40,ven:0,dc:0,imp:0,mull:0,bib:m.bib,mao:[],campo:[],cem:[],exi:[],cmdz:m.cmd,pool:xPool0(),ter:0,tv:0,tl:0,gv:'',fv:'',evs:[]};
@@ -5409,15 +5436,19 @@ function xTurno(){const s=X.sala,e=X.eu,me=xUid();if(!s||!e)return;let mud=0;
     const cp=s.turno!==1;let t='';
     if(cp){if(e.bib.length){e.mao.push(e.bib.shift());t=' e comprou 1';}else t=' e não tinha carta pra comprar (grimório vazio = derrota)';}else t=' (quem começa não compra no 1º turno)';
     xLog(`começou o turno ${s.turno}: desvirou tudo${t}`);if(!(s.fase>0))xSala({fase:1});mud=1;}
-  const g=s.golpe;if(g&&g.para===me&&e.gv!==g.id){e.gv=g.id;e.vida+=(g.vg||0)-(g.dano||0);e.dc+=g.cmd||0;
+  for(const g of [s.golpe,...(s.golpes||[])])if(g&&g.para===me&&e.gv!==g.id){e.gv=g.id;e.vida+=(g.vg||0)-(g.dano||0);if(g.cmd){e.dcm=e.dcm||{};e.dcm[g.de]=(e.dcm[g.de]||0)+g.cmd;e.dc=Math.max(e.dc||0,...Object.values(e.dcm));}
     for(const c of e.campo.slice()){if((g.mortos||[]).includes(c.k)){e.campo.splice(e.campo.indexOf(c),1);if(!c.tok)e.cem.push(xReset(c));}else{if(g.dn&&g.dn[c.k])c.dn=(c.dn||0)+g.dn[c.k];c.bl='';}}
     for(const [k,d] of Object.entries(g.pw||{})){const c=e.campo.find(q=>q.k===k);if(c)xEfCarta(c,'dano',d);}
     xVarre();mud=1;}
-  if(!e.evs)e.evs=[];for(const v of s.ev||[])if(v.para===me&&!e.evs.includes(v.id)){e.evs.push(v.id);xEvAplica(v);mud=1;}if(e.evs.length>80)e.evs=e.evs.slice(-80);
+  if(!e.evs)e.evs=[];for(const v of s.ev||[])if((v.para===me||(v.para==='*'&&v.de!==me))&&!e.evs.includes(v.id)){e.evs.push(v.id);xEvAplica(v);mud=1;}if(e.evs.length>80)e.evs=e.evs.slice(-80);
   const P=s.pilha||[],top=P[P.length-1];
   if(top&&s.rz===top.id&&top.de===me&&X.rzF!==top.id){X.rzF=top.id;const nv=[],rest=xResolve(top,P.slice(0,-1),nv);const o={pilha:rest,rz:'',pri:s.vez,pp:0};
     if(nv.length)o.ev=[...(s.ev||[]),...nv].slice(-30);if(top.tipo==='mag'&&!xInfo(top.c).perm)o.mag={de:me,n:top.nm,img:top.img||'',ts:Date.now()};Object.assign(s,o);xSala(o);mud=1;}
   else if(top&&!s.rz&&s.pri===me){const key=top.id+'.'+(s.pp||0)+'.'+P.length;if(X.apF!==key&&!xTemResposta()){X.apF=key;setTimeout(()=>{if(X.sala&&X.sala.pri===xUid())xPassaPri();},500);}}
+  if(s.cb==='blq'&&s.vez!==me)X.foco=s.vez;
+  if(s.cb==='blq'&&s.vez===me&&s.def&&s.def.every(u=>(s.bq||[]).includes(u)||xMorto(xPub(u)))&&X.dzF!==s.turno){X.dzF=s.turno;xSala({cb:'dano'});}
+  if(xMax()>2&&s.turno&&xMorto(e)){if(!e.fora){e.fora=1;mud=1;xLog('🏳 saiu da partida');}
+    if(s.vez===me&&!(s.pilha||[]).length&&!s.cb)xSala({vez:xProx(me),turno:(s.turno||0)+1,fase:0,cb:''});else if(s.pri===me&&!s.rz)setTimeout(xPassaPri,300);}
   if(mud)xSobe();}
 /* anexo cuja carta saiu: aura vai pro cemitério, equipamento fica solto */
 function xVarre(){const e=X.eu;if(!e)return 0;let mud=0;
@@ -5447,8 +5478,8 @@ async function xConjura(z,k){const e=X.eu,c=e[z].find(q=>q.k===k);if(!c)return;c
   if(!e[z].includes(c))return;const pg=xAplica(e,r);e[z].splice(e[z].indexOf(c),1);xReset(c);if(z==='cmdz')e.imp++;
   xLog(`conjurou ${c.n}${x?` (X=${x})`:''}${alvo?' em '+xAlvoNome(alvo):''}${al.length?' → '+al.map(xAlvoNome).join(', '):''}${imp?` com imposto +${imp}`:''}${pg?' · '+pg:''}`);
   xEmpilha({id:xId(),de:xUid(),tipo:'mag',c,an:alvo,al,x,nm:c.n,img:c.img||''});xSobe();xPintaEu();}
-function xAchaK(k){return [...((X.eu||{}).campo||[]),...((X.op||{}).campo||[])].find(c=>c.k===k);}
-function xAlvos(tp,menos){const l=[];for(const [cp,lado] of [[(X.eu||{}).campo||[],'Seu'],[(X.op||{}).campo||[],'Oponente']])for(const c of cp){if(c.k===menos||c.an)continue;const i=xInfo(c);
+function xAchaK(k){return [...((X.eu||{}).campo||[]),...xOpCampos().flatMap(([c])=>c)].find(c=>c.k===k);}
+function xAlvos(tp,menos){const l=[];for(const [cp,lado] of [[(X.eu||{}).campo||[],'Seu'],...xOpCampos().map(([c,u])=>[c,xMax()>2?xNomeU(u):'Oponente'])])for(const c of cp){if(c.k===menos||c.an)continue;const i=xInfo(c);
   const ok=tp==='creature'?i.cri:tp==='land'?i.land:tp==='artifact'?/Artifact/.test(i.tipo||'')||c.art:tp==='enchantment'?/Enchantment/.test(i.tipo||''):true;if(ok)l.push({c,lado});}return l;}
 function xEscolhe(tit,l){return new Promise(res=>{const dl=bDlg('x1-esc');let ok=0;
   dl.innerHTML=`<div class="b-dlgtop"><h3>${h(tit)}</h3><button class="b-x" data-xfecha aria-label="Fechar">✕</button></div>
@@ -5468,7 +5499,18 @@ const X1NUM={a:1,an:1,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,ni
 const xN=w=>{w=String(w||'').toLowerCase();return /^\d+$/.test(w)?+w:X1NUM[w]!=null?X1NUM[w]:1;};
 const X1ALV="(any target|target creature or planeswalker|target creature or player|target player or planeswalker|target creature an opponent controls|target creature you don't control|target creature you control|target nonland permanent|target artifact or enchantment|target creature|target artifact|target enchantment|target planeswalker|target permanent|target land|target opponent|target player|each opponent|each other creature|each creature your opponents control|each creature|each player)";
 const xNorm=(tx,n)=>{let t=String(tx||'');for(const v of [n,String(n||'').split(' // ')[0],String(n||'').split(',')[0]])if(v&&v.length>2)t=t.split(v).join('this card');return t;};
-const xOutro=()=>((X.sala&&X.sala.jog)||[]).find(u=>u!==xUid())||'';
+const xMax=()=>(X.sala&&X.sala.max)||2;
+const xMorto=p=>!p||p.vida<=0||(p.dc||0)>=21||(p.ven||0)>=10;
+const xPub=u=>u===xUid()?X.eu:(X.ops||{})[u];
+const xVivos=()=>((X.sala&&X.sala.jog)||[]).filter(u=>{const p=xPub(u);return p&&!xMorto(p);});
+function xProx(u){const j=(X.sala&&X.sala.jog)||[],n=j.length,i=j.indexOf(u);for(let q=1;q<=n;q++){const v=j[(i+q)%n],p=xPub(v);if(p&&!xMorto(p))return v;}return u;}
+function xOpsL(){const j=(X.sala&&X.sala.jog)||[],me=xUid(),i=Math.max(0,j.indexOf(me)),r=[];for(let q=1;q<j.length;q++){const u=j[(i+q)%j.length];if(u!==me&&X.ops&&X.ops[u])r.push(u);}return r;}
+const xOpCampos=()=>Object.entries(X.ops||{}).map(([u,p])=>[p.campo||[],u]);
+function xDonoK(k){if(((X.eu||{}).campo||[]).some(c=>c.k===k))return xUid();for(const [cp,u] of xOpCampos())if(cp.some(c=>c.k===k))return u;return '';}
+const xDefDe=c=>c.alv?(String(c.alv).startsWith('P:')?c.alv.slice(2):xDonoK(c.alv)):(((X.sala&&X.sala.jog)||[]).find(u=>u!==X.sala.vez)||'');
+const xAU=v=>xEsBot(X.cod)?window.__xmk.au(v):firebase.firestore.FieldValue.arrayUnion(v);
+function xOutro(){const f=X.foco,o=X.ops||{};if(f&&o[f]&&!xMorto(o[f]))return f;const l=xOpsL();return l.find(u=>!xMorto(o[u]))||l[0]||((X.sala&&X.sala.jog)||[]).find(u=>u!==xUid())||'';}
+Object.defineProperty(X,'op',{get(){return (X.ops||{})[xOutro()]||null;},set(v){},configurable:true});
 const X1QN=['a','an','one','two','three','four','five','x','\\d+'].join('|');
 let FORGE=null;function xForgeCarrega(){if(FORGE)return;FORGE={};fetch('forge.json').then(r=>r.ok?r.json():{}).then(j=>FORGE=j).catch(()=>{});}
 function xForge(tx,n){const E=FORGE&&FORGE[String(n||'').split(' // ')[0]];if(!E)return null;const nr=s=>xNorm(s,n).toLowerCase().replace(/[^a-z0-9]/g,''),t=nr(tx);if(t.length<6)return null;
@@ -5506,17 +5548,17 @@ function xAlvosEf(al){const me=xUid(),ou=xOutro(),l=[];
     switch(al){case 'any target':case 'target creature or planeswalker':return cri||pw;case 'target creature or player':return cri;case 'target player or planeswalker':case 'target planeswalker':return pw;
       case 'target creature an opponent controls':case "target creature you don't control":return cri&&lado!=='Seu';case 'target creature you control':return cri&&lado==='Seu';
       case 'target nonland permanent':return !ld;case 'target artifact or enchantment':return art||en;case 'target creature':return cri;case 'target artifact':return art;case 'target enchantment':return en;case 'target land':return ld;default:return true;}};
-  for(const [cp,lado] of [[(X.eu||{}).campo||[],'Seu'],[(X.op||{}).campo||[],'Oponente']])for(const c of cp)if(!(c.an&&xExiste(c.an)&&!xInfo(c).cri)||al==='target artifact'||al==='target enchantment'||al==='target nonland permanent'||al==='target permanent'||al==='target artifact or enchantment')if(ok(c,lado))l.push({c,lado});
-  if(/any target|player/.test(al)){if(ou)l.push({jog:ou,nome:xNomeU(ou)});l.push({jog:me,nome:'Você'});}
+  for(const [cp,lado] of [[(X.eu||{}).campo||[],'Seu'],...xOpCampos().map(([c,u])=>[c,xMax()>2?xNomeU(u):'Oponente'])])for(const c of cp)if(!(c.an&&xExiste(c.an)&&!xInfo(c).cri)||al==='target artifact'||al==='target enchantment'||al==='target nonland permanent'||al==='target permanent'||al==='target artifact or enchantment')if(ok(c,lado))l.push({c,lado});
+  if(/any target|player/.test(al)){for(const u of xOpsL())if(!xMorto(X.ops[u]))l.push({jog:u,nome:xNomeU(u)});l.push({jog:me,nome:'Você'});}
   return l;}
 function xAlvoNome(t){t=String(t||'');if(t.startsWith('M:'))return (xAchaK(t.slice(2))||{}).n||'?';if(t.startsWith('P:'))return xNomeU(t.slice(2));if(t.startsWith('S:'))return ((X.sala&&X.sala.pilha||[]).find(p=>p.id===t.slice(2))||{}).nm||'mágica';return (xAchaK(t)||{}).n||'?';}
 async function xPedeAlvos(st,nome){const al=[];for(const s of st){if(!xPrecisaAlvo(s))continue;
     const l=s.op==='anula'?((X.sala&&X.sala.pilha)||[]).filter(p=>p.tipo==='mag').map(p=>({st:p})):xAlvosEf(s.al);
     if(!l.length){xAv(`${nome}: sem alvo válido (${s.op==='anula'?'nenhuma mágica na pilha':s.al}).`);return null;}
     const a=await xEscolhe(`${nome}: escolha o alvo`,l);if(!a)return null;al.push(a);}return al;}
-function xEmpilha(it){const s=X.sala;if(!s)return;const o={pilha:[...(s.pilha||[]),xLimpo(it)],pri:xOutro()||xUid(),pp:1,rz:''};Object.assign(s,o);xSala(o);xPintaFase();}
+function xEmpilha(it){const s=X.sala;if(!s)return;const o={pilha:[...(s.pilha||[]),xLimpo(it)],pri:xProx(xUid()),pp:1,rz:''};Object.assign(s,o);xSala(o);xPintaFase();}
 function xPassaPri(){const s=X.sala,P=(s&&s.pilha)||[];if(!P.length||s.pri!==xUid()||s.rz)return;const pp=(s.pp||0)+1;
-  const o=pp>=2?{rz:P[P.length-1].id,pp}:{pri:xOutro()||xUid(),pp};Object.assign(s,o);xSala(o);xPintaFase();}
+  const o=pp>=Math.max(2,xVivos().length)?{rz:P[P.length-1].id,pp}:{pri:xProx(xUid()),pp};Object.assign(s,o);xSala(o);xPintaFase();}
 function xTemResposta(){const e=X.eu;if(!e)return false;if([...e.mao,...e.cmdz].some(c=>{const i=xInfo(c);return i.inst&&!i.land;}))return true;
   return e.campo.some(c=>xHabs(c).some(hb=>!hb.pw&&xHabOk(c,hb)));}
 const XH=new Map();
@@ -5558,8 +5600,8 @@ function xEfCarta(c,op,n,x){const i=xInfo(c);
 function xTodos(tipo){const e=X.eu;for(const c of e.campo.slice()){const i=xInfo(c),art=/Artifact/.test(i.tipo||'')||!!c.art,en=/Enchantment/.test(i.tipo||'');
   const ok=tipo==='creatures'?i.cri:tipo==='artifacts'?art:tipo==='enchantments'?en:tipo==='lands'?i.land:tipo==='planeswalkers'?i.pw:!i.land;if(ok)xEfCarta(c,'destroi');}}
 function xTodosDano(n,menos){for(const c of X.eu.campo.slice())if(c.k!==menos&&xInfo(c).cri)xEfCarta(c,'dano',n);}
-function xNoAlvo(t,op,n,ev,x){if(!t)return;if(t.startsWith('P:')){if(op!=='dano')return;if(t.slice(2)===xUid())X.eu.vida-=n;else ev({op:'vida',d:-n});return;}
-  const c=X.eu.campo.find(q=>q.k===t);if(c)return xEfCarta(c,op,n,x);if(((X.op||{}).campo||[]).some(q=>q.k===t))ev({op:'carta',k:t,o:op,n:n||0,x:x||null});}
+function xNoAlvo(t,op,n,ev,x){if(!t)return;if(t.startsWith('P:')){if(op!=='dano')return;if(t.slice(2)===xUid())X.eu.vida-=n;else ev({op:'vida',d:-n},t.slice(2));return;}
+  const c=X.eu.campo.find(q=>q.k===t);if(c)return xEfCarta(c,op,n,x);const du=xDonoK(t);if(du)ev({op:'carta',k:t,o:op,n:n||0,x:x||null},du);}
 function xEvAplica(v){const e=X.eu;
   if(v.op==='compra'){for(let q=0;q<v.n;q++)if(e.bib.length)e.mao.push(e.bib.shift());}
   else if(v.op==='vida')e.vida+=v.d;
@@ -5576,16 +5618,16 @@ function xResolve(it,rest,nv){const e=X.eu;if(it.tipo==='atq'&&xAtqResolve(it)){
   const tx=it.tx!=null?it.tx:xInfo(it.c).tx,st=xEfeitos(tx,it.nm);
   if(!st.length){xLog(`${it.nm} resolveu (efeito pelo menu: ${tx})`);xAv(`${it.nm} resolveu. Faça o efeito pelo menu: ${String(tx).slice(0,140)}`);return rest;}
   return xFaz(st,it,rest,nv);}
-function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0;const ev=o=>nv.push(Object.assign({id:xId(),para:ou},o));
+function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0;const ev=(o,p)=>nv.push(Object.assign({id:xId(),de:me,para:p||'*'},o));
   for(const s of st){const pa=xPrecisaAlvo(s),t=pa?(it.al||[])[j++]:'',n=s.n==='X'?(it.x||0):s.n;
     if(pa&&(!t||(!/^[PS]:/.test(t)&&!xExiste(t)))){feito.push('o alvo saiu');continue;}
     switch(s.op){
       case 'compra':for(let q=0;q<n;q++)if(e.bib.length)e.mao.push(e.bib.shift());if(s.quem==='todos')ev({op:'compra',n});feito.push((s.quem==='todos'?'cada jogador comprou ':'comprou ')+n);break;
       case 'ganha':e.vida+=n;feito.push(`ganhou ${n} de vida`);break;
       case 'perdeEu':e.vida-=n;feito.push(`perdeu ${n} de vida`);break;
-      case 'perde':ev({op:'vida',d:-n});if(s.quem==='todos')e.vida-=n;feito.push(`${s.quem==='todos'?'cada jogador':xNomeU(ou)} perdeu ${n} de vida`);break;
+      case 'perde':ev({op:'vida',d:-n});if(s.quem==='todos')e.vida-=n;feito.push(`${s.quem==='todos'?'cada jogador':xMax()>2?'cada oponente':xNomeU(ou)} perdeu ${n} de vida`);break;
       case 'dano':if(/^each/.test(s.al)){if(/opponent|player/.test(s.al)){ev({op:'vida',d:-n});if(s.al==='each player')e.vida-=n;}else{ev({op:'danoTodos',n});if(!/your opponents/.test(s.al))xTodosDano(n,s.al==='each other creature'?it.k:'');}feito.push(`${n} de dano (${s.al})`);break;}
-        if(!t){ev({op:'vida',d:-n});feito.push(`${n} de dano em ${xNomeU(ou)}`);break;}
+        if(!t){ev({op:'vida',d:-n},ou);feito.push(`${n} de dano em ${xNomeU(ou)}`);break;}
         xNoAlvo(t,'dano',n,ev);feito.push(`${n} de dano em ${xAlvoNome(t)}`);break;
       case 'destroi':case 'exila':case 'volta':case 'vira':case 'desvira':feito.push(`${{destroi:'destruiu',exila:'exilou',volta:'voltou pra mão',vira:'virou',desvira:'desvirou'}[s.op]} ${xAlvoNome(t)}`);xNoAlvo(t,s.op,0,ev);break;
       case 'pump':feito.push(`${xAlvoNome(t||it.k)} ${s.p>=0?'+':''}${s.p}/${s.t>=0?'+':''}${s.t}`);xNoAlvo(t||it.k,'pump',0,ev,{p:s.p,t:s.t});break;
@@ -5594,12 +5636,12 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
       case 'todos':xTodos(s.tipo);ev({op:'todos',tipo:s.tipo});feito.push('destruiu todas as '+s.tipo);break;
       case 'pumpTodos':e.campo.filter(xCri).forEach(c=>{c.tp=(c.tp||0)+s.p;c.tt=(c.tt||0)+s.t;});feito.push(`suas criaturas ${s.p}/${s.t}`);break;
       case 'anula':{const ix=rest.findIndex(p=>'S:'+p.id===t);if(ix<0){feito.push('a mágica alvo já tinha saído');break;}const p=rest[ix];rest=rest.filter((_,q)=>q!==ix);
-        if(p.tipo==='mag'){if(p.de===me)e.cem.push(p.c);else ev({op:'anulada',c:p.c});}feito.push('anulou '+p.nm);break;}
+        if(p.tipo==='mag'){if(p.de===me)e.cem.push(p.c);else ev({op:'anulada',c:p.c},p.de);}feito.push('anulou '+p.nm);break;}
       case 'ficha':xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1);feito.push(`criou ${n} ficha${n>1?'s':''} ${s.nome}${s.p!=null?' '+s.p+'/'+s.t:''}`);break;
       case 'scry':setTimeout(()=>xLista('bib','Vidência '+n+': mande pro topo ou pro fundo',n),300);feito.push('vidência '+n);break;
       case 'busca':{const pega=[],vi=new Set();for(const pas of [0,1])for(const c of e.bib){if(pega.length>=n)break;if(!/^(Snow-Covered )?(Plains|Island|Swamp|Mountain|Forest|Wastes)$/.test(c.n)||pega.includes(c)||(!pas&&vi.has(c.n)))continue;vi.add(c.n);pega.push(c);}
         pega.forEach((c,q)=>{e.bib.splice(e.bib.indexOf(c),1);if(s.dest==='campo'||(s.dest==='misto'&&q===0)){c.tap=s.tap?1:0;e.campo.push(c);}else e.mao.push(c);});xEmb(e.bib);feito.push(`buscou ${pega.map(c=>c.n).join(', ')||'nada'}`);break;}
-      case 'mill':if(s.quem==='op')ev({op:'mill',n});else for(let q=0;q<n&&e.bib.length;q++)e.cem.push(e.bib.shift());feito.push(`moeu ${n}`);break;}}
+      case 'mill':if(s.quem==='op')ev({op:'mill',n},ou);else for(let q=0;q<n&&e.bib.length;q++)e.cem.push(e.bib.shift());feito.push(`moeu ${n}`);break;}}
   xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);xVarre();return rest;}
 
 const xAtqTx=c=>{const m=xNorm(xInfo(c).tx,c.n).match(/^(?:[A-Za-z ]+ — )?Whenever this card attacks, ([^\n]+)$/im);return m?m[1]:'';};
@@ -5610,7 +5652,7 @@ async function xAtkOk(at){const e=X.eu;
       if(l.length){const k=await xEscolhe(`${c.n}: pôr uma criatura artefato da mão atacando? (feche pra não pôr)`,l);if(k)al=['M:'+k];}}
     else{const st=xEfeitos(tx,c.n);const a2=st.length?await xPedeAlvos(st,c.n):[];if(a2)al=a2;}
     xLog(`gatilho de ataque de ${xNomeF(c)} foi pra pilha`);xEmpilha({id:xId(),de:xUid(),tipo:'atq',tx,nm:xNomeF(c),img:c.img||'',k:c.k,al});}
-  X.sala.cb='blq';xSala({cb:'blq'});xSobe();xPintaEu();}
+  const def=[...new Set(at.map(xDefDe).filter(Boolean))];Object.assign(X.sala,{cb:'blq',def,bq:[]});xSala({cb:'blq',def,bq:[]});xSobe();xPintaEu();}
 function xAtqResolve(it){const e=X.eu,src=e.campo.find(q=>q.k===it.k),tx=it.tx,f=[];let feito=0;
   if(/put an artifact creature card from your hand onto the battlefield tapped and attacking/i.test(tx)){const mk=((it.al||[])[0]||'').slice(2),c=e.mao.find(q=>q.k===mk);
     if(c){e.mao.splice(e.mao.indexOf(c),1);Object.assign(c,{tap:1,atk:1,sk:1});e.campo.push(c);f.push(`pôs ${c.n} virada e atacando`);feito=1;}else f.push('não pôs criatura');
@@ -5625,26 +5667,29 @@ function xConv(c){c.face=c.face?0:1;c.cvf=0;xLog(`${xNomeF(c)} converteu`);}
 const xNomeF=c=>String(c.n).split(' // ')[c.face?1:0]||c.n;
 /* ---------- combate ---------- */
 function xPodeAtk(c){const s=X.sala||{};if(!xVez()||s.fase!==2||s.cb)return false;const v=xPT(c);return xCri(c)&&!c.tap&&!c.atk&&!(c.sk&&!v.kw.has('haste'))&&!v.kw.has('defender')&&!v.pz;}
-function xBloqueia(c,ak){const a=((X.op||{}).campo||[]).find(q=>q.k===ak);if(!a)return;const va=xPT(a),vb=xPT(c);
+function xBloqueia(c,ak){const a=((((X.ops||{})[(X.sala||{}).vez])||{}).campo||[]).find(q=>q.k===ak);if(!a)return;const va=xPT(a),vb=xPT(c);
   if(va.kw.has('unblockable'))return xAv(a.n+' não pode ser bloqueada neste turno.');if(va.kw.has('flying')&&!vb.kw.has('flying')&&!vb.kw.has('reach'))return xAv(a.n+' voa: só bloqueia quem tem voar ou alcance.');c.bl=ak;}
-function xDano(){const e=X.eu,o=X.op,s=X.sala,me=xUid();if(!o||!s)return;const para=s.jog.find(u=>u!==me);
-  const mk=c=>{const v=xPT(c);return {c,P:Math.max(0,v.p),T:v.t,kw:v.kw,dmg:c.dn||0,dt:0,morto:0};};
-  const A=e.campo.filter(c=>c.atk).map(mk),B=(o.campo||[]).filter(c=>c.bl&&A.some(a=>a.c.k===c.bl)).map(mk);
-  let dano=0,cmd=0,vgA=0,vgB=0;const pw={};const bate=(a,r)=>{if(a.c.alv&&(o.campo||[]).some(q=>q.k===a.c.alv))pw[a.c.alv]=(pw[a.c.alv]||0)+r;else{dano+=r;if(a.c.cmd)cmd+=r;}};
+function xDano(){const e=X.eu,s=X.sala,me=xUid();if(!s||!Object.keys(X.ops||{}).length)return;
+  const mk=(c,u)=>{const v=xPT(c);return {c,u,P:Math.max(0,v.p),T:v.t,kw:v.kw,dmg:c.dn||0,dt:0,morto:0};};
+  const A=e.campo.filter(c=>c.atk).map(c=>mk(c,me)),B=xOpCampos().flatMap(([cp,u])=>cp.filter(c=>c.bl&&A.some(a=>a.c.k===c.bl)).map(c=>mk(c,u)));
+  const G={},gp=u=>G[u]=G[u]||{dano:0,cmd:0,vg:0,pw:{}};let vgA=0;
+  const bate=(a,r)=>{const al=a.c.alv,u=xDefDe(a.c)||xOutro();if(al&&!String(al).startsWith('P:')&&xDonoK(al)){const g=gp(xDonoK(al));g.pw[al]=(g.pw[al]||0)+r;}else{const g=gp(u);g.dano+=r;if(a.c.cmd)g.cmd+=r;}};
   for(const pas of [1,2]){const fere=x=>pas===1?(x.kw.has('first strike')||x.kw.has('double strike')):(!x.kw.has('first strike')||x.kw.has('double strike'));const hit=[];
     for(const a of A){if(a.morto||!fere(a))continue;const bs=B.filter(b=>b.c.bl===a.c.k),vv=bs.filter(b=>!b.morto);let r=a.P,deu=0;
       if(!bs.length){bate(a,r);deu=r;}
       else{for(let j=0;j<vv.length&&r>0;j++){const b=vv[j],need=a.kw.has('deathtouch')?1:Math.max(0,b.T-b.dmg),d=(j===vv.length-1&&!a.kw.has('trample'))?r:Math.min(r,need);hit.push([b,d,a]);r-=d;deu+=d;}
         if(r>0&&a.kw.has('trample')){bate(a,r);deu+=r;}}
       if(a.kw.has('lifelink'))vgA+=deu;}
-    for(const b of B){if(b.morto||!fere(b))continue;const a=A.find(x=>x.c.k===b.c.bl);if(a&&!a.morto&&b.P>0){hit.push([a,b.P,b]);if(b.kw.has('lifelink'))vgB+=b.P;}}
+    for(const b of B){if(b.morto||!fere(b))continue;const a=A.find(x=>x.c.k===b.c.bl);if(a&&!a.morto&&b.P>0){hit.push([a,b.P,b]);if(b.kw.has('lifelink'))gp(b.u).vg+=b.P;}}
     for(const [t,n,f] of hit)if(n>0){t.dmg+=n;if(f.kw.has('deathtouch'))t.dt=1;}
     for(const x of [...A,...B])if(!x.morto&&!x.kw.has('indestructible')&&(x.dmg>=x.T||(x.dt&&x.dmg>0)))x.morto=1;}
   for(const a of A){a.c.atk=0;a.c.alv='';if(a.c.cvf&&!a.morto)xConv(a.c);if(a.morto){e.campo.splice(e.campo.indexOf(a.c),1);if(!a.c.tok)e.cem.push(xReset(a.c));}else a.c.dn=a.dmg;}
-  e.vida+=vgA;const dn={};B.forEach(b=>{if(!b.morto&&b.dmg>(b.c.dn||0))dn[b.c.k]=b.dmg-(b.c.dn||0);});
-  xSala({cb:'',fase:3,golpe:{id:xId(),de:me,para,dano,cmd,vg:vgB,mortos:B.filter(b=>b.morto).map(b=>b.c.k),dn,pw}});
+  e.vida+=vgA;B.forEach(b=>gp(b.u));
+  const golpes=Object.entries(G).map(([u,g])=>{const dn={};B.filter(b=>b.u===u).forEach(b=>{if(!b.morto&&b.dmg>(b.c.dn||0))dn[b.c.k]=b.dmg-(b.c.dn||0);});
+    return Object.assign({id:xId(),de:me,para:u,mortos:B.filter(b=>b.u===u&&b.morto).map(b=>b.c.k),dn},g);});
+  xSala({cb:'',fase:3,golpe:null,golpes});
   const mo=[...A,...B].filter(x=>x.morto).map(x=>x.c.n);
-  xLog(`combate: ${o.nome} tomou ${dano}${Object.keys(pw).length?' · planeswalker: '+Object.entries(pw).map(([k,d])=>xAlvoNome(k)+' −'+d).join(', '):''}${cmd?` (${cmd} de comandante)`:''}${vgA?`, ganhou ${vgA} de vida`:''}${vgB?`, ${o.nome} ganhou ${vgB}`:''}${mo.length?' · morreram: '+mo.join(', '):''}`);
+  xLog(`combate: ${golpes.map(g=>`${xNomeU(g.para)} tomou ${g.dano}${g.cmd?` (${g.cmd} de comandante)`:''}${Object.keys(g.pw).length?' · planeswalker: '+Object.entries(g.pw).map(([k,d])=>xAlvoNome(k)+' −'+d).join(', '):''}${g.vg?`, ganhou ${g.vg}`:''}`).join(' · ')}${vgA?` · ganhou ${vgA} de vida`:''}${mo.length?' · morreram: '+mo.join(', '):''}`);
   xVarre();xSobe();xTudo();}
 
 /* ---------- fichas ---------- */
@@ -5676,7 +5721,7 @@ async function xAcao(z,k,op){const e=X.eu;if(!e)return;const i=e[z]?e[z].findInd
   else if(op.startsWith('sac:')){const y=op.slice(4);e.campo.splice(i,1);e.pool[y]++;xLog(`sacrificou ${n}: +{${y}}`);}
   else if(op==='pista'||op==='comida'){const r=xPaga(e,xCusto('{2}'),0);if(!r.ok)return xAv('Falta mana: '+r.falta.join(', '));const pg=xAplica(e,r);e.campo.splice(e.campo.indexOf(c),1);
     if(op==='pista'){if(e.bib.length)e.mao.push(e.bib.shift());xLog(`sacrificou ${n} e comprou 1 · ${pg||'pagou com a mana solta'}`);}else{e.vida+=3;xLog(`sacrificou ${n} e ganhou 3 de vida · ${pg||'pagou com a mana solta'}`);}}
-  else if(op==='atk'||op.startsWith('atk:')){const v=xPT(c);c.alv=op.slice(4);c.atk=v.kw.has('vigilance')?1:2;if(c.atk===2)c.tap=1;}
+  else if(op==='atk'||op.startsWith('atk:')){const v=xPT(c);c.alv=op==='atk'?'P:'+xOutro():op.slice(4);c.atk=v.kw.has('vigilance')?1:2;if(c.atk===2)c.tap=1;}
   else if(op==='atkx'){if(c.atk===2)c.tap=0;c.atk=0;}
   else if(op.startsWith('bl:'))xBloqueia(c,op.slice(3));else if(op==='blx')c.bl='';
   else if(op==='tap'){c.tap=c.tap?0:1;xLog(`${c.tap?'virou':'desvirou'} ${n}`);}
@@ -5697,24 +5742,25 @@ function xVida(campo,d){const e=X.eu;const de=X.vt[campo]?X.vt[campo].de:e[campo
   const rot={vida:'vida',ven:'veneno',dc:'dano de comandante recebido'}[campo];
   X.vt[campo]={de,tm:setTimeout(()=>{const a=e[campo];delete X.vt[campo];if(a!==de)xLog(`${rot}: ${de} → ${a}`);},1500)};xSobe();xPintaEu();}
 function xBotao(a){const e=X.eu,s=X.sala||{},me=xUid();
-  if(a==='criar')return xCria();if(a==='bot')return xCriaBot();if(a==='comecar')return xComeca();
+  if(a==='criar')return xCria();if(a==='criar4')return xCria(4);if(a==='bot')return xCriaBot();if(a==='bot3')return xCriaBot(3);if(a==='comecar')return xComeca();
   if(a==='link'){const u=location.origin+location.pathname+'#x1/'+X.cod;navigator.clipboard.writeText(u).then(()=>bToast('Link copiado: '+u),()=>prompt('Copie o link:',u));return;}
   if(a==='sair'){location.hash='#x1';return;}
   if(a==='lado')return xLadoTroca();if(a==='hist')return document.body.classList.toggle('x1-hist');
   if(a==='d20')return xLog('rolou um d20: '+(1+Math.floor(Math.random()*20)));if(a==='d6')return xLog('rolou um d6: '+(1+Math.floor(Math.random()*6)));
   if(a==='moeda')return xLog('jogou a moeda: '+(Math.random()<.5?'cara':'coroa'));
   if(a==='opcem'||a==='opexi'||a==='opcmdz')return xLista(a,a==='opcem'?'Cemitério do oponente':'Exílio do oponente');
-  if(a==='sorteia'){if(s.turno)return;const v=s.jog[Math.random()*s.jog.length|0];xSala({vez:v,turno:1,fase:0,ini:v,cb:'',golpe:null});return xLog(`sorteou quem começa: ${(s.nomes||{})[v]||'?'}`);}
+  if(a==='sorteia'){if(s.turno)return;const v=s.jog[Math.random()*s.jog.length|0];xSala({vez:v,turno:1,fase:0,ini:v,cb:'',golpe:null,golpes:[]});return xLog(`sorteou quem começa: ${(s.nomes||{})[v]||'?'}`);}
   if(!e)return;if(a==='pri')return xPassaPri();
   if(['fase','passa','atkok','blqok','dano'].includes(a)&&(s.pilha||[]).length)return xAv('Espere a pilha resolver (✋ Passar).');
   if(a==='fase'){if(!xVez()||s.cb)return;if((s.fase||0)>=4)return;return xSala({fase:(s.fase||0)+1});}
   if(a==='passa'){if(!xVez())return;if(s.cb)return xAv('Termine o combate antes de passar.');if(e.mao.length>7)return xAv(`Você está com ${e.mao.length} cartas. Descarte até ficar com 7 (toque na carta › Descartar).`);
-    xLog('passou o turno');return xSala({vez:s.jog.find(u=>u!==me)||me,turno:(s.turno||0)+1,fase:0,cb:''});}
+    xLog('passou o turno');return xSala({vez:xProx(me),turno:(s.turno||0)+1,fase:0,cb:''});}
   if(a==='atkok'){if(!xVez()||s.fase!==2||s.cb)return;const at=e.campo.filter(c=>c.atk);if(!at.length)return xSala({fase:3});
     return xAtkOk(at);}
-  if(a==='blqok'){if(xVez()||s.cb!=='blq')return;const at=((X.op||{}).campo||[]).filter(c=>c.atk);
+  if(a==='blqok'){if(xVez()||s.cb!=='blq')return;const at=(((X.ops||{})[s.vez]||{}).campo||[]).filter(c=>c.atk&&xDefDe(c)===me);
     for(const q of at)if(xPT(q).kw.has('menace')&&e.campo.filter(c=>c.bl===q.k).length===1)return xAv(q.n+' tem ameaçar: precisa de 2 ou mais bloqueadores, ou nenhum.');
-    const bs=e.campo.filter(c=>c.bl);xLog(bs.length?'bloqueou: '+bs.map(c=>`${c.n} → ${(at.find(q=>q.k===c.bl)||{}).n}`).join(', '):'não bloqueou');xSala({cb:'dano'});return;}
+    const bs=e.campo.filter(c=>c.bl);xLog(bs.length?'bloqueou: '+bs.map(c=>`${c.n} → ${(at.find(q=>q.k===c.bl)||{}).n}`).join(', '):'não bloqueou');
+    if((s.bq||[]).includes(me))return;const bq=[...(s.bq||[]),me];s.bq=bq;xSala((s.def||[me]).every(u=>bq.includes(u)||xMorto(xPub(u)))?{cb:'dano',bq}:{bq:xAU(me)});return;}
   if(a==='dano'){if(!xVez()||s.cb!=='dano')return;return xDano();}
   if(a==='livre')return;
   if(a==='comprar'){if(!e.bib.length)return xAv('O grimório acabou');e.mao.push(e.bib.shift());xLog('comprou uma carta (efeito)');}
@@ -5754,25 +5800,34 @@ function xPoolH(p,meu){const l=['W','U','B','R','G','C'].filter(k=>(p||{})[k]>0)
 function xPlacar(e,meu){const x=(k,rot,cl)=>(e[k]||0)>0?`<span class="x1-pt ${cl}" title="${rot}"><b>${e[k]}</b><small>${rot}</small></span>`:'';
   return `<div class="x1-plac"><span class="x1-av${meu?' eu':''}" title="Vida"><i>${h((e.nome||'?').trim()[0]||'?').toUpperCase()}</i><b class="x1-vida">${e.vida||0}</b></span><div class="x1-quem"><b>${h(e.nome)}</b><small>${h(e.deck||'')}</small></div>${x('ven','veneno','vn')}${x('dc','dano cmd','dcm')}${xPoolH(e.pool,meu)}</div>`;}
 function xPintaFase(){const el=$('#x1-fase');if(!el)return;const s=X.sala||{},me=xUid(),eu=s.vez===me,f=s.fase||0,e=X.eu||{},o=X.op;
-  if(!s.turno){el.innerHTML=`<div class="x1-fz"><span>${X.eu&&o?'Os dois estão na mesa. Quem quiser, faz mulligan agora.':'Esperando os dois escolherem o deck.'}</span><span class="x1-esp"></span>${X.eu&&o?'<button class="prim" data-x="sorteia">🎲 Sortear quem começa</button>':''}</div>`;return;}
+  if(!s.turno){const nj=(s.jog||[]).length,np=Object.keys(X.ops||{}).length+(X.eu?1:0),pr=X.eu&&o&&np>=nj,mx=xMax();
+    el.innerHTML=`<div class="x1-fz"><span>${pr?(mx>2?`${np} na mesa${np<mx?` (cabem ${mx}, dá pra esperar mais)`:''}.`:'Os dois estão na mesa.')+' Quem quiser, faz mulligan agora.':mx>2?`Mesão: ${np} de ${mx} prontos. Esperando o pessoal escolher o deck.`:'Esperando os dois escolherem o deck.'}</span><span class="x1-esp"></span>${pr?'<button class="prim" data-x="sorteia">🎲 Sortear quem começa</button>':''}</div>`;return;}
   let ac='',dica='';const P=s.pilha||[];
   if(P.length){const pr=s.pri===me&&!s.rz;ac=pr?'<button class="prim" data-x="pri">✋ Passar (deixa resolver)</button>':`<span class="x1-esp2">${s.rz?'Resolvendo…':'Esperando '+h(xNomeU(s.pri))+' responder…'}</span>`;
     dica=pr?'Pode responder com instantânea, lampejo ou habilidade (toque na carta). Ou passe pra resolver o topo.':'';}
-  else if(eu){if(s.cb==='blq'){ac='<span class="x1-esp2">Esperando os bloqueios…</span>';dica=`${h(xNomeU(s.jog.find(u=>u!==me)))} está escolhendo quem bloqueia.`;}
+  else if(eu){if(s.cb==='blq'){ac='<span class="x1-esp2">Esperando os bloqueios…</span>';dica=`${(s.def||s.jog.filter(u=>u!==me)).filter(u=>!(s.bq||[]).includes(u)).map(u=>h(xNomeU(u))).join(', ')} escolhendo quem bloqueia.`;}
     else if(s.cb==='dano'){ac='<button class="prim" data-x="dano">💥 Causar dano</button>';dica='Bloqueios prontos. Clique em Causar dano.';}
     else if(f===2){ac='<button class="prim" data-x="atkok">⚔ Atacantes prontos</button>';dica='Toque nas suas criaturas e escolha ⚔ Atacar. Sem atacante, o botão pula o combate.';}
     else{ac=(f<4?'<button data-x="fase">Próxima fase ▶</button>':'')+'<button class="prim" data-x="passa">Passar turno ⏭</button>';
       if(f===1||f===3)dica=`Fase principal: ${e.ter?'já jogou terreno':'pode jogar 1 terreno'}, conjurar mágicas e equipar. Toque na carta.`;}}
-  else{if(s.cb==='blq'){const at=(o&&o.campo||[]).filter(c=>c.atk);ac='<button class="prim" data-x="blqok">🛡 Bloqueios prontos</button>';
-      dica=`<b>${h(o?o.nome:'')} atacou</b> com ${at.map(c=>h(c.n)+' '+xPT(c).p+'/'+xPT(c).t).join(', ')} (total ${at.reduce((t,c)=>t+Math.max(0,xPT(c).p),0)}). Toque nas suas criaturas desviradas pra bloquear.`;}
-    else dica='Vez do oponente. Você pode responder com instantânea ou lampejo.';}
+  else{const at=(((X.ops||{})[s.vez]||{}).campo||[]).filter(c=>c.atk&&xDefDe(c)===me);if(s.cb==='blq'&&at.length&&!(s.bq||[]).includes(me)){ac='<button class="prim" data-x="blqok">🛡 Bloqueios prontos</button>';
+      dica=`<b>${h(xNomeU(s.vez))} atacou você</b> com ${at.map(c=>h(c.n)+' '+xPT(c).p+'/'+xPT(c).t).join(', ')} (total ${at.reduce((t,c)=>t+Math.max(0,xPT(c).p),0)}). Toque nas suas criaturas desviradas pra bloquear.`;}
+    else if(s.cb==='blq'){ac='<span class="x1-esp2">Esperando os bloqueios…</span>';dica=xMorto(e)?'Você saiu da partida. Pode assistir.':'';}
+    else dica=xMorto(e)&&xMax()>2?'Você saiu da partida. Pode assistir até o fim.':`Vez de ${h(xNomeU(s.vez))}. Você pode responder com instantânea ou lampejo.`;}
   const mg=s.mag&&Date.now()-s.mag.ts<120000?`<span class="x1-mag" data-xf="${h(s.mag.n)}">✨ ${h(xNomeU(s.mag.de))} conjurou <b>${h(s.mag.n)}</b></span>`:'';
   el.innerHTML=`<div class="x1-fz${eu?' eu':''}"><b>Turno ${s.turno} · ${eu?'Sua vez':'vez de '+h(xNomeU(s.vez))}</b><ol class="x1-fs">${FASES.map((n,j)=>`<li class="${j===f?'on':j<f?'ja':''}">${n}</li>`).join('')}</ol><span class="x1-esp"></span>${ac}</div>${P.length?`<div class="x1-pilha"><small>Pilha (o último resolve primeiro)</small>${P.map(p=>`<span class="x1-pi${p.de===me?' eu':''}" data-xf="${h(p.nm)}">${p.img?`<img src="${h(p.img)}" alt="">`:''}<b>${h(p.nm)}</b><small>${p.tipo==='mag'?'mágica':p.tipo==='etb'||p.tipo==='atq'?'gatilho':'habilidade'} de ${h(xNomeU(p.de))}${(p.al||[]).length?' → '+p.al.map(t=>h(xAlvoNome(t))).join(', '):''}</small></span>`).join('')}</div>`:''}${dica||mg?`<p class="x1-dica">${dica}${mg}</p>`:''}`;}
-function xPintaOp(){const el=$('#x1-op');if(!el)return;const o=X.op;
+function xOpH(o,u){return `<div class="x1-barra">${xPlacar(o)}<div class="x1-zonas"><span>✋ Mão <b>${o.nm}</b></span><span>📚 Grimório <b>${o.nb}</b></span><button data-x="opcem">🪦 Cemitério <b>${(o.cem||[]).length}</b></button><button data-x="opexi">✖ Exílio <b>${(o.exi||[]).length}</b></button></div></div>
+   ${(o.cmdz||[]).length?`<div class="x1-cmd"><small>Zona de comando · imposto +${(o.imp||0)*2}</small>${o.cmdz.map(c=>xC(c,'opcmdz')).join('')}</div>`:''}<div class="x1-campo">${xCampo(o.campo||[],'opcampo',1)}</div>`;}
+function xPintaOps(el){const s=X.sala||{},me=xUid(),j=s.jog||[],i=Math.max(0,j.indexOf(me)),f=xOutro(),L=[];
+  for(let q=1;q<xMax();q++){const u=j[(i+q)%Math.max(j.length,1)];L.push(q<j.length&&u!==me?u:'');}
+  el.className='x1-ops n'+L.length;
+  el.innerHTML=L.map((u,q)=>{if(!u)return `<div class="x1-lado x1-opl x1-o vago"><p class="nota">Lugar ${q+2} vago${xEsBot(X.cod)?'':` · código <b class="mono">${X.cod}</b>`}</p></div>`;const o=X.ops[u];
+    if(!o)return `<div class="x1-lado x1-opl x1-o vago" data-u="${h(u)}"><p class="nota">${h((s.nomes||{})[u]||'Jogador')} está escolhendo o deck…</p></div>`;
+    return `<div style="${X.cwo&&X.cwo[u]?'--cw:'+X.cwo[u]+'px':''}" class="x1-lado x1-opl x1-o${u===f?' foco':''}${s.vez===u?' vez':''}${xMorto(o)?' morto':''}${s.cb==='blq'&&(s.def||[]).includes(u)?' def':''}" data-u="${h(u)}">${xOpH(o,u)}</div>`;}).join('');}
+function xPintaOp(){const el=$('#x1-op');if(!el)return;if(xMax()>2)return xPintaOps(el);const o=X.op;
   if(!o){const ns=X.sala?Object.entries(X.sala.nomes||{}).filter(([u])=>u!==xUid()).map(([,n])=>n):[];
     el.innerHTML=`<p class="nota">${ns.length?h(ns[0])+' entrou e está escolhendo o deck…':`Esperando o outro jogador. Mande o código <b class="mono">${X.cod}</b> ou o link da sala.`}</p>`;return;}
-  el.innerHTML=`<div class="x1-barra">${xPlacar(o)}<div class="x1-zonas"><span>✋ Mão <b>${o.nm}</b></span><span>📚 Grimório <b>${o.nb}</b></span><button data-x="opcem">🪦 Cemitério <b>${(o.cem||[]).length}</b></button><button data-x="opexi">✖ Exílio <b>${(o.exi||[]).length}</b></button></div></div>
-   ${(o.cmdz||[]).length?`<div class="x1-cmd"><small>Zona de comando · imposto +${(o.imp||0)*2}</small>${o.cmdz.map(c=>xC(c,'opcmdz')).join('')}</div>`:''}<div class="x1-campo">${xCampo(o.campo||[],'opcampo',1)}</div>`;}
+  el.innerHTML=xOpH(o);}
 function xPintaLog(){const el=$('#x1-log');if(!el)return;const me=xUid();
   el.innerHTML=X.log.map(l=>`<p class="${l.uid===me?'eu':''}"><b>${h(l.nome)}</b> ${xSym(h(l.t))}</p>`).join('')||'<p class="fraca">Nada ainda. Tudo que vocês fizerem aparece aqui.</p>';el.scrollTop=el.scrollHeight;}
 function xPintaEu(){const e=X.eu,el=$('#x1-eu');if(!el||!e)return;const s=X.sala||{};
@@ -5784,17 +5839,17 @@ function xPintaEu(){const e=X.eu,el=$('#x1-eu');if(!el||!e)return;const s=X.sala
    <div class="x1-maot"><small>Sua mão (${e.mao.length}) · só você vê${e.mao.length>7?' · <b class="x1-ruim">passou de 7, descarte antes de passar o turno</b>':''}</small><div class="x1-mao">${e.mao.map(c=>xC(c,'mao')).join('')||'<p class="nota">Mão vazia</p>'}</div></div>`;}
 function xPinta(msg){const el=$('#x1');if(!el)return;xForgeCarrega();
   if(!CT.auth){el.innerHTML='<p class="nota">Carregando a conta…</p>';return;}
-  if(!xEuU()){el.innerHTML=`<div class="x1-ent"><div class="painel"><p>Pra jogar online, os dois jogadores precisam estar com conta (é de graça).</p><button class="prim" data-ctabre>Entrar ou criar conta</button></div><div class="painel x1-botp"><h3>🤖 Treinar contra o bot</h3><p class="nota">Partida só sua, sem internet de outra pessoa. O bot joga com um dos seus decks.</p>${(()=>{const ds=BK.lst.filter(d=>d.cmd&&d.c&&d.c.length);return ds.length?`<div class="linha"><select id="x1-botdeck"><option value="?">Deck aleatório</option>${ds.map(d=>`<option value="${h(d.id)}">${h(d.nome||d.cmd)}</option>`).join('')}</select><button class="prim" data-x="bot">Jogar contra o bot</button></div>`:'<p class="nota">Monte um deck com comandante em <a href="#decks">Meus decks</a> primeiro.</p>';})()}</div></div>`;return;}
+  if(!xEuU()){el.innerHTML=`<div class="x1-ent"><div class="painel"><p>Pra jogar online, os dois jogadores precisam estar com conta (é de graça).</p><button class="prim" data-ctabre>Entrar ou criar conta</button></div><div class="painel x1-botp"><h3>🤖 Treinar contra o bot</h3><p class="nota">Partida só sua, sem internet de outra pessoa. O bot joga com um dos seus decks.</p>${(()=>{const ds=BK.lst.filter(d=>d.cmd&&d.c&&d.c.length);return ds.length?`<div class="linha"><select id="x1-botdeck"><option value="?">Deck aleatório</option>${ds.map(d=>`<option value="${h(d.id)}">${h(d.nome||d.cmd)}</option>`).join('')}</select><button class="prim" data-x="bot">Jogar contra o bot</button><button data-x="bot3">👥 Mesão contra 3 bots</button></div>`:'<p class="nota">Monte um deck com comandante em <a href="#decks">Meus decks</a> primeiro.</p>';})()}</div></div>`;return;}
   const m=msg?`<p class="ct-msg">${h(msg)}</p>`:'';
   if(!X.cod){el.innerHTML=`<div class="x1-ent">
-     <div class="painel"><h3>Chamar alguém</h3><p class="nota">Cria a sala e manda o código ou o link pro outro jogador.</p><button class="prim" data-x="criar">Criar sala</button></div>
-     <div class="painel x1-botp"><h3>🤖 Treinar contra o bot</h3><p class="nota">Partida só sua, sem internet de outra pessoa. O bot joga com um dos seus decks.</p>${(()=>{const ds=BK.lst.filter(d=>d.cmd&&d.c&&d.c.length);return ds.length?`<div class="linha"><select id="x1-botdeck"><option value="?">Deck aleatório</option>${ds.map(d=>`<option value="${h(d.id)}">${h(d.nome||d.cmd)}</option>`).join('')}</select><button class="prim" data-x="bot">Jogar contra o bot</button></div>`:'<p class="nota">Monte um deck com comandante em <a href="#decks">Meus decks</a> primeiro.</p>';})()}</div>
+     <div class="painel"><h3>Chamar alguém</h3><p class="nota">Cria a sala e manda o código ou o link pro outro jogador.</p><div class="linha"><button class="prim" data-x="criar">Criar sala X1</button><button class="prim" data-x="criar4">👥 Criar mesão (4)</button></div><p class="nota">Mesão: até 4 jogadores, cada um vê a mesa de todo mundo. Começa com 3 se quiser.</p></div>
+     <div class="painel x1-botp"><h3>🤖 Treinar contra o bot</h3><p class="nota">Partida só sua, sem internet de outra pessoa. O bot joga com um dos seus decks.</p>${(()=>{const ds=BK.lst.filter(d=>d.cmd&&d.c&&d.c.length);return ds.length?`<div class="linha"><select id="x1-botdeck"><option value="?">Deck aleatório</option>${ds.map(d=>`<option value="${h(d.id)}">${h(d.nome||d.cmd)}</option>`).join('')}</select><button class="prim" data-x="bot">Jogar contra o bot</button><button data-x="bot3">👥 Mesão contra 3 bots</button></div>`:'<p class="nota">Monte um deck com comandante em <a href="#decks">Meus decks</a> primeiro.</p>';})()}</div>
      <div class="painel"><h3>Entrar numa sala</h3><p class="nota">Recebeu um código? Digite aqui.</p><form id="x1-fent" class="linha"><input id="x1-cod" placeholder="Ex.: K7M2QX" maxlength="8" autocomplete="off" required><button class="prim">Entrar</button></form></div>
      <p class="nota">Jogo com regras: turno e fases, só passa quem está na vez, conjurar paga a mana (vira os terrenos sozinho), 1 terreno por turno, criatura nova fica com enjoo, combate com bloqueio e dano automático, equipar e encantar, marcadores e fichas. Efeito de carta (comprar 2, destruir, buscar) você faz pelo ⚙ Efeitos e pelo menu da carta. Sua mão e seu grimório ficam escondidos do outro.</p></div>${m}`;return;}
-  const topo=`<div class="x1-topo"><span>${xEsBot(X.cod)?'🤖 Treino contra o bot':`Sala <b class="mono">${X.cod}</b>`}</span>${xEsBot(X.cod)?'':'<button data-x="link">🔗 Copiar link</button>'}<button data-x="sair">Sair da sala</button><span class="x1-esp"></span><button data-x="hist" class="x1-bhist">📜 Histórico</button><button data-x="lado" class="x1-blado">📱 ${document.body.classList.contains('x1-ladoon')?'Voltar em pé':'Jogar de lado'}</button><button data-x="d20">🎲 d20</button><button data-x="d6">🎲 d6</button><button data-x="moeda">🪙 Moeda</button></div>`;
+  const topo=`<div class="x1-topo"><span>${xEsBot(X.cod)?(xMax()>2?'🤖 Mesão contra 3 bots':'🤖 Treino contra o bot'):`${xMax()>2?'Mesão':'Sala'} <b class="mono">${X.cod}</b>`}</span>${xEsBot(X.cod)?'':'<button data-x="link">🔗 Copiar link</button>'}<button data-x="sair">Sair da sala</button><span class="x1-esp"></span><button data-x="hist" class="x1-bhist">📜 Histórico</button><button data-x="lado" class="x1-blado">📱 ${document.body.classList.contains('x1-ladoon')?'Voltar em pé':'Jogar de lado'}</button><button data-x="d20">🎲 d20</button><button data-x="d6">🎲 d6</button><button data-x="moeda">🪙 Moeda</button></div>`;
   if(!X.eu){const ds=BK.lst.filter(d=>d.cmd&&d.c&&d.c.length);
-    el.innerHTML=topo+(X.cod&&X.un.length?`<div class="painel"><h3>Escolha seu deck</h3>${ds.length?`<div class="linha"><select id="x1-deck">${ds.map(d=>`<option value="${h(d.id)}">${h(d.nome||d.cmd)} · ${h(d.cmd)} (${bTotal(d)})</option>`).join('')}</select><button class="prim" data-x="comecar">Começar com este deck</button></div><p class="nota">O grimório é embaralhado e você já compra 7. Vida começa em 40.</p>`:'<p class="nota">Você ainda não tem deck com comandante. Monte um em <a href="#decks">Meus decks</a>.</p>'}</div><div id="x1-op" class="x1-lado x1-opl"></div>`:'')+m;xPintaOp();return;}
-  el.innerHTML=topo+`<div class="x1-mesa"><div class="x1-tab"><div id="x1-op" class="x1-lado x1-opl"></div><div class="x1-faseb"><div id="x1-fase"></div><form id="x1-fchat" class="linha"><input id="x1-msg" placeholder="Mensagem pro outro jogador" maxlength="200" autocomplete="off"><button>Enviar</button></form></div><div id="x1-eu" class="x1-lado x1-eul"></div></div><aside class="x1-lat"><small>Histórico da partida</small><div id="x1-log" aria-live="polite"></div></aside></div>${m}`;
+    el.innerHTML=topo+(X.cod&&X.un.length?`<div class="painel"><h3>Escolha seu deck</h3>${ds.length?`<div class="linha"><select id="x1-deck">${ds.map(d=>`<option value="${h(d.id)}">${h(d.nome||d.cmd)} · ${h(d.cmd)} (${bTotal(d)})</option>`).join('')}</select><button class="prim" data-x="comecar">Começar com este deck</button></div><p class="nota">O grimório é embaralhado e você já compra 7. Vida começa em 40.</p>`:'<p class="nota">Você ainda não tem deck com comandante. Monte um em <a href="#decks">Meus decks</a>.</p>'}</div><div id="x1-op" class="${xMax()>2?'x1-ops':'x1-lado x1-opl'}"></div>`:'')+m;xPintaOp();return;}
+  el.innerHTML=topo+`<div class="x1-mesa"><div class="x1-tab"><div id="x1-op" class="${xMax()>2?'x1-ops':'x1-lado x1-opl'}"></div><div class="x1-faseb"><div id="x1-fase"></div><form id="x1-fchat" class="linha"><input id="x1-msg" placeholder="Mensagem pro outro jogador" maxlength="200" autocomplete="off"><button>Enviar</button></form></div><div id="x1-eu" class="x1-lado x1-eul"></div></div><aside class="x1-lat"><small>Histórico da partida</small><div id="x1-log" aria-live="polite"></div></aside></div>${m}`;
   xTurno();xTudo();xPintaLog();}
 
 /* ---------- menus e listas ---------- */
@@ -5806,8 +5861,8 @@ function xOpcoes(z,c){const e=X.eu,s=X.sala||{},o=[],i=xInfo(c),me=xUid();
     if(!c.tap&&i.mana&&!i.sacMana&&!(i.cri&&c.sk&&!v.kw.has('haste')))i.mana.forEach(m=>o.push(['mn:'+m,'💧 Virar pra mana '+xSym(m.split('').map(y=>'{'+y+'}').join(''))]));
     if(i.sacMana)['W','U','B','R','G'].forEach(y=>o.push(['sac:'+y,'💰 Sacrificar: +'+SV(y)]));
     if(c.tok&&c.n==='Pista')o.push(['pista','🔍 Pagar '+SV('2')+' e sacrificar: compre 1']);if(c.tok&&c.n==='Comida')o.push(['comida','🍗 Pagar '+SV('2')+' e sacrificar: ganhe 3']);
-    if(xPodeAtk(c)){o.push(['atk','⚔ Atacar '+h(X.op?X.op.nome:'o jogador')]);for(const p of ((X.op||{}).campo||[]).filter(q=>xInfo(q).pw))o.push(['atk:'+p.k,'⚔ Atacar '+h(p.n)]);}if(c.atk&&!s.cb)o.push(['atkx','✋ Cancelar ataque']);
-    if(s.cb==='blq'&&!xVez()&&i.cri&&!i.lm&&!c.tap&&v.pz<2){for(const a of ((X.op||{}).campo||[]).filter(q=>q.atk))if(c.bl!==a.k)o.push(['bl:'+a.k,'🛡 Bloquear '+h(a.n)]);if(c.bl)o.push(['blx','✋ Tirar bloqueio']);}
+    if(xPodeAtk(c)){const us=xOpsL().filter(u=>!xMorto(X.ops[u]));for(const u of us.length?us:[xOutro()])o.push(['atk:P:'+u,'⚔ Atacar '+h((X.ops[u]||{}).nome||'o jogador')]);for(const u of us)for(const p of (X.ops[u].campo||[]).filter(q=>xInfo(q).pw))o.push(['atk:'+p.k,'⚔ Atacar '+h(p.n)+(us.length>1?' ('+h(X.ops[u].nome)+')':'')]);}if(c.atk&&!s.cb)o.push(['atkx','✋ Cancelar ataque']);
+    if(s.cb==='blq'&&!xVez()&&i.cri&&!i.lm&&!c.tap&&v.pz<2){for(const a of ((X.ops[s.vez]||{}).campo||[]).filter(q=>q.atk&&xDefDe(q)===xUid()))if(c.bl!==a.k)o.push(['bl:'+a.k,'🛡 Bloquear '+h(a.n)]);if(c.bl)o.push(['blx','✋ Tirar bloqueio']);}
     xHabs(c).forEach((hb,j)=>o.push(['hab:'+j,(hb.pw?'◆ '+h(hb.rot):'⚡ '+xSym(h(hb.cu)))+': '+h(hb.tx.length>60?hb.tx.slice(0,58)+'…':hb.tx)]));
     if(i.eq)o.push(['eq',`🗡 Equipar ${xSym(h(i.eq))}`]);
     o.push(['tap',c.tap?'↺ Desvirar':(i.mana?'↻ Virar sem gerar mana':'↻ Virar')]);
@@ -5828,7 +5883,7 @@ function xLista(z,tit,n,busca){X.lst={z,tit,n:n||0,busca:!!busca};const dl=bDlg(
     if(b.dataset.xfecha!=null)return dl.close();if(b.dataset.x)return xBotao(b.dataset.x);
     if(b.dataset.xd){const [zz,k,op]=b.dataset.xd.split('|');if(op==='txt'){const c=xAcha(zz,k);if(c)abreFicha(c.n);return;}xAcao(zz,k,op);}});}
   xListaPinta();if(!dl.open)dl.showModal();}
-function xAcha(z,k){const l=z==='opcem'?(X.op||{}).cem:z==='opexi'?(X.op||{}).exi:z==='opcampo'?(X.op||{}).campo:z==='opcmdz'?(X.op||{}).cmdz:X.eu&&X.eu[z];return (l||[]).find(c=>c.k===k);}
+function xAcha(z,k){if(z.startsWith('op')){const q=z.slice(2);for(const u of [xOutro(),...Object.keys(X.ops||{})]){const c=((X.ops[u]||{})[q]||[]).find(c=>c.k===k);if(c)return c;}return null;}return ((X.eu&&X.eu[z])||[]).find(c=>c.k===k);}
 function xListaPinta(){const L=X.lst,dl=$('#x1-dlg');if(!L||!dl)return;const op=L.z.startsWith('op');
   const l=op?((X.op||{})[L.z.slice(2)]||[]):L.n?X.eu.bib.slice(0,L.n):X.eu[L.z];
   const ds={bib:[['mao','Mão'],['campo','Campo'],['cem','Cemitério'],['exi','Exílio'],['topo','Topo'],['fundo','Fundo']],cem:[['mao','Mão'],['campo','Campo'],['exi','Exílio'],['topo','Topo'],['fundo','Fundo']],exi:[['mao','Mão'],['campo','Campo'],['cem','Cemitério'],['topo','Topo'],['fundo','Fundo']]}[L.z]||[];
@@ -5841,6 +5896,7 @@ function xListaPinta(){const L=X.lst,dl=$('#x1-dlg');if(!L||!dl)return;const op=
 
 /* ---------- eventos ---------- */
 (function(){const el=$('#x1');if(!el)return;
+  el.addEventListener('click',ev=>{const pu=ev.target.closest('.x1-o[data-u]');if(pu&&X.foco!==pu.dataset.u&&X.ops[pu.dataset.u]){X.foco=pu.dataset.u;xPintaOp();xPintaFase();}},true);
   el.addEventListener('click',ev=>{const c=ev.target.closest('[data-xc]');if(c){const z=c.dataset.xc;if(z.startsWith('op')){const q=xAcha(z,c.dataset.k);if(q&&(!q.tok||q.cp))abreFicha(q.n);return;}
       ev.stopPropagation();const r=c.getBoundingClientRect();xMenu(z,c.dataset.k,ev.clientX||r.left,ev.clientY||r.bottom);return;}
     const f=ev.target.closest('[data-xf]');if(f)return abreFicha(f.dataset.xf);
@@ -5875,7 +5931,7 @@ if(location.hash.startsWith('#x1'))aba();
 /* jogar de lado (paisagem) no celular */
 const xMQL=matchMedia('(orientation:landscape) and (max-height:520px)');
 function xLadoAt(){const b=document.body.classList,bs=document.body.style;const jogo=!!document.querySelector('#x1 .x1-mesa')&&document.body.dataset.aba==='x1';
-  const era=b.contains('x1-L');b.toggle('x1-L',jogo||b.contains('x1-ladoon')||xMQL.matches);if(!era&&b.contains('x1-L'))scrollTo(0,0);
+  const era=b.contains('x1-L');b.toggle('x1-L',jogo||b.contains('x1-ladoon')||xMQL.matches);b.toggle('x1-4',jogo&&xMax()>2);if(!era&&b.contains('x1-L'))scrollTo(0,0);
   const gira=b.contains('x1-gira'),W=gira?innerHeight:innerWidth,H=gira?innerWidth:innerHeight,P=!gira&&H>W*1.1;b.toggle('x1-P',P);
   const hd=document.querySelector('header.topo'),top=(!gira&&!b.contains('x1-ladoon')&&W>=900&&H>620&&hd)?hd.offsetHeight:0,h=H-top,cl=(v,a,z)=>Math.round(Math.max(a,Math.min(z,v)));
   bs.setProperty('--x1top',top+'px');bs.setProperty('--cw',(P?cl(Math.min(W*.15,h*.07),38,90):cl(Math.min(h*.105,(W-260)/13),38,118))+'px');bs.setProperty('--hw',(P?cl(Math.min(W*.19,h*.09),50,100):cl(h*.13,50,130))+'px');requestAnimationFrame(()=>xMede());const t=document.querySelector('.x1-blado');if(t)t.textContent='📱 '+(b.contains('x1-ladoon')?'Voltar em pé':'Jogar de lado');}
@@ -5890,9 +5946,11 @@ xMQL.addEventListener('change',xLadoAt);addEventListener('resize',()=>{if(docume
 {const _xp0=xPinta;xPinta=function(...a){const r=_xp0.apply(this,a);xLadoAt();return r;};}
 addEventListener('resize',()=>xLadoAt());addEventListener('hashchange',()=>setTimeout(xLadoAt,50));
 
-function xMede(){const b=document.body;if(!b.classList.contains('x1-L'))return;const cs=['#x1-op>.x1-campo','#x1-eu>.x1-campo'].map(q=>document.querySelector(q)).filter(c=>c&&c.clientHeight);if(!cs.length)return;
+function xMede(){const b=document.body;if(!b.classList.contains('x1-L'))return;const cs=['#x1-op>.x1-campo','#x1-eu>.x1-campo'].map(q=>document.querySelector(q)).filter(c=>c&&c.clientHeight);if(!cs.length&&!document.querySelector('#x1-op .x1-o'))return;
   const ok=()=>cs.every(c=>c.scrollHeight<=c.clientHeight+1&&c.scrollWidth<=c.clientWidth+1);let lo=28,hi=118;
-  while(hi-lo>2){const m=(lo+hi)>>1;b.style.setProperty('--cw',m+'px');if(ok())lo=m;else hi=m;}b.style.setProperty('--cw',lo+'px');}
+  while(hi-lo>2){const m=(lo+hi)>>1;b.style.setProperty('--cw',m+'px');if(ok())lo=m;else hi=m;}b.style.setProperty('--cw',lo+'px');
+  document.querySelectorAll('#x1-op .x1-o').forEach(p=>{const c=p.querySelector(':scope>.x1-campo');if(!c||!c.clientHeight){p.style.removeProperty('--cw');return;}
+    const ok1=()=>c.scrollHeight<=c.clientHeight+1&&c.scrollWidth<=c.clientWidth+1;let a=18,z=Math.max(lo,24)+1;while(z-a>2){const m=(a+z)>>1;p.style.setProperty('--cw',m+'px');if(ok1())a=m;else z=m;}p.style.setProperty('--cw',a+'px');(X.cwo=X.cwo||{})[p.dataset.u]=a;});}
 for(const nm of ['xPintaEu','xPintaOp']){const f0=window[nm]||eval(nm);eval(nm+'=function(...a){const r=f0.apply(this,a);if(document.body.classList.contains("x1-L"))requestAnimationFrame(()=>xMede());return r;}');}
 
 // Bot do X1: roda só na janela escondida (?bot=COD). Usa as mesmas funções do jogador, então segue as mesmas regras.
@@ -5911,8 +5969,8 @@ for(const nm of ['xPintaEu','xPintaOp']){const f0=window[nm]||eval(nm);eval(nm+'
   // escolher alvo: magia "ruim" mira o oponente (a maior criatura dele ou ele), "boa" mira o próprio bot
   xEscolhe=async(tit,l)=>{if(!l.length)return '';
     if(pref){const x=l.find(x=>x.c&&x.c.k===pref);if(x)return x.c.k;}
-    const sts=l.filter(x=>x.st);if(sts.length){const x=sts.find(x=>x.st.id===stAlvo)||sts.find(x=>x.st.de!=='bot');return x?'S:'+x.st.id:'';}const val=x=>x.c?Math.max(0,pt(x.c).p)+pt(x.c).t+(xInfo(x.c).pw?4:0):0;
-    const meu=x=>x.jog!=null?x.jog==='bot':x.st?false:x.lado==='Seu';
+    const sts=l.filter(x=>x.st);if(sts.length){const x=sts.find(x=>x.st.id===stAlvo)||sts.find(x=>x.st.de!==xUid());return x?'S:'+x.st.id:'';}const val=x=>x.c?Math.max(0,pt(x.c).p)+pt(x.c).t+(xInfo(x.c).pw?4:0):0;
+    const meu=x=>x.jog!=null?x.jog===xUid():x.st?false:x.lado==='Seu';
     let c=l.filter(x=>mal?!meu(x):meu(x));if(!c.length)c=l;
     if(mal&&dmgN){const mata=c.filter(x=>x.c&&xInfo(x.c).cri&&pt(x.c).t-(x.c.dn||0)<=dmgN&&!pt(x.c).kw.has('indestructible'));
       if(mata.length)c=mata;else{const pl=c.filter(x=>x.jog!=null);if(pl.length)c=pl;}}
@@ -5924,7 +5982,7 @@ for(const nm of ['xPintaEu','xPintaOp']){const f0=window[nm]||eval(nm);eval(nm+'
     try{await xConjura(z,c.k);}finally{mal=0;pref='';stAlvo='';dmgN=0;}return e[z].length<n;}
   const mao=()=>{const e=X.eu;return [...e.mao.map(c=>['mao',c]),...e.cmdz.map(c=>['cmdz',c])];};
   // resposta na pilha: anular o que vale a pena, salvar criatura alvo de remoção
-  async function responde(top){const e=X.eu;if(top.de==='bot')return 0;
+  async function responde(top){const e=X.eu;if(top.de===xUid())return 0;
     const meuAlvo=(top.al||[]).map(a=>String(a)).find(a=>e.campo.some(c=>c.k===a));
     const doi=top.tipo==='mag'?(custoT(top.c||{n:top.nm})>=3||ehMal(xInfo(top.c||{n:top.nm}).tx,top.nm)&&!!meuAlvo):!!meuAlvo&&ehMal(top.tx||'',top.nm);
     if(doi&&top.tipo==='mag')for(const [z,c] of mao())if(inst(c)&&tem(c,'anula')&&pode(e,c,z)&&await solta(z,c,{mal:1,st:top.id})){return 1;}
@@ -5957,9 +6015,9 @@ for(const nm of ['xPintaEu','xPintaOp']){const f0=window[nm]||eval(nm);eval(nm+'
       const morre=pb.some(b=>{const v=pt(b);return (v.p>=a.t||v.kw.has('deathtouch'))&&!a.kw.has('indestructible')&&a.p<v.t&&!a.kw.has('deathtouch');});
       at.push([c,a,morre]);tot+=a.p;}
     const letal=tot>=(o.vida||40);let n=0;
-    for(const [c,a,morre] of at)if(letal||!morre){c.atk=a.kw.has('vigilance')?1:2;if(c.atk===2)c.tap=1;n++;}
+    for(const [c,a,morre] of at)if(letal||!morre){c.atk=a.kw.has('vigilance')?1:2;c.alv='P:'+xOutro();if(c.atk===2)c.tap=1;n++;}
     if(n){xSobe();}return n;}
-  function bloqueia(){const e=X.eu,o=X.op||{},at=(o.campo||[]).filter(c=>c.atk).sort((a,b)=>pt(b).p-pt(a).p);
+  function bloqueia(){const e=X.eu,o=X.op||{},at=(o.campo||[]).filter(c=>c.atk&&xDefDe(c)===xUid()).sort((a,b)=>pt(b).p-pt(a).p);
     let vem=at.reduce((t,c)=>t+Math.max(0,pt(c).p),0);const livres=e.campo.filter(c=>xCri(c)&&!c.tap&&!c.bl);
     for(const a of at){const va=pt(a);if(va.kw.has('menace'))continue;
       const ok=livres.filter(b=>{if(b.bl)return false;if(va.kw.has('unblockable'))return false;const vb=pt(b);return !va.kw.has('flying')||vb.kw.has('flying')||vb.kw.has('reach');});
@@ -5973,14 +6031,14 @@ for(const nm of ['xPintaEu','xPintaOp']){const f0=window[nm]||eval(nm);eval(nm+'
     if(!e){if(!BK.lst.some(d=>d.id===DECK))try{BK.lst=JSON.parse(parent.eval('JSON.stringify(BK.lst)'));}catch(er){}
       xComeca(DECK||(BK.lst.find(d=>d.cmd&&d.c&&d.c.length)||{}).id);return;}
     if(!s.turno)return;if(X.fim)return;
-    if(e.vida<=0||(e.dc||0)>=21||(e.ven||0)>=10){X.fim=1;xLog('🏳 perdeu. Boa! Pra jogar de novo: Sair da sala › Jogar contra o bot.');return;}
-    if(X.op&&(X.op.vida<=0||(X.op.dc||0)>=21||(X.op.ven||0)>=10)){X.fim=1;xLog('🏆 ganhou a partida. Pra revanche: Sair da sala › Jogar contra o bot.');return;}
+    if(xMorto(e)){if(xMax()>2)return;X.fim=1;xLog('🏳 perdeu. Boa! Pra jogar de novo: Sair da sala › Jogar contra o bot.');return;}
+    if(xOpsL().length&&xOpsL().every(u=>xMorto(X.ops[u]))&&xOpsL().length>=((X.sala.jog||[]).length-1)){X.fim=1;xLog('🏆 ganhou a partida. Pra revanche: Sair da sala › Jogar contra o bot.');return;}
     const P=s.pilha||[];
-    if(P.length){if(s.pri==='bot'&&!s.rz){const top=P[P.length-1],ch=top.id+'.'+P.length;if(X.rp!==ch){X.rp=ch;if(await responde(top))return;}xPassaPri();}return;}
-    if(s.vez!=='bot'&&s.cb==='blq'&&X.bi!==s.turno){X.bi=s.turno;   // remoção instantânea no maior atacante
-      const at=((X.op||{}).campo||[]).filter(c=>c.atk).sort((a,b)=>pt(b).p-pt(a).p)[0];
+    if(P.length){if(s.pri===xUid()&&!s.rz){const top=P[P.length-1],ch=top.id+'.'+P.length;if(X.rp!==ch){X.rp=ch;if(await responde(top))return;}xPassaPri();}return;}
+    if(s.vez!==xUid()&&s.cb==='blq'&&X.bi!==s.turno){X.bi=s.turno;   // remoção instantânea no maior atacante
+      const at=((X.op||{}).campo||[]).filter(c=>c.atk&&xDefDe(c)===xUid()).sort((a,b)=>pt(b).p-pt(a).p)[0];
       if(at)for(const [z,c] of mao())if(inst(c)&&pode(e,c,z)&&ops(xInfo(c).tx,c.n).some(o=>o==='destroi'||o==='exila'||o==='dano'||o==='volta')&&await solta(z,c,{mal:1,pref:at.k}))return;}
-    if(s.vez!=='bot'){if(s.cb==='blq'&&X.bq!==s.turno){X.bq=s.turno;bloqueia();setTimeout(()=>xBotao('blqok'),700);}return;}
+    if(s.vez!==xUid()){if(s.cb==='blq'&&X.bq!==s.turno){X.bq=s.turno;bloqueia();setTimeout(()=>xBotao('blqok'),700);}return;}
     if(s.cb==='dano'){if(X.tq!==s.turno){X.tq=s.turno;   // truque: salvar/fazer vencer atacante bloqueado
         const bl=(X.op&&X.op.campo||[]).filter(c=>c.bl);for(const a of e.campo.filter(c=>c.atk)){const bs=bl.filter(b=>b.bl===a.k);if(!bs.length)continue;
           const dano=bs.reduce((t,b)=>t+Math.max(0,pt(b).p),0);if(dano<pt(a).t)continue;
