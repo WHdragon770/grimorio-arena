@@ -4765,8 +4765,10 @@ addEventListener('load',()=>{if(typeof ctRepinta==='function'){const r0=ctRepint
 const BU={chave:'bulk',d:st.get('bulk',{m:{},y:{}}),jogo:'m',f:''};
 const buVazio=o=>!o||(!Object.keys(o.m||{}).length&&!Object.keys(o.y||{}).length);
 function buConta(uid){const vis=st.get('bulk',{m:{},y:{}});BU.chave=uid?'bulk_'+uid:'bulk';BU.d=st.get(BU.chave,{m:{},y:{}});
-  if(uid&&buVazio(BU.d)&&!buVazio(vis)){BU.d=vis;st.set(BU.chave,vis);st.set('bulk',{m:{},y:{}});}}
-function buDaNuvem(j){try{const o=JSON.parse(j||'{}');if(o&&o.m&&!buVazio(o)){BU.d={m:o.m||{},y:o.y||{}};st.set(BU.chave,BU.d);}}catch(e){}}
+  BU.mig=null;if(uid&&buVazio(BU.d)&&!buVazio(vis)){BU.d=vis;BU.mig=vis;st.set(BU.chave,vis);st.set('bulk',{m:{},y:{}});}}
+function buDaNuvem(j){try{const o=JSON.parse(j||'{}');if(o&&o.m&&!buVazio(o)){const d={m:o.m||{},y:o.y||{}},v=BU.mig;
+    if(v)for(const k of ['m','y'])for(const n in v[k]||{})d[k][n]=Math.max(d[k][n]||0,v[k][n]);// junta o bulk de visitante sem contar duas vezes
+    BU.d=d;st.set(BU.chave,d);if(v){BU.mig=null;if(typeof ctSobe==='function')ctSobe();}}}catch(e){}}
 const buSalva=()=>{st.set(BU.chave,BU.d);if(typeof ctSobe==='function')ctSobe();};
 const buTot=o=>Object.values(o).reduce((s,q)=>s+q,0);
 
