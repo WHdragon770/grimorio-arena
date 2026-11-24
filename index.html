@@ -5505,7 +5505,14 @@ async function xConjura(z,k,cv,cus){const e=X.eu,c=e[z].find(q=>q.k===k);if(!c)r
   if(!e[z].includes(c))return;const pg=xAplica(e,r);e[z].splice(e[z].indexOf(c),1);xReset(c);if(cv&&cvc)c.face=1;if(cus)c.fb=1;if(z==='cmdz')e.imp++;
   if(!(await xWard(al,c.n))){if(z==='cmdz')e.cmdz.push(c);else if(cus)e.exi.push(c);else e.cem.push(c);xSobe();return xPintaEu();}
   xLog(`conjurou ${cvc?xNomeF(c)+' (convertido)':c.n}${x?` (X=${x})`:''}${alvo?' em '+xAlvoNome(alvo):''}${al.length?' → '+al.map(xAlvoNome).join(', '):''}${imp?` com imposto +${imp}`:''}${pg?' · '+pg:''}`);
-  xEmpilha({id:xId(),de:xUid(),tipo:'mag',c,an:alvo,al,x,nm:c.n,img:c.img||''});const ct=xNorm(i.tx,c.n).match(/^When you cast this (?:spell|card), ([^\n]+)$/im);if(ct)setTimeout(()=>xGatTx(c,ct[1],'ao conjurar'),300);xCastou(c);xSobe();xPintaEu();}
+  xEmpilha({id:xId(),de:xUid(),tipo:'mag',c,an:alvo,al,x,nm:c.n,img:c.img||''});const ct=xNorm(i.tx,c.n).match(/^When you cast this (?:spell|card), ([^\n]+)$/im);if(ct)setTimeout(()=>xGatTx(c,ct[1],'ao conjurar'),300);{const nc=(i.tx.match(/^Cascade\b/gim)||[]).length;for(let q=0;q<nc;q++)setTimeout(()=>xCascata(c),400+q*600);}xCastou(c);xSobe();xPintaEu();}
+function xMVc(c){let n=0;for(const m of String(xInfo(c).custo||'').matchAll(/\{([^}]+)\}/g)){const v=m[1].toUpperCase();if(/^\d+$/.test(v))n+=+v;else if(v!=='X')n++;}return n;}
+async function xCascata(c){const e=X.eu,mv=xMVc(c),ex=[];let a=null;
+  while(e.bib.length){const q=e.bib.shift();ex.push(q);const iq=xInfo(q);if(!iq.land&&xMVc(q)<mv){a=q;break;}}
+  xLog(`cascata de ${c.n}: exilou ${ex.length} carta${ex.length>1?'s':''}${a?' até '+a.n:' (nada abaixo de '+mv+')'}`);
+  if(a&&!xInfo(a).aura&&confirm(`Cascata de ${c.n}: conjurar ${a.n} de graça?`)){const ia=xInfo(a);const al=ia.perm?[]:await xPedeAlvos(xEfeitos(ia.tx,a.n),a.n);
+    if(al&&(await xWard(al,a.n))){ex.pop();xReset(a);xLog(`conjurou ${a.n} de graça (cascata)${al.length?' → '+al.map(xAlvoNome).join(', '):''}`);xEmpilha({id:xId(),de:xUid(),tipo:'mag',c:a,an:'',al,x:0,nm:a.n,img:a.img||''});xCastou(a);}}
+  xEmb(ex);e.bib.push(...ex);xSobe();xPintaEu();}
 function xAchaK(k){return [...((X.eu||{}).campo||[]),...xOpCampos().flatMap(([c])=>c)].find(c=>c.k===k);}
 function xAlvos(tp,menos){const l=[];for(const [cp,lado] of [[(X.eu||{}).campo||[],'Seu'],...xOpCampos().map(([c,u])=>[c,xMax()>2?xNomeU(u):'Oponente'])])for(const c of cp){if(c.k===menos||c.an)continue;const i=xInfo(c);
   const ok=tp==='creature'?i.cri:tp==='land'?i.land:tp==='artifact'?/Artifact/.test(i.tipo||'')||c.art:tp==='enchantment'?/Enchantment/.test(i.tipo||''):true;if(ok)l.push({c,lado});}return l;}
@@ -5567,6 +5574,9 @@ function xEfeitos(tx,n){const fg=xForge(tx,n);if(fg)return fg;const L=[];const t
     if(m=s.match(/creatures you control get ([+-]\d+)\/([+-]\d+) until end of turn/))L.push({op:'pumpTodos',p:+m[1],t:+m[2]});
     if(m=s.match(new RegExp('put ('+X1QN+') \\+1/\\+1 counters? on (target creature you control|target creature|each creature you control|this card)')))L.push({op:'cnt',n:xN(m[1]),al:m[2]==='this card'?'':m[2]});
     if(m=s.match(/(target creature|this card)[^,.]*? can't be blocked this turn/))L.push({op:'kt',al:m[1]==='this card'?'':'target creature',kw:'unblockable'});
+    {const AL="(another target creature|target creature or planeswalker(?: you don't control| an opponent controls)?|target creature(?: you don't control| an opponent controls)?|any target)",mp=a=>a==='another target creature'?'target creature':/^target creature or planeswalker/.test(a)?'target creature or planeswalker':a;
+     const fm=s.match(new RegExp("(target creature you control|this card|it) (fights|deals damage equal to its power to) (?:up to one )?"+AL));
+     if(fm){if(fm[1]==='target creature you control')L.push({op:'lutaA',al:'target creature you control'});L.push({op:fm[2]==='fights'?'luta':'morde',al:mp(fm[3])});}}
     if(m=s.match(/^scry (\w+)/))L.push({op:'scry',n:xN(m[1])});
     if(m=s.match(/search your library for (?:a|up to (\w+)) basic land cards?/)){const cp=/onto the battlefield/.test(s),mo=/into your hand/.test(s);L.push({op:'busca',n:m[1]?xN(m[1]):1,dest:cp&&mo?'misto':cp?'campo':'mao',tap:/battlefield tapped/.test(s)});}
     if(m=s.match(new RegExp('^untap '+X1ALV)))L.push({op:'desvira',al:m[1]});else if(m=s.match(new RegExp('^tap '+X1ALV)))L.push({op:'vira',al:m[1]});
@@ -5679,6 +5689,12 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
         xNoAlvo(t,'dano',n,ev);feito.push(`${n} de dano em ${xAlvoNome(t)}`);break;
       case 'destroi':case 'exila':case 'volta':case 'vira':case 'desvira':feito.push(`${{destroi:'destruiu',exila:'exilou',volta:'voltou pra mão',vira:'virou',desvira:'desvirou'}[s.op]} ${xAlvoNome(t)}`);xNoAlvo(t,s.op,0,ev);break;
       case 'pump':feito.push(`${xAlvoNome(t||it.k)} ${s.p>=0?'+':''}${s.p}/${s.t>=0?'+':''}${s.t}`);xNoAlvo(t||it.k,'pump',0,ev,{p:s.p,t:s.t});break;
+      case 'lutaA':it._f=t;break;
+      case 'luta':case 'morde':{const f=it._f||it.k,cf=xAchaK(f),cg=t.startsWith('P:')?null:xAchaK(t);if(!cf){feito.push('quem ia lutar saiu');break;}
+        const vf=xPT(cf),pf=Math.max(0,vf.p),pg=cg?Math.max(0,xPT(cg).p):0;const nf=xAlvoNome(f),ng=xAlvoNome(t);
+        if(cg&&vf.kw.has('deathtouch')&&pf>0&&!xProtDe(cg,cf))xNoAlvo(t,'destroi',0,ev);else if(!cg||!xProtDe(cg,cf))xNoAlvo(t,'dano',pf,ev);
+        if(s.op==='luta'&&cg&&!xProtDe(cf,cg)){if(xPT(cg).kw.has('deathtouch')&&pg>0)xNoAlvo(f,'destroi',0,ev);else xNoAlvo(f,'dano',pg,ev);}
+        feito.push(s.op==='luta'?`${nf} lutou com ${ng} (${pf} x ${pg})`:`${nf} causou ${pf} de dano em ${ng}`);break;}
       case 'kt':xNoAlvo(t||it.k,'kt',0,ev,{kw:s.kw});feito.push(`${xAlvoNome(t||it.k)} não pode ser bloqueada neste turno`);break;
       case 'cnt':if(s.al==='each creature you control')e.campo.filter(xCri).forEach(c=>c.cnt=(c.cnt||0)+n);else xNoAlvo(t||it.k,'cnt',n,ev);feito.push(`+${n} marcador +1/+1`);break;
       case 'todos':xTodos(s.tipo);ev({op:'todos',tipo:s.tipo});feito.push('destruiu todas as '+s.tipo);break;
