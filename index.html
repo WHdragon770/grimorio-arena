@@ -2921,8 +2921,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.82;
-/* dólar ao vivo (AwesomeAPI); 5.82 = do dia da publicação, só se falhar */
+let COTA=5.83;
+/* dólar ao vivo (AwesomeAPI); 5.83 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5335,8 +5335,8 @@ const xReset=c=>Object.assign(c,{k:xId(),tap:0,cnt:0,face:0,sk:0,atk:0,bl:'',an:
 
 /* ---------- leitura da carta (custo, tipo, P/T, palavras-chave, mana, equipar, o que o anexo dá) ---------- */
 const FASES=['Início','Principal 1','Combate','Principal 2','Final'];
-const KWS=['flying','reach','vigilance','haste','deathtouch','lifelink','trample','first strike','double strike','menace','defender','indestructible','hexproof','shroud','flash'];
-const KPT={shroud:'manto',flying:'voar',reach:'alcance',vigilance:'vigilância',haste:'ímpeto',deathtouch:'toque mortífero',lifelink:'vínculo com a vida',trample:'atropelar','first strike':'iniciativa','double strike':'golpe duplo',menace:'ameaçar',defender:'defensor',indestructible:'indestrutível',hexproof:'resistência a magia',flash:'lampejo',unblockable:'não pode ser bloqueada'};
+const KWS=['flying','reach','vigilance','haste','deathtouch','lifelink','trample','first strike','double strike','menace','defender','indestructible','hexproof','shroud','infect','wither','flash'];
+const KPT={shroud:'manto',infect:'infectar',wither:'murchar',flying:'voar',reach:'alcance',vigilance:'vigilância',haste:'ímpeto',deathtouch:'toque mortífero',lifelink:'vínculo com a vida',trample:'atropelar','first strike':'iniciativa','double strike':'golpe duplo',menace:'ameaçar',defender:'defensor',indestructible:'indestrutível',hexproof:'resistência a magia',flash:'lampejo',unblockable:'não pode ser bloqueada'};
 const BAS={Plains:'W',Island:'U',Swamp:'B',Mountain:'R',Forest:'G'};
 function xKwTx(tx){const s=new Set();for(let l of String(tx||'').split('\n')){l=l.replace(/\([^)]*\)/g,'').trim().toLowerCase().replace(/\.$/,'');if(!l)continue;
   const ps=l.split(/,\s*|\s+and\s+/).map(p=>p.trim()).filter(Boolean);if(ps.length&&ps.every(p=>KWS.includes(p)))ps.forEach(p=>s.add(p));}return s;}
@@ -5356,6 +5356,7 @@ function xInfo(c){
   o={tipo,tx,custo:String(r[1]||'').split(' // ')[0],land:/\bLand\b/.test(tipo),cri:/\bCreature\b/.test(tipo)||/^Living metal/im.test(tx),lm:!/\bCreature\b/.test(tipo)&&/^Living metal/im.test(tx),aura:/\bAura\b/.test(tipo),equip:/\bEquipment\b/.test(tipo),perm:!/\b(Instant|Sorcery)\b/.test(tipo)};
   {const w=tx.match(/^Ward(?:\s*|—)((?:\{[^}]+\})+)/im),wv=tx.match(/^Ward—Pay (\d+) life/im);o.ward=w?w[1]:'';o.wardv=wv?+wv[1]:0;
    o.prot=new Set();for(const m of tx.matchAll(/[Pp]rotection from ([a-z ,]+?)(?=[.\n(]|$)/g))for(const w2 of m[1].split(/,\s*|\s+and\s+(?:from\s+)?|\s+or\s+/)){const k={white:'W',blue:'U',black:'B',red:'R',green:'G',everything:'*','each color':'WUBRG','all colors':'WUBRG'}[w2.replace(/^from\s+/,'').trim()];if(k)for(const q of k)o.prot.add(q);}}
+  {const tm=tx.match(/^Toxic (\d+)/im);o.toxic=tm?+tm[1]:0;}
   o.kws=xKwTx(tx);o.inst=/\bInstant\b/.test(tipo)||o.kws.has('flash');
   o.p=parseInt(r[4]);o.t=parseInt(r[5]);if(isNaN(o.p))o.p=0;if(isNaN(o.t))o.t=0;
   o.mana=xManaTx(tipo,tx);
@@ -5438,8 +5439,8 @@ function xTurno(){const s=X.sala,e=X.eu,me=xUid();if(!s||!e)return;let mud=0;
     const cp=s.turno!==1;let t='';
     if(cp){if(e.bib.length){e.mao.push(e.bib.shift());t=' e comprou 1';}else t=' e não tinha carta pra comprar (grimório vazio = derrota)';}else t=' (quem começa não compra no 1º turno)';
     xLog(`começou o turno ${s.turno}: desvirou tudo${t}`);setTimeout(()=>xGatCampo(/^At the beginning of your upkeep, ([^\n]+)$/im,'manutenção'),700);if(!(s.fase>0))xSala({fase:1});mud=1;}
-  for(const g of [s.golpe,...(s.golpes||[])])if(g&&g.para===me&&e.gv!==g.id){e.gv=g.id;e.vida+=(g.vg||0)-(g.dano||0);if(g.cmd){e.dcm=e.dcm||{};e.dcm[g.de]=(e.dcm[g.de]||0)+g.cmd;e.dc=Math.max(e.dc||0,...Object.values(e.dcm));}
-    for(const c of e.campo.slice()){if((g.mortos||[]).includes(c.k)){xMorre(c);}else{if(g.dn&&g.dn[c.k])c.dn=(c.dn||0)+g.dn[c.k];c.bl='';}}
+  for(const g of [s.golpe,...(s.golpes||[])])if(g&&g.para===me&&e.gv!==g.id){e.gv=g.id;e.vida+=(g.vg||0)-(g.dano||0);if(g.ven)e.ven=(e.ven||0)+g.ven;if(g.cmd){e.dcm=e.dcm||{};e.dcm[g.de]=(e.dcm[g.de]||0)+g.cmd;e.dc=Math.max(e.dc||0,...Object.values(e.dcm));}
+    for(const c of e.campo.slice()){if((g.mortos||[]).includes(c.k)){xMorre(c);}else{if(g.dn&&g.dn[c.k])c.dn=(c.dn||0)+g.dn[c.k];if(g.cm&&g.cm[c.k])c.cnt=(c.cnt||0)-g.cm[c.k];c.bl='';}}
     for(const [k,d] of Object.entries(g.pw||{})){const c=e.campo.find(q=>q.k===k);if(c)xEfCarta(c,'dano',d);}
     xVarre();mud=1;}
   if(!e.evs)e.evs=[];for(const v of s.ev||[])if((v.para===me||(v.para==='*'&&v.de!==me))&&!e.evs.includes(v.id)){e.evs.push(v.id);xEvAplica(v);mud=1;}if(e.evs.length>80)e.evs=e.evs.slice(-80);
@@ -5721,10 +5722,10 @@ function xProtDe(c,f){const pr=xInfo(c).prot;if(!pr||!pr.size)return false;if(pr
 function xBloqueia(c,ak){const a=((((X.ops||{})[(X.sala||{}).vez])||{}).campo||[]).find(q=>q.k===ak);if(!a)return;const va=xPT(a),vb=xPT(c);
   if(va.kw.has('unblockable'))return xAv(a.n+' não pode ser bloqueada neste turno.');if(va.kw.has('flying')&&!vb.kw.has('flying')&&!vb.kw.has('reach'))return xAv(a.n+' voa: só bloqueia quem tem voar ou alcance.');if(xProtDe(a,c))return xAv(a.n+' tem proteção: '+c.n+' não pode bloquear.');c.bl=ak;}
 function xDano(){const e=X.eu,s=X.sala,me=xUid();if(!s||!Object.keys(X.ops||{}).length)return;
-  const mk=(c,u)=>{const v=xPT(c);return {c,u,P:Math.max(0,v.p),T:v.t,kw:v.kw,dmg:c.dn||0,dt:0,morto:0};};
+  const mk=(c,u)=>{const v=xPT(c);return {c,u,P:Math.max(0,v.p),T:v.t,kw:v.kw,dmg:c.dn||0,dt:0,morto:0,mm:0,tox:xInfo(c).toxic||0};};
   const A=e.campo.filter(c=>c.atk).map(c=>mk(c,me)),B=xOpCampos().flatMap(([cp,u])=>cp.filter(c=>c.bl&&A.some(a=>a.c.k===c.bl)).map(c=>mk(c,u)));
-  const G={},gp=u=>G[u]=G[u]||{dano:0,cmd:0,vg:0,pw:{}};let vgA=0;
-  const bate=(a,r)=>{const al=a.c.alv,u=xDefDe(a.c)||xOutro();if(al&&!String(al).startsWith('P:')&&xDonoK(al)){const g=gp(xDonoK(al));g.pw[al]=(g.pw[al]||0)+r;}else{const g=gp(u);g.dano+=r;if(a.c.cmd)g.cmd+=r;if(r>0)a.hp=1;}};
+  const G={},gp=u=>G[u]=G[u]||{dano:0,cmd:0,vg:0,ven:0,pw:{},cm:{}};let vgA=0;
+  const bate=(a,r)=>{const al=a.c.alv,u=xDefDe(a.c)||xOutro();if(al&&!String(al).startsWith('P:')&&xDonoK(al)){const g=gp(xDonoK(al));g.pw[al]=(g.pw[al]||0)+r;}else{const g=gp(u);if(a.kw.has('infect'))g.ven+=r;else g.dano+=r;if(r>0&&a.tox)g.ven+=a.tox;if(a.c.cmd)g.cmd+=r;if(r>0)a.hp=1;}};
   for(const pas of [1,2]){const fere=x=>pas===1?(x.kw.has('first strike')||x.kw.has('double strike')):(!x.kw.has('first strike')||x.kw.has('double strike'));const hit=[];
     for(const a of A){if(a.morto||!fere(a))continue;const bs=B.filter(b=>b.c.bl===a.c.k),vv=bs.filter(b=>!b.morto);let r=a.P,deu=0;
       if(!bs.length){bate(a,r);deu=r;}
@@ -5732,16 +5733,16 @@ function xDano(){const e=X.eu,s=X.sala,me=xUid();if(!s||!Object.keys(X.ops||{}).
         if(r>0&&a.kw.has('trample')){bate(a,r);deu+=r;}}
       if(a.kw.has('lifelink'))vgA+=deu;}
     for(const b of B){if(b.morto||!fere(b))continue;const a=A.find(x=>x.c.k===b.c.bl);if(a&&!a.morto&&b.P>0){hit.push([a,b.P,b]);if(b.kw.has('lifelink')&&!xProtDe(a.c,b.c))gp(b.u).vg+=b.P;}}
-    for(const [t,n,f] of hit)if(n>0&&!xProtDe(t.c,f.c)){t.dmg+=n;if(f.kw.has('deathtouch'))t.dt=1;}
+    for(const [t,n,f] of hit)if(n>0&&!xProtDe(t.c,f.c)){t.dmg+=n;if(f.kw.has('infect')||f.kw.has('wither'))t.mm+=n;if(f.kw.has('deathtouch'))t.dt=1;}
     for(const x of [...A,...B])if(!x.morto&&!x.kw.has('indestructible')&&(x.dmg>=x.T||(x.dt&&x.dmg>0)))x.morto=1;}
-  for(const a of A){a.c.atk=0;a.c.alv='';if(a.c.cvf&&!a.morto)xConv(a.c);if(a.morto)xMorre(a.c);else a.c.dn=a.dmg;}
+  for(const a of A){a.c.atk=0;a.c.alv='';if(a.c.cvf&&!a.morto)xConv(a.c);if(a.morto)xMorre(a.c);else{a.c.dn=a.dmg-a.mm;if(a.mm)a.c.cnt=(a.c.cnt||0)-a.mm;}}
   for(const a of A)if(a.hp){const m=xNorm(xInfo(a.c).tx,a.c.n).match(/(?:Whenever this (?:card|creature) deals|and whenever (?:it|this card) deals) combat damage to a player, ([^\n]+)/i);if(m)setTimeout(()=>xGatTx(a.c,m[1],'dano de combate'),500);}
   e.vida+=vgA;B.forEach(b=>gp(b.u));
-  const golpes=Object.entries(G).map(([u,g])=>{const dn={};B.filter(b=>b.u===u).forEach(b=>{if(!b.morto&&b.dmg>(b.c.dn||0))dn[b.c.k]=b.dmg-(b.c.dn||0);});
+  const golpes=Object.entries(G).map(([u,g])=>{const dn={};B.filter(b=>b.u===u).forEach(b=>{if(!b.morto&&b.dmg-b.mm>(b.c.dn||0))dn[b.c.k]=b.dmg-b.mm-(b.c.dn||0);if(!b.morto&&b.mm)gp(u).cm[b.c.k]=b.mm;});
     return Object.assign({id:xId(),de:me,para:u,mortos:B.filter(b=>b.u===u&&b.morto).map(b=>b.c.k),dn},g);});
   xSala({cb:'',fase:3,golpe:null,golpes});
   const mo=[...A,...B].filter(x=>x.morto).map(x=>x.c.n);
-  xLog(`combate: ${golpes.map(g=>`${xNomeU(g.para)} tomou ${g.dano}${g.cmd?` (${g.cmd} de comandante)`:''}${Object.keys(g.pw).length?' · planeswalker: '+Object.entries(g.pw).map(([k,d])=>xAlvoNome(k)+' −'+d).join(', '):''}${g.vg?`, ganhou ${g.vg}`:''}`).join(' · ')}${vgA?` · ganhou ${vgA} de vida`:''}${mo.length?' · morreram: '+mo.join(', '):''}`);
+  xLog(`combate: ${golpes.map(g=>`${xNomeU(g.para)} tomou ${g.dano}${g.ven?` +${g.ven} veneno`:''}${g.cmd?` (${g.cmd} de comandante)`:''}${Object.keys(g.pw).length?' · planeswalker: '+Object.entries(g.pw).map(([k,d])=>xAlvoNome(k)+' −'+d).join(', '):''}${g.vg?`, ganhou ${g.vg}`:''}`).join(' · ')}${vgA?` · ganhou ${vgA} de vida`:''}${mo.length?' · morreram: '+mo.join(', '):''}`);
   xVarre();xSobe();xTudo();}
 
 /* ---------- fichas ---------- */
