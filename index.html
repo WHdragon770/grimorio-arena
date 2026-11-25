@@ -2947,8 +2947,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.86;
-/* dólar ao vivo (AwesomeAPI); 5.86 = do dia da publicação, só se falhar */
+let COTA=5.85;
+/* dólar ao vivo (AwesomeAPI); 5.85 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5589,7 +5589,7 @@ const xReset=c=>{if(c.fd&&!c.fdCast){c.n=c.fdN;c.img=c.fdI||'';delete c.fd;delet
 
 /* ---------- leitura da carta (custo, tipo, P/T, palavras-chave, mana, equipar, o que o anexo dá) ---------- */
 const FASES=['Início','Principal 1','Combate','Principal 2','Final'];
-const KWS=['flying','reach','vigilance','haste','deathtouch','lifelink','trample','first strike','double strike','menace','defender','indestructible','hexproof','shroud','infect','wither','flash','fear','intimidate','shadow','skulk','horsemanship','islandwalk','swampwalk','forestwalk','mountainwalk','plainswalk','changeling'];
+const KWS=['flying','reach','vigilance','haste','deathtouch','lifelink','trample','first strike','double strike','menace','defender','indestructible','hexproof','shroud','infect','wither','flash','fear','intimidate','shadow','skulk','horsemanship','islandwalk','swampwalk','forestwalk','mountainwalk','plainswalk','changeling','banding','flanking'];
 const KPT={shroud:'manto',infect:'infectar',wither:'murchar',flying:'voar',reach:'alcance',vigilance:'vigilância',haste:'ímpeto',deathtouch:'toque mortífero',lifelink:'vínculo com a vida',trample:'atropelar','first strike':'iniciativa','double strike':'golpe duplo',menace:'ameaçar',defender:'defensor',indestructible:'indestrutível',hexproof:'resistência a magia',flash:'lampejo',unblockable:'não pode ser bloqueada',fear:'medo',intimidate:'intimidar',shadow:'sombra',skulk:'espreitar',horsemanship:'equitação',islandwalk:'travessia de ilha',swampwalk:'travessia de pântano',forestwalk:'travessia de floresta',mountainwalk:'travessia de montanha',plainswalk:'travessia de planície',changeling:'metamorfo'};
 const BAS={Plains:'W',Island:'U',Swamp:'B',Mountain:'R',Forest:'G'};
 function xKwTx(tx){const s=new Set();for(let l of String(tx||'').split('\n')){l=l.replace(/\([^)]*\)/g,'').trim().toLowerCase().replace(/\.$/,'');if(!l)continue;
@@ -5611,7 +5611,7 @@ function xInfo(c){if(c.fd)return XFD;
   o={tipo,tx,custo:String(r[1]||'').split(' // ')[0],land:/\bLand\b/.test(tipo),cri:/\bCreature\b/.test(tipo)||/^Living metal/im.test(tx),lm:!/\bCreature\b/.test(tipo)&&/^Living metal/im.test(tx),aura:/\bAura\b/.test(tipo),equip:/\bEquipment\b/.test(tipo),perm:!/\b(Instant|Sorcery)\b/.test(tipo)};
   {const w=tx.match(/^Ward(?:\s*|—)((?:\{[^}]+\})+)/im),wv=tx.match(/^Ward—Pay (\d+) life/im);o.ward=w?w[1]:'';o.wardv=wv?+wv[1]:0;
    o.prot=new Set();for(const m of tx.matchAll(/[Pp]rotection from ([a-z ,]+?)(?=[.\n(]|$)/g))for(const w2 of m[1].split(/,\s*|\s+and\s+(?:from\s+)?|\s+or\s+/)){const k={white:'W',blue:'U',black:'B',red:'R',green:'G',everything:'*','each color':'WUBRG','all colors':'WUBRG'}[w2.replace(/^from\s+/,'').trim()];if(k)for(const q of k)o.prot.add(q);}}
-  {const tm=tx.match(/^Toxic (\d+)/im);o.toxic=tm?+tm[1]:0;}
+  {const tm=tx.match(/^Toxic (\d+)/im);o.toxic=tm?+tm[1]:0;const bu=tx.match(/^Bushido (\d+)/im),ra=tx.match(/^Rampage (\d+)/im);o.bushido=bu?+bu[1]:0;o.rampage=ra?+ra[1]:0;}
   o.kws=xKwTx(tx);{const nt=xNorm(tx,c.n);o.kwVez=[];o.kwFora=[];for(const m of nt.matchAll(/^As long as it'?s (not )?your turn, this (?:card|creature) (?:has|gains) ([a-z ,]+?)\.?$/gim)){const ks=m[2].toLowerCase().split(/,\s*|\s+and\s+/).map(x=>x.trim()).filter(x=>KWS.includes(x));(m[1]?o.kwFora:o.kwVez).push(...ks);}
     o.mbb=/^this (?:card|creature) must be blocked if able/im.test(nt);}o.inst=/\bInstant\b/.test(tipo)||o.kws.has('flash');
   o.p=parseInt(r[4]);o.t=parseInt(r[5]);if(isNaN(o.p))o.p=0;if(isNaN(o.t))o.t=0;
@@ -6188,29 +6188,37 @@ function xBlqErr(a,c){const va=xPT(a),vb=xPT(c),ca=xCorFonte(a.n),cb=xCorFonte(c
 function xBloqueia(c,ak){const a=((((X.ops||{})[(X.sala||{}).vez])||{}).campo||[]).find(q=>q.k===ak);if(!a)return;const va=xPT(a),vb=xPT(c);
   if(va.kw.has('unblockable'))return xAv(a.n+' não pode ser bloqueada neste turno.');if(va.kw.has('flying')&&!vb.kw.has('flying')&&!vb.kw.has('reach'))return xAv(a.n+' voa: só bloqueia quem tem voar ou alcance.');if(xProtDe(a,c))return xAv(a.n+' tem proteção: '+c.n+' não pode bloquear.');{const er=xBlqErr(a,c);if(er)return xAv(er);}c.bl=ak;}
 function xDano(){const e=X.eu,s=X.sala,me=xUid();if(!s||!Object.keys(X.ops||{}).length)return;
-  const mk=(c,u)=>{const v=xPT(c);return {c,u,P:Math.max(0,v.p),T:v.t,kw:v.kw,dmg:c.dn||0,dt:0,morto:0,mm:0,tox:xInfo(c).toxic||0};};
+  const mk=(c,u)=>{const v=xPT(c);const ii=xInfo(c);return {c,u,P:Math.max(0,v.p),T:v.t,kw:v.kw,dmg:c.dn||0,dt:0,morto:0,mm:0,tox:ii.toxic||0,bus:ii.bushido||0,ram:ii.rampage||0};};
   const A=e.campo.filter(c=>c.atk).map(c=>mk(c,me)),B=xOpCampos().flatMap(([cp,u])=>cp.filter(c=>c.bl&&A.some(a=>a.c.k===c.bl)).map(c=>mk(c,u)));
+  const bk=a=>a.c.band?A.filter(x=>x.c.band===a.c.band).map(x=>x.c.k):[a.c.k],blq=a=>B.filter(b=>bk(a).includes(b.c.bl)),xtra=[];
+  for(const a of A){const bs=blq(a);if(!bs.length)continue;if(a.bus){a.P+=a.bus;a.T+=a.bus;a.bon=(a.bon||0)+a.bus;xtra.push(`bushido: ${a.c.n} +${a.bus}/+${a.bus}`);}if(a.ram&&bs.length>1){const r=a.ram*(bs.length-1);a.P+=r;a.T+=r;a.bon=(a.bon||0)+r;xtra.push(`rampage: ${a.c.n} +${r}/+${r}`);}
+    if(a.kw.has('flanking'))B.filter(b=>b.c.bl===a.c.k&&!b.kw.has('flanking')).forEach(b=>{b.P=Math.max(0,b.P-1);b.T-=1;xtra.push(`flanking: ${b.c.n} -1/-1`);});}
+  for(const b of B)if(b.bus){b.P+=b.bus;b.T+=b.bus;b.bon=b.bus;xtra.push(`bushido: ${b.c.n} +${b.bus}/+${b.bus}`);}
+  for(const x of [...A,...B])if(x.T<=0&&!x.morto){x.morto=1;}
+  const aguenta=(L,n,f)=>L.slice().sort((p,q)=>((xProtDe(q.c,f.c)?2:q.kw.has('indestructible')?1:0)-(xProtDe(p.c,f.c)?2:p.kw.has('indestructible')?1:0))||((q.T-q.dmg)-(p.T-p.dmg)))[0];
   const G={},gp=u=>G[u]=G[u]||{dano:0,cmd:0,vg:0,ven:0,pw:{},cm:{}};let vgA=0;
   const bate=(a,r)=>{const al=a.c.alv,u=xDefDe(a.c)||xOutro();if(al&&!String(al).startsWith('P:')&&xDonoK(al)){const g=gp(xDonoK(al));g.pw[al]=(g.pw[al]||0)+r;}else{const g=gp(u);if(a.kw.has('infect'))g.ven+=r;else g.dano+=r;if(r>0&&a.tox)g.ven+=a.tox;if(a.c.cmd)g.cmd+=r;if(r>0)a.hp=1;}};
   for(const pas of [1,2]){const fere=x=>pas===1?(x.kw.has('first strike')||x.kw.has('double strike')):(!x.kw.has('first strike')||x.kw.has('double strike'));const hit=[];
-    for(const a of A){if(a.morto||!fere(a))continue;const bs=B.filter(b=>b.c.bl===a.c.k),vv=bs.filter(b=>!b.morto);let r=a.P,deu=0;
+    for(const a of A){if(a.morto||!fere(a))continue;const bs=blq(a),vv=bs.filter(b=>!b.morto);let r=a.P,deu=0;
       if(!bs.length){bate(a,r);deu=r;}
+      else if(vv.length>1&&vv.some(b=>b.kw.has('banding'))){const b=aguenta(vv,r,a);hit.push([b,r,a]);deu=r;xtra.push(`banding: o defensor jogou o dano de ${a.c.n} todo em ${b.c.n}`);}
       else{for(let j=0;j<vv.length&&r>0;j++){const b=vv[j],need=a.kw.has('deathtouch')?1:Math.max(0,b.T-b.dmg),d=(j===vv.length-1&&!a.kw.has('trample'))?r:Math.min(r,need);hit.push([b,d,a]);r-=d;deu+=d;}
         if(r>0&&a.kw.has('trample')){bate(a,r);deu+=r;}}
       if(a.kw.has('lifelink'))vgA+=deu;}
-    for(const b of B){if(b.morto||!fere(b))continue;const a=A.find(x=>x.c.k===b.c.bl);if(a&&!a.morto&&b.P>0){hit.push([a,b.P,b]);if(b.kw.has('lifelink')&&!xProtDe(a.c,b.c))gp(b.u).vg+=b.P;}}
+    for(const b of B){if(b.morto||!fere(b))continue;let a=A.find(x=>x.c.k===b.c.bl);if(a&&a.c.band){const bn=A.filter(x=>x.c.band===a.c.band&&!x.morto);if(bn.length>1){const q=aguenta(bn,b.P,b);if(q!==a)xtra.push(`bando: dano de ${b.c.n} foi pra ${q.c.n}`);a=q;}}if(a&&!a.morto&&b.P>0){hit.push([a,b.P,b]);if(b.kw.has('lifelink')&&!xProtDe(a.c,b.c))gp(b.u).vg+=b.P;}}
     for(const [t,n,f] of hit)if(n>0&&!xProtDe(t.c,f.c)){t.dmg+=n;(f.dc=f.dc||[]).push([t,t.dmg>(f.kw.has('deathtouch')?1:t.T)]);if(f.kw.has('infect')||f.kw.has('wither'))t.mm+=n;if(f.kw.has('deathtouch'))t.dt=1;}
     for(const x of [...A,...B])if(!x.morto&&!x.kw.has('indestructible')&&(x.dmg>=x.T||(x.dt&&x.dmg>0)))x.morto=1;}
-  for(const a of A){a.c.atk=0;a.c.alv='';if(a.c.cvf&&!a.morto)xConv(a.c);if(a.morto)xMorre(a.c);else{a.c.dn=a.dmg-a.mm;if(a.mm)a.c.cnt=(a.c.cnt||0)-a.mm;}}
+  if(xtra.length)xLog([...new Set(xtra)].join(' · '));
+  for(const a of A){a.c.atk=0;a.c.alv='';delete a.c.band;if(a.c.cvf&&!a.morto)xConv(a.c);if(a.morto)xMorre(a.c);else{a.c.dn=Math.max(0,a.dmg-a.mm-(a.bon||0));if(a.mm)a.c.cnt=(a.c.cnt||0)-a.mm;}}
   for(const a of A)if(a.hp){const m=xNorm(xInfo(a.c).tx,a.c.n).match(/(?:Whenever this (?:card|creature) deals|and whenever (?:it|this card) deals) combat damage to a player, ([^\n]+)/i);if(m)setTimeout(()=>xGatTx(a.c,m[1],'dano de combate'),500);}
   for(const a of A)for(const [t,exc] of a.dc||[]){const m=xNorm(xInfo(a.c).tx,a.c.n).match(/Whenever this (?:card|creature) deals (?:combat )?damage to a creature, (if that creature was dealt excess damage this turn, )?([^\n]+)/i);if(!m||(m[1]&&!exc))continue;
     const sm=m[2].match(/^that creature's controller sacrifices (?:a|an) (noncreature, nonland permanent|creature|nonland permanent|permanent)/i);
     if(sm){const nm=xNomeF(a.c),tp={'noncreature, nonland permanent':'nc','creature':'creature','nonland permanent':'nonland permanent','permanent':'permanent'}[sm[1].toLowerCase()];setTimeout(()=>{xLog(`${nm}: ${t.c.n} levou dano${exc?' excedente':''}, ${xNomeU(t.u)} sacrifica ${sm[1]}`);xEvia({op:'sacr',n:1,tipo:tp,nm,para:t.u});},500);}
     else setTimeout(()=>xGatTx(a.c,m[2],'dano em criatura'),500);}
   e.vida+=vgA;B.forEach(b=>gp(b.u));
-  const golpes=Object.entries(G).map(([u,g])=>{const dn={};B.filter(b=>b.u===u).forEach(b=>{if(!b.morto&&b.dmg-b.mm>(b.c.dn||0))dn[b.c.k]=b.dmg-b.mm-(b.c.dn||0);if(!b.morto&&b.mm)gp(u).cm[b.c.k]=b.mm;});
+  const golpes=Object.entries(G).map(([u,g])=>{const dn={};B.filter(b=>b.u===u).forEach(b=>{if(!b.morto&&b.dmg-b.mm-(b.bon||0)>(b.c.dn||0))dn[b.c.k]=b.dmg-b.mm-(b.bon||0)-(b.c.dn||0);if(!b.morto&&b.mm)gp(u).cm[b.c.k]=b.mm;});
     return Object.assign({id:xId(),de:me,para:u,mortos:B.filter(b=>b.u===u&&b.morto).map(b=>b.c.k),dn},g);});
-  xSala({cb:'',fase:3,golpe:null,golpes});
+  window.__golpes=golpes;xSala({cb:'',fase:3,golpe:null,golpes});
   const mo=[...A,...B].filter(x=>x.morto).map(x=>x.c.n);
   xLog(`combate: ${golpes.map(g=>`${xNomeU(g.para)} tomou ${g.dano}${g.ven?` +${g.ven} veneno`:''}${g.cmd?` (${g.cmd} de comandante)`:''}${Object.keys(g.pw).length?' · planeswalker: '+Object.entries(g.pw).map(([k,d])=>xAlvoNome(k)+' −'+d).join(', '):''}${g.vg?`, ganhou ${g.vg}`:''}`).join(' · ')}${vgA?` · ganhou ${vgA} de vida`:''}${mo.length?' · morreram: '+mo.join(', '):''}`);
   xVarre();xSobe();xTudo();}
@@ -6260,7 +6268,7 @@ async function xAcao(z,k,op){const e=X.eu;if(!e)return;const i=e[z]?e[z].findInd
   else if(op==='pista'||op==='comida'){const r=xPaga(e,xCusto('{2}'),0);if(!r.ok)return xAv('Falta mana: '+r.falta.join(', '));const pg=xAplica(e,r);e.campo.splice(e.campo.indexOf(c),1);
     if(op==='pista'){if(e.bib.length)e.mao.push(e.bib.shift());xLog(`sacrificou ${n} e comprou 1 · ${pg||'pagou com a mana solta'}`);}else{e.vida+=3;xLog(`sacrificou ${n} e ganhou 3 de vida · ${pg||'pagou com a mana solta'}`);}}
   else if(op==='atk'||op.startsWith('atk:')){const v=xPT(c);c.alv=op==='atk'?'P:'+xOutro():op.slice(4);c.atk=v.kw.has('vigilance')?1:2;if(c.atk===2)c.tap=1;}
-  else if(op==='atkx'){if(c.atk===2)c.tap=0;c.atk=0;}
+  else if(op==='atkx'){if(c.atk===2)c.tap=0;c.atk=0;delete c.band;}else if(op==='banda'){const L=e.campo.filter(q=>q!==c&&q.atk&&q.alv===c.alv);const ks=XBOT?L.map(q=>q.k):await xMarca('Bando com quem? (no máximo 1 sem banding)',L.map(q=>({k:q.k,rot:xNomeF(q)+(xPT(q).kw.has('banding')?' (banding)':'')})),1,L.length);if(!ks)return;const sel=L.filter(q=>ks.includes(q.k));if(sel.filter(q=>!xPT(q).kw.has('banding')).length>1)return xAv('Bando: no máximo 1 criatura sem banding.');[c,...sel].forEach(q=>q.band=c.k);xLog(`formou bando: ${[c,...sel].map(q=>q.n).join(' + ')} (bloquear um bloqueia todos; você divide o dano)`);}
   else if(op.startsWith('bl:'))xBloqueia(c,op.slice(3));else if(op==='blx')c.bl='';
   else if(op==='tap'){c.tap=c.tap?0:1;xLog(`${c.tap?'virou':'desvirou'} ${n}`);}
   else if(op==='c+'||op==='c-'){c.cnt=(c.cnt||0)+(op==='c+'?1:-1);xLog(`${n}: ${op==='c+'?'+1/+1':'−1/−1'} (agora ${c.cnt>0?'+':''}${c.cnt})`);}
@@ -6406,7 +6414,7 @@ function xOpcoes(z,c){const e=X.eu,s=X.sala||{},o=[],i=xInfo(c),me=xUid();
     if(!c.tap&&i.mana&&!i.sacMana&&!(i.cri&&c.sk&&!v.kw.has('haste')))i.mana.forEach(m=>o.push(['mn:'+m,'💧 Virar pra mana '+xSym(m.split('').map(y=>'{'+y+'}').join(''))]));
     if(i.sacMana)['W','U','B','R','G'].forEach(y=>o.push(['sac:'+y,'💰 Sacrificar: +'+SV(y)]));
     if(c.tok&&c.n==='Pista')o.push(['pista','🔍 Pagar '+SV('2')+' e sacrificar: compre 1']);if(c.tok&&c.n==='Comida')o.push(['comida','🍗 Pagar '+SV('2')+' e sacrificar: ganhe 3']);if(c.tok&&c.n==='Sangue'&&!c.tap)o.push(['sangue','🩸 Pagar '+SV('1')+', virar, descartar 1 e sacrificar: compre 1']);
-    if(xPodeAtk(c)){const us=xOpsL().filter(u=>!xMorto(X.ops[u]));for(const u of us.length?us:[xOutro()])o.push(['atk:P:'+u,'⚔ Atacar '+h((X.ops[u]||{}).nome||'o jogador')]);for(const u of us)for(const p of (X.ops[u].campo||[]).filter(q=>xInfo(q).pw))o.push(['atk:'+p.k,'⚔ Atacar '+h(p.n)+(us.length>1?' ('+h(X.ops[u].nome)+')':'')]);}if(c.atk&&!s.cb)o.push(['atkx','✋ Cancelar ataque']);
+    if(xPodeAtk(c)){const us=xOpsL().filter(u=>!xMorto(X.ops[u]));for(const u of us.length?us:[xOutro()])o.push(['atk:P:'+u,'⚔ Atacar '+h((X.ops[u]||{}).nome||'o jogador')]);for(const u of us)for(const p of (X.ops[u].campo||[]).filter(q=>xInfo(q).pw))o.push(['atk:'+p.k,'⚔ Atacar '+h(p.n)+(us.length>1?' ('+h(X.ops[u].nome)+')':'')]);}if(c.atk&&!s.cb)o.push(['atkx','✋ Cancelar ataque']);if(c.atk&&!s.cb&&xPT(c).kw.has('banding')&&e.campo.some(q=>q!==c&&q.atk&&q.alv===c.alv))o.push(['banda','🛡 Formar bando']);if(c.band&&c.atk){const bn=e.campo.filter(q=>q.band===c.band&&q.atk);if(bn.length>1)o.push(['txt0','🛡 Em bando com '+bn.filter(q=>q!==c).map(q=>h(q.n)).join(', ')]);}
     if(s.cb==='blq'&&!xVez()&&xCri(c)&&!i.lm&&!c.tap&&v.pz<2){for(const a of ((X.ops[s.vez]||{}).campo||[]).filter(q=>q.atk&&xDefDe(q)===xUid()))if(c.bl!==a.k)o.push(['bl:'+a.k,'🛡 Bloquear '+h(a.n)]);if(c.bl)o.push(['blx','✋ Tirar bloqueio']);}
     xHabs(c).forEach((hb,j)=>o.push(['hab:'+j,(hb.pw?'◆ '+h(hb.rot):'⚡ '+xSym(h(hb.cu)))+': '+h(hb.tx.length>60?hb.tx.slice(0,58)+'…':hb.tx)]));
     if(i.eq)o.push(['eq',`🗡 Equipar ${xSym(h(i.eq))}`]);{const cr=String(i.tx).match(/^Crew (\d+)/m);if(cr&&/\bVehicle\b/.test(i.tipo)&&c.trip!==s.turno)o.push(['crew',`🚗 Tripular ${cr[1]}`]);}if(xKC(c,'Reconfigure'))o.push(c.rcf&&c.an?['reconfx',`🔧 Reconfigurar ${xSym(h(xKC(c,'Reconfigure')))}: soltar`]:['reconf',`🔧 Reconfigurar ${xSym(h(xKC(c,'Reconfigure')))}: anexar`]);if(c.hide&&e.exi.some(q=>q.k===c.hide))o.push(['hidej','🂠 Jogar a carta escondida']);if(c.fd&&!c.fdCast)o.push(['desvm',`🂠 Desvirar pra cima ${xSym(h(c.fdC))} (${h(c.fdN)})`]);
