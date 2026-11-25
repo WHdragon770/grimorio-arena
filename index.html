@@ -5413,6 +5413,7 @@ function fgPasso(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.S
       if(al)return put({op:'dano',n,al},[]);if(df==='Opponent'||df==='Player.Opponent')return [{op:'dano',n,al:'each opponent'}];if(df==='Player')return [{op:'dano',n,al:'each player'}];if(df==='You')return [{op:'perdeEu',n}];return nao();}
     case 'DamageAll':{const n=N('NumDmg');if(n==null)return nao('número');const o=[];if(d.ValidCards==='Creature')o.push({op:'dano',n,al:'each creature'});else if(d.ValidCards)return nao('quais criaturas');
       if(d.ValidPlayers==='Player')o.push({op:'dano',n,al:'each player'});else if(/Opponent/.test(d.ValidPlayers||''))o.push({op:'dano',n,al:'each opponent'});return o.length?o:nao();}
+    case 'Discard':{const df=d.Defined||'You';if(df!=='You'&&!/^You$/.test(d.Defined||''))return nao('descarte de outro jogador');if(d.Mode==='Hand')return [{op:'descarta',n:99}];const n=N('NumCards')??1;if(n==null)return nao('número');return [{op:'descarta',n}];}
     case 'Draw':{const n=N('NumCards');if(n==null)return nao('número');const df=d.Defined||'You';if(df==='Player')return [{op:'compra',n,quem:'todos'}];if(df!=='You'&&!al)return nao('quem compra');return [{op:'compra',n,quem:'eu'}];}
     case 'GainLife':{const n=N('LifeAmount');if(n==null)return nao('número');if((d.Defined||'You')!=='You'||al)return nao('quem ganha');return [{op:'ganha',n}];}
     case 'LoseLife':{const n=N('LifeAmount');if(n==null)return nao('número');const df=d.Defined||'';if(df==='You')return [{op:'perdeEu',n}];if(df==='Opponent'||df==='Player.Opponent'||al)return [{op:'perde',n,quem:'op'}];if(df==='Player')return [{op:'perde',n,quem:'todos'}];return nao();}
@@ -5794,6 +5795,9 @@ async function xConjura(z,k,cv,cus){const e=X.eu,c=e[z].find(q=>q.k===k);if(!c)r
   if(!r.ok)return xAv(`Falta mana pra ${c.n}: ${r.falta.join(', ')}.`+(e.campo.some(q=>q.tok&&q.mana&&!q.tap)?' Dá pra sacrificar um Tesouro antes.':''));
   let alvo='';if(i.aura){alvo=await xEscolhe(`Encantar o quê com ${c.n}?`,xAlvos(i.enc,''));if(!alvo)return;}
   const al=i.perm?[]:await xPedeAlvos(xEfeitos(tk,c.n,!!kc,c.k),c.n,c.k);if(!al)return;
+  {const ad=i.tx.match(/As an additional cost to cast this spell, discard (a|an|one|two|three) cards?/i);if(ad){const n=xN(ad[1].toLowerCase()),L=e.mao.filter(q=>q!==c);if(L.length<n)return xAv(`${c.n}: precisa descartar ${n} carta(s) como custo.`);
+    let ks=null;if(XBOT)ks=L.slice().sort((a,b)=>(xInfo(b).land?1:0)-(xInfo(a).land?1:0)||xMVc(a)-xMVc(b)).slice(0,n).map(q=>q.k);else ks=await xMarca(`${c.n}: descarte ${n} carta${n>1?'s':''} (custo adicional)`,L.map(q=>({k:q.k,rot:q.n})),n,n);if(!ks||!e[z].includes(c))return;
+    for(const k of ks){const ix=e.mao.findIndex(q=>q.k===k);if(ix>=0){const d=e.mao.splice(ix,1)[0];e.cem.push(xReset(d));xLog(`descartou ${d.n} (custo de ${c.n})`);}}xDescartou(ks.length);}}
   if(!e[z].includes(c))return;const pg=xAplica(e,r);e[z].splice(e[z].indexOf(c),1);xReset(c);c.kick=kick;c.bb=bb;if(dz)for(const kk of dvK){const ix=e.cem.findIndex(q=>q.k===kk);if(ix>=0)e.exi.push(e.cem.splice(ix,1)[0]);}if(cv&&cvc||cv===2)c.face=1;if(cus)c.fb=1;if(z==='cmdz')e.imp++;
   if(!(await xWard(al,c.n))){if(z==='cmdz')e.cmdz.push(c);else if(cus)e.exi.push(c);else e.cem.push(c);xSobe();return xPintaEu();}
   xLog(`conjurou ${cvc?xNomeF(c)+' (convertido)':c.n}${x?` (X=${x})`:''}${alvo?' em '+xAlvoNome(alvo):''}${al.length?' → '+al.map(xAlvoNome).join(', '):''}${imp?` com imposto +${imp}`:''}${kick?' com kicker':''}${r.cv?` (convocou ${r.cv} criatura${r.cv>1?'s':''})`:''}${dz?` (delve: exilou ${dz} do cemitério)`:''}${pg?' · '+pg:''}`);
@@ -5897,7 +5901,7 @@ function xEfTx(tx0,n){const L=[];let txt=String(tx0).replace(/\([^)]*\)/g,'').to
     if(m=s.match(/(each player|each opponent) loses (\w+) life unless (?:they|that player) (discards? a card|sacrifices? an artifact, a creature, or a land)/)){L.push({op:'castigo',n:xN(m[2]),alt:/discard/.test(m[3])?'disc':'sac'});continue;}
     if(/^sacrifice (this|it\b)/.test(s))L.push({op:'sacrEsta'});
     else if(m=s.match(/sacrifice (an? |one |two |three )?(artifact|creature|land|enchantment|nonland permanent|permanent)s?((?:, (?:and )?an? (?:artifact|creature|land|enchantment))*)/)){if(!/\b(target|each) (player|opponent)s? sacrifices?/.test(s)&&!/sacrifice[^:]*:/.test(s)){L.push({op:'sacrEu',n:xN((m[1]||'a').trim()),v:XTIPO[m[2]],d:m[2]});for(const x of (m[3]||'').matchAll(/an? (artifact|creature|land|enchantment)/g))L.push({op:'sacrEu',n:1,v:XTIPO[x[1]],d:x[1]});}}
-    if(m=s.match(/(?:^|\band |\. )discard (a|an|one|two|three|\w+) cards?/))L.push({op:'descarta',n:xN(m[1])});
+    if(m=s.match(/(?:^|\band |\. |\bthen )discard (a|an|one|two|three|\w+) cards?/))L.push({op:'descarta',n:xN(m[1])});
     if(m=s.match(/target creature gets ([+-]\d+)\/([+-]\d+) until your next turn/))L.push({op:'pumpProx',al:'target creature',p:+m[1]});
     if(/target creature can't attack until your next turn/.test(s))L.push({op:'naoAtaca',al:'target creature'});
     if(m=s.match(/exile the top (\w+) cards? of your library\. (?:until end of turn, )?you may play (?:them|those cards|that card)/)||(m=txt.match(/exile the top (\w+) cards? of your library\. (?:until end of turn, )?you may play (?:them|those cards|that card)[^.]*this turn/))&&s.startsWith('exile the top'))L.push({op:'exiJoga',n:xN(m[1])});
@@ -5988,7 +5992,7 @@ async function xLeal(c){if(c.mk&&c.mk.lealdade!=null)return;let L=LEAL.get(c.n);
   const q=X.eu.campo.find(x=>x.k===c.k);if(!q)return;q.mk=Object.assign({},q.mk,{lealdade:L});xLog(`${c.n} entrou com lealdade ${L}`);xSobe();xPintaEu();}
 function xEtbTx(tx,n){const m=xNorm(tx,n).match(/^When this (?:card|creature|artifact|enchantment|permanent) enters(?: the battlefield)?(?: under your control)?(?: and whenever [^,\n]+)?, ([^\n]+)$/im);return m?m[1]:'';}
 async function xGatilho(c){const t0=xInfo(c).tx,m=xEtbTx(/^Kicker/im.test(t0)?xKick(t0,c.kick):t0,c.n);if(m)return xGatTx(c,m,'entrou');}
-function xDescartou(){for(const c of X.eu.campo.slice()){if(c.tok&&!c.cp)continue;const m=xNorm(xInfo(c).tx,c.n).match(/Whenever you discard (?:a|one or more) cards?, ([^\n]+)/i);if(m)xGatTx(c,m[1],'descarte');}}
+function xDescartou(q){q=q||1;for(const c of X.eu.campo.slice()){if(c.tok&&!c.cp)continue;const m=xNorm(xInfo(c).tx,c.n).match(/Whenever you discard (a|one or more) cards?, ([^\n]+)/i);if(m)for(let j=0;j<(m[1]==='a'?q:1);j++)xGatTx(c,m[2],'descarte');}}
 async function xGatTx(c,m,rot){if(/choose (?:one|two|three|one or both|one or more|any number)[^—–]*[—–-]\s*$/i.test(m)&&c.n){const tx=xNorm(xInfo(c).tx||'',c.n),i=tx.indexOf(m);if(i>=0){const b=tx.slice(i+m.length).match(/^(?:\s*\n\s*•[^\n]*)+/);if(b)m+=b[0];}}const st=xEfeitos(m,c.n,0,c.k);
   if(!st.length){xLog(`gatilho de ${c.n}: ${m} (o jogo ainda não faz esse gatilho)`);return xAv(`⚠ ${c.n} (${rot}): ${m.slice(0,140)} (o jogo ainda não faz esse gatilho)`);}
   const al=await xPedeAlvos(st,c.n,c.k);if(!al)return xLog(`gatilho de ${c.n} ficou sem alvo`);if(!(await xWard(al,c.n)))return;
@@ -6469,7 +6473,7 @@ async function xDescarta(n,nm){const e=X.eu;n=Math.min(n,e.mao.length);if(!n)ret
   if(XBOT)ks=e.mao.slice().sort((a,b)=>(xInfo(b).land?1:0)-(xInfo(a).land?1:0)||xMVc(b)-xMVc(a)).slice(0,n).map(c=>c.k);
   else{ks=null;while(!ks)ks=await xMarca(`${nm}: descarte ${n} carta${n>1?'s':''}`,e.mao.map(c=>({k:c.k,rot:c.n})),n,n);}
   for(const k of ks){const ix=e.mao.findIndex(c=>c.k===k);if(ix<0)continue;const c=e.mao.splice(ix,1)[0];e.cem.push(c);xLog(`descartou ${c.n} (${nm})`);}
-  xDescartou();xSobe();xTudo();}
+  xDescartou(ks.length);xSobe();xTudo();}
 async function xSacrEu(s,nm,k){const e=X.eu,ctx={eu:xUid(),src:k||'',sv:{}},pe=c=>(c.tok?0:1)*100+(xInfo(c).cri?xPT(c).p+xPT(c).t:5);
   for(let j=0;j<(s.n||1);j++){const L=e.campo.filter(c=>fgValid(c,s.v||'Permanent',ctx));if(!L.length){xLog(`${nm}: nada pra sacrificar (${s.d||s.v})`);break;}let c=null;
     if(!XBOT&&L.length>1){while(!c){const q=await xEscolhe(`${nm}: sacrifique ${s.d||'um permanente'}`,L.map(q=>({c:q,lado:'Seu'})));c=L.find(x=>x.k===q);}}
