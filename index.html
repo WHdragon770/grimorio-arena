@@ -6490,6 +6490,8 @@ function xListaPinta(){const L=X.lst,dl=$('#x1-dlg');if(!L||!dl)return;const op=
 /* ---------- eventos ---------- */
 (function(){const el=$('#x1');if(!el)return;
   el.addEventListener('click',ev=>{const pu=ev.target.closest('.x1-o[data-u]');if(pu&&X.foco!==pu.dataset.u&&X.ops[pu.dataset.u]){X.foco=pu.dataset.u;xPintaOp();xPintaFase();}},true);
+  el.addEventListener('dblclick',ev=>{const c=ev.target.closest('[data-xc]');if(!c)return;const z=c.dataset.xc;if(z!=='mao'&&z!=='cmdz')return;const e=X.eu,q=e&&e[z]&&e[z].find(x=>x.k===c.dataset.k);if(!q)return;
+    const o=xOpcoes(z,q).find(x=>x[0]==='cast');if(!o)return;ev.stopPropagation();const m=$('#x1-menu');if(m)m.hidden=true;xAcao(z,q.k,'cast');});
   el.addEventListener('click',ev=>{const c=ev.target.closest('[data-xc]');if(c){const z=c.dataset.xc;if(z.startsWith('op')){const q=xAcha(z,c.dataset.k);if(q&&(!q.tok||q.cp))abreFicha(q.n);return;}
       ev.stopPropagation();const r=c.getBoundingClientRect();xMenu(z,c.dataset.k,ev.clientX||r.left,ev.clientY||r.bottom);return;}
     const f=ev.target.closest('[data-xf]');if(f)return abreFicha(f.dataset.xf);
