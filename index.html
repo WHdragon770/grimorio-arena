@@ -2948,8 +2948,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.81;
-/* dólar ao vivo (AwesomeAPI); 5.81 = do dia da publicação, só se falhar */
+let COTA=5.82;
+/* dólar ao vivo (AwesomeAPI); 5.82 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5354,6 +5354,7 @@ function fgProp(c,p,ctx){let m;
   if(p==='Equipped')return fgTodos().some(q=>q.an===c.k&&xInfo(q).equip);if(p==='Enchanted')return fgTodos().some(q=>q.an===c.k&&xInfo(q).aura);
   if(m=p.match(/^(power|toughness|cmc)(LT|LE|EQ|GE|GT|NE)(-?\d+|X)$/)){const v=m[3]==='X'?fgConta('X',ctx):+m[3];if(v==null)return true;const n=m[1]==='cmc'?xMVc(c):xInfo(c).cri?xPT(c)[m[1]==='power'?'p':'t']:0;return fgCmp(n,m[2]+v);}
   if(m=p.match(/^with(.+)$/))return xInfo(c).cri?xPT(c).kw.has(m[1].replace(/([a-z])([A-Z])/g,'$1 $2').toLowerCase()):false;
+  if(p[0]==='!')return !fgProp(c,p.slice(1),ctx);
   if(m=p.match(/^named(.+)$/))return fgN(c.n)===m[1];
   if(m=p.match(/^non(.+)$/))return !fgTem(c,m[1]);
   if(/^[A-Z]/.test(p))return fgTem(c,p);
@@ -5418,7 +5419,7 @@ function fgPasso(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.S
     case 'Discard':{const df=d.Defined||'You';if(df!=='You'&&!/^You$/.test(d.Defined||''))return nao('descarte de outro jogador');if(d.Mode==='Hand')return [{op:'descarta',n:99}];const n=N('NumCards')??1;if(n==null)return nao('número');return [{op:'descarta',n}];}
     case 'Draw':{const n=N('NumCards');if(n==null)return nao('número');const df=d.Defined||'You';if(df==='Player')return [{op:'compra',n,quem:'todos'}];if(df!=='You'&&!al)return nao('quem compra');return [{op:'compra',n,quem:'eu'}];}
     case 'GainLife':{const n=N('LifeAmount');if(n==null)return nao('número');if((d.Defined||'You')!=='You'||al)return nao('quem ganha');return [{op:'ganha',n}];}
-    case 'LoseLife':{const n=N('LifeAmount');if(n==null)return nao('número');const df=d.Defined||'';if(df==='You')return [{op:'perdeEu',n}];if(df==='Opponent'||df==='Player.Opponent'||al)return [{op:'perde',n,quem:'op'}];if(df==='Player')return [{op:'perde',n,quem:'todos'}];return nao();}
+    case 'LoseLife':{const n=N('LifeAmount');if(n==null)return nao('número');const df=d.Defined||'';if(df==='You')return [{op:'perdeEu',n}];if(df==='Opponent'||df==='Player.Opponent'||al)return [{op:'perde',n,quem:'op'}];if(df==='Player')return [{op:'perde',n,quem:'todos'}];if(!df)return [{op:'perdeEu',n}];return nao('quem perde');}
     case 'Destroy':if(!al)return nao('sem alvo');return put({op:'destroi',al},[]);
     case 'DestroyAll':{const t={'Creature':'creatures','Artifact':'artifacts','Enchantment':'enchantments','Land':'lands','Permanent.nonLand':'nonland permanents','Planeswalker':'planeswalkers'}[d.ValidCards||''];return t?[{op:'todos',tipo:t}]:nao('quais');}
     case 'ChangeZone':{const og=d.Origin||'',ds=d.Destination||'';
@@ -5426,7 +5427,13 @@ function fgPasso(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.S
       if(og==='Library'&&(ds==='Battlefield'||ds==='Hand')&&/^Land\.Basic(\+YouCtrl)?$/.test(d.ChangeType||'')){const n=N('ChangeNum');if(n==null)return nao('número');return [{op:'busca',n,dest:ds==='Battlefield'?'campo':'mao',tap:d.Tapped==='True'}];}
       if(og==='Graveyard'&&!al&&(!d.Defined||d.Defined==='Self')&&!d.ChangeType&&(ds==='Battlefield'||ds==='Hand'))return [{op:'doCem',dest:ds==='Battlefield'?'campo':'mao',tap:d.Tapped==='True'}];
       if(og==='Graveyard'&&(d.ValidTgts||d.ChangeType)&&(ds==='Battlefield'||ds==='Hand')&&!/Opp|Other|TargetedPlayer/.test(d.ValidTgts||d.ChangeType)){const n=d.TargetMin==='0'&&!d.TargetMax?1:(N('TargetMax')||N('ChangeNum')||1);return [{op:'doCemAlvo',n,v:(d.ValidTgts||d.ChangeType),dest:ds==='Battlefield'?'campo':'mao',tap:d.Tapped==='True'}];}
-      return nao();}
+      if((og==='Library'||og==='Hand')&&!al&&!d.Defined&&d.ChangeType&&!/IsRemembered|Opp|TargetedPlayer|ChosenType|sharesCreatureTypeWith/.test(d.ChangeType)){
+        let n=d.ChangeNum==null?1:N('ChangeNum');if(n==null||n==='X')return nao('número');const dm={Hand:'mao',Battlefield:'campo',Graveyard:'cem',Library:'topo'}[ds];if(!dm)return nao(og+' → '+ds);
+        if(ds==='Library'&&d.LibraryPosition!=null&&d.LibraryPosition!=='0')return nao('posição no grimório');
+        let dest=dm;const s1=d.SubAbility&&fgPP((ctx.sv||{})[d.SubAbility]||''),s2=s1&&s1.d.SubAbility&&fgPP((ctx.sv||{})[s1.d.SubAbility]||'');
+        if(ds==='Library'&&d.RememberChanged&&s1&&/IsRemembered/.test(s1.d.ChangeType||'')){if(!(s1.d.Destination==='Battlefield'&&s2&&s2.d.Destination==='Hand'&&/IsRemembered/.test(s2.d.ChangeType||'')))return nao('separar as cartas buscadas');dest='misto';ctx.pula=[d.SubAbility,s1.d.SubAbility];}
+        return [{op:'tutor',n,v:d.ChangeType,og:og==='Hand'?'mao':'bib',dest,tap:d.Tapped==='True'||(dest==='misto'&&s1&&s1.d.Tapped==='True'),dif:d.DifferentNames?1:0,ate:d.Mandatory==='True'?0:1}];}
+      return nao((og||'?')+' → '+(ds||'?')+(al?' com alvo':''));}
     case 'Counter':return d.TargetType==='Spell'&&!d.ValidTgts?.includes('Activated')?[{op:'anula',al:'spell'}]:nao();
     case 'Pump':{const o=[],a=d.NumAtt?N('NumAtt'):0,b=d.NumDef?N('NumDef'):0;if(a==null||b==null||a==='X'||b==='X')return nao('número');
       if(!al&&d.Defined&&d.Defined!=='Self')return nao('quem');
@@ -5464,7 +5471,7 @@ function fgPasso(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.S
   }
   return nao('ação '+api);}
 function fgCadeia(d,api,ctx){let o=fgPasso(d,api,ctx),vis=0,dd=d;
-  while(dd.SubAbility){if(++vis>10)break;const s=(ctx.sv||{})[dd.SubAbility];if(!s){o.push({op:'nao',d:'passo '+dd.SubAbility});break;}const p=fgPP(s);const pl=ctx.pula===dd.SubAbility;dd=p.d;if(!pl)o=o.concat(fgPasso(p.d,p.api,ctx));}
+  while(dd.SubAbility){if(++vis>10)break;const s=(ctx.sv||{})[dd.SubAbility];if(!s){o.push({op:'nao',d:'passo '+dd.SubAbility});break;}const p=fgPP(s);const pl=Array.isArray(ctx.pula)?ctx.pula.includes(dd.SubAbility):ctx.pula===dd.SubAbility;dd=p.d;if(!pl)o=o.concat(fgPasso(p.d,p.api,ctx));}
   return o;}
 function fgDescr(d,sv){const l=[d.SpellDescription||d.TriggerDescription||''];let dd=d,vis=0;while(dd.SubAbility&&sv&&sv[dd.SubAbility]&&++vis<10){dd=fgPP(sv[dd.SubAbility]).d;if(dd.SpellDescription)l.push(dd.SpellDescription);}return l.join(' ');}
 /* todas as partes da carta com texto: mágica, habilidade ativada e gatilho */
@@ -6223,6 +6230,14 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
         if(p.tipo==='mag'){if(p.de===me)e.cem.push(p.c);else ev({op:'anulada',c:p.c},p.de);}feito.push('anulou '+p.nm);break;}
       case 'ficha':xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1);feito.push(`criou ${n} ficha${n>1?'s':''} ${s.nome}${s.p!=null?' '+s.p+'/'+s.t:''}`);break;
       case 'scry':setTimeout(()=>xLista('bib','Vidência '+n+': mande pro topo ou pro fundo',n),300);feito.push('vidência '+n);break;
+      case 'tutor':{const og=s.og==='mao'?e.mao:e.bib,kc=it.k,nm=it.nm,ctxv={eu:me,src:kc,sv:{}};let L=og.filter(c=>{try{return fgValid(c,s.v,ctxv);}catch(er){return false;}});
+        const vis=new Set(),U=L.filter(c=>{if(vis.has(c.n))return false;vis.add(c.n);return true;});
+        setTimeout(async()=>{let ks;if(!U.length)ks=[];else if(XBOT)ks=U.slice().sort((a,b)=>(s.dest==='campo'&&xInfo(a).land?-1:0)||xMVc(b)-xMVc(a)).slice(0,n).map(c=>c.k);
+          else{ks=null;while(!ks)ks=await xMarca(`${nm}: buscar ${s.ate?'até ':''}${n} (${s.og==='mao'?'da mão':'do grimório'})`,(s.dif?U:L).map(c=>({k:c.k,rot:c.n})),s.ate||!L.length?0:Math.min(n,L.length),n);}
+          let pg=ks.map(k=>og.find(c=>c.k===k)).filter(Boolean);if(s.dif){const v2=new Set();pg=pg.filter(c=>!v2.has(c.n)&&v2.add(c.n));}
+          pg.forEach((c,q)=>{og.splice(og.indexOf(c),1);const d=s.dest==='misto'?(q===0?'campo':'mao'):s.dest;if(d==='campo'){c.tap=s.tap?1:0;e.campo.push(c);xEntrou(c);}else if(d==='mao')e.mao.push(c);else if(d==='cem')e.cem.push(c);});
+          if(s.og!=='mao')xEmb(e.bib);if(s.dest==='topo')pg.forEach(c=>e.bib.unshift(c));
+          xLog(`${nm}: ${pg.length?(s.dest==='topo'?'buscou e pôs no topo ':'buscou ')+(s.dest==='topo'&&!XBOT?pg.map(c=>c.n).join(', '):s.dest==='topo'?pg.length+' carta':pg.map(c=>c.n).join(', ')):'não achou nada'}${s.og!=='mao'?' e embaralhou':''}`);xSobe();xPintaEu();},300);feito.push('busca');break;}
       case 'busca':{const pega=[],vi=new Set();for(const pas of [0,1])for(const c of e.bib){if(pega.length>=n)break;if(!/^(Snow-Covered )?(Plains|Island|Swamp|Mountain|Forest|Wastes)$/.test(c.n)||pega.includes(c)||(!pas&&vi.has(c.n)))continue;vi.add(c.n);pega.push(c);}
         pega.forEach((c,q)=>{e.bib.splice(e.bib.indexOf(c),1);if(s.dest==='campo'||(s.dest==='misto'&&q===0)){c.tap=s.tap?1:0;e.campo.push(c);}else e.mao.push(c);});xEmb(e.bib);feito.push(`buscou ${pega.map(c=>c.n).join(', ')||'nada'}`);break;}
       case 'mill':if(s.quem==='op')ev({op:'mill',n},ou);else for(let q=0;q<n&&e.bib.length;q++)e.cem.push(e.bib.shift());feito.push(`moeu ${n}`);break;}}
