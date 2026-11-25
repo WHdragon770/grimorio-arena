@@ -3045,8 +3045,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.82;
-/* dólar ao vivo (AwesomeAPI); 5.82 = do dia da publicação, só se falhar */
+let COTA=5.81;
+/* dólar ao vivo (AwesomeAPI); 5.81 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5533,6 +5533,12 @@ function fgPasso(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.S
         if(ds==='Library'&&d.RememberChanged&&s1&&/IsRemembered/.test(s1.d.ChangeType||'')){if(!(s1.d.Destination==='Battlefield'&&s2&&s2.d.Destination==='Hand'&&/IsRemembered/.test(s2.d.ChangeType||'')))return nao('separar as cartas buscadas');dest='misto';ctx.pula=[d.SubAbility,s1.d.SubAbility];}
         return [{op:'tutor',n,v:d.ChangeType,og:og==='Hand'?'mao':'bib',dest,tap:d.Tapped==='True'||(dest==='misto'&&s1&&s1.d.Tapped==='True'),dif:d.DifferentNames?1:0,ate:d.Mandatory==='True'?0:1}];}
       return nao((og||'?')+' → '+(ds||'?')+(al?' com alvo':''));}
+    case 'ChangeZoneAll':{const Z={Battlefield:'campo',Graveyard:'cem',Hand:'mao',Exile:'exi',Library:'bib'},og=Z[d.Origin||''],ds=Z[d.Destination||''];let v=d.ChangeType||'Card';
+      if(!og||!ds||og===ds)return nao((d.Origin||'?')+' → '+(d.Destination||'?'));if(/Remembered|Chosen|Targeted|sharesName|named/.test(v))return nao('quais cartas');
+      if(ds==='bib'&&d.LibraryPosition!=null&&d.LibraryPosition!=='-1'&&!d.Shuffle)return nao('posição no grimório');
+      let quem='todos';if(d.ValidTgts&&/Player|Opponent/.test(d.ValidTgts))quem='alvo';else if(d.Defined==='You'||/\.(YouCtrl|YouOwn)\b/.test(v))quem='eu';else if(/Opp(Ctrl|Own)/.test(v)||/Opponent/.test(d.Defined||''))quem='op';else if(d.Defined&&d.Defined!=='Player')return nao('de quem');
+      v=v.split(',').map(x=>x.replace(/\.(YouCtrl|YouOwn|OppCtrl|OppOwn)\b/g,'').replace(/\+(YouCtrl|YouOwn|OppCtrl|OppOwn)\b/g,'')).join(',');
+      return [{op:'zonas',og,ds,v,quem,emb:d.Shuffle==='True'||d.RandomOrder==='True'?1:0}];}
     case 'Counter':return d.TargetType==='Spell'&&!d.ValidTgts?.includes('Activated')?[{op:'anula',al:'spell'}]:nao();
     case 'Pump':{const o=[],a=d.NumAtt?N('NumAtt'):0,b=d.NumDef?N('NumDef'):0;if(a==null||b==null||a==='X'||b==='X')return nao('número');
       if(!al&&d.Defined&&d.Defined!=='Self')return nao('quem');
@@ -5591,6 +5597,8 @@ function fgPartes(s){const o=[];for(const a of s.A||[]){const p=fgPP(a);if(p.k==
 function fgEfeitos(tx,n,k){const s0=FG.get(fgN(n));if(!s0)return null;const nr=x=>xNorm(String(x).replace(/CARDNAME|NICKNAME|\bthis (?:creature|permanent|artifact|enchantment|land)\b/g,fgN(n)),n).toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]/g,''),t=nr(tx);if(t.length<5)return null;
   for(const s of [s0,s0.alt].filter(Boolean)){const P=fgPartes(s).map(p=>Object.assign(p,{nd:nr(p.desc)})).filter(p=>p.nd.length>4);
     let M=P.filter(p=>t.includes(p.nd));if(!M.length){M=P.filter(p=>p.nd.includes(t)).sort((a,b)=>a.nd.length-b.nd.length).slice(0,1);}
+    if(!M.length){const W=x=>new Set(xNorm(String(x).replace(/CARDNAME|NICKNAME/g,fgN(n)),n).toLowerCase().replace(/\([^)]*\)/g,'').split(/[^a-z0-9']+/).filter(w=>w.length>2&&!['the','and','this','card','that','its','your','you','all','from','with','for','each','cards'].includes(w))),tw=W(tx);
+      if(tw.size>=2){let mx=0;for(const p of P){const pw=W(p.desc);let i=0;for(const w of tw)if(pw.has(w))i++;const a1=i/tw.size,b1=i/Math.max(1,pw.size);if(a1>=.75&&b1>=.4&&a1+b1>mx){mx=a1+b1;M=[p];}}}}
     if(M.length){const ctx={eu:xUid(),src:k||'',sv:s.sv||{}};return M.flatMap(p=>fgCadeia(p.d,p.api,ctx));}}
   return null;}
 /* ---------- habilidades ativadas (custo e restrição do script) ---------- */
@@ -6092,7 +6100,7 @@ async function xEquipa(k,cuE){const e=X.eu,c=e.campo.find(q=>q.k===k);if(!c)retu
 const X1NUM={a:1,an:1,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,twenty:20,x:'X'};
 const xN=w=>{w=String(w||'').toLowerCase();return /^\d+$/.test(w)?+w:X1NUM[w]!=null?X1NUM[w]:1;};
 const X1ALV="(any target|target creature or planeswalker|target creature or player|target player or planeswalker|target creature an opponent controls|target creature you don't control|target creature you control|target nonland permanent|target artifact or enchantment|target creature|target artifact|target enchantment|target planeswalker|target permanent|target land|target opponent|target player|each opponent|each other creature|each creature your opponents control|each creature|each player)";
-const xNorm=(tx,n)=>{let t=String(tx||'');for(const v of [n,String(n||'').split(' // ')[0],String(n||'').split(',')[0]])if(v&&v.length>2)t=t.split(v).join('this card');{const a=String(n||'').split(' // ')[0];const m=!a.includes(',')&&a.match(/^([A-Z][a-z]{2,}) (?:the|of)\b/);if(m)t=t.replace(new RegExp('\\b'+m[1]+'\\b(?![ ,]+(?:the|of)\\b)','g'),'this card');}return t;};
+const xNorm=(tx,n)=>{let t=String(tx||'');for(const v of [n,String(n||'').split(' // ')[0],String(n||'').split(',')[0]])if(v&&v.length>2)t=t.split(v).join('this card');t=t.replace(/\b([Tt])his (?:land|Vehicle|vehicle|Equipment|equipment|Aura|aura|Spacecraft|spacecraft)\b/g,'$1his card');{const a=String(n||'').split(' // ')[0];const m=!a.includes(',')&&a.match(/^([A-Z][a-z]{2,}) (?:the|of)\b/);if(m)t=t.replace(new RegExp('\\b'+m[1]+'\\b(?![ ,]+(?:the|of)\\b)','g'),'this card');}return t;};
 const xMax=()=>(X.sala&&X.sala.max)||2;
 const xMorto=p=>!p||p.vida<=0||(p.dc||0)>=21||(p.ven||0)>=10;
 const xPub=u=>u===xUid()?X.eu:(X.ops||{})[u];
@@ -6247,6 +6255,10 @@ function xEfCarta(c,op,n,x){const i=xInfo(c);
   xVarre();}
 function xTodos(tipo){const e=X.eu;for(const c of e.campo.slice()){const i=xInfo(c),art=/Artifact/.test(i.tipo||'')||!!c.art,en=/Enchantment/.test(i.tipo||'');
   const ok=tipo==='creatures'?i.cri:tipo==='artifacts'?art:tipo==='enchantments'?en:tipo==='lands'?i.land:tipo==='planeswalkers'?i.pw:!i.land;if(ok)xEfCarta(c,'destroi');}}
+function xZonas(v){const e=X.eu,ok=c=>{try{return fgValid(c,v.v,{eu:xUid(),src:'',sv:{}});}catch(er){return false;}};let n=0;
+  if(v.og==='campo'){for(const c of e.campo.slice())if(ok(c)){n++;xSai(c,v.ds);}}
+  else{const L=e[v.og].filter(ok);e[v.og]=e[v.og].filter(c=>!L.includes(c));n=L.length;const M=v.emb?xEmb(L):L;if(v.ds==='campo')M.forEach(c=>{c.tap=0;e.campo.push(c);xEntrou(c);});else e[v.ds].push(...M);}
+  if(v.ds==='bib'&&v.emb&&v.og!=='campo')e.bib=xEmb(e.bib);xVarre();return n;}
 function xCada(o,f){for(const c of X.eu.campo.slice())if(xFiltro(f,c))xEfCarta(c,o);}
 function xTodosDano(n,menos){for(const c of X.eu.campo.slice())if(c.k!==menos&&xInfo(c).cri)xEfCarta(c,'dano',n);}
 function xNoAlvo(t,op,n,ev,x){if(!t)return;if(t.startsWith('P:')){if(op!=='dano')return;if(t.slice(2)===xUid())X.eu.vida-=n;else ev({op:'vida',d:-n},t.slice(2));return;}
@@ -6270,7 +6282,7 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='morreu')xGatCampo(/Whenever (?:this (?:card|creature) or )?(another |a |an )((?:nontoken )?[A-Za-z -]*?creature)( an opponent controls| you don't control)? dies, ([^\n]+)/i,v.n+' morreu',m=>!(/nontoken/i.test(m[2])&&v.tok)&&xFiltro(m[2].replace(/creature/i,''),{n:v.n,tok:v.tok}));
   else if(v.op==='presente'){const g=v.g;if(/card/.test(g)){if(e.bib.length)e.mao.push(e.bib.shift());xLog('ganhou o presente: comprou 1');}else if(/food/.test(g))xFicha('Comida',null,null,[],1);else if(/treasure/.test(g))xFicha('Tesouro',null,null,[],1,1);else if(/octopus/.test(g))xFicha('Polvo',8,8);else if(/fish/.test(g)){xFicha('Peixe',1,1);if(/tapped/.test(g))e.campo[e.campo.length-1].tap=1;}else xLog('ganhou o presente: '+g+' (⚠ o jogo não sabe criar esse)');}
   else if(v.op==='demo')xTempestade({n:v.n,img:v.img},1,v.tx,v.nf,'cópia demonstrada');
-  else if(v.op==='todos')xTodos(v.tipo);else if(v.op==='cada')xCada(v.o,v.f);else if(v.op==='danoTodos')xTodosDano(v.n);
+  else if(v.op==='zonas')xZonas(v);else if(v.op==='todos')xTodos(v.tipo);else if(v.op==='cada')xCada(v.o,v.f);else if(v.op==='danoTodos')xTodosDano(v.n);
   else if(v.op==='anulada')e.cem.push(v.c);
   else if(v.op==='mill'){for(let q=0;q<v.n&&e.bib.length;q++)e.cem.push(e.bib.shift());}
   xVarre();}
@@ -6334,6 +6346,8 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
       case 'cntTodos':{const ctx={eu:me,src:it.k,sv:{}};let q=0;e.campo.forEach(c=>{if(fgValid(c,s.v,ctx)){c.cnt=(c.cnt||0)+n;q++;}});feito.push(`+${n} marcador +1/+1 em ${q}`);break;}
       case 'cnt':if(s.al==='each creature you control')e.campo.filter(xCri).forEach(c=>c.cnt=(c.cnt||0)+n);else xNoAlvo(t||it.k,'cnt',n,ev);feito.push(`+${n} marcador +1/+1`);break;
       case 'cada':if(s.q!=='op')xCada(s.o,s.f);if(s.q!=='eu')ev({op:'cada',o:s.o,f:s.f});feito.push(`${s.o} em cada ${s.f}${s.q==='op'?' dos oponentes':s.q==='eu'?' sua':''}`);break;
+      case 'zonas':{const os=Object.keys(X.ops||{}),q=s.quem==='alvo'?[X.op&&os.includes(xOutro())?xOutro():os[0]].filter(Boolean):s.quem==='eu'?[]:os;if(s.quem==='eu'||s.quem==='todos')xZonas(s);for(const u of q)ev(Object.assign({},s,{op:'zonas'}),u);
+        const ZN={campo:'campo',cem:'cemitério',mao:'mão',exi:'exílio',bib:'grimório'};feito.push(`${s.quem==='eu'?'suas':s.quem==='todos'?'todas as':'do oponente:'} ${s.v.split(',').map(x=>{const[t,...q]=x.split('.');return ({Card:'cartas',Creature:'criaturas',Artifact:'artefatos',Enchantment:'encantamentos',Land:'terrenos',Planeswalker:'planeswalkers',Permanent:'permanentes',Instant:'instantâneas',Sorcery:'feitiços'}[t]||t)+(q.join('.').includes('attacking')?' atacantes':q.join('.').includes('nonLand')?' (menos terrenos)':q.length?' ('+q.join('.')+')':'');}).join(' e ')} ${ZN[s.og]} → ${ZN[s.ds]}`);break;}
       case 'todos':xTodos(s.tipo);ev({op:'todos',tipo:s.tipo});feito.push('destruiu todas as '+s.tipo);break;
       case 'pumpTodos':e.campo.filter(c=>xCri(c)&&(!s.v||fgValid(c,s.v,{eu:me,src:it.k,sv:{}}))).forEach(c=>{c.tp=(c.tp||0)+s.p;c.tt=(c.tt||0)+s.t;if(s.kw&&s.kw.length)c.kt=[...new Set([...(c.kt||[]),...s.kw])];});feito.push(`suas criaturas${s.p||s.t?' '+s.p+'/'+s.t:''}${s.kw&&s.kw.length?' ganham '+s.kw.join(', '):''}`);break;
       case 'anula':{const ix=rest.findIndex(p=>'S:'+p.id===t);if(ix<0){feito.push('a mágica alvo já tinha saído');break;}const p=rest[ix];rest=rest.filter((_,q)=>q!==ix);
