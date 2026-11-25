@@ -2921,8 +2921,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.89;
-/* dólar ao vivo (AwesomeAPI); 5.89 = do dia da publicação, só se falhar */
+let COTA=5.9;
+/* dólar ao vivo (AwesomeAPI); 5.9 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5423,20 +5423,25 @@ function fgPasso(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.S
     case 'DelayedTrigger':{const ex=fgPP((ctx.sv||{})[d.Execute]||'');if(d.Mode==='SpellCast'&&ex.api==='CopySpellAbility'&&d.ThisTurn==='True')return [{op:'copiaProx',v:d.ValidCard||'Instant,Sorcery'}];return nao('gatilho atrasado');}
     case 'Dig':{const n=N('DigNum'),sub=fgPP((ctx.sv||{})[d.SubAbility]||''),mp=sub.api==='Effect'&&/MayPlay\$ True/.test((ctx.sv||{})[sub.d.StaticAbilities]||'');
       if(n!=null&&d.DestinationZone==='Exile'&&d.ChangeNum==='All'&&mp)return [{op:'exiJoga',n,prox:/NextTurn/.test(sub.d.Duration||'')?1:0}];return nao('olhar o topo e escolher');}
+    case 'PeekAndReveal':{const n=N('PeekAmount')||1,sb=d.SubAbility&&fgPP((ctx.sv||{})[d.SubAbility]||'');
+      if(n===1&&sb&&sb.api==='SetState'&&sb.d.Mode==='Transform'&&(!sb.d.Defined||sb.d.Defined==='Self')&&sb.d.ConditionDefined==='Remembered'){ctx.pula=d.SubAbility;return [{op:'espiaTransforma',v:(sb.d.ConditionPresent||'Card').replace(/Card\./g,'')}];}
+      if(n===1&&!d.SubAbility)return [{op:'espia',rev:d.NoReveal?0:1}];return nao('olhar o topo');}
+    case 'TakeInitiative':return [{op:'iniciativa'}];
+    case 'Goad':return al?put({op:'goad',al},[]):nao('provocar');
     case 'Surveil':{const n=N('Amount');if(n==null)return nao('número');return [{op:'vigia',n}];}
     case 'Venture':return (d.Defined||'You')==='You'?[{op:'masmorra'}]:nao('quem explora');
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
 function fgCadeia(d,api,ctx){let o=fgPasso(d,api,ctx),vis=0,dd=d;
-  while(dd.SubAbility){if(++vis>10)break;const s=(ctx.sv||{})[dd.SubAbility];if(!s){o.push({op:'nao',d:'passo '+dd.SubAbility});break;}const p=fgPP(s);dd=p.d;o=o.concat(fgPasso(p.d,p.api,ctx));}
+  while(dd.SubAbility){if(++vis>10)break;const s=(ctx.sv||{})[dd.SubAbility];if(!s){o.push({op:'nao',d:'passo '+dd.SubAbility});break;}const p=fgPP(s);const pl=ctx.pula===dd.SubAbility;dd=p.d;if(!pl)o=o.concat(fgPasso(p.d,p.api,ctx));}
   return o;}
 function fgDescr(d,sv){const l=[d.SpellDescription||d.TriggerDescription||''];let dd=d,vis=0;while(dd.SubAbility&&sv&&sv[dd.SubAbility]&&++vis<10){dd=fgPP(sv[dd.SubAbility]).d;if(dd.SpellDescription)l.push(dd.SpellDescription);}return l.join(' ');}
 /* todas as partes da carta com texto: mágica, habilidade ativada e gatilho */
 function fgPartes(s){const o=[];for(const a of s.A||[]){const p=fgPP(a);if(p.k==='SP'||p.k==='AB')o.push({tipo:p.k,d:p.d,api:p.api,desc:p.api==='Charm'?(p.d.Choices||'').split(',').map(x=>fgDescr(fgPP((s.sv||{})[x.trim()]||'').d,s.sv)).join(' '):fgDescr(p.d,s.sv)});}
   for(const t of s.T||[]){const p=fgPP(t),ex=(s.sv||{})[p.d.Execute];if(!ex)continue;const q=fgPP(ex);o.push({tipo:'T',d:q.d,api:q.api,trig:p.d,desc:(p.d.TriggerDescription||'')+' '+fgDescr(q.d,s.sv)});}return o;}
 /* texto -> ops pelo script real. null = a carta não tem script ou o trecho não bate com nenhuma parte. */
-function fgEfeitos(tx,n,k){const s0=FG.get(fgN(n));if(!s0)return null;const nr=x=>xNorm(String(x).replace(/CARDNAME|NICKNAME/g,fgN(n)),n).toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]/g,''),t=nr(tx);if(t.length<5)return null;
+function fgEfeitos(tx,n,k){const s0=FG.get(fgN(n));if(!s0)return null;const nr=x=>xNorm(String(x).replace(/CARDNAME|NICKNAME|\bthis (?:creature|permanent|artifact|enchantment|land)\b/g,fgN(n)),n).toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]/g,''),t=nr(tx);if(t.length<5)return null;
   for(const s of [s0,s0.alt].filter(Boolean)){const P=fgPartes(s).map(p=>Object.assign(p,{nd:nr(p.desc)})).filter(p=>p.nd.length>4);
     let M=P.filter(p=>t.includes(p.nd));if(!M.length){M=P.filter(p=>p.nd.includes(t)).sort((a,b)=>a.nd.length-b.nd.length).slice(0,1);}
     if(M.length){const ctx={eu:xUid(),src:k||'',sv:s.sv||{}};return M.flatMap(p=>fgCadeia(p.d,p.api,ctx));}}
@@ -5516,7 +5521,8 @@ function fgPronto(n){return FGOK.has(fgH(fgN(n)));}
 const FGDG={'Lost Mine of Phandelver':[['Cave Entrance','Scry 1.',[1,2]],['Goblin Lair','Create a 1/1 red Goblin creature token.',[3,4]],['Mine Tunnels','Create a Treasure token.',[4,5]],['Storeroom','Put a +1/+1 counter on target creature.',[6]],['Dark Pool','Each opponent loses 1 life and you gain 1 life.',[6]],['Fungi Cavern','Target creature gets -4/-0 until your next turn.',[6]],['Temple of Dumathoin','Draw a card.',[]]],
  'Dungeon of the Mad Mage':[['Yawning Portal','You gain 1 life.',[1]],['Dungeon Level','Scry 1.',[2,3]],['Goblin Bazaar','Create a Treasure token.',[4]],['Twisted Caverns',"Target creature can't attack until your next turn.",[4]],['Lost Level','Scry 2.',[5,6]],['Runestone Caverns','Exile the top two cards of your library. You may play them this turn.',[7]],["Muiral's Graveyard",'Create two 1/1 black Skeleton creature tokens.',[7]],['Deep Mines','Scry 3.',[8]],["Mad Wizard's Lair",'Draw three cards.',[]]],
  'Tomb of Annihilation':[['Trapped Entry','Each player loses 1 life.',[1,2]],['Veils of Fear','Each player loses 2 life unless they discard a card.',[3]],['Oubliette','Discard a card and sacrifice an artifact, a creature, and a land.',[4]],['Sandfall Cell','Each player loses 2 life unless they sacrifice an artifact, a creature, or a land.',[4]],['Cradle of the Death God','Create The Atropal, a legendary 4/4 black God Horror creature token with deathtouch.',[]]]};
-const FGDGPT={'Lost Mine of Phandelver':'Mina Perdida de Phandelver','Dungeon of the Mad Mage':'Masmorra do Mago Louco','Tomb of Annihilation':'Tumba da Aniquilação'};
+FGDG['Undercity']=[['Secret Entrance','Search your library for a basic land card, reveal it, put it into your hand, then shuffle.',[1,2]],['Forge','Put two +1/+1 counters on target creature.',[3,4]],['Lost Well','Scry 2.',[4,5]],['Trap!','Target player loses 5 life.',[6]],['Arena','Goad target creature.',[6,7]],['Stash','Create a Treasure token.',[7]],['Archives','Draw a card.',[8]],['Catacombs','Create a 4/1 black Skeleton creature token with menace.',[8]],['Throne of the Dead Three','Reveal the top ten cards of your library. Put a creature card from among them onto the battlefield with three +1/+1 counters on it. It gains hexproof until your next turn. Then shuffle.',[]]];
+const FGDGPT={'Lost Mine of Phandelver':'Mina Perdida de Phandelver','Dungeon of the Mad Mage':'Masmorra do Mago Louco','Tomb of Annihilation':'Tumba da Aniquilação','Undercity':'Cidade Subterrânea'};
 
 // X1 online: 1 contra 1 com regras (turno, fases, mana, terreno por turno, combate, anexos, marcadores, fichas) pelo Firestore.
 // x1/{cod} {dono,jog,nomes,ts, vez,turno,fase,ini,cb,golpe,mag} · pub/{uid} mesa visível · priv/{uid} grimório+mão (só o dono lê) · log
@@ -5599,7 +5605,7 @@ function xCusto(s){const o={g:0,x:0,pips:[]};for(const m of String(s||'').matchA
 /* tudo que está preso numa carta, dos dois lados da mesa */
 function xAnx(k){const l=[];for(const [cp,z] of [[(X.eu||{}).campo||[],'campo'],...xOpCampos().map(([c])=>[c,'opcampo'])])for(const c of cp)if(c.an===k)l.push([c,z]);return l;}
 const xExiste=k=>((X.eu||{}).campo||[]).some(c=>c.k===k)||xOpCampos().some(([cp])=>cp.some(c=>c.k===k));
-function xPT(c){const i=xInfo(c);let p=i.p+(c.cnt||0)+(c.tp||0)+(c.tpN||0),t=i.t+(c.cnt||0)+(c.tt||0);const kw=new Set(i.kws);(c.kt||[]).forEach(x=>kw.add(x));let pz=0;
+function xPT(c){const i=xInfo(c);let p=i.p+(c.cnt||0)+(c.tp||0)+(c.tpN||0),t=i.t+(c.cnt||0)+(c.tt||0);const kw=new Set(i.kws);(c.kt||[]).forEach(x=>kw.add(x));(c.ktN||[]).forEach(x=>kw.add(x));let pz=0;
   for(const [a] of xAnx(c.k)){const j=xInfo(a);if(j.da){p+=j.da.p;t+=j.da.t;j.da.kw.forEach(x=>kw.add(x));}if(j.pz)pz=Math.max(pz,j.pz);}
   return {p,t,kw,pz,mod:p!==i.p||t!==i.t};}
 const xCri=c=>xInfo(c).cri;
@@ -5657,15 +5663,17 @@ function xComeca(id){const d=BK.lst.find(x=>x.id===(id||($('#x1-deck')||{}).valu
 /* ---------- turno: desvirar, comprar, esvaziar mana, limpar "até o fim do turno", receber o golpe ---------- */
 function xTurno(){const s=X.sala,e=X.eu,me=xUid();if(!s||!e)return;let mud=0;
   const fv=(s.turno||0)+'.'+(s.fase||0);if(e.fv!==fv){e.fv=fv;if(xTotP(e.pool)){e.pool=xPool0();mud=1;}}
-  if(s.turno&&e.tl!==s.turno){e.tl=s.turno;for(const c of e.campo)if(c.ateU&&s.vez===c.ateU&&s.turno>c.ateT){c.tpN=0;c.naN=0;c.ateU='';}for(const c of e.campo)if(c.tp||c.tt||c.dn||c.atk||c.bl||c.kt||c.alv){c.tp=0;c.tt=0;c.dn=0;c.atk=0;c.bl='';c.kt=null;c.alv='';}mud=1;}
+  if(s.turno&&e.tl!==s.turno){e.tl=s.turno;for(const c of e.campo)if(c.ateU&&s.vez===c.ateU&&s.turno>c.ateT){c.tpN=0;c.naN=0;c.ateU='';c.gd='';c.ktN=null;}for(const c of e.campo)if(c.tp||c.tt||c.dn||c.atk||c.bl||c.kt||c.alv){c.tp=0;c.tt=0;c.dn=0;c.atk=0;c.bl='';c.kt=null;c.alv='';}mud=1;}
   if(s.turno&&s.vez===me&&e.tv!==s.turno){e.tv=s.turno;e.ter=0;e.campo.forEach(c=>{c.tap=0;c.sk=0;});
     const cp=s.turno!==1;let t='';
     if(cp){if(e.bib.length){e.mao.push(e.bib.shift());t=' e comprou 1';}else t=' e não tinha carta pra comprar (grimório vazio = derrota)';}else t=' (quem começa não compra no 1º turno)';
-    xLog(`começou o turno ${s.turno}: desvirou tudo${t}`);setTimeout(()=>xGatCampo(/^At the beginning of your upkeep, ([^\n]+)$/im,'manutenção'),700);if(!(s.fase>0))xSala({fase:1});mud=1;}
+    xLog(`começou o turno ${s.turno}: desvirou tudo${t}`);setTimeout(()=>xGatCampo(/^At the beginning of your upkeep, ([^\n]+)$/im,'manutenção'),700);if(s.ini&&s.ini.u===me){xLog('manutenção com a iniciativa');setTimeout(()=>xVenture('Iniciativa',1),900);}if(!(s.fase>0))xSala({fase:1});mud=1;}
   for(const g of [s.golpe,...(s.golpes||[])])if(g&&g.para===me&&e.gv!==g.id){e.gv=g.id;e.vida+=(g.vg||0)-(g.dano||0);if(g.ven)e.ven=(e.ven||0)+g.ven;if(g.cmd){e.dcm=e.dcm||{};e.dcm[g.de]=(e.dcm[g.de]||0)+g.cmd;e.dc=Math.max(e.dc||0,...Object.values(e.dcm));}
     for(const c of e.campo.slice()){if((g.mortos||[]).includes(c.k)){xMorre(c);}else{if(g.dn&&g.dn[c.k])c.dn=(c.dn||0)+g.dn[c.k];if(g.cm&&g.cm[c.k])c.cnt=(c.cnt||0)-g.cm[c.k];c.bl='';}}
     for(const [k,d] of Object.entries(g.pw||{})){const c=e.campo.find(q=>q.k===k);if(c)xEfCarta(c,'dano',d);}
+    if((g.dano||0)>0&&s.ini&&s.ini.u===me&&g.de&&g.de!==me){const ni={u:g.de,id:xId()};s.ini=ni;X.iniV=ni.id;xSala({ini:ni});xLog('levou dano de combate e perdeu a iniciativa');}
     xVarre();mud=1;}
+  if(s.ini&&s.ini.u===me&&s.ini.id!==X.iniV){X.iniV=s.ini.id;xLog('roubou a iniciativa');setTimeout(()=>xVenture('Iniciativa',1),350);}
   if(!e.evs)e.evs=[];for(const v of s.ev||[])if((v.para===me||(v.para==='*'&&v.de!==me))&&!e.evs.includes(v.id)){e.evs.push(v.id);xEvAplica(v);mud=1;}if(e.evs.length>80)e.evs=e.evs.slice(-80);
   const P=s.pilha||[],top=P[P.length-1];
   if(top&&s.rz===top.id&&top.de===me&&X.rzF!==top.id){X.rzF=top.id;const nv=[],rest=xResolve(top,P.slice(0,-1),nv);const o={pilha:rest,rz:'',pri:s.vez,pp:0};
@@ -5823,9 +5831,14 @@ function xEfTx(tx0,n){const L=[];let txt=String(tx0).replace(/\([^)]*\)/g,'').to
    if(mm){const bl=mm[2].split(/\n?\s*•\s*/).map(x=>x.trim()).filter(Boolean),qt={one:[1,1],two:[2,2],three:[3,3],'one or both':[1,2],'one or more':[1,bl.length],'any number':[0,bl.length]}[mm[1]];
      L.push(...xEfTx(txt.slice(0,mm.index),n));L.push({op:'modal',n:qt[1],min:qt[0],ops:bl.map(b=>({rot:b.replace(/^./,x=>x.toUpperCase()),st:xEfTx(b,n)}))});return L;}}
   for(const s0 of txt.split(/\n|(?<=\.)\s+/)){const s=s0.trim();let m;
+    if(m=s.match(/^if an? ([a-z ]+?) card is revealed this way, transform/)){L.push({op:'espiaTransforma',v:m[1].split(/ or |, /).map(w=>({instant:'Instant',sorcery:'Sorcery'})[w.trim()]||XTIPO[w.trim()]).filter(Boolean).join(',')||'Card'});continue;}
+    if(/^look at the top card of your library$|^you may reveal that card$/.test(s.replace(/\.$/,'')))continue;
     if(/when(?:ever)? you (?:next )?cast your next instant or sorcery spell this turn, copy (?:that|it)/.test(s)){L.push({op:'copiaProx',v:'Instant,Sorcery'});continue;}
     if(!s||/^(when|whenever|at the beginning|as long as|equip|enchant |as an additional cost)/.test(s))continue;
     if(/venture into the dungeon/.test(s))L.push({op:'masmorra'});
+    if(/venture into undercity/.test(s))L.push({op:'masmorra',und:1});
+    if(/you take the initiative/.test(s))L.push({op:'iniciativa'});
+    if(m=s.match(/^goad (target creature(?: an opponent controls)?)/))L.push({op:'goad',al:m[1]});
     if(m=s.match(/return (?:up to (\w+) )?target ([a-z ]*?)cards? from your graveyard to (your hand|the battlefield)/))L.push({op:'doCemAlvo',n:m[1]?xN(m[1]):1,v:(m[2].trim().split(' ').map(w=>XTIPO[w]).filter(Boolean).join('.')||'Card'),dest:m[3]==='your hand'?'mao':'campo',tap:/battlefield tapped/.test(s)});
     else if(m=s.match(/return this card from your graveyard to (your hand|the battlefield)/))L.push({op:'doCem',dest:m[1]==='your hand'?'mao':'campo',tap:/battlefield tapped/.test(s)});
     if(m=s.match(/^surveil (\w+)/))L.push({op:'vigia',n:xN(m[1])});
@@ -5936,7 +5949,7 @@ function xEfCarta(c,op,n,x){const i=xInfo(c);
   else if(op==='pump'){c.tp=(c.tp||0)+x.p;c.tt=(c.tt||0)+x.t;}
   else if(op==='cnt')c.cnt=(c.cnt||0)+n;
   else if(op==='kt')c.kt=[...new Set([...(c.kt||[]),x.kw])];
-  else if(op==='pumpProx'){c.tpN=(c.tpN||0)+x.p;c.ateU=x.u;c.ateT=x.tn;}else if(op==='naoAtaca'){c.naN=1;c.ateU=x.u;c.ateT=x.tn;}
+  else if(op==='pumpProx'){c.tpN=(c.tpN||0)+x.p;c.ateU=x.u;c.ateT=x.tn;}else if(op==='naoAtaca'){c.naN=1;c.ateU=x.u;c.ateT=x.tn;}else if(op==='goad'){c.gd=x.u;c.ateU=x.u;c.ateT=x.tn;}
   else if(op==='dano'){if(i.pw&&!i.cri){c.mk=Object.assign({},c.mk);c.mk.lealdade=(c.mk.lealdade||0)-n;}else if(i.cri)c.dn=(c.dn||0)+n;}
   xVarre();}
 function xTodos(tipo){const e=X.eu;for(const c of e.campo.slice()){const i=xInfo(c),art=/Artifact/.test(i.tipo||'')||!!c.art,en=/Enchantment/.test(i.tipo||'');
@@ -6002,7 +6015,9 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
       case 'doCemAlvo':setTimeout(()=>xDoCem(s,it.nm),300);feito.push(`volta ${n} do cemitério pr${s.dest==='campo'?'o campo':'a mão'}`);break;
       case 'copiaProx':e.copiaProx={t:(X.sala||{}).turno,v:s.v||'Instant,Sorcery',nm:it.nm};feito.push('a próxima mágica instantânea ou feitiço neste turno vai ser copiada');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
-      case 'masmorra':setTimeout(()=>xVenture(it.nm),300);feito.push('explorou a masmorra');break;
+      case 'masmorra':setTimeout(()=>xVenture(it.nm,s.und),300);feito.push(s.und?'explorou a Cidade Subterrânea':'explorou a masmorra');break;
+      case 'iniciativa':xIniPega();feito.push('pegou a iniciativa');break;
+      case 'goad':xNoAlvo(t||it.k,'goad',0,ev,{u:xUid(),tn:(X.sala||{}).turno});feito.push(`${xAlvoNome(t||it.k)} foi provocada`);break;
       case 'sacrEsta':{const c=e.campo.find(q=>q.k===it.k);if(c){xMorre(c);feito.push('sacrificou '+c.n);}break;}
       case 'sacrEu':setTimeout(()=>xSacrEu(s,it.nm,it.k),300);feito.push(`sacrifica ${n} ${s.d||''}`);break;
       case 'descarta':setTimeout(()=>xDescarta(n,it.nm),300);feito.push('descarta '+n);break;
@@ -6011,6 +6026,9 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
       case 'naoAtaca':xNoAlvo(t,'naoAtaca',0,ev,{u:me,tn:(X.sala||{}).turno});feito.push(`${xAlvoNome(t)} não pode atacar até o seu próximo turno`);break;
       case 'exiJoga':{const S=X.sala||{},tn=(S.turno||0)+(s.prox?Math.max(2,(S.jog||[]).length):0),l=e.bib.splice(0,n);l.forEach(c=>{c.jogaAte=tn;e.exi.push(c);});feito.push(`exilou ${l.map(c=>c.n).join(', ')} (pode jogar ${s.prox?'até o fim do seu próximo turno':'neste turno'}, é só tocar no exílio)`);break;}
 
+      case 'espiaTransforma':{const t=e.bib[0],c=e.campo.find(q=>q.k===it.k);if(!t){feito.push('biblioteca vazia');break;}const ti=xInfo(t).tipo||'',ok=String(s.v||'Card').split(',').some(v=>v==='Card'||new RegExp('\\b'+v+'\\b').test(ti));
+        if(ok){feito.push('revelou '+t.n+' do topo');if(c){xConv(c);feito.push('transformou');}else feito.push('não está mais no campo pra transformar');}else feito.push('olhou o topo, não revelou');break;}
+      case 'espia':{const t=e.bib[0];feito.push(t?(s.rev?'revelou '+t.n+' do topo':'olhou o topo'):'biblioteca vazia');break;}
       case 'transforma':{const c=e.campo.find(q=>q.k===it.k);if(c){xConv(c);feito.push('transformou');}else feito.push('não está mais no campo pra transformar');break;}
       case 'mk':{const c=e.campo.find(q=>q.k===it.k);if(c){c.mk=Object.assign({},c.mk,{[s.t]:((c.mk||{})[s.t]||0)+n});feito.push(`+${n} marcador ${s.t}`);}break;}
       case 'cntTodos':{const ctx={eu:me,src:it.k,sv:{}};let q=0;e.campo.forEach(c=>{if(fgValid(c,s.v,ctx)){c.cnt=(c.cnt||0)+n;q++;}});feito.push(`+${n} marcador +1/+1 em ${q}`);break;}
@@ -6049,7 +6067,7 @@ function xAtqResolve(it,nv){const e=X.eu,src=e.campo.find(q=>q.k===it.k),tx=it.t
     xLog(`${it.nm}: ${f.join(' · ')}`);return 1;}
   return 0;}
 function xConv(c){c.face=c.face?0:1;c.cvf=0;xLog(`${xNomeF(c)} converteu`);}
-const xNomeF=c=>String(c.n).split(' // ')[c.face?1:0]||c.n;
+const xNomeF=c=>{const p=String(c.n).split(' // ');if(c.face&&p.length<2&&!c.tok){const r=acharDB(c.n);if(r&&Array.isArray(r[10])&&r[10][0])return r[10][0];}return p[c.face?1:0]||c.n;};
 /* ---------- combate ---------- */
 function xPodeAtk(c){const s=X.sala||{};if(!xVez()||s.fase!==2||s.cb)return false;const v=xPT(c);return xCri(c)&&!c.naN&&!c.tap&&!c.atk&&!(c.sk&&!v.kw.has('haste'))&&!v.kw.has('defender')&&!v.pz;}
 function xProtDe(c,f){const pr=xInfo(c).prot;if(!pr||!pr.size)return false;if(pr.has('*'))return true;if(f.tok&&!f.cp)return false;for(const q of xCorFonte(f.n))if(pr.has(q))return true;return false;}
@@ -6151,7 +6169,9 @@ function xBotao(a){const e=X.eu,s=X.sala||{},me=xUid();
     if(e.fimT!==s.turno){e.fimT=s.turno;if(xGatCampo(/^At the beginning of (?:your|each) end step, ([^\n]+)$/im,'fim do turno')){xSobe();return xAv('Gatilhos de fim de turno foram pra pilha. Resolva e passe de novo.');}}if(e.mao.length>7)return xAv(`Você está com ${e.mao.length} cartas. Descarte até ficar com 7 (toque na carta › Descartar).`);
     const ex=(s.ext||{})[me]||0;if(ex){xLog('passou o turno e joga o turno extra');return xSala({vez:me,turno:(s.turno||0)+1,fase:0,cb:'',ext:Object.assign({},s.ext,{[me]:ex-1})});}
     xLog('passou o turno');return xSala({vez:xProx(me),turno:(s.turno||0)+1,fase:0,cb:''});}
-  if(a==='atkok'){if(!xVez()||s.fase!==2||s.cb)return;const at=e.campo.filter(c=>c.atk);if(!at.length)return xSala({fase:3});
+  if(a==='atkok'){if(!xVez()||s.fase!==2||s.cb)return;
+    for(const c of e.campo)if(c.gd&&!c.atk&&xPodeAtk(c)){const o=((s.jog||[]).filter(u=>u!==xUid()&&u!==c.gd))[0]||c.gd;c.alv='P:'+o;c.atk=xPT(c).kw.has('vigilance')?1:2;if(c.atk===2)c.tap=1;xLog(`${xNomeF(c)} está provocada: atacou junto`);}
+    const at=e.campo.filter(c=>c.atk);if(!at.length)return xSala({fase:3});
     return xAtkOk(at);}
   if(a==='blqok'){if(xVez()||s.cb!=='blq')return;const at=(((X.ops||{})[s.vez]||{}).campo||[]).filter(c=>c.atk&&xDefDe(c)===me);
     for(const q of at)if(xPT(q).kw.has('menace')&&e.campo.filter(c=>c.bl===q.k).length===1)return xAv(q.n+' tem ameaçar: precisa de 2 ou mais bloqueadores, ou nenhum.');
@@ -6374,13 +6394,21 @@ async function xCastigo(v){const e=X.eu;let pagou=0;
   if(v.alt==='disc'&&e.mao.length){if(XBOT||confirm(`${v.nm}: descartar uma carta pra não perder ${v.n} de vida?`)){await xDescarta(1,v.nm);pagou=1;}}
   else if(v.alt==='sac'){const L=e.campo.filter(c=>xInfo(c).cri||xInfo(c).land||fgTem(c,'Artifact'));if(L.length&&(XBOT?e.vida<=v.n+2:confirm(`${v.nm}: sacrificar artefato, criatura ou terreno pra não perder ${v.n} de vida?`))){await xSacrEu({n:1,v:'Artifact,Creature,Land',d:'um artefato, criatura ou terreno'},v.nm,'');pagou=1;}}
   if(!pagou){e.vida-=v.n;xLog(`perdeu ${v.n} de vida (${v.nm})`);}xSobe();xTudo();}
-async function xVenture(nm){const e=X.eu;let d=e.dg;
-  if(!d||!FGDG[d.d]){const ns=Object.keys(FGDG),q=XBOT?['0']:await xMarca(`${nm}: escolha a masmorra`,ns.map((x,i)=>({k:String(i),rot:`${FGDGPT[x]} (${FGDG[x].length} salas)`})),1,1);if(!q)return;
+async function xVenture(nm,und){const e=X.eu;let d=e.dg;
+  if(und&&(!d||!FGDG[d.d]))d=e.dg={d:'Undercity',r:0};
+  else if(!d||!FGDG[d.d]){const ns=Object.keys(FGDG).filter(x=>x!=='Undercity'),q=XBOT?['0']:await xMarca(`${nm}: escolha a masmorra`,ns.map((x,i)=>({k:String(i),rot:`${FGDGPT[x]} (${FGDG[x].length} salas)`})),1,1);if(!q)return;
     d=e.dg={d:ns[+q[0]],r:0};}
   else{const sa=FGDG[d.d][d.r][2];let r=sa[0];if(sa.length>1&&!XBOT){const q=await xMarca(`${FGDGPT[d.d]}: escolha a próxima sala`,sa.map(x=>({k:String(x),rot:FGDG[d.d][x][0]+': '+FGDG[d.d][x][1]})),1,1);if(q)r=+q[0];}d.r=r;}
   const [sala,tx,sai]=FGDG[d.d][d.r];xLog(`${FGDGPT[d.d]}: entrou em ${sala} (${tx})`);
   if(!sai.length){e.dgOk=(e.dgOk||0)+1;e.dg=null;xLog(`completou ${FGDGPT[d.d]}`);}
+  if(sala==='Throne of the Dead Three'){await xTrono();xSobe();xTudo();return;}
   xGatTx({n:sala,k:'',img:''},tx,'sala da masmorra');xSobe();xTudo();}
+async function xTrono(){const e=X.eu,s=X.sala||{},top=e.bib.slice(0,10);xLog('Trono dos Três Mortos: revelou '+(top.map(c=>c.n).join(', ')||'nada'));
+  const cr=top.filter(c=>xInfo(c).cri);let k=cr.length?cr[0].k:null;if(cr.length>1&&!XBOT)k=await xEscolhe('Trono dos Três Mortos: qual criatura entra com 3 marcadores +1/+1?',cr.map(c=>({c,lado:'Topo'})))||cr[0].k;
+  const c=cr.find(q=>q.k===k);if(c){e.bib.splice(e.bib.indexOf(c),1);xReset(c);c.cnt=(c.cnt||0)+3;c.ktN=['hexproof'];c.ateU=xUid();c.ateT=s.turno||0;c.sk=1;e.campo.push(c);xLog(`${c.n} entrou com 3 marcadores +1/+1 e resistência a magia até o seu próximo turno`);}
+  xEmb(e.bib);xLog('embaralhou o grimório');}
+/* iniciativa: quem pega explora a Cidade Subterrânea; dano de combate rouba; manutenção explora de novo */
+function xIniPega(){const me=xUid(),id=xId();X.iniV=id;if(X.sala)X.sala.ini={u:me,id};xSala({ini:{u:me,id}});xLog('você pegou a iniciativa');setTimeout(()=>xVenture('Iniciativa',1),350);}
 
 // Bot do X1: roda só na janela escondida (?bot=COD). Usa as mesmas funções do jogador, então segue as mesmas regras.
 (function(){if(!XBOT)return;
