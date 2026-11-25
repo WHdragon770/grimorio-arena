@@ -2948,8 +2948,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.82;
-/* dólar ao vivo (AwesomeAPI); 5.82 = do dia da publicação, só se falhar */
+let COTA=5.81;
+/* dólar ao vivo (AwesomeAPI); 5.81 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5364,6 +5364,7 @@ function fgValid(c,spec,ctx){if(!spec)return true;return String(spec).split(',')
   return t.split('+').every(w=>fgTem(c,w))&&ps.every(p=>fgProp(c,p,ctx));});}
 /* ---------- números (SVar X, Count$) ---------- */
 function fgConta(v,ctx,fundo){if(v==null||v==='')return 1;v=String(v).trim().replace(/^\+/,'');if(/^-?\d+$/.test(v))return +v;
+  if(ctx.dado&&v===ctx.dado)return 'X';
   if(/^[A-Za-z]\w*$/.test(v)&&ctx.sv&&ctx.sv[v]!=null){if((fundo||0)>6)return null;return fgConta(ctx.sv[v],ctx,(fundo||0)+1);}
   const [base,...mods]=v.split('/');let n=null,m;
   if(base==='Count$xPaid')return mods.length?null:'X';
@@ -5459,10 +5460,20 @@ function fgPasso(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.S
       return [{op:'modal',n,min:mn,ops:ch.map(x=>{const q=fgPP((ctx.sv||{})[x]||'');return {rot:String(q.d.SpellDescription||x).replace(/CARDNAME|NICKNAME/g,'esta carta'),st:q.api?fgCadeia(q.d,q.api,ctx):[{op:'nao',d:x}]};})}];}
     case 'DelayedTrigger':{const ex=fgPP((ctx.sv||{})[d.Execute]||'');if(d.Mode==='SpellCast'&&ex.api==='CopySpellAbility'&&d.ThisTurn==='True')return [{op:'copiaProx',v:d.ValidCard||'Instant,Sorcery'}];return nao('gatilho atrasado');}
     case 'Dig':{const n=N('DigNum'),sub=fgPP((ctx.sv||{})[d.SubAbility]||''),mp=sub.api==='Effect'&&/MayPlay\$ True/.test((ctx.sv||{})[sub.d.StaticAbilities]||'');
-      if(n!=null&&d.DestinationZone==='Exile'&&d.ChangeNum==='All'&&mp)return [{op:'exiJoga',n,prox:/NextTurn/.test(sub.d.Duration||'')?1:0}];return nao('olhar o topo e escolher');}
+      if(n!=null&&d.DestinationZone==='Exile'&&d.ChangeNum==='All'&&mp)return [{op:'exiJoga',n,prox:/NextTurn/.test(sub.d.Duration||'')?1:0}];
+      if(n==null||n==='X')return nao('número');if(d.Defined&&d.Defined!=='You')return nao('grimório de outro');
+      if(d.RememberChanged&&/Remembered/.test(JSON.stringify(ctx.sv||{})))return nao('usa as cartas escolhidas');
+      const Z={Hand:'mao',Battlefield:'campo',Graveyard:'cem',Exile:'exi',Library:'topo'},d1=Z[d.DestinationZone||'Hand'],d2=d.DestinationZone2==null?'fundo':d.DestinationZone2==='Library'?(d.LibraryPosition2==='0'?'topo':'fundo'):Z[d.DestinationZone2];
+      if(!d1||!d2||d.ChangeNum==='X')return nao('destino '+(d.DestinationZone||'')+'/'+(d.DestinationZone2||''));const all=d.ChangeNum==='All'||d.AnyNumber==='True';
+      return [{op:'cava',n,k:all?99:(d.ChangeNum==null?1:+d.ChangeNum||1),v:d.ChangeValid||'Card',d1,d2,tap:d.Tapped==='True'?1:0,ate:all||d.Optional==='True'?1:0,auto:d.ChangeNum==='All'?1:0}];}
     case 'PeekAndReveal':{const n=N('PeekAmount')||1,sb=d.SubAbility&&fgPP((ctx.sv||{})[d.SubAbility]||'');
       if(n===1&&sb&&sb.api==='SetState'&&sb.d.Mode==='Transform'&&(!sb.d.Defined||sb.d.Defined==='Self')&&sb.d.ConditionDefined==='Remembered'){ctx.pula=d.SubAbility;return [{op:'espiaTransforma',v:(sb.d.ConditionPresent||'Card').replace(/Card\./g,'')}];}
       if(n===1&&!d.SubAbility)return [{op:'espia',rev:d.NoReveal?0:1}];return nao('olhar o topo');}
+    case 'RollDice':{if(d.Amount&&d.Amount!=='1'||d.Modifier||d.ResultSVar&&d.ResultSubAbilities)return nao('vários dados ou modificador');const fa=+(d.Sides||6),br=[];if(d.ResultSVar){ctx.dado=d.ResultSVar;return [{op:'dado',f:fa,br:[],v:1}];}
+      for(const pr of String(d.ResultSubAbilities||'').split(',').filter(Boolean)){const m=pr.match(/^(\d+)(?:-(\d+))?:(.+)$|^Else:(.+)$/);if(!m)return nao('tabela do dado');
+        const sv=(ctx.sv||{})[m[3]||m[4]];if(!sv)return nao('tabela do dado');const q=fgPP(sv),ops=fgCadeia(q.d,q.api,ctx);
+        if(ops.some(o=>o.op==='nao'))return ops.filter(o=>o.op==='nao');if(ops.some(o=>o.al))return nao('alvo dentro do dado');br.push({a:m[4]?0:+m[1],b:m[4]?99:+(m[2]||m[1]),st:ops});}
+      return [{op:'dado',f:fa,br}];}
     case 'TakeInitiative':return [{op:'iniciativa'}];case 'BecomeMonarch':return [{op:'monarca'}];case 'Amass':return [{op:'amass',n:/^\d+$/.test(d.Num||'1')?+(d.Num||1):'X',tp:String(d.Type||'Army').toLowerCase()}];
     case 'Goad':return al?put({op:'goad',al},[]):nao('provocar');
     case 'Surveil':{const n=N('Amount');if(n==null)return nao('número');return [{op:'vigia',n}];}
@@ -6230,6 +6241,15 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
         if(p.tipo==='mag'){if(p.de===me)e.cem.push(p.c);else ev({op:'anulada',c:p.c},p.de);}feito.push('anulou '+p.nm);break;}
       case 'ficha':xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1);feito.push(`criou ${n} ficha${n>1?'s':''} ${s.nome}${s.p!=null?' '+s.p+'/'+s.t:''}`);break;
       case 'scry':setTimeout(()=>xLista('bib','Vidência '+n+': mande pro topo ou pro fundo',n),300);feito.push('vidência '+n);break;
+      case 'dado':{const r=1+Math.floor(Math.random()*s.f),b=s.br.find(q=>r>=q.a&&r<=q.b);feito.push(`rolou d${s.f}: ${r}`);if(s.v)it=Object.assign({},it,{x:r});xLog(`🎲 ${it.nm}: rolou d${s.f} e tirou ${r}`);if(b&&b.st.length)setTimeout(()=>{xFaz(b.st,Object.assign({},it,{al:[]}),[],nv);xSobe();xPintaEu();},250);break;}
+      case 'cava':{const nm=it.nm,ctxv={eu:me,src:it.k,sv:{}},top=e.bib.splice(0,n);const ok=c=>{try{return fgValid(c,s.v,ctxv);}catch(er){return false;}},L=top.filter(ok);
+        setTimeout(async()=>{let ks;if(s.auto)ks=L.map(c=>c.k);else if(XBOT)ks=L.slice().sort((a,b)=>xMVc(b)-xMVc(a)).slice(0,s.k).map(c=>c.k);
+          else{ks=null;while(!ks)ks=await xMarca(`${nm}: olhando ${top.length} do topo, escolha ${s.ate?'até ':''}${Math.min(s.k,L.length)}`,top.map(c=>({k:c.k,rot:c.n+(ok(c)?'':' (não vale)')})),s.ate||!L.length?0:Math.min(s.k,L.length),s.k);}
+          const pg=ks.map(k=>L.find(c=>c.k===k)).filter(Boolean).slice(0,s.k),rs=top.filter(c=>!pg.includes(c));
+          const poe=(c,d)=>{if(d==='campo'){c.tap=s.tap?1:0;e.campo.push(c);xEntrou(c);}else if(d==='mao')e.mao.push(c);else if(d==='cem')e.cem.push(c);else if(d==='exi')e.exi.push(c);else if(d==='topo')e.bib.unshift(c);else e.bib.push(c);};
+          pg.forEach(c=>poe(c,s.d1));xEmb(rs).forEach(c=>poe(c,s.d2));
+          const lg={mao:'pra mão',campo:'pro campo',cem:'pro cemitério',exi:'pro exílio',topo:'pro topo'}[s.d1];
+          xLog(`${nm}: olhou ${top.length} do topo, ${pg.length?pg.map(c=>c.n).join(', ')+' '+lg:'não pegou nada'}; o resto foi ${s.d2==='fundo'?'pro fundo':s.d2==='cem'?'pro cemitério':s.d2==='exi'?'pro exílio':'de volta'}`);xSobe();xPintaEu();},300);feito.push('olhou o topo');break;}
       case 'tutor':{const og=s.og==='mao'?e.mao:e.bib,kc=it.k,nm=it.nm,ctxv={eu:me,src:kc,sv:{}};let L=og.filter(c=>{try{return fgValid(c,s.v,ctxv);}catch(er){return false;}});
         const vis=new Set(),U=L.filter(c=>{if(vis.has(c.n))return false;vis.add(c.n);return true;});
         setTimeout(async()=>{let ks;if(!U.length)ks=[];else if(XBOT)ks=U.slice().sort((a,b)=>(s.dest==='campo'&&xInfo(a).land?-1:0)||xMVc(b)-xMVc(a)).slice(0,n).map(c=>c.k);
