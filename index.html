@@ -5466,6 +5466,9 @@ function fgConta(v,ctx,fundo){if(v==null||v==='')return 1;v=String(v).trim().rep
   if(/^[A-Za-z]\w*$/.test(v)&&ctx.sv&&ctx.sv[v]!=null){if((fundo||0)>6)return null;return fgConta(ctx.sv[v],ctx,(fundo||0)+1);}
   const [base,...mods]=v.split('/');let n=null,m;
   if(/^-[A-Za-z]\w*$/.test(v)){const r=fgConta(v.slice(1),ctx,(fundo||0)+1);if(r==null)return null;if(typeof r==='number')return -r;if(r==='X')return {q:'X',sg:-1};return Object.assign({},r,{sg:-(r.sg||1)});}
+  if(m=base.match(/^(Count|TriggeredCard)\$CardCounters\.(\w+)$/)){if(fgMods(1,mods)==null){fgAv('conta do Forge ainda não lida: '+v);return null;}return {q:m[1]==='Count'?'mkSi':'mkTk',t:m[2]==='P1P1'?'+1':m[2].toLowerCase(),md:mods};}
+  if(m=base.match(/^TargetedPlayer\$CardsIn(Hand|Library|Graveyard)$/)){if(fgMods(1,mods)==null){fgAv('conta do Forge ainda não lida: '+v);return null;}return {q:'tp',f:{Hand:'nm',Library:'nb',Graveyard:'cem'}[m[1]],md:mods};}
+  if(base==='Count$LifeYouGainedThisTurn'){if(fgMods(1,mods)==null){fgAv('conta do Forge ainda não lida: '+v);return null;}return {q:'vgt',md:mods};}
   if(m=base.match(/^Count\$YourCounters(\w+)$/)){if(fgMods(1,mods)==null){fgAv('conta do Forge ainda não lida: '+v);return null;}return {q:'pc',t:m[1].toLowerCase(),md:mods};}
   if(m=base.match(/^Sacrificed\$Card(Power|Toughness|ManaCost|CMC)$/)){if(fgMods(1,mods)==null){fgAv('conta do Forge ainda não lida: '+v);return null;}return {q:'sac',f:{Power:'p',Toughness:'t'}[m[1]]||'mv',md:mods};}
   if(m=base.match(/^(?:TriggeredCard\$Card(Power|Toughness|ManaCost|CMC)|TriggerCount\$(DamageAmount|LifeAmount))$/)){if(fgMods(1,mods)==null){fgAv('conta do Forge ainda não lida: '+v);return null;}return {q:'tc',f:m[2]?(m[2]==='LifeAmount'?'vida':'dano'):{Power:'p',Toughness:'t'}[m[1]]||'mv',md:mods};}
@@ -5834,7 +5837,7 @@ function xAplica(e,r){e.pool=r.pool;r.tap.forEach(([c])=>c.tap=1);if(r.vida)e.vi
   const n=r.tap.map(([c])=>c.n);return (n.length?'virou '+n.join(', '):'')+(r.vida?(n.length?' e ':'')+`pagou ${r.vida} de vida`:'');}
 
 /* ---------- sincronizar ---------- */
-function xGanhouVida(n){for(const c of X.eu.campo.slice()){if(c.tok&&!c.cp)continue;const m=xNorm(xInfo(c).tx,c.n).match(/Whenever you gain life, ([^\n]+)/i);if(m)xGatTx(c,m[1],'ganhou vida',{vida:n});}}
+function xGanhouVida(n){{const tu=(X.sala||{}).turno;if(X.eu.vgtT!==tu){X.eu.vgtT=tu;X.eu.vgt=0;}X.eu.vgt+=n;}for(const c of X.eu.campo.slice()){if(c.tok&&!c.cp)continue;const m=xNorm(xInfo(c).tx,c.n).match(/Whenever you gain life, ([^\n]+)/i);if(m)xGatTx(c,m[1],'ganhou vida',{vida:n});}}
 function xSobe(){clearTimeout(X.tm);X.tm=setTimeout(()=>{const e=X.eu;if(!e||!X.cod)return;if(e.__vv!=null&&e.vida>e.__vv)xGanhouVida(e.vida-e.__vv);e.__vv=e.vida;const me=xUid(),r=xRef();
   r.collection('pub').doc(me).set(xLimpo({nome:e.nome,deck:e.deck,vida:e.vida,ven:e.ven,pc:e.pc||{},dc:e.dc,imp:e.imp,mull:e.mull,nb:e.bib.length,nm:e.mao.length,campo:e.campo,cem:e.cem,exi:e.exi,cmdz:e.cmdz,pool:e.pool,ter:e.ter,tv:e.tv,tl:e.tl,gv:e.gv,fv:e.fv,evs:e.evs,ts:Date.now()})).catch(er=>xAv('Não sincronizou ('+(er.code||'erro')+')'));
   r.collection('priv').doc(me).set(xLimpo({bib:e.bib,mao:e.mao,ts:Date.now()})).catch(()=>{});},200);}
@@ -5894,7 +5897,7 @@ function xTurno(){const s=X.sala,e=X.eu,me=xUid();if(!s||!e)return;let mud=0;
     if(s.vez===me&&!(s.pilha||[]).length&&!s.cb)xSala({vez:xProx(me),turno:(s.turno||0)+1,fase:0,cb:''});else if(s.pri===me&&!s.rz)setTimeout(xPassaPri,300);}
   if(mud)xSobe();}
 /* ---------- gatilhos genéricos ---------- */
-function xTc(c){try{const v=xPT(c);return {p:v.p,t:v.t,mv:xMVc(c)};}catch(e){return null;}}
+function xTc(c){try{const v=xPT(c);return {p:v.p,t:v.t,mv:xMVc(c),cnt:c.cnt||0,mk:c.mk||null};}catch(e){return null;}}
 function xGatCampo(re,rot,f,menos,tc){let n=0;const rg=new RegExp(re.source,re.flags.replace('g','')+'g');for(const c of X.eu.campo.slice()){if(c===menos||(c.tok&&!c.cp))continue;for(const m of xNorm(xInfo(c).tx,c.n).matchAll(rg))if(!f||f(m,c)){n++;const q=n;setTimeout(()=>xGatTx(c,m[m.length-1],rot,tc),300+q*150);}}return n;}
 const XCOR={white:'W',blue:'U',black:'B',red:'R',green:'G'};
 function xFiltro(f,c){const i=xInfo(c);f=String(f||'').toLowerCase().replace(/\b(a|an|another|other|your first|one or more|nontoken)\b/g,' ').replace(/\s+/g,' ').trim();if(!f||f==='permanent')return true;
@@ -6348,7 +6351,7 @@ function xResolve(it,rest,nv){const e=X.eu;if(it.tipo==='atq'&&xAtqResolve(it,nv
 function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0;
   if(st.some(s=>s.op==='modal')){const al=(it.al||[]).slice(),m0=String(al[0]||'');let ix=[0];if(m0.startsWith('M#')){ix=m0.slice(2).split(',').map(Number);al.shift();}let um=0;st=st.flatMap(s=>s.op==='modal'&&!um++?ix.flatMap(q=>(s.ops[q]||{}).st||[]):[s]);it=Object.assign({},it,{al});}const ev=(o,p)=>nv.push(Object.assign({id:xId(),de:me,para:p||'*'},o));
   const L0=(()=>{const c=(it.al||[]).map(k=>typeof k==='string'&&xAchaK(k)).find(Boolean);return c?{p:xInfo(c).cri?xPT(c).p:0,t:xInfo(c).cri?xPT(c).t:0,mv:xMVc(c),u:(X.eu.campo.includes(c)?me:(xOpCampos().find(([cp])=>cp.includes(c))||[])[1])}:(()=>{const pi=((X.sala||{}).pilha||[]).find(p=>(it.al||[]).includes(p.id));return {p:0,t:0,mv:0,u:pi&&pi.de};})();})();
-  const rv=v=>{if(!v||typeof v!=='object')return v;let n=v.q==='X'?(it.x||0):v.q==='Y'?(it.y||0):v.q==='tc'?((it.tc||{})[v.f]||0):v.q==='sac'?((it.sc||{})[v.f]||0):v.q==='pc'?((X.eu.pc||{})[v.t]||0):(L0[v.f]||0);n=fgMods(n,v.md||[]);return (n==null?0:n)*(v.sg||1);};
+  const rv=v=>{if(!v||typeof v!=='object')return v;let n=v.q==='X'?(it.x||0):v.q==='Y'?(it.y||0):v.q==='tc'?((it.tc||{})[v.f]||0):v.q==='sac'?((it.sc||{})[v.f]||0):v.q==='pc'?((X.eu.pc||{})[v.t]||0):v.q==='mkSi'||v.q==='mkTk'?(()=>{const kk=v.q==='mkSi'?it.k:(it.tc||{}).tk,c=X.eu.campo.find(q=>q.k===kk)||xAchaK(kk)||(v.q==='mkSi'?it.sc:it.tc)||{};return v.t==='+1'?Math.max(0,c.cnt||0):((c.mk||{})[v.t]||0);})():v.q==='tp'?(()=>{const P=(it.al||[]).find(a=>String(a).startsWith('P:'));if(!P)return 0;const u=P.slice(2),o=u===xUid()?{nm:X.eu.mao.length,nb:X.eu.bib.length,cem:X.eu.cem.length}:(X.ops||{})[u]||{};return v.f==='cem'?(o.cem||[]).length??o.cem:(o[v.f]||0);})():v.q==='vgt'?(X.eu.vgtT===(X.sala||{}).turno?X.eu.vgt||0:0):(L0[v.f]||0);n=fgMods(n,v.md||[]);return (n==null?0:n)*(v.sg||1);};
   let ult='';for(let s of st){if(s.kk&&(s.kk>0)!==!!((it.c||{}).kick))continue;if(['n','p','t'].some(q=>s[q]&&typeof s[q]==='object'))s=Object.assign({},s,{n:rv(s.n),p:rv(s.p),t:rv(s.t)});if(s.p==='X'||s.t==='X')s=Object.assign({},s,{p:s.p==='X'?(it.x||0):s.p,t:s.t==='X'?(it.x||0):s.t});
     const pa=xPrecisaAlvo(s),t=pa?(it.al||[])[j++]:s.tk?((it.tc||{}).tk||''):s.td?((it.tc||{}).td||''):s.mesmo?ult:'',n=s.n==='X'?(it.x||0):s.n;if(pa&&t)ult=t;if((s.tk||s.td)&&!t){feito.push('sem a carta do gatilho');continue;}
     if(pa&&(!t||(!/^[PS]:/.test(t)&&!xExiste(t)))){feito.push('o alvo saiu');continue;}
