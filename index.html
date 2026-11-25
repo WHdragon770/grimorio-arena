@@ -5467,7 +5467,7 @@ function fgConta(v,ctx,fundo){if(v==null||v==='')return 1;v=String(v).trim().rep
   const [base,...mods]=v.split('/');let n=null,m;
   if(/^-[A-Za-z]\w*$/.test(v)){const r=fgConta(v.slice(1),ctx,(fundo||0)+1);if(r==null)return null;if(typeof r==='number')return -r;if(r==='X')return {q:'X',sg:-1};return Object.assign({},r,{sg:-(r.sg||1)});}
   if(m=base.match(/^Sacrificed\$Card(Power|Toughness|ManaCost|CMC)$/)){if(fgMods(1,mods)==null){fgAv('conta do Forge ainda não lida: '+v);return null;}return {q:'sac',f:{Power:'p',Toughness:'t'}[m[1]]||'mv',md:mods};}
-  if(m=base.match(/^(?:TriggeredCard\$Card(Power|Toughness|ManaCost|CMC)|TriggerCount\$(DamageAmount))$/)){if(fgMods(1,mods)==null){fgAv('conta do Forge ainda não lida: '+v);return null;}return {q:'tc',f:m[2]?'dano':{Power:'p',Toughness:'t'}[m[1]]||'mv',md:mods};}
+  if(m=base.match(/^(?:TriggeredCard\$Card(Power|Toughness|ManaCost|CMC)|TriggerCount\$(DamageAmount|LifeAmount))$/)){if(fgMods(1,mods)==null){fgAv('conta do Forge ainda não lida: '+v);return null;}return {q:'tc',f:m[2]?(m[2]==='LifeAmount'?'vida':'dano'):{Power:'p',Toughness:'t'}[m[1]]||'mv',md:mods};}
   if(m=base.match(/^(?:Parent)?Targeted\$Card(Power|Toughness|ManaCost|CMC)$/)){if(fgMods(1,mods)==null){fgAv('conta do Forge ainda não lida: '+v);return null;}return {q:'alvo',f:{Power:'p',Toughness:'t'}[m[1]]||'mv',md:mods};}
   if(base==='Count$xPaid')return mods.length?null:'X';
   if(m=base.match(/^Count\$Valid (.+)$/))n=fgTodos().filter(c=>fgValid(c,m[1],ctx)).length;
@@ -5821,7 +5821,8 @@ function xAplica(e,r){e.pool=r.pool;r.tap.forEach(([c])=>c.tap=1);if(r.vida)e.vi
   const n=r.tap.map(([c])=>c.n);return (n.length?'virou '+n.join(', '):'')+(r.vida?(n.length?' e ':'')+`pagou ${r.vida} de vida`:'');}
 
 /* ---------- sincronizar ---------- */
-function xSobe(){clearTimeout(X.tm);X.tm=setTimeout(()=>{const e=X.eu;if(!e||!X.cod)return;const me=xUid(),r=xRef();
+function xGanhouVida(n){for(const c of X.eu.campo.slice()){if(c.tok&&!c.cp)continue;const m=xNorm(xInfo(c).tx,c.n).match(/Whenever you gain life, ([^\n]+)/i);if(m)xGatTx(c,m[1],'ganhou vida',{vida:n});}}
+function xSobe(){clearTimeout(X.tm);X.tm=setTimeout(()=>{const e=X.eu;if(!e||!X.cod)return;if(e.__vv!=null&&e.vida>e.__vv)xGanhouVida(e.vida-e.__vv);e.__vv=e.vida;const me=xUid(),r=xRef();
   r.collection('pub').doc(me).set(xLimpo({nome:e.nome,deck:e.deck,vida:e.vida,ven:e.ven,dc:e.dc,imp:e.imp,mull:e.mull,nb:e.bib.length,nm:e.mao.length,campo:e.campo,cem:e.cem,exi:e.exi,cmdz:e.cmdz,pool:e.pool,ter:e.ter,tv:e.tv,tl:e.tl,gv:e.gv,fv:e.fv,evs:e.evs,ts:Date.now()})).catch(er=>xAv('Não sincronizou ('+(er.code||'erro')+')'));
   r.collection('priv').doc(me).set(xLimpo({bib:e.bib,mao:e.mao,ts:Date.now()})).catch(()=>{});},200);}
 function xLog(t){if(!X.cod)return;xRef().collection('log').add({uid:xUid(),nome:X.eu?X.eu.nome:ctNome(xEuU()),t:String(t).slice(0,300),ts:Date.now()}).catch(()=>{});}
