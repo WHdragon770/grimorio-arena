@@ -3045,8 +3045,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.81;
-/* dólar ao vivo (AwesomeAPI); 5.81 = do dia da publicação, só se falhar */
+let COTA=5.82;
+/* dólar ao vivo (AwesomeAPI); 5.82 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5464,6 +5464,8 @@ function fgConta(v,ctx,fundo){if(v==null||v==='')return 1;v=String(v).trim().rep
   if(ctx.dado&&v===ctx.dado)return 'X';
   if(/^[A-Za-z]\w*$/.test(v)&&ctx.sv&&ctx.sv[v]!=null){if((fundo||0)>6)return null;return fgConta(ctx.sv[v],ctx,(fundo||0)+1);}
   const [base,...mods]=v.split('/');let n=null,m;
+  if(/^-[A-Za-z]\w*$/.test(v)){const r=fgConta(v.slice(1),ctx,(fundo||0)+1);if(r==null)return null;if(typeof r==='number')return -r;if(r==='X')return {q:'X',sg:-1};return Object.assign({},r,{sg:-(r.sg||1)});}
+  if(m=base.match(/^(?:Parent)?Targeted\$Card(Power|Toughness|ManaCost|CMC)$/)){if(fgMods(1,mods)==null){fgAv('conta do Forge ainda não lida: '+v);return null;}return {q:'alvo',f:{Power:'p',Toughness:'t'}[m[1]]||'mv',md:mods};}
   if(base==='Count$xPaid')return mods.length?null:'X';
   if(m=base.match(/^Count\$Valid (.+)$/))n=fgTodos().filter(c=>fgValid(c,m[1],ctx)).length;
   else if(m=base.match(/^Count\$ValidGraveyard (.+)$/))n=((X.eu||{}).cem||[]).filter(c=>fgValid(c,m[1],ctx)).length;
@@ -5478,9 +5480,10 @@ function fgConta(v,ctx,fundo){if(v==null||v==='')return 1;v=String(v).trim().rep
   else if(m=base.match(/^Number\$(-?\d+)$/))n=+m[1];
   else if(m=base.match(/^Count\$Compare (\w+) (GE|GT|LE|LT|EQ|NE)(\d+)\.(\d+)\.(\d+)$/)){const a=fgConta(m[1],ctx,(fundo||0)+1);if(a==null)return null;n=fgCmp(a,m[2]+m[3])?+m[4]:+m[5];}
   if(n==null){fgAv('conta do Forge ainda não lida: '+base);return null;}
-  for(const md of mods){let q;if(q=md.match(/^Plus\.(-?\d+)$/))n+=+q[1];else if(q=md.match(/^Minus\.(\d+)$/))n-=+q[1];else if(q=md.match(/^Times\.(\d+)$/))n*=+q[1];
+  n=fgMods(n,mods);if(n==null)fgAv('conta do Forge ainda não lida: '+v);return n;}
+function fgMods(n,mods){for(const md of mods){let q;if(q=md.match(/^Plus\.(-?\d+)$/))n+=+q[1];else if(q=md.match(/^Minus\.(\d+)$/))n-=+q[1];else if(q=md.match(/^Times\.(\d+)$/))n*=+q[1];
     else if(md==='HalfDown')n=Math.floor(n/2);else if(md==='HalfUp')n=Math.ceil(n/2);else if(md==='Twice'||md==='Double')n*=2;else if(md==='Negative')n=-n;else if(q=md.match(/^LimitMax\.(\d+)$/))n=Math.min(n,+q[1]);
-    else{fgAv('conta do Forge ainda não lida: '+v);return null;}}
+    else return null;}
   return n;}
 /* condições de passo/estática/ativação. null = não sei ler */
 function fgCond(d,ctx,pre){pre=pre||'';const ip=d[pre+'IsPresent']||d[pre+(pre?'Present':'IsPresent')];
@@ -5511,13 +5514,13 @@ function fgPasso(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.S
   if(d.UnlessCost)return nao('custo do oponente');
   const A=fgAlvo(d),al=A&&A.al,put=(x,o)=>{if(A&&A.v)x.v=A.v;o.push(x);return o;},N=k=>{const n=fgConta(d[k],ctx);return n;};
   switch(api){
-    case 'DealDamage':{const n=N('NumDmg');if(n==null)return nao('número');const df=d.Defined||'';if(d.DamageSource)return nao('fonte');
+    case 'DealDamage':{const n=N('NumDmg');if(n==null)return nao('número');const df=d.Defined||'';if(d.DamageSource){if(/^(ParentTarget|Targeted)$/.test(d.DamageSource)&&al&&n&&n.q==='alvo'&&n.f==='p'&&!(n.md||[]).length)return put({op:'morde',al},[]);return nao('fonte');}
       if(al)return put({op:'dano',n,al},[]);if(df==='Opponent'||df==='Player.Opponent')return [{op:'dano',n,al:'each opponent'}];if(df==='Player')return [{op:'dano',n,al:'each player'}];if(df==='You')return [{op:'perdeEu',n}];return nao();}
     case 'DamageAll':{const n=N('NumDmg');if(n==null)return nao('número');const o=[];if(d.ValidCards==='Creature')o.push({op:'dano',n,al:'each creature'});else if(d.ValidCards)return nao('quais criaturas');
       if(d.ValidPlayers==='Player')o.push({op:'dano',n,al:'each player'});else if(/Opponent/.test(d.ValidPlayers||''))o.push({op:'dano',n,al:'each opponent'});return o.length?o:nao();}
     case 'Discard':{const df=d.Defined||'You';if(df!=='You'&&!/^You$/.test(d.Defined||''))return nao('descarte de outro jogador');if(d.Mode==='Hand')return [{op:'descarta',n:99}];const n=N('NumCards')??1;if(n==null)return nao('número');return [{op:'descarta',n}];}
     case 'Draw':{const n=N('NumCards');if(n==null)return nao('número');const df=d.Defined||'You';if(df==='Player')return [{op:'compra',n,quem:'todos'}];if(df!=='You'&&!al)return nao('quem compra');return [{op:'compra',n,quem:'eu'}];}
-    case 'GainLife':{const n=N('LifeAmount');if(n==null)return nao('número');if((d.Defined||'You')!=='You'||al)return nao('quem ganha');return [{op:'ganha',n}];}
+    case 'GainLife':{const n=N('LifeAmount');if(n==null)return nao('número');if(/^(Parent)?TargetedController$/.test(d.Defined||'')&&!al)return [{op:'ganhaDono',n}];if((d.Defined||'You')!=='You'||al)return nao('quem ganha');return [{op:'ganha',n}];}
     case 'LoseLife':{const n=N('LifeAmount');if(n==null)return nao('número');const df=d.Defined||'';if(df==='You')return [{op:'perdeEu',n}];if(df==='Opponent'||df==='Player.Opponent'||al)return [{op:'perde',n,quem:'op'}];if(df==='Player')return [{op:'perde',n,quem:'todos'}];if(!df)return [{op:'perdeEu',n}];return nao('quem perde');}
     case 'Destroy':if(!al)return nao('sem alvo');return put({op:'destroi',al},[]);
     case 'DestroyAll':{const t={'Creature':'creatures','Artifact':'artifacts','Enchantment':'enchantments','Land':'lands','Permanent.nonLand':'nonland permanents','Planeswalker':'planeswalkers'}[d.ValidCards||''];return t?[{op:'todos',tipo:t}]:nao('quais');}
@@ -5539,20 +5542,23 @@ function fgPasso(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.S
       let quem='todos';if(d.ValidTgts&&/Player|Opponent/.test(d.ValidTgts))quem='alvo';else if(d.Defined==='You'||/\.(YouCtrl|YouOwn)\b/.test(v))quem='eu';else if(/Opp(Ctrl|Own)/.test(v)||/Opponent/.test(d.Defined||''))quem='op';else if(d.Defined&&d.Defined!=='Player')return nao('de quem');
       v=v.split(',').map(x=>x.replace(/\.(YouCtrl|YouOwn|OppCtrl|OppOwn)\b/g,'').replace(/\+(YouCtrl|YouOwn|OppCtrl|OppOwn)\b/g,'')).join(',');
       return [{op:'zonas',og,ds,v,quem,emb:d.Shuffle==='True'||d.RandomOrder==='True'?1:0}];}
+    case 'TargetOnly':return al?put({op:'lutaA',al},[]):nao('sem alvo');
+    case 'Poison':{const n=N('Num');if(n==null)return nao('número');const df=d.Defined||'';if(df==='Player')return [{op:'veneno',n,quem:'todos'}];if(df==='You')return [{op:'veneno',n,quem:'eu'}];
+      if(/Opponent/.test(df))return [{op:'veneno',n,quem:'ops'}];if(al==='target player'||al==='target opponent')return [{op:'veneno',n,quem:'alvo'}];return nao('quem');}
     case 'Counter':return d.TargetType==='Spell'&&!d.ValidTgts?.includes('Activated')?[{op:'anula',al:'spell'}]:nao();
-    case 'Pump':{const o=[],a=d.NumAtt?N('NumAtt'):0,b=d.NumDef?N('NumDef'):0;if(a==null||b==null||a==='X'||b==='X')return nao('número');
+    case 'Pump':{const o=[],a=d.NumAtt?N('NumAtt'):0,b=d.NumDef?N('NumDef'):0;if(a==null||b==null)return nao('número');
       if(!al&&d.Defined&&d.Defined!=='Self')return nao('quem');
       if(a||b)put({op:'pump',al:al||'',p:a,t:b},o);for(const k of (d.KW||'').split(' & ').filter(Boolean)){if(!FGKW[k])return nao('habilidade '+k);put({op:'kt',al:al||'',kw:FGKW[k]},o);}return o;}
     case 'PumpAll':{const a=d.NumAtt?N('NumAtt'):0,b=d.NumDef?N('NumDef'):0;if(a==null||b==null)return nao('número');const kw=(d.KW||'').split(' & ').filter(Boolean);if(kw.some(k=>!FGKW[k]))return nao('habilidade pra todos');
       return [{op:'pumpTodos',p:a,t:b,kw:kw.map(k=>FGKW[k]),v:d.ValidCards||'Creature.YouCtrl'}];}
-    case 'PutCounter':{const n=N('CounterNum');if(n==null||n==='X')return nao('número');const ty=d.CounterType;if(!al&&d.Defined&&d.Defined!=='Self')return nao('quem');
-      if(ty==='P1P1'||ty==='M1M1')return put({op:'cnt',n:ty==='M1M1'?-n:n,al:al||''},[]);if(!al)return [{op:'mk',n,t:ty==='LOYALTY'?'lealdade':ty.toLowerCase()}];return nao('marcador '+ty);}
+    case 'PutCounter':{const n=N('CounterNum');if(n==null)return nao('número');const ty=d.CounterType;if(!al&&d.Defined&&d.Defined!=='Self')return nao('quem');
+      if(ty==='P1P1'||ty==='M1M1')return put({op:'cnt',n:ty==='M1M1'?(typeof n==='number'?-n:n==='X'?{q:'X',sg:-1}:Object.assign({},n,{sg:-(n.sg||1)})):n,al:al||''},[]);if(!al)return [{op:'mk',n,t:ty==='LOYALTY'?'lealdade':ty.toLowerCase()}];return nao('marcador '+ty);}
     case 'PutCounterAll':{const n=N('CounterNum');if(n==null)return nao('número');if(d.CounterType!=='P1P1')return nao('marcador '+d.CounterType);return [{op:'cntTodos',n,v:d.ValidCards||'Creature.YouCtrl'}];}
     case 'Token':{const n=N('TokenAmount');if(n==null)return nao('número');if((d.TokenOwner||'You')!=='You')return nao('dono da ficha');const o=fgFicha(d.TokenScript||'',n);return o||nao('ficha '+d.TokenScript);}
     case 'Mill':{const n=N('NumCards');if(n==null)return nao('número');const df=d.Defined||'You';return [{op:'mill',n,quem:df==='You'?'eu':'op'}];}
     case 'Scry':{const n=N('ScryNum');if(n==null)return nao('número');return [{op:'scry',n}];}
     case 'Tap':case 'Untap':if(!al&&((!d.Defined&&!d.UntapType&&!d.ValidCards)||d.Defined==='Self'||d.Defined==='Enchanted'||d.Defined==='Equipped'))return [{op:'viraSi',up:api==='Untap'?1:0,h:d.Defined==='Enchanted'||d.Defined==='Equipped'?1:0}];if(!al)return nao('sem alvo');return put({op:api==='Tap'?'vira':'desvira',al},[]);
-    case 'Fight':if(d.Defined&&d.Defined!=='Self')return nao('quem luta');if(!al)return nao('sem alvo');return put({op:'luta',al},[]);
+    case 'Fight':if(d.Defined==='ParentTarget'&&al)return put({op:'luta',al},[]);if(d.Defined&&d.Defined!=='Self')return nao('quem luta');if(!al)return nao('sem alvo');return put({op:'luta',al},[]);
     case 'Sacrifice':{const n=N('Amount');if(n==null)return nao('número');const df=d.Defined||'You',tp=/^Creature/.test(d.SacValid||'')?'creature':'permanent';
       if(df==='Player.Opponent'||df==='Opponent')return [{op:'sacr',n,tipo:tp,quem:'each opponent'}];if(df==='Player')return [{op:'sacr',n,tipo:tp,quem:'each player'}];if(al==='target player'||al==='target opponent')return [{op:'sacr',n,tipo:tp,quem:'target'}];if(df==='Self'||d.SacValid==='Self'||d.SacValid==='Card.Self')return [{op:'sacrEsta'}];if(df==='You')return [{op:'sacrEu',n,v:d.SacValid||'Permanent',d:d.SacMessage||d.SacValid||'permanente'}];return nao('quem sacrifica');}
     case 'Connive':return (!d.Defined||d.Defined==='Self')?[{op:'connive'}]:nao('quem conspira');
@@ -6296,7 +6302,10 @@ function xResolve(it,rest,nv){const e=X.eu;if(it.tipo==='atq'&&xAtqResolve(it,nv
   return xFaz(st,it,rest,nv);}
 function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0;
   if(st.some(s=>s.op==='modal')){const al=(it.al||[]).slice(),m0=String(al[0]||'');let ix=[0];if(m0.startsWith('M#')){ix=m0.slice(2).split(',').map(Number);al.shift();}let um=0;st=st.flatMap(s=>s.op==='modal'&&!um++?ix.flatMap(q=>(s.ops[q]||{}).st||[]):[s]);it=Object.assign({},it,{al});}const ev=(o,p)=>nv.push(Object.assign({id:xId(),de:me,para:p||'*'},o));
-  for(const s of st){const pa=xPrecisaAlvo(s),t=pa?(it.al||[])[j++]:'',n=s.n==='X'?(it.x||0):s.n;
+  const L0=(()=>{const c=(it.al||[]).map(k=>typeof k==='string'&&xAchaK(k)).find(Boolean);return c?{p:xInfo(c).cri?xPT(c).p:0,t:xInfo(c).cri?xPT(c).t:0,mv:xMVc(c),u:(X.eu.campo.includes(c)?me:(xOpCampos().find(([cp])=>cp.includes(c))||[])[1])}:{p:0,t:0,mv:0};})();
+  const rv=v=>{if(!v||typeof v!=='object')return v;let n=v.q==='X'?(it.x||0):(L0[v.f]||0);n=fgMods(n,v.md||[]);return (n==null?0:n)*(v.sg||1);};
+  for(let s of st){if(['n','p','t'].some(q=>s[q]&&typeof s[q]==='object'))s=Object.assign({},s,{n:rv(s.n),p:rv(s.p),t:rv(s.t)});if(s.p==='X'||s.t==='X')s=Object.assign({},s,{p:s.p==='X'?(it.x||0):s.p,t:s.t==='X'?(it.x||0):s.t});
+    const pa=xPrecisaAlvo(s),t=pa?(it.al||[])[j++]:'',n=s.n==='X'?(it.x||0):s.n;
     if(pa&&(!t||(!/^[PS]:/.test(t)&&!xExiste(t)))){feito.push('o alvo saiu');continue;}
     switch(s.op){
       case 'extra':{const sx=X.sala||{};xSala({ext:Object.assign({},sx.ext,{[me]:((sx.ext||{})[me]||0)+1})});feito.push('vai jogar um turno extra');break;}
@@ -6313,6 +6322,9 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
       case 'prolif':{xProlif();feito.push('proliferar');break;}
       case 'sacr':{const os=Object.keys(X.ops||{}),q=/^target/.test(s.quem)?[X.op&&os.includes(xOutro())?xOutro():os[0]].filter(Boolean):os;for(const u of q)ev({op:'sacr',n,tipo:s.tipo,nm:it.nm},u);if(s.quem==='each player')xSacr({n,tipo:s.tipo,nm:it.nm});feito.push(`${s.quem==='each player'?'cada jogador':q.length>1?'cada oponente':'o oponente'} sacrifica ${n} ${s.tipo==='creature'?'criatura':'permanente'}${n>1?'s':''}`);break;}
       case 'lutaA':it._f=t;break;
+      case 'ganhaDono':if(!L0.u)break;if(L0.u===me)e.vida+=n;else ev({op:'vida',d:n},L0.u);feito.push(`${L0.u===me?'você':xNomeU(L0.u)} ganhou ${n} de vida`);break;
+      case 'veneno':{const os=Object.keys(X.ops||{}).filter(u=>!xMorto(X.ops[u])),q=s.quem==='alvo'?[X.op&&os.includes(xOutro())?xOutro():os[0]].filter(Boolean):s.quem==='eu'?[]:os;
+        if(s.quem==='eu'||s.quem==='todos')e.ven=(e.ven||0)+n;for(const u of q)ev({op:'ven',n},u);feito.push(`${s.quem==='todos'?'cada jogador':s.quem==='eu'?'você':q.length>1?'cada oponente':'o oponente'} ganhou ${n} marcador${n>1?'es':''} de veneno`);break;}
       case 'luta':case 'morde':{const f=it._f||it.k,cf=xAchaK(f),cg=t.startsWith('P:')?null:xAchaK(t);if(!cf){feito.push('quem ia lutar saiu');break;}
         const vf=xPT(cf),pf=Math.max(0,vf.p),pg=cg?Math.max(0,xPT(cg).p):0;const nf=xAlvoNome(f),ng=xAlvoNome(t);
         if(cg&&vf.kw.has('deathtouch')&&pf>0&&!xProtDe(cg,cf))xNoAlvo(t,'destroi',0,ev);else if(!cg||!xProtDe(cg,cf))xDanoF(f,t,pf,ev);
