@@ -2948,8 +2948,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.81;
-/* dólar ao vivo (AwesomeAPI); 5.81 = do dia da publicação, só se falhar */
+let COTA=5.82;
+/* dólar ao vivo (AwesomeAPI); 5.82 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5698,7 +5698,7 @@ function xTurno(){const s=X.sala,e=X.eu,me=xUid();if(!s||!e)return;let mud=0;
   if(s.turno&&s.vez===me&&e.tv!==s.turno){e.tv=s.turno;e.ter=0;{const vo=e.exi.filter(q=>q.ph),sa=e.campo.filter(q=>!(q.tok&&!q.cp)&&/^Phasing$/m.test(xInfo(q).tx));for(const q of vo){e.exi.splice(e.exi.indexOf(q),1);delete q.ph;e.campo.push(q);xLog(`${q.n} voltou de fase`);}for(const q of sa){e.campo.splice(e.campo.indexOf(q),1);q.ph=1;e.exi.push(q);xLog(`${q.n} saiu de fase (volta no próximo turno)`);}}e.campo.forEach(c=>{c.tap=0;c.sk=0;});
     const cp=s.turno!==1;let t='';
     if(cp){if(xDraga())t=' e dragou no lugar da compra';else if(e.bib.length){const d=e.bib.shift();e.mao.push(d);t=' e comprou 1';xMilagre(d);}else t=' e não tinha carta pra comprar (grimório vazio = derrota)';}else t=' (quem começa não compra no 1º turno)';
-    xLog(`começou o turno ${s.turno}: desvirou tudo${t}`);setTimeout(()=>xGatCampo(/^At the beginning of your upkeep, ([^\n]+)$/im,'manutenção'),700);if(e.exi.some(q=>q.susp))setTimeout(xTempo,1100);if(e.exi.some(q=>q.reb))setTimeout(xRebote,1300);if(e.campo.some(xCuL))setTimeout(xCumul,1500);if(e.campo.some(q=>/^(Vanishing|Fading) \d/im.test(xInfo(q).tx||'')))setTimeout(xDesvanece,1700);if(s.ini&&s.ini.u===me){xLog('manutenção com a iniciativa');setTimeout(()=>xVenture('Iniciativa',1),900);}if(!(s.fase>0))xSala({fase:1});mud=1;}
+    xLog(`começou o turno ${s.turno}: desvirou tudo${t}`);setTimeout(()=>xGatCampo(/^At the beginning of your upkeep, ([^\n]+)$/im,'manutenção'),700);if(e.exi.some(q=>q.susp))setTimeout(xTempo,1100);if(e.exi.some(q=>q.reb))setTimeout(xRebote,1300);if(e.campo.some(xCuL))setTimeout(xCumul,1500);if(s.dn)setTimeout(xDiaNoite,1800);if(e.campo.some(q=>/^(Vanishing|Fading) \d/im.test(xInfo(q).tx||'')))setTimeout(xDesvanece,1700);if(s.ini&&s.ini.u===me){xLog('manutenção com a iniciativa');setTimeout(()=>xVenture('Iniciativa',1),900);}if(!(s.fase>0))xSala({fase:1});mud=1;}
   for(const g of [s.golpe,...(s.golpes||[])])if(g&&g.para===me&&e.gv!==g.id){e.gv=g.id;e.vida+=(g.vg||0)-(g.dano||0);if(g.ven)e.ven=(e.ven||0)+g.ven;if(g.cmd){e.dcm=e.dcm||{};e.dcm[g.de]=(e.dcm[g.de]||0)+g.cmd;e.dc=Math.max(e.dc||0,...Object.values(e.dcm));}
     for(const c of e.campo.slice()){if((g.mortos||[]).includes(c.k)){xMorre(c);}else{if(g.dn&&g.dn[c.k])c.dn=(c.dn||0)+g.dn[c.k];if(g.cm&&g.cm[c.k])c.cnt=(c.cnt||0)-g.cm[c.k];c.bl='';}}
     for(const [k,d] of Object.entries(g.pw||{})){const c=e.campo.find(q=>q.k===k);if(c)xEfCarta(c,'dano',d);}
@@ -5745,7 +5745,7 @@ function xEntrou(c){if(!X.eu.campo.includes(c))return;xEtbRep(c);xEtbEsc(c);xP3E
 function xDanoF(sk,t,n,ev){const sc=sk&&xAchaK(sk),kw=sc&&xInfo(sc).cri?xPT(sc).kw:new Set();
   if(kw.has('infect')&&t.startsWith('P:')){const u=t.slice(2);if(u===xUid())X.eu.ven+=n;else ev({op:'ven',n},u);return ' (veneno)';}
   if((kw.has('infect')||kw.has('wither'))&&!t.startsWith('P:')){const cg=xAchaK(t);if(cg&&xInfo(cg).cri){xNoAlvo(t,'cnt',-n,ev);return ' (−1/−1)';}}
-  xNoAlvo(t,'dano',n,ev);return '';}
+  if(t.startsWith('P:')&&t.slice(2)!==xUid()&&n>0)xVelUp();xNoAlvo(t,'dano',n,ev);return '';}
 function xEvia(v){const s=X.sala;if(!s)return;const ev=[...(s.ev||[]),Object.assign({id:xId(),de:xUid(),para:'*'},v)].slice(-30);s.ev=ev;xSala({ev});}
 function xUmbra(c){const e=X.eu;if(!e||!e.campo.includes(c)||!xCri(c))return 0;const u=e.campo.find(q=>q.an===c.k&&/^(Umbra|Totem) armor/im.test(xInfo(q).tx||''));if(!u)return 0;c.dn=0;xLog(`umbra armor: ${u.n} foi destruída no lugar de ${c.n} (dano removido)`);xMorre(u);return 1;}
 function xMorre(c){const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;e.campo.splice(ix,1);const cnt=c.cnt||0,i=xInfo(c),tx=xNorm(i.tx,c.n),tok=c.tok&&!c.cp;
@@ -5795,7 +5795,13 @@ async function xParear(c){const e=X.eu;if(!xCri(c)||c.par)return;const sol=q=>/^
   const L=sol(c)?e.campo.filter(livre):e.campo.filter(q=>livre(q)&&sol(q));if(!L.length)return;
   let ks=XBOT?[L[0].k]:await xMarca(`Soulbond: parear ${c.n} com qual criatura? (pode pular)`,L.map(q=>({k:q.k,rot:xNomeF(q),on:0})),0,1);if(!ks||!ks.length)return;const q=e.campo.find(z=>z.k===ks[0]);if(!q||!e.campo.includes(c))return;
   c.par=q.k;q.par=c.k;xLog(`soulbond: ${c.n} pareada com ${q.n}`);xSobe();xPintaEu();}
-async function xP3Etb(c){setTimeout(()=>xParear(c),600);if(c.tok&&!c.cp)return;const e=X.eu,i=xInfo(c),t=xNorm(i.tx,c.n).replace(/\([^)]*\)/g,'');let m;
+const XDB=c=>/^(Daybound|Nightbound)/m.test(String(xInfo(c).tx||''))&&Array.isArray((acharDB(c.n)||[])[10]);
+function xDNSync(){const s=X.sala||{},e=X.eu;if(!e||!s.dn)return;const w=s.dn==='noite'?1:0;for(const c of e.campo)if(XDB(c)&&(c.face?1:0)!==w){c.face=w;xLog(`${w?'🌙 noite':'☀ dia'}: ${c.n.split(' // ')[w]||c.n} transformou`);}xSobe();xPintaEu();}
+function xDiaNoite(){const s=X.sala||{};if(!s.dn)return;const n=(s.sp&&s.sp.t===s.turno-1)?s.sp.n:0;let nv=s.dn;if(s.dn==='dia'&&n===0)nv='noite';else if(s.dn==='noite'&&n>=2)nv='dia';if(nv!==s.dn){s.dn=nv;xSala({dn:nv});xLog(nv==='noite'?'🌙 virou noite (nenhuma mágica no turno anterior)':'☀ virou dia (2+ mágicas no turno anterior)');}xDNSync();}
+function xVelUp(){const e=X.eu,s=X.sala||{};if(!e||!e.vel||e.vel>=4||e.velT===s.turno||(s.vez&&s.vez!==xUid()))return;e.vel++;e.velT=s.turno;xLog(`🏎 velocidade ${e.vel}${e.vel===4?' (máxima! habilidades de Max speed ligadas)':''}`);XH.clear();xSobe();xPintaEu();}
+async function xP3Etb(c){setTimeout(()=>xParear(c),600);{const e=X.eu,s=X.sala||{},t0=String(xInfo(c).tx||'');
+    if(/^Start your engines!/m.test(t0)&&!e.vel){e.vel=1;xLog('🏎 ligou os motores: velocidade 1');}
+    if(XDB(c)){if(!s.dn){s.dn='dia';xSala({dn:'dia'});xLog('☀ agora é dia (daybound)');}else if(s.dn==='noite'&&!c.face){c.face=1;xLog(`🌙 ${c.n} entrou transformada (é noite)`);}}}if(c.tok&&!c.cp)return;const e=X.eu,i=xInfo(c),t=xNorm(i.tx,c.n).replace(/\([^)]*\)/g,'');let m;
   if(m=t.match(/^Modular (\d+)/im)){c.cnt=(c.cnt||0)+ +m[1];xLog(`${c.n}: modular, entrou com ${m[1]} marcador(es) +1/+1`);}
   if(m=t.match(/^(Vanishing|Fading) (\d+)/im)){const k=m[1]==='Vanishing'?'time':'fade';c.mk=Object.assign({},c.mk);c.mk[k]=(c.mk[k]||0)+ +m[2];xLog(`${c.n}: entrou com ${m[2]} marcador(es) de ${k==='time'?'tempo':'desvanecer'}`);}
   if(/^Riot\s*$/im.test(t)){const hs=XBOT?1:confirm(`Tumulto: OK = ${c.n} ganha ímpeto · Cancelar = 1 marcador +1/+1`);if(hs){c.sk=0;c.kt=[...(c.kt||[]),'haste'];xLog(`${c.n}: tumulto, ganhou ímpeto`);}else{c.cnt=(c.cnt||0)+1;xLog(`${c.n}: tumulto, 1 marcador +1/+1`);}}
@@ -6068,7 +6074,7 @@ function xTemResposta(){const e=X.eu;if(!e)return false;if(((X.sala||{}).pilha||
   return e.campo.some(c=>xHabs(c).some(hb=>!hb.pw&&xHabOk(c,hb)));}
 const XH=new Map();
 function xHabs(c){if(c.tok&&!c.cp)return [];const hk=c.n+(c.face?'|v':'');if(XH.has(hk))return XH.get(hk);const i=xInfo(c),fh=fgHabs(c),l=[];
-  for(const ln0 of xNorm(i.tx,c.n).split('\n')){let ex=0;const ln=ln0.replace(/^Exhaust\s*[—-]\s*/i,()=>{ex=1;return '';});let m=ln.match(/^([+−-]\d+|0): (.+)$/);if(m&&i.pw){l.push({pw:1,cu:+m[1].replace('−','-'),rot:m[1],tx:m[2]});continue;}
+  for(const ln0 of xNorm(i.tx,c.n).split('\n')){let ex=0;if(/^Max speed\s*[—-]/i.test(ln0)&&((X.eu||{}).vel||0)<4)continue;const ln=ln0.replace(/^Max speed\s*[—-]\s*/i,'').replace(/^Exhaust\s*[—-]\s*/i,()=>{ex=1;return '';});let m=ln.match(/^([+−-]\d+|0): (.+)$/);if(m&&i.pw){l.push({pw:1,cu:+m[1].replace('−','-'),rot:m[1],tx:m[2]});continue;}
     if(fh)continue;m=ln.match(/^((?:\{[^}]+\}|, |sacrifice this (?:card|land|creature|artifact|enchantment|permanent|token|equipment))+): (.+)$/i);if(!m||/\bAdd\b/.test(m[2])||/^Equip/i.test(ln))continue;
     l.push({ex,cu:m[1],tx:m[2],t:/\{T\}/.test(m[1]),sac:/sacrifice/i.test(m[1]),mana:m[1].replace(/\{T\}|sacrifice this (?:card|land|creature|artifact|enchantment|permanent|token|equipment)|, /gi,'')});}
   if(fh)l.push(...fh);if(fh||fgPronto(c.n))XH.set(hk,l);return l;}
@@ -6275,7 +6281,7 @@ function xDano(){const e=X.eu,s=X.sala,me=xUid();if(!s||!Object.keys(X.ops||{}).
   e.vida+=vgA;B.forEach(b=>gp(b.u));
   const golpes=Object.entries(G).map(([u,g])=>{const dn={};B.filter(b=>b.u===u).forEach(b=>{if(!b.morto&&b.dmg-b.mm-(b.bon||0)>(b.c.dn||0))dn[b.c.k]=b.dmg-b.mm-(b.bon||0)-(b.c.dn||0);if(!b.morto&&b.mm)gp(u).cm[b.c.k]=b.mm;});
     return Object.assign({id:xId(),de:me,para:u,mortos:B.filter(b=>b.u===u&&b.morto).map(b=>b.c.k),dn},g);});
-  window.__golpes=golpes;xSala({cb:'',fase:3,golpe:null,golpes});
+  if(golpes.some(g=>g.dano>0))xVelUp();window.__golpes=golpes;xSala({cb:'',fase:3,golpe:null,golpes});
   const mo=[...A,...B].filter(x=>x.morto).map(x=>x.c.n);
   xLog(`combate: ${golpes.map(g=>`${xNomeU(g.para)} tomou ${g.dano}${g.ven?` +${g.ven} veneno`:''}${g.cmd?` (${g.cmd} de comandante)`:''}${Object.keys(g.pw).length?' · planeswalker: '+Object.entries(g.pw).map(([k,d])=>xAlvoNome(k)+' −'+d).join(', '):''}${g.vg?`, ganhou ${g.vg}`:''}`).join(' · ')}${vgA?` · ganhou ${vgA} de vida`:''}${mo.length?' · morreram: '+mo.join(', '):''}`);
   xVarre();xSobe();xTudo();}
