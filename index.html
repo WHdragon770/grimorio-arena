@@ -3045,8 +3045,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.83;
-/* dólar ao vivo (AwesomeAPI); 5.83 = do dia da publicação, só se falhar */
+let COTA=5.82;
+/* dólar ao vivo (AwesomeAPI); 5.82 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5557,7 +5557,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       const a=d.Power!=null?N('Power'):null,b=d.Toughness!=null?N('Toughness'):null;if((d.Power!=null&&a==null)||(d.Toughness!=null&&b==null))return nao('número');
       const kws=[];for(const k of String(d.Keywords||'').split(' & ').filter(Boolean)){if(!FGKW[k])return nao('habilidade '+k);kws.push(FGKW[k]);}
       if(!cri&&a==null&&!kws.length)return [];return put({op:'anima',al:al||'',p:a,t:b,cri:cri?1:0,kws,perm:du?1:0},[]);}
-    case 'Effect':{for(const k of ['Triggers','ReplacementEffects','Abilities','ImprintCards','Name'])if(d[k]&&k!=='Name')return nao('efeito com '+k);
+    case 'Effect':{{const st0=d.StaticAbilities||'';if(/MayPlay\$ True/.test((ctx.sv||{})[st0]||'')&&/Exile/.test((ctx.sv||{})[st0]||''))return [];}for(const k of ['Triggers','ReplacementEffects','Abilities','ImprintCards','Name'])if(d[k]&&k!=='Name')return nao('efeito com '+k);
       const L=String(d.StaticAbilities||'').split(',').filter(Boolean);if(!L.length)return nao('efeito sem estática');const du=d.Duration||'';const o=[];
       for(const nm of L){const st={};for(const pp of String((ctx.sv||{})[nm]||'').split('|')){const q=pp.indexOf('$');if(q>0)st[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}const md=st.Mode||(nm==='MustAttack'?'MustAttack':'');
         if(md==='Continuous'&&st.Affected==='You'&&st.SetMaxHandSize==='Unlimited'&&Object.keys(st).length<=4){o.push({op:'semMax'});continue;}
@@ -5587,7 +5587,6 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'Proliferate':return [{op:'prolif'}];
     case 'AddTurn':return [{op:'extra'}];
     case 'SetState':return (d.Mode==='Transform'&&(!d.Defined||d.Defined==='Self'))?[{op:'transforma'}]:nao('estado '+(d.Mode||''));
-    case 'Effect':{const st=d.StaticAbilities||'';if(/MayPlay\$ True/.test((ctx.sv||{})[st]||'')&&/Exile/.test((ctx.sv||{})[st]||''))return [];if(al&&st&&/CantBlockBy/.test((ctx.sv||{})[st]||''))return put({op:'kt',al,kw:'unblockable'},[]);return nao();}
     case 'Charm':{const ch=(d.Choices||'').split(',').map(x=>x.trim()).filter(Boolean),n=+(d.CharmNum||1),mn=d.MinCharmNum!=null?+d.MinCharmNum:n;
       return [{op:'modal',n,min:mn,ops:ch.map(x=>{const q=fgPP((ctx.sv||{})[x]||'');return {rot:String(q.d.SpellDescription||x).replace(/CARDNAME|NICKNAME/g,'esta carta'),st:q.api?fgCadeia(q.d,q.api,ctx):[{op:'nao',d:x}]};})}];}
     case 'DelayedTrigger':{const ex=fgPP((ctx.sv||{})[d.Execute]||'');if(d.Mode==='SpellCast'&&ex.api==='CopySpellAbility'&&d.ThisTurn==='True')return [{op:'copiaProx',v:d.ValidCard||'Instant,Sorcery'}];return nao('gatilho atrasado');}
