@@ -5461,7 +5461,7 @@ function fgValid(c,spec,ctx){if(!spec)return true;return String(spec).split(',')
   return t.split('+').every(w=>fgTem(c,w))&&ps.every(p=>fgProp(c,p,ctx));});}
 /* ---------- números (SVar X, Count$) ---------- */
 function fgConta(v,ctx,fundo){if(v==null||v==='')return 1;v=String(v).trim().replace(/^\+/,'');if(/^-?\d+$/.test(v))return +v;
-  if(ctx.dado&&v===ctx.dado)return 'X';
+  if(ctx.dado&&v===ctx.dado)return 'X';if(ctx.dado2&&v===ctx.dado2)return {q:'Y'};
   if(/^[A-Za-z]\w*$/.test(v)&&ctx.sv&&ctx.sv[v]!=null){if((fundo||0)>6)return null;return fgConta(ctx.sv[v],ctx,(fundo||0)+1);}
   const [base,...mods]=v.split('/');let n=null,m;
   if(/^-[A-Za-z]\w*$/.test(v)){const r=fgConta(v.slice(1),ctx,(fundo||0)+1);if(r==null)return null;if(typeof r==='number')return -r;if(r==='X')return {q:'X',sg:-1};return Object.assign({},r,{sg:-(r.sg||1)});}
@@ -5600,11 +5600,12 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'PeekAndReveal':{const n=N('PeekAmount')||1,sb=d.SubAbility&&fgPP((ctx.sv||{})[d.SubAbility]||'');
       if(n===1&&sb&&sb.api==='SetState'&&sb.d.Mode==='Transform'&&(!sb.d.Defined||sb.d.Defined==='Self')&&sb.d.ConditionDefined==='Remembered'){ctx.pula=d.SubAbility;return [{op:'espiaTransforma',v:(sb.d.ConditionPresent||'Card').replace(/Card\./g,'')}];}
       if(n===1&&!d.SubAbility)return [{op:'espia',rev:d.NoReveal?0:1}];return nao('olhar o topo');}
-    case 'RollDice':{if(d.Amount&&d.Amount!=='1'||d.Modifier||d.ResultSVar&&d.ResultSubAbilities)return nao('vários dados ou modificador');const fa=+(d.Sides||6),br=[];if(d.ResultSVar){ctx.dado=d.ResultSVar;return [{op:'dado',f:fa,br:[],v:1}];}
+    case 'RollDice':{const qd=d.Amount==null?1:+d.Amount,md=d.Modifier==null?0:+d.Modifier;if(!(qd>=1&&qd<=10)||isNaN(md)||d.ResultSVar&&d.ResultSubAbilities||d.EvenOddResults||d.OtherSVar&&!d.ChosenSVar)return nao('vários dados ou modificador');
+      const fa=+(d.Sides||6),br=[],ex={q:qd,md,ig:+(d.IgnoreLower||0),esc:d.ChosenSVar?1:0};if(d.ResultSVar||d.ChosenSVar){ctx.dado=d.ResultSVar||d.ChosenSVar;if(d.OtherSVar)ctx.dado2=d.OtherSVar;return [Object.assign({op:'dado',f:fa,br:[],v:1},ex)];}
       for(const pr of String(d.ResultSubAbilities||'').split(',').filter(Boolean)){const m=pr.match(/^(\d+)(?:-(\d+))?:(.+)$|^Else:(.+)$/);if(!m)return nao('tabela do dado');
         const sv=(ctx.sv||{})[m[3]||m[4]];if(!sv)return nao('tabela do dado');const q=fgPP(sv),ops=fgCadeia(q.d,q.api,ctx);
         if(ops.some(o=>o.op==='nao'))return ops.filter(o=>o.op==='nao');if(ops.some(o=>o.al))return nao('alvo dentro do dado');br.push({a:m[4]?0:+m[1],b:m[4]?99:+(m[2]||m[1]),st:ops});}
-      return [{op:'dado',f:fa,br}];}
+      return [Object.assign({op:'dado',f:fa,br},ex)];}
     case 'TakeInitiative':return [{op:'iniciativa'}];case 'BecomeMonarch':return [{op:'monarca'}];case 'Amass':return [{op:'amass',n:/^\d+$/.test(d.Num||'1')?+(d.Num||1):'X',tp:String(d.Type||'Army').toLowerCase()}];
     case 'Goad':return al?put({op:'goad',al},[]):nao('provocar');
     case 'Surveil':{const n=N('Amount');if(n==null)return nao('número');return [{op:'vigia',n}];}
@@ -6326,7 +6327,7 @@ function xResolve(it,rest,nv){const e=X.eu;if(it.tipo==='atq'&&xAtqResolve(it,nv
 function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0;
   if(st.some(s=>s.op==='modal')){const al=(it.al||[]).slice(),m0=String(al[0]||'');let ix=[0];if(m0.startsWith('M#')){ix=m0.slice(2).split(',').map(Number);al.shift();}let um=0;st=st.flatMap(s=>s.op==='modal'&&!um++?ix.flatMap(q=>(s.ops[q]||{}).st||[]):[s]);it=Object.assign({},it,{al});}const ev=(o,p)=>nv.push(Object.assign({id:xId(),de:me,para:p||'*'},o));
   const L0=(()=>{const c=(it.al||[]).map(k=>typeof k==='string'&&xAchaK(k)).find(Boolean);return c?{p:xInfo(c).cri?xPT(c).p:0,t:xInfo(c).cri?xPT(c).t:0,mv:xMVc(c),u:(X.eu.campo.includes(c)?me:(xOpCampos().find(([cp])=>cp.includes(c))||[])[1])}:(()=>{const pi=((X.sala||{}).pilha||[]).find(p=>(it.al||[]).includes(p.id));return {p:0,t:0,mv:0,u:pi&&pi.de};})();})();
-  const rv=v=>{if(!v||typeof v!=='object')return v;let n=v.q==='X'?(it.x||0):v.q==='tc'?((it.tc||{})[v.f]||0):(L0[v.f]||0);n=fgMods(n,v.md||[]);return (n==null?0:n)*(v.sg||1);};
+  const rv=v=>{if(!v||typeof v!=='object')return v;let n=v.q==='X'?(it.x||0):v.q==='Y'?(it.y||0):v.q==='tc'?((it.tc||{})[v.f]||0):(L0[v.f]||0);n=fgMods(n,v.md||[]);return (n==null?0:n)*(v.sg||1);};
   let ult='';for(let s of st){if(s.kk&&(s.kk>0)!==!!((it.c||{}).kick))continue;if(['n','p','t'].some(q=>s[q]&&typeof s[q]==='object'))s=Object.assign({},s,{n:rv(s.n),p:rv(s.p),t:rv(s.t)});if(s.p==='X'||s.t==='X')s=Object.assign({},s,{p:s.p==='X'?(it.x||0):s.p,t:s.t==='X'?(it.x||0):s.t});
     const pa=xPrecisaAlvo(s),t=pa?(it.al||[])[j++]:s.mesmo?ult:'',n=s.n==='X'?(it.x||0):s.n;if(pa&&t)ult=t;
     if(pa&&(!t||(!/^[PS]:/.test(t)&&!xExiste(t)))){feito.push('o alvo saiu');continue;}
@@ -6397,7 +6398,7 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
       case 'ficha':if(s.dono==='alvo'&&L0.u&&L0.u!==me){ev({op:'fichaD',nome:s.nome,p:s.p,t:s.t,kw:s.kw,art:s.art,mana:s.mana,n},L0.u);feito.push(`${xNomeU(L0.u)} ganhou ${n} ficha${n>1?'s':''} ${s.nome}${s.p!=null?' '+s.p+'/'+s.t:''}`);break;}if(s.dono==='alvo'&&!L0.u){feito.push('o dono da ficha saiu');break;}
         xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1);feito.push(`criou ${n} ficha${n>1?'s':''} ${s.nome}${s.p!=null?' '+s.p+'/'+s.t:''}`);break;
       case 'scry':setTimeout(()=>xLista('bib','Vidência '+n+': mande pro topo ou pro fundo',n),300);feito.push('vidência '+n);break;
-      case 'dado':{const r=1+Math.floor(Math.random()*s.f),b=s.br.find(q=>r>=q.a&&r<=q.b);feito.push(`rolou d${s.f}: ${r}`);if(s.v)it=Object.assign({},it,{x:r});xLog(`🎲 ${it.nm}: rolou d${s.f} e tirou ${r}`);if(b&&b.st.length)setTimeout(()=>{xFaz(b.st,Object.assign({},it,{al:[]}),[],nv);xSobe();xPintaEu();},250);break;}
+      case 'dado':{const qd=s.q||1,R=Array.from({length:qd},()=>1+Math.floor(Math.random()*s.f)),K=R.slice().sort((x,y)=>y-x).slice(0,Math.max(1,qd-(s.ig||0))),r=(s.esc?K[0]:K.reduce((x,y)=>x+y,0))+(s.md||0),b=s.br.find(q=>r>=q.a&&r<=q.b),rt=`${qd>1?qd:''}d${s.f}${s.md?(s.md>0?'+':'')+s.md:''}`,dt=qd>1?` (${R.join(', ')}${s.esc?', ficou o maior':s.ig?', sem o menor':''})`:'';feito.push(`rolou ${rt}: ${r}${dt}`);if(s.v)it=Object.assign({},it,{x:r,y:qd>1&&s.esc?K[1]:0});xLog(`🎲 ${it.nm}: rolou ${rt} e tirou ${r}${dt}`);if(b&&b.st.length)setTimeout(()=>{xFaz(b.st,Object.assign({},it,{al:[]}),[],nv);xSobe();xPintaEu();},250);break;}
       case 'cava':{const nm=it.nm,ctxv={eu:me,src:it.k,sv:{}},top=e.bib.splice(0,n);const ok=c=>{try{return fgValid(c,s.v,ctxv);}catch(er){return false;}},L=top.filter(ok);
         setTimeout(async()=>{let ks;if(s.auto)ks=L.map(c=>c.k);else if(XBOT)ks=L.slice().sort((a,b)=>xMVc(b)-xMVc(a)).slice(0,s.k).map(c=>c.k);
           else{ks=null;while(!ks)ks=await xMarca(`${nm}: olhando ${top.length} do topo, escolha ${s.ate?'até ':''}${Math.min(s.k,L.length)}`,top.map(c=>({k:c.k,rot:c.n+(ok(c)?'':' (não vale)')})),s.ate||!L.length?0:Math.min(s.k,L.length),s.k);}
