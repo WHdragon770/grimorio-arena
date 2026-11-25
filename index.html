@@ -5628,6 +5628,10 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'Goad':return al?put({op:'goad',al},[]):nao('provocar');
     case 'Surveil':{const n=N('Amount');if(n==null)return nao('número');return [{op:'vigia',n}];}
     case 'Venture':return (d.Defined||'You')==='You'?[{op:'masmorra'}]:nao('quem explora');
+    case 'Mana':{const pr=String(d.Produced||'').trim(),n=N('Amount');if(n==null)return nao('número');if(d.Defined&&d.Defined!=='You')return nao('mana pra outro jogador');
+      if(/^[WUBRGC]( [WUBRGC])*$/.test(pr))return [{op:'mana',c:pr.replace(/ /g,''),n}];
+      const cm=pr==='Any'||pr==='Combo Any'?'WUBRG':(pr.match(/^Combo ([WUBRGC]( [WUBRGC])*)$/)||[])[1];if(cm)return [{op:'mana',esc:cm.replace(/ /g,''),n}];
+      return nao('mana '+pr);}
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
@@ -6392,6 +6396,7 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
       case 'doCem':{const ix=e.cem.findIndex(q=>q.k===it.k);if(ix<0){feito.push('a carta saiu do cemitério');break;}const c=e.cem.splice(ix,1)[0];if(s.dest==='campo'){xReset(c);c.tap=s.tap?1:0;c.sk=xInfo(c).cri?1:0;e.campo.push(c);setTimeout(()=>xEntrou(c),450);}else e.mao.push(c);feito.push(`${c.n} voltou do cemitério pr${s.dest==='campo'?'o campo':'a mão'}`);break;}
       case 'doCemAlvo':setTimeout(()=>xDoCem(s,it.nm),300);feito.push(`volta ${n} do cemitério pr${s.dest==='campo'?'o campo':'a mão'}`);break;
       case 'copiaProx':e.copiaProx={t:(X.sala||{}).turno,v:s.v||'Instant,Sorcery',nm:it.nm};feito.push('a próxima mágica instantânea ou feitiço neste turno vai ser copiada');break;
+      case 'mana':{const q=Math.max(0,+n||0);if(s.esc&&s.esc.length>1){setTimeout(()=>xManaEsc(q,s.esc,it.nm),300);feito.push(`${q} mana de uma cor à escolha`);break;}const y=s.c||s.esc||'C';let tx='';for(let r=0;r<q;r++)for(const c of y){e.pool[c]=(e.pool[c]||0)+1;tx+='{'+c+'}';}feito.push(`${tx} na reserva de mana`);break;}
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
       case 'masmorra':setTimeout(()=>xVenture(it.nm,s.und),300);feito.push(s.und?'explorou a Cidade Subterrânea':'explorou a masmorra');break;
       case 'iniciativa':xIniPega();feito.push('pegou a iniciativa');break;
@@ -6838,6 +6843,9 @@ async function xDoCem(s,nm){const e=X.eu,v=String(s.v).replace(/[.+](YouCtrl|You
   for(let q=0;q<(s.n||1)&&L.length;q++){let c=null;if(XBOT)c=L.sort((a,b)=>xMVc(b)-xMVc(a))[0];else{const k=await xEscolhe(`${nm}: escolha no cemitério (fechar = nenhuma)`,L.map(x=>({c:x,lado:'Cemitério'})));c=L.find(x=>x.k===k);}if(!c)break;
     L.splice(L.indexOf(c),1);e.cem.splice(e.cem.indexOf(c),1);if(s.dest==='campo'){xReset(c);c.tap=s.tap?1:0;c.sk=xInfo(c).cri?1:0;e.campo.push(c);setTimeout(()=>xEntrou(c),450);}else e.mao.push(c);xLog(`${c.n} voltou do cemitério (${nm})`);}
   xSobe();xTudo();}
+/* mana de mágica/habilidade (Dark Ritual, Cabal Ritual...): vai pra reserva e some na troca de fase */
+async function xManaEsc(q,esc,nm){const e=X.eu;let y=esc[0];if(!XBOT){const v=await xMarca(`${nm}: escolha a cor da mana`,[...esc].map(c=>({k:c,rot:'{'+c+'}'})),1,1);if(v&&v[0])y=v[0];}
+  e.pool[y]=(e.pool[y]||0)+q;xLog(`${nm}: +${('{'+y+'}').repeat(q)} na reserva de mana`);xTudo();}
 function xVigia(n,nm){if(XBOT){const e=X.eu;for(const c of e.bib.slice(0,n))if(xInfo(c).land&&e.campo.filter(q=>xInfo(q).land).length>=6){e.bib.splice(e.bib.indexOf(c),1);e.cem.push(c);xLog(`vigiar: ${c.n} foi pro cemitério`);}xTudo();return;}
   xLista('bib',`Vigiar ${n} (${nm}): deixe no topo ou mande pro cemitério`,n);}
 async function xDescarta(n,nm){const e=X.eu;n=Math.min(n,e.mao.length);if(!n)return;let ks;
