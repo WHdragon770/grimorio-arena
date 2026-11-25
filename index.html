@@ -2948,8 +2948,8 @@ const h=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const f1=n=>Number(n).toFixed(1).replace('.',','),pct=n=>Math.round(n*100)+'%',pp=n=>(n>=0?'+':'')+f1(n*100);
 const brl=n=>'R$ '+Number(n).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
 const st={get(k,d){try{const v=localStorage.getItem('ga_'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('ga_'+k,JSON.stringify(v));}catch(e){}}};
-let COTA=5.81;
-/* dólar ao vivo (AwesomeAPI); 5.81 = do dia da publicação, só se falhar */
+let COTA=5.82;
+/* dólar ao vivo (AwesomeAPI); 5.82 = do dia da publicação, só se falhar */
 (async()=>{try{const c=JSON.parse(localStorage.getItem('ga_cota')||'null');if(c&&Date.now()-c.t<36e5&&c.v>0){COTA=c.v;return;}}catch(e){}
   try{const r=await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL'),j=await r.json(),v=+j.USDBRL.bid;if(!(v>0))return;
     const mud=Math.abs(v-COTA)>.005;COTA=v;try{localStorage.setItem('ga_cota',JSON.stringify({v,t:Date.now()}));}catch(e){}
@@ -5375,13 +5375,14 @@ function fgConta(v,ctx,fundo){if(v==null||v==='')return 1;v=String(v).trim().rep
   else if(base==='PlayerCountOpponents$Amount')n=Math.max(1,Object.keys(X.ops||{}).filter(u=>!xMorto(X.ops[u])).length);
   else if(base==='Count$InYourYard')n=X.eu.cem.length;
   else if(base==='Count$YourLifeTotal')n=X.eu.vida;
+  else if(base==='Count$Domain')n=['Plains','Island','Swamp','Mountain','Forest'].filter(t=>X.eu.campo.some(c=>new RegExp('\\b'+t+'\\b').test(xInfo(c).tipo||''))).length;
   else if(base==='Count$CardPower'||base==='Count$CardToughness'){const c=xAchaK(ctx.src);n=c&&xInfo(c).cri?xPT(c)[base.endsWith('Power')?'p':'t']:0;}
   else if(base==='Count$CardCounters.P1P1'){const c=xAchaK(ctx.src);n=c?Math.max(0,c.cnt||0):0;}
   else if(m=base.match(/^Number\$(-?\d+)$/))n=+m[1];
   else if(m=base.match(/^Count\$Compare (\w+) (GE|GT|LE|LT|EQ|NE)(\d+)\.(\d+)\.(\d+)$/)){const a=fgConta(m[1],ctx,(fundo||0)+1);if(a==null)return null;n=fgCmp(a,m[2]+m[3])?+m[4]:+m[5];}
   if(n==null){fgAv('conta do Forge ainda não lida: '+base);return null;}
   for(const md of mods){let q;if(q=md.match(/^Plus\.(-?\d+)$/))n+=+q[1];else if(q=md.match(/^Minus\.(\d+)$/))n-=+q[1];else if(q=md.match(/^Times\.(\d+)$/))n*=+q[1];
-    else if(md==='HalfDown')n=Math.floor(n/2);else if(md==='HalfUp')n=Math.ceil(n/2);else if(md==='Twice')n*=2;else if(md==='Negative')n=-n;else if(q=md.match(/^LimitMax\.(\d+)$/))n=Math.min(n,+q[1]);
+    else if(md==='HalfDown')n=Math.floor(n/2);else if(md==='HalfUp')n=Math.ceil(n/2);else if(md==='Twice'||md==='Double')n*=2;else if(md==='Negative')n=-n;else if(q=md.match(/^LimitMax\.(\d+)$/))n=Math.min(n,+q[1]);
     else{fgAv('conta do Forge ainda não lida: '+v);return null;}}
   return n;}
 /* condições de passo/estática/ativação. null = não sei ler */
@@ -5447,7 +5448,7 @@ function fgPasso(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.S
     case 'Token':{const n=N('TokenAmount');if(n==null)return nao('número');if((d.TokenOwner||'You')!=='You')return nao('dono da ficha');const o=fgFicha(d.TokenScript||'',n);return o||nao('ficha '+d.TokenScript);}
     case 'Mill':{const n=N('NumCards');if(n==null)return nao('número');const df=d.Defined||'You';return [{op:'mill',n,quem:df==='You'?'eu':'op'}];}
     case 'Scry':{const n=N('ScryNum');if(n==null)return nao('número');return [{op:'scry',n}];}
-    case 'Tap':case 'Untap':if(!al)return nao('sem alvo');return put({op:api==='Tap'?'vira':'desvira',al},[]);
+    case 'Tap':case 'Untap':if(!al&&((!d.Defined&&!d.UntapType&&!d.ValidCards)||d.Defined==='Self'||d.Defined==='Enchanted'||d.Defined==='Equipped'))return [{op:'viraSi',up:api==='Untap'?1:0,h:d.Defined==='Enchanted'||d.Defined==='Equipped'?1:0}];if(!al)return nao('sem alvo');return put({op:api==='Tap'?'vira':'desvira',al},[]);
     case 'Fight':if(d.Defined&&d.Defined!=='Self')return nao('quem luta');if(!al)return nao('sem alvo');return put({op:'luta',al},[]);
     case 'Sacrifice':{const n=N('Amount');if(n==null)return nao('número');const df=d.Defined||'You',tp=/^Creature/.test(d.SacValid||'')?'creature':'permanent';
       if(df==='Player.Opponent'||df==='Opponent')return [{op:'sacr',n,tipo:tp,quem:'each opponent'}];if(df==='Player')return [{op:'sacr',n,tipo:tp,quem:'each player'}];if(al==='target player'||al==='target opponent')return [{op:'sacr',n,tipo:tp,quem:'target'}];if(df==='Self'||d.SacValid==='Self'||d.SacValid==='Card.Self')return [{op:'sacrEsta'}];if(df==='You')return [{op:'sacrEu',n,v:d.SacValid||'Permanent',d:d.SacMessage||d.SacValid||'permanente'}];return nao('quem sacrifica');}
@@ -6230,6 +6231,7 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
       case 'espiaTransforma':{const t=e.bib[0],c=e.campo.find(q=>q.k===it.k);if(!t){feito.push('biblioteca vazia');break;}const ti=xInfo(t).tipo||'',ok=String(s.v||'Card').split(',').some(v=>v==='Card'||new RegExp('\\b'+v+'\\b').test(ti));
         if(ok){feito.push('revelou '+t.n+' do topo');if(c){xConv(c);feito.push('transformou');}else feito.push('não está mais no campo pra transformar');}else feito.push('olhou o topo, não revelou');break;}
       case 'espia':{const t=e.bib[0];feito.push(t?(s.rev?'revelou '+t.n+' do topo':'olhou o topo'):'biblioteca vazia');break;}
+      case 'viraSi':{const c0=e.campo.find(q=>q.k===it.k),c=c0&&s.h?xAchaK(c0.an):c0;if(c){c.tap=s.up?0:1;feito.push(`${s.up?'desvirou':'virou'} ${c.n}`);}else feito.push('a carta não está mais no campo');break;}
       case 'transforma':{const c=e.campo.find(q=>q.k===it.k);if(c){xConv(c);feito.push('transformou');}else feito.push('não está mais no campo pra transformar');break;}
       case 'mk':{const c=e.campo.find(q=>q.k===it.k);if(c){c.mk=Object.assign({},c.mk,{[s.t]:((c.mk||{})[s.t]||0)+n});feito.push(`+${n} marcador ${s.t}`);}break;}
       case 'cntTodos':{const ctx={eu:me,src:it.k,sv:{}};let q=0;e.campo.forEach(c=>{if(fgValid(c,s.v,ctx)){c.cnt=(c.cnt||0)+n;q++;}});feito.push(`+${n} marcador +1/+1 em ${q}`);break;}
