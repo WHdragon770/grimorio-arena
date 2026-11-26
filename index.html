@@ -5711,7 +5711,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'Goad':return al?put({op:'goad',al},[]):nao('provocar');
     case 'Surveil':{const n=N('Amount');if(n==null)return nao('número');return [{op:'vigia',n}];}
     case 'Venture':return (d.Defined||'You')==='You'?[{op:'masmorra'}]:nao('quem explora');
-    case 'Mana':{const pr=String(d.Produced||'').trim(),n=N('Amount');if(n==null)return nao('número');if(d.Defined&&d.Defined!=='You')return nao('mana pra outro jogador');
+    case 'Mana':{const pr=String(d.Produced||'').trim(),n=N('Amount');if(n==null)return nao('número');if(d.Defined==='TriggeredCardController')return [];if(d.Defined&&d.Defined!=='You')return nao('mana pra outro jogador');
       if(/^[WUBRGC]( [WUBRGC])*$/.test(pr))return [{op:'mana',c:pr.replace(/ /g,''),n}];
       const cm=pr==='Any'||pr==='Combo Any'?'WUBRG':(pr.match(/^Combo ([WUBRGC]( [WUBRGC])*)$/)||[])[1];if(cm)return [{op:'mana',esc:cm.replace(/ /g,''),n}];
       return nao('mana '+pr);}
@@ -5722,6 +5722,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       else if(sub.api==='DealDamage'&&/^(Player\.IsRemembered|Remembered)$/.test(q.Defined||'')){const v=nn('NumDmg');if(v==null)return nao('número');st.push({op:'rpPerde',n:v,dano:1});}
       else if(sub.api==='Token'){const v=q.TokenAmount==null?1:nn('TokenAmount');if(v==null)return nao('número');const o=fgFicha(q.TokenScript||'',1);if(!o||o.length!==1||o[0].op!=='ficha')return nao('ficha '+q.TokenScript);
         const ow=q.TokenOwner||'You';if(!/^(You|Player\.IsRemembered|Remembered)$/.test(ow))return nao('dono da ficha');st.push(Object.assign({},o[0],{op:'rpFicha',n:v,dono:ow==='You'?'eu':'rp',tap:q.TokenTapped==='True'?1:0,atk:q.TokenAttacking?1:0}));}
+      else if(sub.api==='PumpAll'&&q.ValidCards==='Creature.RememberedPlayerCtrl'&&q.NumAtt==='-X'&&q.NumDef==='-X'&&/^PlayerCountRemembered\$Counters\.Poison$/.test((ctx.sv||{}).X||''))st.push({op:'rpPumpVen',n:1});
       else return nao('ação RepeatEach');
       return [{op:'cadaJog',quem:rpT,st}];}
     case 'ManaReflected':return [{op:'mana',esc:d.ColorOrType==='Type'?'WUBRGC':'WUBRG',n:1}];
@@ -5941,7 +5942,11 @@ const xCri=c=>(xInfo(c).cri&&!(c.rcf&&c.an&&xAchaK(c.an))&&!(c.bst&&c.an&&xAchaK
 
 /* ---------- mana ---------- */
 function xFontes(e){const f=[];for(const c of e.campo){if(c.tap)continue;const i=xInfo(c);if(!i.mana||i.sacMana)continue;if(i.cri&&c.sk&&!xPT(c).kw.has('haste'))continue;f.push({c,op:i.mana,cri:i.cri?1:0,land:i.land?1:0});}
+  for(const s of f){const ex=xManaAura(e,s.c);if(ex.length)s.op=s.op.flatMap(o=>ex.map(x=>o+x));}
   return f.sort((a,b)=>(a.cri-b.cri)||(b.land-a.land)||(a.op.length-b.op.length));}
+/* mana a mais de auras no terreno: lista de opções (cada uma é uma string de símbolos somados) */
+function xManaAura(e,c){let ops=[''];for(const a of e.campo){if(a.an!==c.k||a===c)continue;const m=xNorm(xInfo(a).tx,a.n).match(/Whenever enchanted (?:land|Forest|Island|Swamp|Mountain|Plains) is tapped for mana, its controller adds an additional ([^.\n]+)/i);if(!m)continue;
+    const b=(m[1].match(/\{([WUBRGC])\}/g)||[]).map(x=>x[1]).join('');const ch=b?[b]:/one mana of (?:any color|the chosen color)/i.test(m[1])?['W','U','B','R','G']:[];if(!ch.length)continue;ops=ops.flatMap(o=>ch.map(x=>o+x));}return ops.length===1&&ops[0]===''?[]:ops;}
 /* paga com a mana solta primeiro e vira o que faltar (terreno antes de pedra, criatura por último). Não sacrifica Tesouro sozinho. */
 function xPaga(e,cs,extra,conv){const pool=Object.assign(xPool0(),e.pool),tap=[],us=new Set(),F=xFontes(e);
   if(conv)for(const c of e.campo)if(!c.tap&&xInfo(c).cri&&!F.some(f=>f.c===c))F.push({c,op:[...xCorFonte(c.n),'C'],cri:1,land:0,cv:1});let vida=0,g=cs.g+(extra||0);const falta=[];
@@ -6473,6 +6478,7 @@ function xEvAplica(v){const e=X.eu;
       if(pg){xAplica(e,r);xLog(`pagou ${v.c} pra ${v.nm}`);}else xLog(`não pagou ${v.c} pra ${v.nm}${r.ok?'':' (sem mana)'}`);if(pg===!!v.sw)xEvia({op:'fazPra',st:v.st,nm:v.nm,para:v.de});xSobe();xPintaEu();})();}
   else if(v.op==='descOp'){setTimeout(()=>xDescarta(v.n,v.nm).then(()=>{xSobe();xPintaEu();}),300);}
   else if(v.op==='cntV'){xFilV(v.v,v.de,c=>{c.cnt=(c.cnt||0)+v.n;});xVarre();xSobe();xPintaEu();}
+  else if(v.op==='pumpVen'){const n=e.ven||0;if(n){e.campo.forEach(c=>{if(xInfo(c).cri){c.tp=(c.tp||0)-n;c.tt=(c.tt||0)-n;}});xLog(`suas criaturas ganharam -${n}/-${n} até o fim do turno`);}xVarre();xSobe();xPintaEu();}
   else if(v.op==='mortoVivo'){xMortoVivo(v.v,v.vs,v.nm);xSobe();xPintaEu();}
   else if(v.op==='fazPra'){xFazDepois(v.st||[],{nm:v.nm,k:'',al:[],tc:{},sc:{}});}
   else if(v.op==='cemTira'){const ix=e.cem.findIndex(q=>q.k===v.k);if(ix>=0){const c=e.cem.splice(ix,1)[0];if(v.z==='topo')e.bib.unshift(c);else if(v.z==='fundo')e.bib.push(c);else if(v.z==='campo'){}else e.exi.push(c);xLog(`${c.n} saiu do seu cemitério (${v.nm})`);}}
@@ -6555,6 +6561,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'cadaJog':{const us=(s.quem==='todos'?[me]:[]).concat(Object.keys(X.ops||{}).filter(u=>!xMorto(X.ops[u])));const tx=[];
         for(const u of us){it.rp=u;for(const q of s.st){const n2=Math.max(0,+rv(q.n)||0);if(!n2)continue;
           if(q.op==='rpPerde'){if(u===me)e.vida-=n2;else ev({op:'vida',d:-n2},u);tx.push(`${u===me?'você':xNomeU(u)} ${q.dano?'levou '+n2+' de dano':'perdeu '+n2+' de vida'}`);}
+          else if(q.op==='rpPumpVen'){if(u===me){const v=e.ven||0;e.campo.forEach(c=>{if(xInfo(c).cri){c.tp=(c.tp||0)-v;c.tt=(c.tt||0)-v;}});}else ev({op:'pumpVen'},u);tx.push(`criaturas de ${u===me?'você':xNomeU(u)} ganham -X/-X (X = veneno)`);}
           else if(q.op==='rpFicha'){const dono=q.dono==='rp'?u:me;if(dono===me){xFicha(q.nome,q.p,q.t,q.kw,q.art,q.mana,n2,1);xFichaPos(e,n2,q,u);}else ev({op:'fichaD',nome:q.nome,p:q.p,t:q.t,kw:q.kw,art:q.art,mana:q.mana,n:n2},u);
             tx.push(`${n2} ficha${n2>1?'s':''} ${q.nome}${q.atk?' atacando '+xNomeU(u):''}${dono!==me?' pra '+xNomeU(dono):''}`);}}}
         delete it.rp;feito.push(tx.join(' · ')||'nada aconteceu');break;}
