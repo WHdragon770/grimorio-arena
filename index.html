@@ -5778,7 +5778,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       if(d.SubAbility){const sb=fgPP((ctx.sv||{})[d.SubAbility]||'');if(sb.api==='ChangeZone'&&sb.d.Defined==='Targeted'&&sb.d.Origin==='Stack'&&sb.d.Destination==='Hand'&&!sb.d.SubAbility){volta=1;ctx.pula=d.SubAbility;}}
       return [{op:'copiaS',al:'spell',vs,volta}];}
     case 'Discover':{const n=N('Num');if(typeof n!=='number')return nao('número');return [{op:'descobre',n}];}
-    case 'Protection':{if(d.Gains!=='Choice'||!/^(AnyColor|AnyColor,Colorless|Colorless,AnyColor)$/.test(d.Choices||'')||!al)return nao('proteção');return put({op:'protCor',al,inc:/Colorless/.test(d.Choices)?1:0},[]);}
+    case 'Protection':{if(d.Gains!=='Choice'||!/^(AnyColor|AnyColor,Colorless|Colorless,AnyColor)$/i.test(d.Choices||'')||!al)return nao('proteção');return put({op:'protCor',al,inc:/Colorless/i.test(d.Choices)?1:0},[]);}
     case 'Earthbend':{const n=N('Num');if(n==null||n==='X')return nao('número');return [{op:'terra',n}];}
     case 'Fog':return [{op:'prevC',al:'',v:'Card'}];
     case 'RemoveFromCombat':return al?put({op:'tiraCombate',al},[]):nao('sem alvo');
@@ -5797,6 +5797,9 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       if(d.Duration!=='UntilEndOfTurn')return nao('duração');const df=d.Defined||'';if(!al&&df!=='Remembered')return nao('quem');return put({op:'clone',al:al||'',lemb:df==='Remembered'?1:0},[]);}
     case 'AlterAttribute':return (d.Attributes==='Harnessed'&&(!d.Defined||d.Defined==='Self'))?[{op:'harn'}]:nao('ação AlterAttribute');
     case 'Attach':{if(/^TriggeredCard(LKICopy)?$/.test(d.Defined||'')&&!d.Object&&!d.ConditionDefined)return [{op:'equipaTc'}];return nao('ação Attach');}
+    case 'RevealHand':{if(d.Look!=='True'&&!d.Look)return nao('ação RevealHand');if(al==='target player'||al==='target opponent')return put({op:'verMao',al},[]);return nao('ação RevealHand');}
+    case 'GenericChoice':{if((d.Defined&&d.Defined!=='You')||d.ValidTgts||al)return nao('ação GenericChoice');const ch=String(d.Choices||'').split(',').map(x=>x.trim()).filter(Boolean);if(ch.length<2)return nao('ação GenericChoice');
+      return [{op:'modal',n:1,min:1,ops:ch.map(x=>{const q=fgPP((ctx.sv||{})[x]||'');return {rot:String(q.d&&(q.d.SpellDescription||q.d.StackDescription)||x).replace(/CARDNAME|NICKNAME/g,'esta carta'),st:q.api?fgCadeia(q.d,q.api,ctx):[{op:'nao',d:x}]};})}];}
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
@@ -6529,6 +6532,8 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='carta'){const c=e.campo.find(q=>q.k===v.k);if(c)xEfCarta(c,v.o,v.n,v.x);}
   else if(v.op==='aniq')xAniq(v);
   else if(v.op==='sacr')xSacr(v);
+  else if(v.op==='pedeMao'){xEvia({op:'maoVista',nm:v.nm,cartas:e.mao.map(c=>c.n),para:v.de});xLog(`${xNomeU(v.de)} olhou a sua mão (${v.nm})`);}
+  else if(v.op==='maoVista'){const L=v.cartas||[];xLog(`${v.nm}: mão de ${xNomeU(v.de)}: ${L.length?L.join(', '):'vazia'}`);xAv(`${v.nm} — mão de ${xNomeU(v.de)}: ${L.length?L.join(', '):'vazia'}`);}
   else if(v.op==='castigo')xCastigo(v);
   else if(v.op==='ven')e.ven=(e.ven||0)+v.n;
   else if(v.op==='morreu'&&(xTT().mor++,1))xGatCampo(/Whenever (?:this (?:card|creature) or )?(another |a |an )((?:nontoken )?[A-Za-z -]*?creature)( an opponent controls| you don't control)? dies, ([^\n]+)/i,v.n+' morreu',m=>!(/nontoken/i.test(m[2])&&v.tok)&&xFiltro(m[2].replace(/creature/i,''),{n:v.n,tok:v.tok}),null,{tk:v.k||'',tku:v.de});
@@ -6729,6 +6734,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'maisMana':{const tn=(X.sala||{}).turno||0;(e.mm=(e.mm||[]).filter(q=>q.t===tn)).push({v:s.v,cor:s.cor,n:s.n,t:tn});feito.push(`até o fim do turno, cada ${s.v} virado pra mana dá {${s.cor}} a mais (pra todos)`);break;}
       case 'harn':{const c=e.campo.find(q=>q.k===it.k);if(c){c.harn=1;feito.push(`${c.n} foi harnessed: a habilidade ∞ está ativa`);}break;}
       case 'equipaTc':{const eq=e.campo.find(q=>q.k===it.k),cr=e.campo.find(q=>q.k===(it.tc||{}).tk);if(!eq||!cr){feito.push('não deu pra equipar');break;}eq.an=cr.k;feito.push(`${eq.n} foi anexado a ${cr.n}`);break;}
+      case 'verMao':{const u=String(t||(it.al||[]).find(a=>/^P:/.test(String(a)))||('P:'+xOutro())).replace(/^P:/,'');if(!u||u===me){feito.push('olhou a própria mão');break;}ev({op:'pedeMao',nm:it.nm},u);feito.push(`olha a mão de ${xNomeU(u)}`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
