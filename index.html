@@ -7452,7 +7452,8 @@ async function xAcao(z,k,op){const e=X.eu;if(!e)return;const i=e[z]?e[z].findInd
 function xVida(campo,d){const e=X.eu;const de=X.vt[campo]?X.vt[campo].de:e[campo];e[campo]=Math.max(0,e[campo]+d);clearTimeout((X.vt[campo]||{}).tm);
   const rot={vida:'vida',ven:'veneno',dc:'dano de comandante recebido'}[campo];
   X.vt[campo]={de,tm:setTimeout(()=>{const a=e[campo];delete X.vt[campo];if(a!==de)xLog(`${rot}: ${de} → ${a}`);},1500)};xSobe();xPintaEu();}
-function xBotao(a){const e=X.eu,s=X.sala||{},me=xUid();
+async function xAtkTodas(){const e=X.eu;if(!e)return;const L=e.campo.filter(c=>!c.atk&&xPodeAtk(c));if(!L.length)return xAv('Nenhuma criatura pode atacar agora.');const us=xOpsL().filter(u=>!xMorto(X.ops[u]));let u=us[0]||xOutro();if(us.length>1&&!XBOT){const q=await xMarca('Atacar com todas: qual jogador?',us.map((x,j)=>({k:x,rot:(X.ops[x]||{}).nome||'jogador',on:j===0?1:0})),1,1);if(!q)return;u=q[0];}for(const c of L)await xAcao('campo',c.k,'atk:P:'+u);xLog(`atacou com todas (${L.length}) em ${xNomeU(u)}`);xSobe();xTudo();}
+function xBotao(a){const e=X.eu,s=X.sala||{},me=xUid();if(a==='atktodas')return xAtkTodas();
   if(a==='auto'){X.auto=X.auto?0:1;X.autoI=(s.turno||0)+'.'+(s.fase||0)+'.'+s.vez;if(X.auto)xLog('⏩ automático até a etapa Final');return xPintaFase();}
   if(a==='criar')return xCria();if(a==='criar4')return xCria(4);if(a==='bot')return xCriaBot();if(a==='bot3')return xCriaBot(3);if(a==='comecar')return xComeca();
   if(a==='link'){const u=location.origin+location.pathname+'#x1/'+X.cod;navigator.clipboard.writeText(u).then(()=>bToast('Link copiado: '+u),()=>prompt('Copie o link:',u));return;}
@@ -7536,7 +7537,7 @@ function xPintaFase(){const el=$('#x1-fase');if(!el)return;const s=X.sala||{},me
     dica=pr?'Pode responder com instantânea, lampejo ou habilidade (toque na carta). Ou passe pra resolver o topo.':'';}
   else if(eu){if(s.cb==='blq'){ac='<span class="x1-esp2">Esperando os bloqueios…</span>';dica=`${(s.def||s.jog.filter(u=>u!==me)).filter(u=>!(s.bq||[]).includes(u)).map(u=>h(xNomeU(u))).join(', ')} escolhendo quem bloqueia.`;}
     else if(s.cb==='dano'){ac='<button class="prim" data-x="dano">💥 Causar dano</button>';dica='Bloqueios prontos. Clique em Causar dano.';}
-    else if(f===2){ac='<button class="prim" data-x="atkok">⚔ Atacantes prontos</button>';dica='Toque nas suas criaturas e escolha ⚔ Atacar. Sem atacante, o botão pula o combate.';}
+    else if(f===2){ac=((X.eu&&X.eu.campo||[]).some(c=>!c.atk&&xPodeAtk(c))?'<button data-x="atktodas">⚔ Atacar com todas</button>':'')+'<button class="prim" data-x="atkok">⚔ Atacantes prontos</button>';dica='Toque nas suas criaturas e escolha ⚔ Atacar. Sem atacante, o botão pula o combate.';}
     else{ac=(f<4?'<button data-x="fase">Próxima fase ▶</button>':'')+'<button class="prim" data-x="passa">Passar turno ⏭</button>';
       if(f===1||f===3)dica=`Fase principal: ${e.ter?'já jogou terreno':'pode jogar 1 terreno'}, conjurar mágicas e equipar. Toque na carta.`;}}
   else{const at=(((X.ops||{})[s.vez]||{}).campo||[]).filter(c=>c.atk&&xDefDe(c)===me);if(s.cb==='blq'&&at.length&&!(s.bq||[]).includes(me)){ac='<button class="prim" data-x="blqok">🛡 Bloqueios prontos</button>';
