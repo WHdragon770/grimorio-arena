@@ -5588,7 +5588,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
   const A=fgAlvo(d),al=A&&A.al,put=(x,o)=>{if(A&&A.v)x.v=A.v;o.push(x);return o;},N=k=>{const n=fgConta(d[k],ctx);return n;};
   switch(api){
     case 'DealDamage':{const n=N('NumDmg');if(n==null)return nao('número');const df=d.Defined||'';if(d.DamageSource&&/^Triggered(Card|Attacker)(LKICopy)?$/.test(d.DamageSource)&&al)return put({op:'dano',n,al,fk:1},[]);if(d.DamageSource){if(/^(ParentTarget|Targeted)$/.test(d.DamageSource)&&al&&n&&n.q==='alvo'&&n.f==='p'&&!(n.md||[]).length)return put({op:'morde',al},[]);return nao('fonte');}
-      if(!al&&/^(Targeted|ParentTarget)Controller$/.test(df))return [{op:'danoDono',n}];if(al)return put({op:'dano',n,al},[]);if(d.__m&&!df)return [{op:'dano',n,al:''}];if(df==='Opponent'||df==='Player.Opponent')return [{op:'dano',n,al:'each opponent'}];if(df==='Player')return [{op:'dano',n,al:'each player'}];if(df==='You')return [{op:'perdeEu',n}];return nao();}
+      if(!al&&/^(Targeted|ParentTarget)Controller$/.test(df))return [{op:'danoDono',n}];if(!al&&df==='TriggeredSourceController')return [{op:'danoTc',n}];if(al)return put({op:'dano',n,al},[]);if(d.__m&&!df)return [{op:'dano',n,al:''}];if(df==='Opponent'||df==='Player.Opponent')return [{op:'dano',n,al:'each opponent'}];if(df==='Player')return [{op:'dano',n,al:'each player'}];if(df==='You')return [{op:'perdeEu',n}];return nao();}
     case 'DamageAll':{const n=N('NumDmg');if(n==null)return nao('número');const o=[];if(d.ValidCards==='Creature')o.push({op:'dano',n,al:'each creature'});else if(d.ValidCards&&/^Creature\b/.test(d.ValidCards)&&fgSpecOk(d.ValidCards,ctx))o.push({op:'dano',n,al:'each creature',v:d.ValidCards});else if(d.ValidCards)return nao('quais criaturas');
       if(d.ValidPlayers==='Player')o.push({op:'dano',n,al:'each player'});else if(/Opponent/.test(d.ValidPlayers||''))o.push({op:'dano',n,al:'each opponent'});return o.length?o:nao();}
     case 'Discard':{const df=d.Defined||'You';if(/^(Opponent|Player\.Opponent|Player|TriggeredTarget)$/.test(df)&&!d.RememberDiscarded&&(!d.Mode||d.Mode==='TgtChoose'||d.Mode==='Hand')){const n=d.Mode==='Hand'?99:(N('NumCards')??1);if(typeof n!=='number')return nao('número');return [{op:'descOp',n,quem:df==='Player'?'todos':df==='TriggeredTarget'?'td':'ops'}];}if(df!=='You'&&!/^You$/.test(d.Defined||''))return nao('descarte de outro jogador');if(d.Mode==='Hand')return [{op:'descarta',n:99}];const n=N('NumCards')??1;if(n==null)return nao('número');return [{op:'descarta',n}];}
@@ -6473,7 +6473,7 @@ async function xPedeAlvos(st,nome,k){const al=[];let mm='';st=st.slice();st=st.f
     if(!l.length){xAv(`${nome}: sem alvo válido (${s.op==='anula'?'nenhuma mágica na pilha':s.al}).`);return null;}
     const a=await xEscolhe(`${nome}: escolha o alvo`,l);if(!a)return null;al.push(a);}if(mm)al.unshift(mm);return al;}
 // ward: alvo do oponente com Ward. Paga ou a mágica/habilidade é anulada. true = segue.
-async function xWard(al,nome){const e=X.eu;for(const a of al||[]){if(!a||a.startsWith('P:')||a.startsWith('S:')||a.startsWith('M#'))continue;const c=xAchaK(a.replace(/^M:/,''));if(!c||(X.eu.campo||[]).includes(c))continue;const i=xInfo(c);if(!i.ward&&!i.wardv)continue;
+async function xWard(al,nome){const e=X.eu;for(const a of al||[]){if(!a||a.startsWith('P:')||a.startsWith('S:')||a.startsWith('M#'))continue;const c=xAchaK(a.replace(/^M:/,''));if(!c||(X.eu.campo||[]).includes(c))continue;{const u0=xDonoK(c.k);if(u0&&u0!==xUid())xEvia({op:'virouAlvo',k:c.k,nm:nome,para:u0});}const i=xInfo(c);if(!i.ward&&!i.wardv)continue;
   const ct=i.ward||`${i.wardv} de vida`;
   if(i.wardv){if(e.vida>i.wardv&&confirm(`${c.n} tem Ward: pagar ${i.wardv} de vida? Se não pagar, ${nome} é anulada.`)){e.vida-=i.wardv;xLog(`pagou Ward de ${c.n} (${ct})`);continue;}}
   else{const r=xPaga(e,xCusto(i.ward),0);if(r.ok&&confirm(`${c.n} tem Ward ${i.ward}: pagar? Se não pagar, ${nome} é anulada.`)){const pg=xAplica(e,r);xLog(`pagou Ward de ${c.n} (${ct})${pg?' · '+pg:''}`);continue;}}
@@ -6555,6 +6555,7 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='carta'){const c=e.campo.find(q=>q.k===v.k);if(c)xEfCarta(c,v.o,v.n,v.x);}
   else if(v.op==='aniq')xAniq(v);
   else if(v.op==='sacr')xSacr(v);
+  else if(v.op==='virouAlvo'){const c=X.eu.campo.find(q=>q.k===v.k);if(c)xGatCampo(/^(Whenever an? [A-Za-z]+ you control becomes the target of a spell or ability an opponent controls, [^\n]+)$/im,`${xNomeU(v.de)} mirou ${c.n} (${v.nm||'?'})`,m=>{const tp=(m[0].match(/^Whenever an? ([A-Za-z]+) you control/i)||[])[1];try{return xFiltro(tp,c);}catch(er){return false;}},null,{tku:v.de,tk:c.k});}
   else if(v.op==='faseTodos'){const L=X.eu.campo.filter(c=>xCri(c));for(const c of L)xEfCarta(c,'fase');xLog(`${xNomeU(v.de)}: suas ${L.length} criatura(s) saíram de fase`);}
   else if(v.op==='fimComb'){for(const c of X.eu.campo){c.atk=0;c.alv='';c.bl='';}xLog(`${xNomeU(v.de)} terminou a fase de combate`);}
   else if(v.op==='tentaB'){setTimeout(()=>{const sim=!XBOT&&confirm(`${v.nm} (${xNomeU(v.de)}): buscar um terreno no seu grimório e pôr no campo? Se buscar, ${xNomeU(v.de)} busca mais um.`);xLog(`${v.nm}: você ${sim?'buscou':'não buscou'}`);if(sim){xFazDepois(v.st||[],{nm:v.nm,k:'',al:[],tc:{},sc:{}});xEvia({op:'fazPra',st:v.eu||[],nm:v.nm,para:v.de});}},300);}
@@ -6809,6 +6810,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'faseV':{const L=e.campo.filter(c=>{try{return fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}});for(const c of L)xEfCarta(c,'fase');feito.push(`${L.length} permanente(s) sua(s) saíram de fase`);break;}
       case 'faseJ':{const u=String(t||'').startsWith('P:')?String(t).slice(2):xOutro();if(u===me){const L=e.campo.filter(c=>xCri(c));for(const c of L)xEfCarta(c,'fase');}else ev({op:'faseTodos',v:'Creature'},u);feito.push(`as criaturas de ${u===me?'você':xNomeU(u)} saíram de fase`);break;}
       case 'anulaTc':{const tk=(it.tc||{}).tk,ix=rest.findIndex(p=>p.tipo==='mag'&&p.c&&p.c.k===tk);if(ix<0){feito.push('a mágica já tinha saído da pilha');break;}const p=rest[ix];rest=rest.filter((z,q)=>q!==ix);if(p.de===me)e.cem.push(p.c);else ev({op:'anulada',c:p.c},p.de);feito.push('anulou '+p.nm);break;}
+      case 'danoTc':{const u=(it.tc||{}).tku;if(!u||u===me){feito.push('sem jogador pra dar dano');break;}xNoAlvo('P:'+u,'dano',n,ev);feito.push(`${n} de dano em ${xNomeU(u)}`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
