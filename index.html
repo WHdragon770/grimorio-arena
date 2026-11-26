@@ -5813,6 +5813,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'MultiplyCounter':{if(d.CounterType==='P1P1'&&(d.Defined==='Enchanted'||d.Defined==='Equipped')&&!al&&(!d.Multiplier||d.Multiplier==='2'))return [{op:'dobraCnt',anx:1}];if(d.CounterType==='P1P1'&&al&&!d.TargetMax)return put({op:'dobraCnt',al},[]);return nao('ação MultiplyCounter');}
     case 'ChooseCard':{if(d.Cost==='Draw<2/You>'&&d.ChoiceZone==='Hand'&&/DrawnThisTurn/.test(d.Choices||'')){const rp=fgPP((ctx.sv||{})[d.SubAbility]||''),rs=rp.api==='RepeatEach'?fgPP((ctx.sv||{})[rp.d.RepeatSubAbility]||''):{};if(rs.api==='ChangeZone'&&/^PayLife<(\d+)>$/.test(rs.d.UnlessCost||'')){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'sylvan',n:+(d.Amount||2),vida:+rs.d.UnlessCost.match(/\d+/)[0]}];}}return nao('ação ChooseCard');}
     case 'EndTurn':{if(Object.keys(d).some(k=>!/^(AB|DB|SP|Cost|ConditionPlayerTurn|SpellDescription|StackDescription|SubAbility)$/.test(k)))return nao('fim do turno com detalhe');return [{op:'fimTurno',so:d.ConditionPlayerTurn==='True'?1:0}];}
+    case 'AddPhase':{if(d.ExtraPhase!=='Combat'||(d.AfterPhase&&d.AfterPhase!=='EndCombat')||Object.keys(d).some(k=>!/^(AB|DB|SP|Cost|ExtraPhase|AfterPhase|SpellDescription|StackDescription|SubAbility)$/.test(k)))return nao('ação AddPhase');return [{op:'combExtra'}];}
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
@@ -6781,6 +6782,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
           const ex=(S2.ext||{})[me]||0;xLog(`${it.nm}: o turno terminou${P.length?` (${P.length} na pilha foram exilados)`:''}`);xSobe();
           xSala(Object.assign({vez:ex?me:xProx(me),turno:(S2.turno||0)+1,fase:0,cb:'',pilha:[],pri:'',pp:0,rz:''},ex?{ext:Object.assign({},S2.ext,{[me]:ex-1})}:{}));},900);
         feito.push('o turno termina');break;}
+      case 'combExtra':{const S=X.sala||{};if(S.vez!==me){feito.push('combate adicional só no seu turno');break;}const c=e.campo.find(q=>q.k===it.k);if(c&&c.cbT===S.turno){feito.push('já deu o combate adicional neste turno');break;}if(c)c.cbT=S.turno;const cx=S.cbX&&S.cbX.t===S.turno?S.cbX.n:0,o={cbX:{t:S.turno,n:cx+1}};Object.assign(S,o);xSala(o);feito.push('depois deste combate há uma fase de combate adicional');break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
@@ -6932,7 +6934,7 @@ function xDano(){const e=X.eu,s=X.sala,me=xUid();if(!s||!Object.keys(X.ops||{}).
   e.vida+=vgA;B.forEach(b=>gp(b.u));
   const golpes=Object.entries(G).map(([u,g])=>{const dn={};B.filter(b=>b.u===u).forEach(b=>{if(!b.morto&&b.dmg-b.mm-(b.bon||0)>(b.c.dn||0))dn[b.c.k]=b.dmg-b.mm-(b.bon||0)-(b.c.dn||0);if(!b.morto&&b.mm)gp(u).cm[b.c.k]=b.mm;});
     return Object.assign({id:xId(),de:me,para:u,mortos:B.filter(b=>b.u===u&&b.morto).map(b=>b.c.k),dn},g);});
-  if(golpes.some(g=>g.dano>0))xVelUp();window.__golpes=golpes;xSala({cb:'',fase:3,golpe:null,golpes});
+  if(golpes.some(g=>g.dano>0))xVelUp();window.__golpes=golpes;{const cx=(s.cbX&&s.cbX.t===s.turno)?s.cbX.n:0;if(cx>0){xLog('combate adicional: ataque de novo');xSala({cb:'',fase:2,golpe:null,golpes,cbX:{t:s.turno,n:cx-1}});}else xSala({cb:'',fase:3,golpe:null,golpes});}
   const mo=[...A,...B].filter(x=>x.morto).map(x=>x.c.n);
   xLog(`combate: ${golpes.map(g=>`${xNomeU(g.para)} tomou ${g.dano}${g.ven?` +${g.ven} veneno`:''}${g.cmd?` (${g.cmd} de comandante)`:''}${Object.keys(g.pw).length?' · planeswalker: '+Object.entries(g.pw).map(([k,d])=>xAlvoNome(k)+' −'+d).join(', '):''}${g.vg?`, ganhou ${g.vg}`:''}`).join(' · ')}${vgA?` · ganhou ${vgA} de vida`:''}${mo.length?' · morreram: '+mo.join(', '):''}`);
   xVarre();xSobe();xTudo();}
