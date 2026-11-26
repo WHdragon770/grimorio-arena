@@ -5735,7 +5735,8 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'DelayedTrigger':{const ex=fgPP((ctx.sv||{})[d.Execute]||'');if(d.Mode==='SpellCast'&&ex.api==='CopySpellAbility'&&d.ThisTurn==='True')return [{op:'copiaProx',v:d.ValidCard||'Instant,Sorcery'}];
       if(d.Mode==='Phase'&&/^(Upkeep|End of Turn|End Of Turn)$/.test(d.Phase||'')&&(!d.ValidPlayer||d.ValidPlayer==='You')&&ex.api){const st=fgCadeia(ex.d,ex.api,ctx);if(st.some(o=>o.op==='nao'))return st;return [{op:'atrasa',ph:/Upkeep/.test(d.Phase)?'Upkeep':'End',st}];}
       return nao('gatilho atrasado');}
-    case 'Dig':{const n=N('DigNum'),sub=fgPP((ctx.sv||{})[d.SubAbility]||''),mp=sub.api==='Effect'&&/MayPlay\$ True/.test((ctx.sv||{})[sub.d.StaticAbilities]||'');
+    case 'Dig':{if(d.Defined==='Player'&&d.DestinationZone==='Exile'&&d.ChangeNum==='All'&&d.SubAbility&&!al){const pl=fgPP((ctx.sv||{})[d.SubAbility]||'');if(pl.api==='Play'&&pl.d.WithoutManaCost==='True'&&/IsRemembered|Remembered/.test(pl.d.Valid||pl.d.Defined||'')){const n=N('DigNum');if(typeof n==='number'){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'topoJoga',quem:'todos',n,ate:0}];}}}
+const n=N('DigNum'),sub=fgPP((ctx.sv||{})[d.SubAbility]||''),mp=sub.api==='Effect'&&/MayPlay\$ True/.test((ctx.sv||{})[sub.d.StaticAbilities]||'');
       if(n!=null&&(!d.Defined||d.Defined==='You')&&d.DestinationZone==='Exile'&&d.ChangeNum==='All'&&(d.Imprint||d.RememberChanged)&&sub.api==='Play'&&/IsImprinted|IsRemembered/.test(sub.d.Valid||'')&&sub.d.Optional==='True'){const ps=[d.SubAbility];let st=[];const s2=fgPP((ctx.sv||{})[sub.d.SubAbility]||'');
         if(s2.api&&s2.d.ConditionDefined==='Remembered'&&s2.d.ConditionCompare==='EQ0'){const d2=Object.assign({},s2.d);delete d2.ConditionDefined;delete d2.ConditionPresent;delete d2.ConditionCompare;delete d2.SubAbility;st=fgPasso(d2,s2.api,ctx);if(st.some(o=>o.op==='nao'))return st;ps.push(sub.d.SubAbility);}
         ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),...ps];return [{op:'exiJogaJa',n,gr:sub.d.WithoutManaCost==='True'?1:0,sp:sub.d.ValidSA==='Spell'?1:0,st}];}
@@ -5781,7 +5782,8 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       else return nao('ação RepeatEach');
       return [{op:'cadaJog',quem:rpT,st}];}
     case 'ManaReflected':return [{op:'mana',esc:d.ColorOrType==='Type'?'WUBRGC':'WUBRG',n:1}];
-    case 'DigUntil':{if(d.Defined&&d.Defined!=='You')return nao('grimório de outro');const v=d.Valid||'Card';if(!fgSpecOk(v,ctx))return nao('quais cartas');const Z={Exile:'exi',Hand:'mao',Battlefield:'campo',Graveyard:'cem',Library:'fundo'};
+    case 'DigUntil':{if(d.Defined==='Opponent'&&d.Valid==='Card.nonLand'&&d.FoundDestination==='Exile'&&d.RevealedDestination==='Exile'&&d.SubAbility&&!al){const pl=fgPP((ctx.sv||{})[d.SubAbility]||'');if(pl.api==='Play'&&pl.d.WithoutManaCost==='True'&&pl.d.Defined==='Remembered'){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'topoJoga',quem:'ops',n:1,ate:1}];}}
+if(d.Defined&&d.Defined!=='You')return nao('grimório de outro');const v=d.Valid||'Card';if(!fgSpecOk(v,ctx))return nao('quais cartas');const Z={Exile:'exi',Hand:'mao',Battlefield:'campo',Graveyard:'cem',Library:'fundo'};
       const fd=Z[d.FoundDestination||'Library'],rd=d.RevealedDestination==null?'fundo':d.RevealedDestination==='Library'?(d.RevealedLibraryPosition==='0'?'topo':'fundo'):Z[d.RevealedDestination];if(!fd||!rd)return nao('destino');
       const n=d.Amount==null?1:N('Amount');if(typeof n!=='number')return nao('número');
       return [{op:'cavaAte',v,n,fd,rd,tap:d.Tapped==='True'?1:0,mt:d.MinTotalCMC?+d.MinTotalCMC:0,lr:d.RememberRevealed?1:0}];}
@@ -6568,6 +6570,9 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='carta'){const c=e.campo.find(q=>q.k===v.k);if(c)xEfCarta(c,v.o,v.n,v.x);}
   else if(v.op==='aniq')xAniq(v);
   else if(v.op==='sacr')xSacr(v);
+  else if(v.op==='pedeTopo'){const e=X.eu,ex=[],vai=[];if(v.ate){while(e.bib.length){const c=e.bib.shift();if(xInfo(c).land&&!xInfo(c).cri)ex.push(c);else{vai.push(c);break;}}}else for(const c of e.bib.splice(0,v.n||1))(xInfo(c).land&&!xInfo(c).cri?ex:vai).push(c);e.exi.push(...ex);
+    xLog(`${v.nm} (${xNomeU(v.de)}): exilou ${[...ex,...vai].map(c=>c.n).join(', ')||'nada'} do topo do seu grimório`);if(vai.length)xEvia({op:'topoVem',cs:JSON.parse(JSON.stringify(vai)),nm:v.nm,para:v.de});xSobe();}
+  else if(v.op==='topoVem'){const tn=(X.sala||{}).turno||0;for(const c of v.cs||[]){c.dono0=v.de;c.jogaAte=tn;c.gratisAte=tn;X.eu.exi.push(c);}xLog(`${v.nm}: ${(v.cs||[]).map(c=>c.n).join(', ')} (de ${xNomeU(v.de)}) no exílio, pode conjurar de graça neste turno`);}
   else if(v.op==='virouAlvo'){const c=X.eu.campo.find(q=>q.k===v.k);if(c)xGatCampo(/^(Whenever an? [A-Za-z]+ you control becomes the target of a spell or ability an opponent controls, [^\n]+)$/im,`${xNomeU(v.de)} mirou ${c.n} (${v.nm||'?'})`,m=>{const tp=(m[0].match(/^Whenever an? ([A-Za-z]+) you control/i)||[])[1];try{return xFiltro(tp,c);}catch(er){return false;}},null,{tku:v.de,tk:c.k});}
   else if(v.op==='faseTodos'){const L=X.eu.campo.filter(c=>xCri(c));for(const c of L)xEfCarta(c,'fase');xLog(`${xNomeU(v.de)}: suas ${L.length} criatura(s) saíram de fase`);}
   else if(v.op==='fimComb'){for(const c of X.eu.campo){c.atk=0;c.alv='';c.bl='';}xLog(`${xNomeU(v.de)} terminou a fase de combate`);}
@@ -6829,6 +6834,9 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
           if(c){const z=e.cem.includes(c)?'cem':'exi';e[z].splice(e[z].indexOf(c),1);e.mao.push(c);xLog(`${it.nm}: ${c.n} foi pra mão`);}if(res.length)xFazDepois(res,Object.assign({},it,{al:al2}));else{xSobe();xPintaEu();}},300);
         feito.push('escolhe uma carta pra mão');xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
       case 'pBib':{if(!t){feito.push('sem alvo');break;}xNoAlvo(t,'pBib',0,ev,{pos:s.pos,warp:s.warp});feito.push(`${xAlvoNome(t)} vai pro grimório do dono`);break;}
+      case 'topoJoga':{const tn=(X.sala||{}).turno||0,L=xOpsL().filter(u=>!xMorto(X.ops[u]));for(const u of L)ev({op:'pedeTopo',n,ate:s.ate,nm:it.nm},u);
+        if(s.quem==='todos'){const l=e.bib.splice(0,n);for(const c of l){e.exi.push(c);if(!(xInfo(c).land&&!xInfo(c).cri)){c.jogaAte=tn;c.gratisAte=tn;}}if(l.length)xLog(`${it.nm}: exilou ${l.map(c=>c.n).join(', ')} do seu grimório`);}
+        feito.push(`exila do topo do grimório ${s.quem==='todos'?'de cada jogador':'de cada oponente'}; pode conjurar de graça neste turno (toque no exílio)`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
