@@ -5735,6 +5735,14 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
         const tp=String(d.Types||'').split(',').map(x=>x.trim()).filter(Boolean),a=d.Power!=null?N('Power'):null,b=d.Toughness!=null?N('Toughness'):null;if((d.Power!=null&&typeof a!=='number')||(d.Toughness!=null&&typeof b!=='number'))return nao('número');
         const kws=[];for(const k of String(d.Keywords||'').split(' & ').filter(Boolean)){if(!FGKW[k])return nao('habilidade '+k);kws.push(FGKW[k]);}const CT=/^(Creature|Artifact|Enchantment|Land)$/;
         return put({op:'anima',al:al||'',p:a,t:b,cri:tp.includes('Creature')?1:0,kws,perm:d.Duration?1:0,sem:1,tp:tp.filter(x=>!CT.test(x)).join(' '),ct:tp.filter(x=>CT.test(x)).join(' '),rt:d.RemoveCreatureTypes==='True'?1:0,rc:d.RemoveCardTypes==='True'?1:0},[]);}
+      /* regra geral: ganha gatilho/habilidade ativada do script (vai pro texto e pro script desta cópia) */if((d.Triggers||d.Abilities)&&!['staticAbilities','sVars','RemoveAllAbilities','Replacements','HiddenKeywords'].some(k=>d[k])&&(!d.Duration||d.Duration==='Permanent')&&(!d.Defined||(d.Defined==='Self'&&!al))&&(al||!d.ValidTgts)&&!ctx.ganF){
+        const sv=ctx.sv||{},T=[],A=[],tx=[],TM=/^(ChangesZone|DamageDone|DamageDoneOnce|Attacks|AttackerBlocked|Blocks|SpellCast)$/;
+        for(const nm of String(d.Triggers||'').split(',').map(x=>x.trim()).filter(Boolean)){const r=fgPP('X$ X | '+(sv[nm]||'')).d;if(!r.Mode||!TM.test(r.Mode)||!r.Execute||!sv[r.Execute]||!r.TriggerDescription)return nao('habilidade dada');const ex=fgPP(sv[r.Execute]);let st=[];try{st=fgCadeia(ex.d,ex.api,Object.assign({},ctx,{ganF:1}));}catch(er){st=[{op:'nao'}];}if(!st.length||st.some(o=>o.op==='nao'))return nao('habilidade dada');T.push(sv[nm]);tx.push(r.TriggerDescription);}
+        for(const nm of String(d.Abilities||'').split(',').map(x=>x.trim()).filter(Boolean)){const q=fgPP(sv[nm]||'');if(q.k!=='AB'||!q.api||q.api==='Mana'||q.d.ActivationZone||q.d.Planeswalker)return nao('habilidade dada');const cu=fgCusto(q.d.Cost);if(cu.nao)return nao('habilidade dada');let st=[];try{st=fgCadeia(q.d,q.api,Object.assign({},ctx,{ganF:1}));}catch(er){st=[{op:'nao'}];}if(!st.length||st.some(o=>o.op==='nao'))return nao('habilidade dada');A.push(sv[nm]);tx.push(fgDescr(q.d,sv));}
+        const vs={},fila=[...T,...A];while(fila.length){const l=fila.shift();for(const w of String(l).match(/[A-Za-z][A-Za-z0-9_]*/g)||[])if(sv[w]!=null&&vs[w]==null){vs[w]=sv[w];fila.push(sv[w]);}}
+        const d2=Object.assign({},d);delete d2.Triggers;delete d2.Abilities;let r0=[];try{r0=fgPasso(d2,'Animate',ctx);}catch(er){r0=[{op:'nao'}];}if(r0.some(o=>o.op==='nao'))return r0;
+        const gan={id:'g'+[...T.concat(A).join('§')].reduce((h,ch)=>(h*31+ch.charCodeAt(0))|0,7).toString(36),tx:tx.join('\n'),T,A,sv:vs},an=r0.find(o=>o.op==='anima');
+        if(an){an.gan=gan;an.perm=d.Duration?1:0;return r0;}return put({op:'anima',al:al||'',p:null,t:null,cri:0,kws:[],perm:d.Duration?1:0,gan},[]);}
       for(const k of ['Triggers','Abilities','staticAbilities','sVars','RemoveAllAbilities','Replacements'])if(d[k])return nao('habilidade dada');
       const du=d.Duration||'';if(du&&du!=='Permanent')return nao('duração');const tp=String(d.Types||'').split(','),cri=tp.includes('Creature');
       const a=d.Power!=null?N('Power'):null,b=d.Toughness!=null?N('Toughness'):null;if((d.Power!=null&&a==null)||(d.Toughness!=null&&b==null))return nao('número');
@@ -5949,10 +5957,10 @@ function fgPartes(s){const o=[];for(const a of s.A||[]){const p=fgPP(a);if(p.k==
   for(const k of s.K||[]){const m=String(k).match(/^Chapter:\d+:(.+)$/);if(m)for(const nm of m[1].split(',')){const q=fgPP((s.sv||{})[nm.trim()]||'');if(q.api)o.push({tipo:'SP',d:q.d,api:q.api,desc:fgDescr(q.d,s.sv)});}}
   for(const t of s.T||[]){const p=fgPP(t),ex=(s.sv||{})[p.d.Execute];if(!ex)continue;const q=fgPP(ex);o.push({tipo:'T',d:q.d,api:q.api,trig:p.d,desc:(p.d.TriggerDescription||'')+' '+fgDescr(q.d,s.sv)});}return o;}
 /* texto -> ops pelo script real. null = a carta não tem script ou o trecho não bate com nenhuma parte. */
-function fgEfeitos(tx,n,k){const s0=FG.get(fgN(n));if(!s0)return null;const nr=x=>xNorm(String(x).replace(/CARDNAME|NICKNAME|\bthis (?:creature|permanent|artifact|enchantment|land)\b/g,fgN(n)),n).toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]/g,''),t=nr(tx);if(t.length<5)return null;
-  for(const s of [s0,s0.alt].filter(Boolean)){const P=fgPartes(s).map(p=>Object.assign(p,{nd:nr(p.desc)})).filter(p=>p.nd.length>4);
+function fgEfeitos(tx,n,k){const s0=FG.get(fgN(n)),SG=[...FGG.values()];if(!s0&&!SG.length)return null;const nr=x=>xNorm(String(x).replace(/CARDNAME|NICKNAME|\bthis (?:creature|permanent|artifact|enchantment|land)\b/g,fgN(n)),n).toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]/g,''),t=nr(tx);if(t.length<5)return null;
+  for(const s of [s0,s0&&s0.alt,...SG].filter(Boolean)){const gz=SG.includes(s),P=fgPartes(s).map(p=>Object.assign(p,{nd:nr(p.desc)})).filter(p=>p.nd.length>4);
     let M=P.filter(p=>t.includes(p.nd));if(!M.length){M=P.filter(p=>p.nd.includes(t)).sort((a,b)=>a.nd.length-b.nd.length).slice(0,1);}
-    if(!M.length){const W=x=>new Set(xNorm(String(x).replace(/CARDNAME|NICKNAME/g,fgN(n)),n).toLowerCase().replace(/\([^)]*\)/g,'').split(/[^a-z0-9']+/).filter(w=>w.length>2&&!['the','and','this','card','that','its','your','you','all','from','with','for','each','cards'].includes(w))),tw=W(tx);
+    if(!M.length&&!gz){const W=x=>new Set(xNorm(String(x).replace(/CARDNAME|NICKNAME/g,fgN(n)),n).toLowerCase().replace(/\([^)]*\)/g,'').split(/[^a-z0-9']+/).filter(w=>w.length>2&&!['the','and','this','card','that','its','your','you','all','from','with','for','each','cards'].includes(w))),tw=W(tx);
       if(tw.size>=2){let mx=0;for(const p of P){const pw=W(p.desc);let i=0;for(const w of tw)if(pw.has(w))i++;const a1=i/tw.size,b1=i/Math.max(1,pw.size);if(a1>=.75&&b1>=.4&&a1+b1>mx){mx=a1+b1;M=[p];}}}}
     if(M.length){const ctx={eu:xUid(),src:k||'',sv:s.sv||{}};return M.flatMap(p=>fgCadeia(p.d,p.api,ctx));}}
   return null;}
@@ -5976,8 +5984,8 @@ function fgCusto(s){const o={mana:'',t:0,q:0,sac:0,rot:[],ex:[],nao:''};
     else{o.nao=o.nao||p;o.rot.push(p);}}
   o.rot=o.rot.join(', ');return o;}
 const FGMK={P1P1:'+1/+1',M1M1:'-1/-1',LOYALTY:'lealdade'};
-function fgHabs(c){const s=fgDe(c);if(!s)return null;const l=[],nm=fgN(c.n);
-  (s.A||[]).forEach((a,j)=>{const {k,api,d}=fgPP(a);if(k!=='AB'||api==='Mana'||d.Planeswalker==='True')return;if(d.ActivationZone&&d.ActivationZone!=='Battlefield')return;
+function fgHabs(c){const s0=fgDe(c),g=c&&c.ani&&!c.ani.sem&&c.ani.gan;if(!s0&&!g)return null;const l=[],nm=fgN(c.n);
+  for(const s of [s0,g&&{A:g.A,sv:g.sv}].filter(Boolean))(s.A||[]).forEach((a,j)=>{const {k,api,d}=fgPP(a);if(k!=='AB'||api==='Mana'||d.Planeswalker==='True')return;if(d.ActivationZone&&d.ActivationZone!=='Battlefield')return;
     const cu=fgCusto(d.Cost);const tx=fgDescr(d,s.sv).replace(/CARDNAME|NICKNAME/g,nm).replace(/^.*?:\s*/,m=>/[{}]|Sacrifice|Discard|Pay|Tap|Remove|Exile/i.test(m)?'':m);
     l.push({cu:cu.rot,tx,t:cu.t,sac:cu.sac,mana:cu.mana,fg:{j,d,cu,sv:s.sv||{}}});});
   return l;}
@@ -6099,7 +6107,8 @@ const XELKM=new Map();function xElkI(c){const A=c.elk?null:c.ani,k=c.n+'|'+(c.to
   if(A){const [sp,sb0]=String(o0.tipo||'').split(' — ');let ty=A.rc?'':(sp||'');if(A.ct)ty=[...new Set((ty+' '+A.ct).split(' ').filter(Boolean))].join(' ');let sb=A.rt?'':(sb0||'');if(A.tp)sb=(sb?sb+' ':'')+A.tp;const tipo=ty+(sb?' — '+sb:''),land=/\bLand\b/.test(tipo);
     o=Object.assign({},o0,{tipo,tx:'',land,cri:/\bCreature\b/.test(tipo)||!!A.cri,lm:0,kws:new Set(),kwVez:[],kwFora:[],prot:new Set(),ward:'',wardv:0,toxic:0,mana:land?o0.mana:null,sacMana:0,saga:0});XELKM.set(k,o);return o;}
   o={tipo:'Creature — Elk',tx:'',custo:o0.custo||'',land:0,cri:1,lm:0,aura:0,equip:0,perm:1,inst:0,p:3,t:3,kws:new Set(),kwVez:[],kwFora:[],prot:new Set(),ward:'',wardv:0,toxic:0,mana:null,sacMana:0,eq:'',art:0};XELKM.set(k,o);return o;}
-function xInfo(c){if(c.fd)return c.fdW?XFDW:XFD;if(c.elk||(c.ani&&c.ani.sem))return xElkI(c);if(c.trs)return XTRS;
+const FGG=new Map();function xGanI(c){const g=c.ani.gan,k=c.n+'|'+(c.tok?1:0)+'|'+(c.face?1:0)+'|'+g.id;FGG.set(g.id,g);let o=XELKM.get(k);if(o)return o;const c2=Object.assign({},c,{ani:Object.assign({},c.ani)});delete c2.ani.gan;const o0=xInfo(c2);o=Object.assign({},o0,{tx:(o0.tx?o0.tx+'\n':'')+g.tx.replace(/CARDNAME|NICKNAME/g,c.n)});XELKM.set(k,o);return o;}
+function xInfo(c){if(c.fd)return c.fdW?XFDW:XFD;if(c.elk||(c.ani&&c.ani.sem))return xElkI(c);if(c.ani&&c.ani.gan)return xGanI(c);if(c.trs)return XTRS;
   if(c.tok&&!c.cp)return {tok:1,cri:c.p!=null&&c.p!=='',land:0,art:!!c.art,perm:1,inst:0,custo:'',p:+c.p||0,t:+c.t||0,kws:new Set(c.kw||[]),mana:c.mana?['W','U','B','R','G']:null,sacMana:!!c.mana,eq:'',aura:0,da:null};
   const ck=c.n+(c.face?'|v':'');let o=XI.get(ck);if(o)return o;const r0=acharDB(c.n)||[],vs=c.face&&Array.isArray(r0[10])?r0[10]:null;
   const r=vs?[vs[0],vs[1],r0[2],vs[2],vs[3],vs[4],vs[5]]:r0;
@@ -6690,7 +6699,7 @@ function xPassaPri(){const s=X.sala,P=(s&&s.pilha)||[];if(!P.length||s.pri!==xUi
 function xTemResposta(){const e=X.eu;if(!e)return false;if(((X.sala||{}).pilha||[]).some(p=>p.ss))return false;if([...e.mao,...e.cmdz].some(c=>{const i=xInfo(c);return i.inst&&!i.land;}))return true;
   return e.campo.some(c=>xHabs(c).some(hb=>!hb.pw&&xHabOk(c,hb)));}
 const XH=new Map();
-function xHabs(c){if(c.tok&&!c.cp)return [];const hk=c.n+(c.face?'|v':'');if(XH.has(hk))return XH.get(hk);const i=xInfo(c),fh=fgHabs(c),l=[];
+function xHabs(c){if(c.tok&&!c.cp&&!(c.ani&&c.ani.gan))return [];const hk=c.n+(c.face?'|v':'')+(c.ani&&c.ani.gan?'|'+c.ani.gan.id:'')+(c.ani&&c.ani.sem?'|sem':'');if(XH.has(hk))return XH.get(hk);const i=xInfo(c),fh=fgHabs(c),l=[];
   for(const ln0 of xNorm(i.tx,c.n).split('\n')){let ex=0;if(/^Max speed\s*[—-]/i.test(ln0)&&((X.eu||{}).vel||0)<4)continue;const ln=ln0.replace(/^Max speed\s*[—-]\s*/i,'').replace(/^Exhaust\s*[—-]\s*/i,()=>{ex=1;return '';});let m=ln.match(/^([+−-]\d+|0): (.+)$/);if(m&&i.pw){l.push({pw:1,cu:+m[1].replace('−','-'),rot:m[1],tx:m[2]});continue;}
     if(fh)continue;m=ln.match(/^((?:\{[^}]+\}|, |sacrifice this (?:card|land|creature|artifact|enchantment|permanent|token|equipment))+): (.+)$/i);if(!m||/\bAdd\b/.test(m[2])||/^Equip/i.test(ln))continue;
     l.push({ex,cu:m[1],tx:m[2],t:/\{T\}/.test(m[1]),sac:/sacrifice/i.test(m[1]),mana:m[1].replace(/\{T\}|sacrifice this (?:card|land|creature|artifact|enchantment|permanent|token|equipment)|, /gi,'')});}
@@ -6738,7 +6747,7 @@ function xEfCarta(c,op,n,x){const i=xInfo(c);
     if((x||{}).warp&&e.bib.length){const t=e.bib[0],it=xInfo(t);xLog(`revelou ${t.n} do topo do grimório`);if(!it.land||it.perm||it.cri||/\b(Artifact|Creature|Enchantment|Land|Planeswalker|Battle)\b/.test(it.tipo||'')){if(/\b(Artifact|Creature|Enchantment|Land|Planeswalker|Battle)\b/.test(it.tipo||'')){e.bib.shift();t.tap=0;t.sk=it.cri?1:0;e.campo.push(t);xLog(`${t.n} é permanente: entrou no campo`);setTimeout(()=>xEntrou(t),300);}}}}}
   else if(op==='dobraTudo'){if((c.cnt||0)>0)c.cnt*=2;if(c.mk)for(const q of Object.keys(c.mk))if((c.mk[q]||0)>0)c.mk[q]*=2;}
   else if(op==='destroiF'){if(c.regen){c.regen=0;c.dn=0;c.tap=1;c.atk=0;c.bl='';xLog(c.n+' regenerou');}else xSai(c,'cem');}
-  else if(op==='anima'){c.ani={p:x.p,t:x.t,kw:x.kws||[],cri:x.cri,perm:x.perm};if(x.sem)Object.assign(c.ani,{sem:1,tp:x.tp||'',ct:x.ct||'',rt:x.rt||0,rc:x.rc||0});}
+  else if(op==='anima'){c.ani={p:x.p,t:x.t,kw:x.kws||[],cri:x.cri,perm:x.perm};if(x.sem)Object.assign(c.ani,{sem:1,tp:x.tp||'',ct:x.ct||'',rt:x.rt||0,rc:x.rc||0});if(x.gan)c.ani.gan=x.gan;}
   else if(op==='kt')c.kt=[...new Set([...(c.kt||[]),...(x.kws||[x.kw])])];
   else if(op==='pumpProx'){c.tpN=(c.tpN||0)+x.p;c.ateU=x.u;c.ateT=x.tn;}else if(op==='naoAtaca'){c.naN=1;c.ateU=x.u;c.ateT=x.tn;}else if(op==='goad'){c.gd=x.u;c.ateU=x.u;c.ateT=x.tn;}
   else if(op==='dano'){if(xGidS(c,n))return;if(xPvD(c,null,null,0)){xLog(`dano em ${c.n} prevenido`);return;}n=xEscD(c,null,n);if(!(n>0))return;if(i.cri&&X.eu&&X.eu.campo.includes(c)&&X.eu.surT&&X.eu.surT===((X.sala||{}).turno||0)&&X.__dsn&&xSurBR(X.__dsn)){xLog(`Surge of Salvation: dano de ${X.__dsn} em ${c.n} prevenido`);return;}if(i.pw&&!i.cri){c.mk=Object.assign({},c.mk);c.mk.lealdade=(c.mk.lealdade||0)-n;}else if(i.cri){c.dn=(c.dn||0)+n;xTomouDano(c,n);}}
@@ -6897,7 +6906,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
         if(cg&&vf.kw.has('deathtouch')&&pf>0&&!xProtDe(cg,cf))xNoAlvo(t,'destroi',0,ev);else if(!cg||!xProtDe(cg,cf))xDanoF(f,t,pf,ev);
         if(s.op==='luta'&&cg&&!xProtDe(cf,cg)){if(xPT(cg).kw.has('deathtouch')&&pg>0)xNoAlvo(f,'destroi',0,ev);else xDanoF(t,f,pg,ev);}
         feito.push(s.op==='luta'?`${nf} lutou com ${ng} (${pf} x ${pg})`:`${nf} causou ${pf} de dano em ${ng}`);break;}
-      case 'anima':xNoAlvo(t||it.k,'anima',0,ev,{p:s.p,t:s.t,kws:s.kws,cri:s.cri,perm:s.perm,sem:s.sem,tp:s.tp,ct:s.ct,rt:s.rt,rc:s.rc});feito.push(`${xAlvoNome(t||it.k)}${s.sem?' perdeu todas as habilidades e':''} virou ${s.cri?'criatura'+(s.p!=null?` ${s.p}/${s.t}`:''):'outra coisa'}${s.kws.length?' com '+s.kws.join(', '):''}${s.perm?'':' até o fim do turno'}`);break;
+      case 'anima':xNoAlvo(t||it.k,'anima',0,ev,{p:s.p,t:s.t,kws:s.kws,cri:s.cri,perm:s.perm,sem:s.sem,tp:s.tp,ct:s.ct,rt:s.rt,rc:s.rc,gan:s.gan});if(s.gan&&!s.cri&&s.p==null&&!s.kws.length){feito.push(`${xAlvoNome(t||it.k)} ganhou: ${s.gan.tx.replace(/CARDNAME|NICKNAME/g,'esta carta')}${s.perm?'':' (até o fim do turno)'}`);break;}feito.push(`${xAlvoNome(t||it.k)}${s.sem?' perdeu todas as habilidades e':''} virou ${s.cri?'criatura'+(s.p!=null?` ${s.p}/${s.t}`:''):'outra coisa'}${s.kws.length?' com '+s.kws.join(', '):''}${s.perm?'':' até o fim do turno'}`);break;
       case 'kt':xNoAlvo(t||it.k,'kt',0,ev,Object.assign({kw:s.kw},s.kws?{kws:s.kws}:{}));feito.push(`${xAlvoNome(t||it.k)} ${s.kw==='unblockable'?'não pode ser bloqueada':s.kw==='nbloq'||s.kw==='blqHaste'?KPT[s.kw]:'ganhou '+(KPT[s.kw]||s.kw)} neste turno`);break;
       case 'nao':feito.push('⚠ o jogo ainda não faz: '+s.d);break;
       case 'doCem':{const ix=e.cem.findIndex(q=>q.k===it.k);if(ix<0){feito.push('a carta saiu do cemitério');break;}const c=e.cem.splice(ix,1)[0];if(s.dest==='campo'){xReset(c);c.tap=s.tap?1:0;c.sk=xInfo(c).cri?1:0;e.campo.push(c);setTimeout(()=>xEntrou(c),450);}else e.mao.push(c);feito.push(`${c.n} voltou do cemitério pr${s.dest==='campo'?'o campo':'a mão'}`);break;}
