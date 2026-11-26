@@ -5787,7 +5787,10 @@ if(d.Defined&&d.Defined!=='You')return nao('grimório de outro');const v=d.Valid
       const fd=Z[d.FoundDestination||'Library'],rd=d.RevealedDestination==null?'fundo':d.RevealedDestination==='Library'?(d.RevealedLibraryPosition==='0'?'topo':'fundo'):Z[d.RevealedDestination];if(!fd||!rd)return nao('destino');
       const n=d.Amount==null?1:N('Amount');if(typeof n!=='number')return nao('número');
       return [{op:'cavaAte',v,n,fd,rd,tap:d.Tapped==='True'?1:0,mt:d.MinTotalCMC?+d.MinTotalCMC:0,lr:d.RememberRevealed?1:0}];}
-    case 'Play':{const df=d.Defined||'',vl=d.Valid||'';if(!(df==='Remembered'||/IsRemembered/.test(vl))||(d.Controller&&d.Controller!=='You'))return nao('ação Play');
+    case 'Play':{if(d.TgtZone==='Graveyard'&&d.WithoutManaCost==='True'&&/^(Instant,Sorcery|Instant|Sorcery)$/.test(d.ValidTgts||'')&&d.ReplaceGraveyard==='Exile'&&!d.SubAbility)return [{op:'cemJoga',v:d.ValidTgts}];
+      if(d.ValidZone==='Hand'&&d.WithoutManaCost==='True'&&d.Valid==='Permanent.YouOwn'&&d.ValidSA==='Spell.cmcEQX'&&String((ctx.sv||{}).Y||'').trim()==='Count$Valid Permanent.YouCtrl+Other$GreatestCardManaCost'&&String((ctx.sv||{}).X||'').trim()==='SVar$Y/Plus.1'){const sb=fgPP((ctx.sv||{})[d.SubAbility]||'');const scry=sb.api==='Scry'&&sb.d.ConditionCompare==='EQ0'?+(sb.d.ScryNum||1):0;if(scry)ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'maoJoga',scry}];}
+    }
+    case 'Play__':{const df=d.Defined||'',vl=d.Valid||'';if(!(df==='Remembered'||/IsRemembered/.test(vl))||(d.Controller&&d.Controller!=='You'))return nao('ação Play');
       return [{op:'joga',gr:d.WithoutManaCost==='True'?1:0,sp:d.ValidSA==='Spell'?1:0}];}
     case 'Shuffle':return (!d.Defined||d.Defined==='You')?[{op:'embaralha'}]:nao('grimório de outro');
     case 'ImmediateTrigger':{const ex=fgPP((ctx.sv||{})[d.Execute]||'');if(!ex.api)return nao('gatilho imediato');if(d.Cost&&ex.api){const mS=String(d.Cost).match(/^Sac<1\/([^/>]+)(?:\/[^>]*)?>$/);if(mS){if(!fgSpecOk(mS[1],ctx))return nao('custo');const st=fgCadeia(ex.d,ex.api,ctx);if(st.some(o=>o.op==='nao'))return st;return [{op:'sacOu',v:mS[1],st}];}const tk=String(d.Cost).trim().split(/\s+/);if(!tk.every(x=>/^(\d+|[WUBRGC])$/.test(x)))return nao('custo');const st=fgCadeia(ex.d,ex.api,ctx);if(st.some(o=>o.op==='nao'))return st;return [{op:'pagaOu',c:tk.map(x=>'{'+x+'}').join(''),sw:1,st}];}return fgCadeia(ex.d,ex.api,ctx);}
@@ -6340,6 +6343,8 @@ function xProlif(){const ev=(o,p)=>xEvia(Object.assign({},o,{para:p||'*'}));cons
     if(t==='E'){const c=e.campo.find(x=>x.k===id);if(!c)continue;if(c.cnt)c.cnt+=c.cnt>0?1:-1;if(c.mk)for(const y in c.mk)if(c.mk[y]>0)c.mk=Object.assign({},c.mk,{[y]:c.mk[y]+1});q++;}
     else if(t==='V'){if(id==='eu')e.ven++;else ev({op:'ven',n:1},id);q++;}else if(t==='O'){const c=xAchaK(id);if(c){xNoAlvo(id,'cnt',c.cnt>0?1:-1,ev);q++;}}}
     xLog(`proliferou ${q}`);xSobe();xPintaEu();});}
+async function xGratis(a,z,exi,rot){const e=X.eu;if(!e[z].includes(a))return false;const ia=xInfo(a);let an='';if(ia.aura){an=await xEscolhe(`Encantar o quê com ${a.n}?`,xAlvos(ia.enc,''));}const al=ia.aura&&!an?null:ia.perm?[]:await xPedeAlvos(xEfeitos(ia.tx,a.n),a.n);
+  if(!al||!(await xWard(al,a.n))||!e[z].includes(a))return false;e[z].splice(e[z].indexOf(a),1);xReset(a);a.ms0=1;if(exi)a.fb=1;xLog(`conjurou ${a.n} de graça (${rot})${al.length?' → '+al.map(xAlvoNome).join(', '):''}`);xEmpilha({id:xId(),de:xUid(),tipo:'mag',c:a,an,al,x:0,nm:a.n,img:a.img||''});xCastou(a);xSobe();xPintaEu();return true;}
 async function xCascata(c){const e=X.eu,mv=xMVc(c),ex=[];let a=null;
   while(e.bib.length){const q=e.bib.shift();ex.push(q);const iq=xInfo(q);if(!iq.land&&xMVc(q)<mv){a=q;break;}}
   xLog(`cascata de ${c.n}: exilou ${ex.length} carta${ex.length>1?'s':''}${a?' até '+a.n:' (nada abaixo de '+mv+')'}`);
@@ -6837,6 +6842,13 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'topoJoga':{const tn=(X.sala||{}).turno||0,L=xOpsL().filter(u=>!xMorto(X.ops[u]));for(const u of L)ev({op:'pedeTopo',n,ate:s.ate,nm:it.nm},u);
         if(s.quem==='todos'){const l=e.bib.splice(0,n);for(const c of l){e.exi.push(c);if(!(xInfo(c).land&&!xInfo(c).cri)){c.jogaAte=tn;c.gratisAte=tn;}}if(l.length)xLog(`${it.nm}: exilou ${l.map(c=>c.n).join(', ')} do seu grimório`);}
         feito.push(`exila do topo do grimório ${s.quem==='todos'?'de cada jogador':'de cada oponente'}; pode conjurar de graça neste turno (toque no exílio)`);break;}
+      case 'cemJoga':{const L=e.cem.filter(c=>{try{return fgValid(c,s.v,{eu:me,src:'',sv:{}});}catch(er){return false;}});if(!L.length){feito.push('nenhuma mágica instantânea ou feitiço no cemitério');break;}
+        setTimeout(async()=>{const k=XBOT?L.slice().sort((a,b)=>xMVc(b)-xMVc(a))[0].k:await xEscolhe(`${it.nm}: conjurar qual de graça? (é exilada depois; feche pra não conjurar)`,L.map(c=>({c,lado:'Cemitério'})));const c=L.find(q=>q.k===k);if(c)await xGratis(c,'cem',1,it.nm);},300);
+        feito.push('pode conjurar de graça uma mágica do cemitério');break;}
+      case 'maoJoga':{const mv=Math.max(0,...e.campo.filter(c=>c.k!==it.k&&!(c.tok&&!c.cp)).map(c=>xMVc(c)))+1,L=e.mao.filter(c=>{const i=xInfo(c);return i.perm&&!(i.land&&!i.cri)&&xMVc(c)===mv;});
+        setTimeout(async()=>{let ok=false;if(L.length){const k=XBOT?L[0].k:await xEscolhe(`${it.nm}: conjurar de graça uma permanente de valor ${mv}? (feche pra não conjurar)`,L.map(c=>({c,lado:'Mão'})));const c=L.find(q=>q.k===k);if(c)ok=await xGratis(c,'mao',0,it.nm);}
+          if(!ok&&s.scry)xFazDepois([{op:'scry',n:s.scry}],Object.assign({},it,{al:[]}));},300);
+        feito.push(`pode conjurar de graça uma permanente de valor de mana ${mv} da mão`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
