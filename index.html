@@ -5581,6 +5581,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
   if(/^(Remembered|RememberedLKI|Targeted|ThisTargetedCard|ParentTarget|Triggered(?:Card|Attacker|NewCard)(?:LKICopy)?)$/.test(d.ConditionDefined)&&fgSpecOk(d.ConditionNotPresent||d.ConditionPresent||'Card',ctx)&&Object.keys(d).filter(k=>k.startsWith('Condition')).every(k=>['ConditionDefined','ConditionPresent','ConditionNotPresent','ConditionCompare','ConditionDescription'].includes(k))){
     const d2=Object.assign({},d);for(const k of Object.keys(d2))if(k.startsWith('Condition'))delete d2[k];const r=fgPasso0(d2,api,ctx);if(r.length===1&&r[0].op==='skyTok')return r;/* a condição (exilou algo) é conferida pelo e.skyM */if(r.some(o=>o.op==='nao'))return r;
     return [{op:'se',d:/^Remember/.test(d.ConditionDefined)?'lemb':/^Triggered/.test(d.ConditionDefined)?'tc':'alvo',v:d.ConditionNotPresent||d.ConditionPresent||'Card',neg:d.ConditionNotPresent?1:0,cmp:d.ConditionCompare||'GE1',st:r}];}
+  if(api==='LoseLife'&&d.Defined==='Player.Opponent'&&d.ConditionCheckSVar==='Y'&&d.ConditionSVarCompare==='GE3'&&String((ctx.sv||{}).Y||'').trim()==='Sacrificed$CardTypes'&&d.SubAbility){const g1=fgPP((ctx.sv||{})[d.SubAbility]||''),g2=g1.d&&fgPP((ctx.sv||{})[g1.d.SubAbility]||'');if(g1.api==='GainLife'&&g2&&g2.api==='Draw'){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility,g1.d.SubAbility];return [{op:'baba',p:+d.LifeAmount||0,g:+g1.d.LifeAmount||0,c:+g2.d.NumCards||0}];}}
   const cd=fgCond(d,ctx,'Condition');if(cd===false)return [];if(cd===null)return nao('condição');
   if(d.UnlessCost){if(api==='Counter'&&(!d.UnlessPayer||d.UnlessPayer==='TargetedController')){const uc=String(d.UnlessCost).trim();let pz=null;
     if(/^\d+$/.test(uc))pz={g:+uc};else if(/^[A-Za-z]\w*$/.test(uc)){const n=fgConta(uc,ctx);if(typeof n==='number')pz={g:n};}else if(uc==='Discard<1/Hand>')pz={mao:1};
@@ -5900,6 +5901,7 @@ function fgCusto(s){const o={mana:'',t:0,q:0,sac:0,rot:[],ex:[],nao:''};
     else if(p==='T'){o.t=1;o.rot.push('{T}');}
     else if(p==='Q'){o.q=1;o.rot.push('{Q}');o.nao=o.nao||p;}
     else if(/^Sac<1\/(CARDNAME|NICKNAME)>$/.test(p)){o.sac=1;o.rot.push('sacrifique esta');}
+    else if(m=p.match(/^Sac<X\/([^/>]+)(?:\/([^>]+))?>$/)){o.ex.push({k:'sacX',v:m[1],d:m[2]||m[1]});o.rot.push(`sacrifique até X ${m[2]||m[1]}`);}
     else if(m=p.match(/^Sac<(\d+)\/([^/>]+)(?:\/([^>]+))?>$/)){o.ex.push({k:'sac',n:+m[1],v:m[2],d:m[3]||m[2]});o.rot.push(`sacrifique ${m[1]} ${m[3]||m[2]}`);}
     else if(m=p.match(/^Discard<(\d+)\/([^/>]+)(?:\/([^>]+))?>$/)){o.ex.push({k:'disc',n:+m[1],v:m[2]==='Hand'?'':m[2],tudo:m[2]==='Hand'});o.rot.push(m[2]==='Hand'?'descarte a mão':`descarte ${m[1]}`);}
     else if(m=p.match(/^PayEnergy<(\d+)>$/)){o.ex.push({k:'en',n:+m[1]});o.rot.push(`pague ${m[1]} de energia`);}
@@ -5936,6 +5938,10 @@ function fgPodeHab(c,hb){const g=hb.fg;if(!g)return '';const d=g.d,cu=g.cu,e=X.e
 /* paga a parte do custo que não é mana nem {T}. false = cancelou */
 async function fgPagaEx(c,hb){const g=hb.fg;if(!g)return true;const e=X.eu,ctx={eu:xUid(),src:c.k,sv:g.sv},s=X.sala||{};
   for(const x of g.cu.ex){
+    if(x.k==='sacX'){const mx=+((g.d||{}).XMax)||99,l=e.campo.filter(y=>{try{return fgValid(y,x.v,ctx);}catch(er){return false;}});let ks=[];
+      if(XBOT){const tp=new Set(),ord=l.slice().sort((a,b)=>((a.tok?0:10)+xMVc(a)+(a===c?50:0)+(a.cmd?99:0))-((b.tok?0:10)+xMVc(b)+(b===c?50:0)+(b.cmd?99:0)));for(const y of ord){if(ks.length>=mx)break;const t=xTiposC(y).filter(z=>!tp.has(z));if(t.length){ks.push(y.k);t.forEach(z=>tp.add(z));}}if(tp.size<3)ks=[];}
+      else{const r=await xMarca(`${c.n}: sacrifique até ${mx} permanente(s)`,l.map(y=>({k:y.k,rot:y.n+' ('+xTiposC(y).join('/')+')'})),0,mx);if(r==null)return false;ks=r.slice(0,mx);}
+      const tp=new Set();for(const k of ks){const y=e.campo.find(z=>z.k===k);if(!y)continue;xTiposC(y).forEach(z=>tp.add(z));xLog(`sacrificou ${y.n} (custo de ${c.n})`);xMorre(y);}X.ultSacT={k:c.k,n:tp.size,q:ks.length,t:s.turno||0};continue;}
     if(x.k==='sac'){for(let q=0;q<x.n;q++){const l=e.campo.filter(y=>fgValid(y,x.v,ctx)&&!(g.cu.sac&&y===c)).map(y=>({c:y,lado:'Seu'}));const a=l.length===1&&x.n===1&&XBOT?l[0].c.k:await xEscolhe(`${c.n}: sacrifique ${x.d}`,l);if(!a)return false;const y=e.campo.find(z=>z.k===a);if(!y)return false;xLog(`sacrificou ${y.n} (custo de ${c.n})`);c.__sc=xTc(y);xMorre(y);}}
     else if(x.k==='disc'){if(x.tudo){e.cem.push(...e.mao.splice(0));xDescartou();continue;}for(let q=0;q<x.n;q++){const l=e.mao.filter(y=>fgValid(y,x.v,ctx)).map(y=>({c:y,lado:'Mão'}));const a=await xEscolhe(`${c.n}: descarte uma carta`,l);if(!a)return false;const ix=e.mao.findIndex(z=>z.k===a);if(ix<0)return false;const y=e.mao.splice(ix,1)[0];e.cem.push(y);xLog(`descartou ${y.n} (custo de ${c.n})`);xDescartou();}}
     else if(x.k==='en'){if(((e.pc||{}).energy||0)<x.n){xAv(`${c.n}: falta energia (tem ${((e.pc||{}).energy||0)}, precisa ${x.n}).`);return false;}e.pc=Object.assign({},e.pc,{energy:e.pc.energy-x.n});}
@@ -7034,6 +7040,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
           if(!b){xEmb(e.bib);xLog(`${it.nm}: não pegou nada`);return fim();}e.bib.splice(e.bib.indexOf(b),1);const bm=xMVc(b);let campo=bm<=sm;
           if(!campo){const df=bm-sm,r=xPaga(e,xCusto('{'+df+'}'));if(r.ok&&(XBOT||confirm(`${it.nm}: pagar {${df}} pra pôr ${b.n} no campo? (se não, vai pro cemitério)`))){xAplica(e,r);campo=true;xLog(`${it.nm}: pagou {${df}}`);}}
           if(campo){e.campo.push(b);setTimeout(()=>xEntrou(b),300);}else e.cem.push(b);xEmb(e.bib);xLog(`${it.nm}: ${b.n} (valor ${bm}) ${campo?'entrou no campo':'foi pro cemitério'}`);fim();},300);return rest;}
+      case 'baba':{const S=X.ultSacT&&X.ultSacT.k===it.k?X.ultSacT:{n:0,q:0};X.ultSacT=null;if(S.n<3){feito.push(`sacrificou ${S.q} permanente(s) com ${S.n} tipo(s): menos de 3, nada acontece`);break;}for(const u of xOpsL().filter(u=>!xMorto(X.ops[u])))ev({op:'vida',d:-s.p},u);e.vida+=s.g;for(let q=0;q<s.c;q++)if(e.bib.length)e.mao.push(e.bib.shift());feito.push(`${S.n} tipos sacrificados: cada oponente perde ${s.p}, você ganha ${s.g} e compra ${s.c}`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
