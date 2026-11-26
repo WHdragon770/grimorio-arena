@@ -5814,6 +5814,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'ChooseCard':{if(d.Cost==='Draw<2/You>'&&d.ChoiceZone==='Hand'&&/DrawnThisTurn/.test(d.Choices||'')){const rp=fgPP((ctx.sv||{})[d.SubAbility]||''),rs=rp.api==='RepeatEach'?fgPP((ctx.sv||{})[rp.d.RepeatSubAbility]||''):{};if(rs.api==='ChangeZone'&&/^PayLife<(\d+)>$/.test(rs.d.UnlessCost||'')){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'sylvan',n:+(d.Amount||2),vida:+rs.d.UnlessCost.match(/\d+/)[0]}];}}return nao('ação ChooseCard');}
     case 'EndTurn':{if(Object.keys(d).some(k=>!/^(AB|DB|SP|Cost|ConditionPlayerTurn|SpellDescription|StackDescription|SubAbility)$/.test(k)))return nao('fim do turno com detalhe');return [{op:'fimTurno',so:d.ConditionPlayerTurn==='True'?1:0}];}
     case 'AddPhase':{if(d.ExtraPhase!=='Combat'||(d.AfterPhase&&d.AfterPhase!=='EndCombat')||Object.keys(d).some(k=>!/^(AB|DB|SP|Cost|ExtraPhase|AfterPhase|SpellDescription|StackDescription|SubAbility)$/.test(k)))return nao('ação AddPhase');return [{op:'combExtra'}];}
+    case 'EndCombatPhase':{if(Object.keys(d).some(k=>!/^(AB|DB|SP|Cost|SpellDescription|StackDescription|SubAbility)$/.test(k)))return nao('fim do combate com detalhe');return [{op:'fimComb'}];}
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
@@ -6549,6 +6550,7 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='carta'){const c=e.campo.find(q=>q.k===v.k);if(c)xEfCarta(c,v.o,v.n,v.x);}
   else if(v.op==='aniq')xAniq(v);
   else if(v.op==='sacr')xSacr(v);
+  else if(v.op==='fimComb'){for(const c of X.eu.campo){c.atk=0;c.alv='';c.bl='';}xLog(`${xNomeU(v.de)} terminou a fase de combate`);}
   else if(v.op==='tentaB'){setTimeout(()=>{const sim=!XBOT&&confirm(`${v.nm} (${xNomeU(v.de)}): buscar um terreno no seu grimório e pôr no campo? Se buscar, ${xNomeU(v.de)} busca mais um.`);xLog(`${v.nm}: você ${sim?'buscou':'não buscou'}`);if(sim){xFazDepois(v.st||[],{nm:v.nm,k:'',al:[],tc:{},sc:{}});xEvia({op:'fazPra',st:v.eu||[],nm:v.nm,para:v.de});}},300);}
   else if(v.op==='buscaB'){xLog(`${v.nm}: você pode buscar ${v.n} terreno(s) básico(s)`);setTimeout(()=>xFazDepois([{op:'busca',n:v.n,dest:v.dest,tap:v.tap}],{nm:v.nm,k:'',al:[],tc:{},sc:{}}),300);}
   else if(v.op==='cmdVolta'){const L=e.campo.filter(c=>c.cmd);L.forEach(c=>xSai(c,'cmdz'));if(L.length)xLog('seus comandantes voltaram pra zona de comando');}
@@ -6783,6 +6785,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
           xSala(Object.assign({vez:ex?me:xProx(me),turno:(S2.turno||0)+1,fase:0,cb:'',pilha:[],pri:'',pp:0,rz:''},ex?{ext:Object.assign({},S2.ext,{[me]:ex-1})}:{}));},900);
         feito.push('o turno termina');break;}
       case 'combExtra':{const S=X.sala||{};if(S.vez!==me){feito.push('combate adicional só no seu turno');break;}const c=e.campo.find(q=>q.k===it.k);if(c&&c.cbT===S.turno){feito.push('já deu o combate adicional neste turno');break;}if(c)c.cbT=S.turno;const cx=S.cbX&&S.cbX.t===S.turno?S.cbX.n:0,o={cbX:{t:S.turno,n:cx+1}};Object.assign(S,o);xSala(o);feito.push('depois deste combate há uma fase de combate adicional');break;}
+      case 'fimComb':{const S=X.sala||{};if(S.fase!==2&&!S.cb){feito.push('não estava em combate');break;}for(const c of e.campo){c.atk=0;c.alv='';c.bl='';}ev({op:'fimComb'});setTimeout(()=>{const S2=X.sala||{};if(S2.turno===S.turno&&(S2.fase===2||S2.cb))xSala({cb:'',fase:3,golpe:null});},700);feito.push('a fase de combate terminou');break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
