@@ -5684,6 +5684,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       for(const nm of L){const st={};for(const pp of String((ctx.sv||{})[nm]||'').split('|')){const q=pp.indexOf('$');if(q>0)st[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}const md=st.Mode||(nm==='MustAttack'?'MustAttack':'');
         if(md==='Continuous'&&st.Affected==='You'&&st.SetMaxHandSize==='Unlimited'&&Object.keys(st).length<=4){o.push({op:'semMax'});continue;}
         if(md==='CantBlockBy'&&st.ValidBlocker==='Creature.withoutHaste'&&/^(Card|Creature)\.(Self|EffectSource)$/.test(st.ValidAttacker||'')&&(!du||du==='UntilHostLeavesPlayOrEOT')&&!al){o.push({op:'kt',al:'',kw:'blqHaste'});continue;}
+        if(md==='CantChangeLife'&&(st.ValidPlayer||'You')==='You'&&du==='UntilYourNextTurn'&&Object.keys(st).every(k=>/^(Mode|ValidPlayer|Description)$/.test(k))){o.push({op:'vidaT'});continue;}
         if(du&&du!=='UntilEndOfCombat')return nao('duração '+du);
         if(md==='CantBeCast'){const vc={'Card':'all','Card.nonCreature':'noncre','Instant,Sorcery':'is'}[st.ValidCard||'Card'];if(!vc)return nao('trava '+st.ValidCard);
           const cs=st.Caster||'Player',quem=cs==='Opponent'?'ops':cs==='Player'?'todos':cs==='You'?'eu':cs==='Player.IsRemembered'&&(al==='target player'||al==='target opponent')?'alvo':null;if(!quem)return nao('trava de quem');
@@ -5780,7 +5781,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'Shuffle':return (!d.Defined||d.Defined==='You')?[{op:'embaralha'}]:nao('grimório de outro');
     case 'ImmediateTrigger':{const ex=fgPP((ctx.sv||{})[d.Execute]||'');if(!ex.api)return nao('gatilho imediato');if(d.Cost&&ex.api){const mS=String(d.Cost).match(/^Sac<1\/([^/>]+)(?:\/[^>]*)?>$/);if(mS){if(!fgSpecOk(mS[1],ctx))return nao('custo');const st=fgCadeia(ex.d,ex.api,ctx);if(st.some(o=>o.op==='nao'))return st;return [{op:'sacOu',v:mS[1],st}];}const tk=String(d.Cost).trim().split(/\s+/);if(!tk.every(x=>/^(\d+|[WUBRGC])$/.test(x)))return nao('custo');const st=fgCadeia(ex.d,ex.api,ctx);if(st.some(o=>o.op==='nao'))return st;return [{op:'pagaOu',c:tk.map(x=>'{'+x+'}').join(''),sw:1,st}];}return fgCadeia(ex.d,ex.api,ctx);}
     case 'Regenerate':if(al)return put({op:'regen',al},[]);if(!d.Defined||d.Defined==='Self')return [{op:'regen',al:''}];return nao('quem regenera');
-    case 'Phases':{if(d.AllValid)return nao('todas saem de fase');if(al)return put({op:'fase',al},[]);if(!d.Defined||d.Defined==='Self')return [{op:'fase',al:''}];return nao('quem sai de fase');}
+    case 'Phases':{if(d.AllValid==='Creature.TargetedPlayerCtrl'&&al&&/player|opponent/.test(al))return put({op:'faseJ',al},[]);if(d.AllValid)return nao('todas saem de fase');if(!al&&/^Valid [A-Za-z]+\.YouCtrl$/.test(d.Defined||'')&&fgSpecOk(d.Defined.slice(6),ctx))return [{op:'faseV',v:d.Defined.slice(6)}];if(al)return put({op:'fase',al},[]);if(!d.Defined||d.Defined==='Self')return [{op:'fase',al:''}];return nao('quem sai de fase');}
     case 'AnimateAll':{const v=d.ValidCards||'';if(d.RemoveKeywords==='Indestructible'&&Object.keys(d).every(k=>/^(AB|DB|SP|Cost|ValidCards|RemoveKeywords|SubAbility|SpellDescription|StackDescription|AILogic)$/.test(k))&&fgSpecOk(v,ctx)){const sb=fgPP((ctx.sv||{})[d.SubAbility]||'');if(sb.api==='DestroyAll'&&sb.d.ValidCards===v){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'mataV',v,ni:1}];}}if(!/YouCtrl/.test(v)||!fgSpecOk(v,ctx))return nao('quais permanentes');for(const k of ['Triggers','Abilities','staticAbilities','sVars','RemoveAllAbilities','Replacements','RemoveKeywords','Colors','RemoveCreatureTypes'])if(d[k])return nao('habilidade dada');
       const du=d.Duration||'';if(du&&du!=='Permanent')return nao('duração');const tp=String(d.Types||'').split(','),cri=tp.includes('Creature');const a=d.Power!=null?N('Power'):null,b=d.Toughness!=null?N('Toughness'):null;if((d.Power!=null&&a==null)||(d.Toughness!=null&&b==null)||a==='X'||b==='X')return nao('número');
       const kws=[];for(const k of String(d.Keywords||'').split(' & ').filter(Boolean)){if(!FGKW[k])return nao('habilidade '+k);kws.push(FGKW[k]);}return [{op:'animaTodos',v,p:a,t:b,cri:cri?1:0,kws,perm:du?1:0}];}
@@ -6035,7 +6036,7 @@ function xAplica(e,r){e.pool=r.pool;r.tap.forEach(([c])=>c.tap=1);if(r.vida)e.vi
 
 /* ---------- sincronizar ---------- */
 function xGanhouVida(n){{const tu=(X.sala||{}).turno;if(X.eu.vgtT!==tu){X.eu.vgtT=tu;X.eu.vgt=0;}X.eu.vgt+=n;}for(const c of X.eu.campo.slice()){if(c.tok&&!c.cp)continue;const m=xNorm(xInfo(c).tx,c.n).match(/Whenever you gain life, ([^\n]+)/i);if(m)xGatTx(c,m[1],'ganhou vida',{vida:n});}}
-function xSobe(){clearTimeout(X.tm);X.tm=setTimeout(()=>{const e=X.eu;if(!e||!X.cod)return;if(e.__vv!=null&&e.vida>e.__vv)xGanhouVida(e.vida-e.__vv);e.__vv=e.vida;const me=xUid(),r=xRef();
+function xSobe(){clearTimeout(X.tm);X.tm=setTimeout(()=>{xVidaT(X.eu);const e=X.eu;if(!e||!X.cod)return;if(e.__vv!=null&&e.vida>e.__vv)xGanhouVida(e.vida-e.__vv);e.__vv=e.vida;const me=xUid(),r=xRef();
   r.collection('pub').doc(me).set(xLimpo({nome:e.nome,deck:e.deck,vida:e.vida,ven:e.ven,pc:e.pc||{},dc:e.dc,imp:e.imp,mull:e.mull,nb:e.bib.length,nm:e.mao.length,campo:e.campo,cem:e.cem,exi:e.exi,cmdz:e.cmdz,pool:e.pool,ter:e.ter,tv:e.tv,tl:e.tl,gv:e.gv,fv:e.fv,evs:e.evs,prevC:e.prevC||[],atr:e.atr||[],emb:e.emb||[],protJ:e.protJ||[],tvO:e.tvO||0,mm:e.mm||[],ts:Date.now()})).catch(er=>xAv('Não sincronizou ('+(er.code||'erro')+')'));
   r.collection('priv').doc(me).set(xLimpo({bib:e.bib,mao:e.mao,ts:Date.now()})).catch(()=>{});},200);}
 function xLog(t){if(!X.cod)return;xRef().collection('log').add({uid:xUid(),nome:X.eu?X.eu.nome:ctNome(xEuU()),t:String(t).slice(0,300),ts:Date.now()}).catch(()=>{});}
@@ -6256,7 +6257,8 @@ async function xAlt(z,k,cu,mod,sv){const e=X.eu,c=e[z]&&e[z].find(q=>q.k===k);if
 function xCopiaF(c,o){const e=X.eu,q=Object.assign(xLimpo(c),{k:xId(),tok:1,cp:1,cmd:0,an:'',atk:0,bl:'',tap:0,sk:0,cnt:0,mk:null,dn:0,jogaAte:null},o||{});delete q.mod;e.campo.push(q);setTimeout(()=>xEntrou(q),300);return q;}
 const xFlash=c=>{const m=String(xInfo(c).tx).match(/^Flashback ((?:\{[^}]+\})+)/m);return m?m[1]:'';};
 /* anexo cuja carta saiu: aura vai pro cemitério, equipamento fica solto */
-function xVarre(){const e=X.eu;if(!e)return 0;let mud=0;xTT();for(const q of e.campo.filter(q=>q.rean&&!e.campo.some(z=>z.k===q.rean))){delete q.rean;xLog(`${q.n} foi sacrificada (a aura que a trouxe saiu)`);xMorre(q);xTT().sac++;mud=1;}
+function xVidaT(e){if(!e||!e.vidaT)return;const s=X.sala||{};if(s.vez===xUid()&&(s.turno||0)>e.vidaT.t){e.vidaT=null;return;}if(e.vida!==e.vidaT.v){xLog(`seu total de vida não pode mudar (${e.vidaT.nm})`);e.vida=e.vidaT.v;}}
+function xVarre(){const e=X.eu;if(!e)return 0;let mud=0;xTT();for(const q of e.campo.filter(q=>q.rean&&!e.campo.some(z=>z.k===q.rean))){delete q.rean;xLog(`${q.n} foi sacrificada (a aura que a trouxe saiu)`);xMorre(q);xTT().sac++;mud=1;}xVidaT(e);
   for(const c of e.campo.slice()){const i=xInfo(c);let m=0;if(xCri(c)){const v=xPT(c);if(v.t<=0||(c.dn&&c.dn>=v.t&&!v.kw.has('indestructible')&&!xUmbra(c)))m=1;}else if(i.pw&&c.mk&&c.mk.lealdade!=null&&c.mk.lealdade<=0)m=1;
     if(m&&c.regen&&xPT(c).t>0){c.regen=0;c.dn=0;c.tap=1;c.atk=0;c.bl='';xLog(c.n+' regenerou');m=0;mud=1;}if(m){xLog(c.n+' morreu');xMorre(c);mud=1;}}
   for(const c of e.cem)if(/When this card is put into a graveyard from anywhere, (?:its owner shuffles their graveyard|shuffle (?:it and )?your graveyard) into (?:their|your) library/i.test(xNorm(xInfo(c).tx,c.n))){const q=e.cem.length;e.bib.push(...e.cem.splice(0));xEmb(e.bib);xLog(`${c.n} foi pro cemitério: embaralhou o cemitério (${q} cartas) no grimório`);mud=1;break;}
@@ -6552,6 +6554,7 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='carta'){const c=e.campo.find(q=>q.k===v.k);if(c)xEfCarta(c,v.o,v.n,v.x);}
   else if(v.op==='aniq')xAniq(v);
   else if(v.op==='sacr')xSacr(v);
+  else if(v.op==='faseTodos'){const L=X.eu.campo.filter(c=>xCri(c));for(const c of L)xEfCarta(c,'fase');xLog(`${xNomeU(v.de)}: suas ${L.length} criatura(s) saíram de fase`);}
   else if(v.op==='fimComb'){for(const c of X.eu.campo){c.atk=0;c.alv='';c.bl='';}xLog(`${xNomeU(v.de)} terminou a fase de combate`);}
   else if(v.op==='tentaB'){setTimeout(()=>{const sim=!XBOT&&confirm(`${v.nm} (${xNomeU(v.de)}): buscar um terreno no seu grimório e pôr no campo? Se buscar, ${xNomeU(v.de)} busca mais um.`);xLog(`${v.nm}: você ${sim?'buscou':'não buscou'}`);if(sim){xFazDepois(v.st||[],{nm:v.nm,k:'',al:[],tc:{},sc:{}});xEvia({op:'fazPra',st:v.eu||[],nm:v.nm,para:v.de});}},300);}
   else if(v.op==='buscaB'){xLog(`${v.nm}: você pode buscar ${v.n} terreno(s) básico(s)`);setTimeout(()=>xFazDepois([{op:'busca',n:v.n,dest:v.dest,tap:v.tap}],{nm:v.nm,k:'',al:[],tc:{},sc:{}}),300);}
@@ -6801,6 +6804,9 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
             const n=Math.max(0,Math.min(c.cnt,parseInt(prompt(`Quantos marcadores mover? (1 a ${c.cnt})`,String(c.cnt))||'0',10)||0));if(!n)break;c.cnt-=n;tot+=n;xNoAlvo(k,'cnt',n,ev2);xLog(`${it.nm}: moveu ${n} marcador(es) +1/+1 pra ${xAlvoNome(k)}`);}
           for(const o of nv2)xEvia(o);if(tot){xVarre();xSobe();xPintaEu();}},300);
         feito.push('pode mover marcadores +1/+1');break;}
+      case 'vidaT':{e.vidaT={v:e.vida,t:(X.sala||{}).turno||0,nm:it.nm};feito.push('seu total de vida não pode mudar até o seu próximo turno');break;}
+      case 'faseV':{const L=e.campo.filter(c=>{try{return fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}});for(const c of L)xEfCarta(c,'fase');feito.push(`${L.length} permanente(s) sua(s) saíram de fase`);break;}
+      case 'faseJ':{const u=String(t||'').startsWith('P:')?String(t).slice(2):xOutro();if(u===me){const L=e.campo.filter(c=>xCri(c));for(const c of L)xEfCarta(c,'fase');}else ev({op:'faseTodos',v:'Creature'},u);feito.push(`as criaturas de ${u===me?'você':xNomeU(u)} saíram de fase`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
