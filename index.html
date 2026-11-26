@@ -5630,7 +5630,12 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       const a=d.Power!=null?N('Power'):null,b=d.Toughness!=null?N('Toughness'):null;if((d.Power!=null&&a==null)||(d.Toughness!=null&&b==null))return nao('número');
       const kws=[];for(const k of String(d.Keywords||'').split(' & ').filter(Boolean)){if(!FGKW[k])return nao('habilidade '+k);kws.push(FGKW[k]);}
       if(!cri&&a==null&&!kws.length)return [];return put({op:'anima',al:al||'',p:a,t:b,cri:cri?1:0,kws,perm:du?1:0},[]);}
-    case 'Effect':{{const st0=d.StaticAbilities||'';if(/MayPlay\$ True/.test((ctx.sv||{})[st0]||'')&&/Exile/.test((ctx.sv||{})[st0]||''))return [];}for(const k of ['Triggers','ReplacementEffects','Abilities','ImprintCards','Name'])if(d[k]&&k!=='Name')return nao('efeito com '+k);
+    case 'Effect':{if(d.ReplacementEffects&&!d.StaticAbilities&&!d.Triggers&&!d.Abilities&&!d.Duration){const pv=[];let ok=true;
+        for(const nm of String(d.ReplacementEffects).split(',')){const r={};for(const pp of String((ctx.sv||{})[nm]||'').split('|')){const q=pp.indexOf('$');if(q>0)r[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}
+          if(r.Event!=='DamageDone'||r.Prevent!=='True'||r.IsCombat!=='True'||Object.keys(r).some(k=>!['Event','Prevent','IsCombat','ActiveZones','ValidSource','Description'].includes(k))){ok=false;break;}
+          const vs=r.ValidSource||'Card';if(/IsRemembered/.test(vs)){if(!al||!/Targeted/.test(d.RememberObjects||'')){ok=false;break;}pv.push({op:'prevC',al,v:''});}else if(fgSpecOk(vs,ctx))pv.push({op:'prevC',al:'',v:vs});else{ok=false;break;}}
+        if(ok&&pv.length)return pv.map(o=>o.al?put(o,[])[0]:o);}
+      {const st0=d.StaticAbilities||'';if(/MayPlay\$ True/.test((ctx.sv||{})[st0]||'')&&/Exile/.test((ctx.sv||{})[st0]||''))return [];}for(const k of ['Triggers','ReplacementEffects','Abilities','ImprintCards','Name'])if(d[k]&&k!=='Name')return nao('efeito com '+k);
       const L=String(d.StaticAbilities||'').split(',').filter(Boolean);if(!L.length)return nao('efeito sem estática');const du=d.Duration||'';const o=[];
       for(const nm of L){const st={};for(const pp of String((ctx.sv||{})[nm]||'').split('|')){const q=pp.indexOf('$');if(q>0)st[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}const md=st.Mode||(nm==='MustAttack'?'MustAttack':'');
         if(md==='Continuous'&&st.Affected==='You'&&st.SetMaxHandSize==='Unlimited'&&Object.keys(st).length<=4){o.push({op:'semMax'});continue;}
@@ -6530,6 +6535,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'regen':xNoAlvo(t||it.k,'regen',0,ev);feito.push(`${xAlvoNome(t||it.k)} vai regenerar se for destruída neste turno`);break;
       case 'atrasa':(e.atr=e.atr||[]).push({ph:s.ph,t0:(X.sala||{}).turno||0,st:s.st,nm:it.nm,k:it.k||'',lemb:it.lemb||null});feito.push(s.ph==='Upkeep'?'efeito guardado pra sua próxima manutenção':'efeito guardado pro final do turno');break;
       case 'pagaOu':{const cs=xCusto(s.c),r=xPaga(e,cs);let pagou=false;if(r.ok&&(XBOT||confirm(`${it.nm}: pagar ${s.c}?`))){xAplica(e,r);pagou=true;}feito.push(pagou?'pagou '+s.c:'não pagou '+s.c);if(pagou===!!s.sw)st.splice(st.indexOf(s)+1,0,...s.st);break;}
+      case 'prevC':(e.prevC=(e.prevC||[]).filter(q=>q.tn===((X.sala||{}).turno||0))).push({tn:(X.sala||{}).turno||0,v:s.v||'',k:s.al?(t||''):''});feito.push(s.al?`dano de combate de ${xAlvoNome(t)} prevenido neste turno`:'dano de combate prevenido neste turno ('+s.v+')');break;
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
@@ -6642,7 +6648,8 @@ function xBlqErr(a,c){const va=xPT(a),vb=xPT(c),ca=xCorFonte(a.n),cb=xCorFonte(c
 function xBloqueia(c,ak){const a=((((X.ops||{})[(X.sala||{}).vez])||{}).campo||[]).find(q=>q.k===ak);if(!a)return;const va=xPT(a),vb=xPT(c);
   if(va.kw.has('unblockable'))return xAv(a.n+' não pode ser bloqueada neste turno.');if(va.kw.has('flying')&&!vb.kw.has('flying')&&!vb.kw.has('reach'))return xAv(a.n+' voa: só bloqueia quem tem voar ou alcance.');if(xProtDe(a,c))return xAv(a.n+' tem proteção: '+c.n+' não pode bloquear.');{const er=xBlqErr(a,c);if(er)return xAv(er);}c.bl=ak;}
 function xDano(){const e=X.eu,s=X.sala,me=xUid();if(!s||!Object.keys(X.ops||{}).length)return;
-  const mk=(c,u)=>{const v=xPT(c);const ii=xInfo(c);return {c,u,P:Math.max(0,v.p),T:v.t,kw:v.kw,dmg:c.dn||0,dt:0,morto:0,mm:0,tox:ii.toxic||0,bus:ii.bushido||0,ram:ii.rampage||0};};
+  const PV=[X.eu,...Object.values(X.ops||{})].flatMap(p=>(p&&p.prevC)||[]).filter(q=>q.tn===(s.turno||0)),pvOk=(c,u)=>PV.some(q=>q.k?q.k===c.k:(()=>{try{return fgValid(c,q.v,{eu:u,src:'',sv:{}});}catch(er){return false;}})());
+  const mk=(c,u)=>{const v=xPT(c);const ii=xInfo(c);return {c,u,P:pvOk(c,u)?0:Math.max(0,v.p),T:v.t,kw:v.kw,dmg:c.dn||0,dt:0,morto:0,mm:0,tox:ii.toxic||0,bus:ii.bushido||0,ram:ii.rampage||0};};
   const A=e.campo.filter(c=>c.atk).map(c=>mk(c,me)),B=xOpCampos().flatMap(([cp,u])=>cp.filter(c=>c.bl&&A.some(a=>a.c.k===c.bl)).map(c=>mk(c,u)));
   const bk=a=>a.c.band?A.filter(x=>x.c.band===a.c.band).map(x=>x.c.k):[a.c.k],blq=a=>B.filter(b=>bk(a).includes(b.c.bl)),xtra=[];
   for(const a of A){const bs=blq(a);if(!bs.length)continue;if(a.bus){a.P+=a.bus;a.T+=a.bus;a.bon=(a.bon||0)+a.bus;xtra.push(`bushido: ${a.c.n} +${a.bus}/+${a.bus}`);}if(a.ram&&bs.length>1){const r=a.ram*(bs.length-1);a.P+=r;a.T+=r;a.bon=(a.bon||0)+r;xtra.push(`rampage: ${a.c.n} +${r}/+${r}`);}
