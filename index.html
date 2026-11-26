@@ -5845,6 +5845,7 @@ if(d.Defined&&d.Defined!=='You')return nao('grimório de outro');const v=d.Valid
       if(!d.ValidCards||!fgSpecOk(d.ValidCards,ctx))return nao('quais');if(stun)ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];const o=[{op:'viraV',v:d.ValidCards,stun}];
       if(d.Cost&&ctx.__trig!==0){const tk=String(d.Cost).trim().split(/\s+/);if(!tk.every(x=>/^(\d+|[WUBRGC])$/.test(x)))return nao('custo');return [{op:'pagaOu',c:tk.map(x=>'{'+x+'}').join(''),sw:1,st:o}];}return o;}
     case 'ChoosePlayer':if(d.Random==='True'&&/^Player\.Opponent\+!EnchantedBy$/.test(d.Choices||'')&&d.SubAbility){const at=fgPP((ctx.sv||{})[d.SubAbility]||'');if(at.api==='Attach'&&at.d.Defined==='ChosenPlayer'){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'maldMove'}];}}
+    if(api==='ChoosePlayer'&&d.Random==='True'&&d.Choices==='Player.Opponent'&&d.SubAbility){const ef=fgPP((ctx.sv||{})[d.SubAbility]||''),sa=ef.api==='Effect'?String((ctx.sv||{})[ef.d.StaticAbilities]||''):'';if(ef.d&&ef.d.RememberObjects==='Self'&&/^Mode\$ MustAttack\b/.test(sa)&&/MustAttack\$ ChosenPlayer/.test(sa)){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'ataJog'}];}}
     case 'ChoosePlayer':return (d.Choices==='Player.Opponent'&&!d.Random&&(!d.Defined||d.Defined==='You'))?[{op:'escJog'}]:nao('ação ChoosePlayer');
     case 'Clone':{for(const k of Object.keys(d))if(!/^(AB|DB|SP|Cost|ValidTgts|TgtPrompt|Defined|Duration|SpellDescription|StackDescription|SubAbility|AILogic|PrecostDesc|__m|Activator|TargetType|IsCurse)$/.test(k))return nao(k);
       if(d.Duration!=='UntilEndOfTurn')return nao('duração');const df=d.Defined||'';if(!al&&df!=='Remembered')return nao('quem');return put({op:'clone',al:al||'',lemb:df==='Remembered'?1:0},[]);}
@@ -6929,6 +6930,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'danoEsc':{const res=st.slice(si+1),al2=(it.al||[]).slice(j);setTimeout(async()=>{const l=xAlvosEf('any target',it.nm).filter(a=>a.jog!=null||(a.c&&(()=>{try{return fgValid(a.c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}})()));const k=l.length?await xEscolhe(`${it.nm}: escolha quem toma o dano`,l):null;if(k)xFazDepois([{op:'dano',n:s.n,al:'any target'},...res],Object.assign({},it,{al:[k,...al2]}));else if(res.length)xFazDepois(res,Object.assign({},it,{al:al2}));},300);return rest;}
       case 'pwMais':{const c=e.campo.find(q=>q.k===it.k);if(!c){feito.push('o planeswalker saiu');break;}const tn=(X.sala||{}).turno||0;c.ltX={t:tn,n:((c.ltX&&c.ltX.t===tn)?c.ltX.n:0)+s.n};feito.push(`${c.n} pode usar lealdade mais ${s.n} vez(es) neste turno`);break;}
       case 'compraU':{const u=s.u||ou;if(u===me){let q=n;if(s.ate&&!XBOT){const r=parseInt(prompt(`${it.nm}: comprar quantas (0 a ${n})?`,String(n)),10);q=isNaN(r)?n:Math.max(0,Math.min(n,r));}for(let z=0;z<q&&e.bib.length;z++)e.mao.push(e.bib.shift());feito.push(`comprou ${q}`);}else{ev({op:'compraAte',n,ate:s.ate,nm:it.nm},u);feito.push(`${xNomeU(u)} compra ${s.ate?'até ':''}${n}`);}break;}
+      case 'ataJog':{const c=e.campo.find(q=>q.k===it.k),L=xOpsL().filter(u=>!xMorto(X.ops[u]));if(!c||!L.length){feito.push('sem oponente');break;}const u=L[Math.floor(Math.random()*L.length)];c.mAt={u,t:(X.sala||{}).turno||0};feito.push(`${c.n} ataca ${xNomeU(u)} neste combate, se puder`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
@@ -7171,6 +7173,7 @@ function xBotao(a){const e=X.eu,s=X.sala||{},me=xUid();
     xLog('passou o turno');return xSala({vez:xProx(me),turno:(s.turno||0)+1,fase:0,cb:''});}
   if(a==='atkok'){if(!xVez()||s.fase!==2||s.cb)return;
     for(const c of e.campo)if(c.gd&&!c.atk&&xPodeAtk(c)){const o=((s.jog||[]).filter(u=>u!==xUid()&&u!==c.gd))[0]||c.gd;c.alv='P:'+o;c.atk=xPT(c).kw.has('vigilance')?1:2;if(c.atk===2)c.tap=1;xLog(`${xNomeF(c)} está provocada: atacou junto`);}
+    for(const c of e.campo)if(c.mAt&&c.mAt.t===s.turno&&xPodeAtk(c)&&X.ops&&X.ops[c.mAt.u]&&!xMorto(X.ops[c.mAt.u])){if(!c.atk){c.atk=xPT(c).kw.has('vigilance')?1:2;if(c.atk===2)c.tap=1;}c.alv='P:'+c.mAt.u;xLog(`${xNomeF(c)} tem que atacar ${xNomeU(c.mAt.u)}: atacou`);}
     const at=e.campo.filter(c=>c.atk);if(!at.length)return xSala({fase:3});
     return xAtkOk(at);}
   if(a==='blqok'){if(xVez()||s.cb!=='blq')return;const at=(((X.ops||{})[s.vez]||{}).campo||[]).filter(c=>c.atk&&xDefDe(c)===me);
