@@ -5810,7 +5810,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'RevealHand':{if(d.Look!=='True'&&!d.Look)return nao('ação RevealHand');if(al==='target player'||al==='target opponent')return put({op:'verMao',al},[]);return nao('ação RevealHand');}
     case 'GenericChoice':{if((d.Defined&&d.Defined!=='You')||d.ValidTgts||al)return nao('ação GenericChoice');const ch=String(d.Choices||'').split(',').map(x=>x.trim()).filter(Boolean);if(ch.length<2)return nao('ação GenericChoice');
       return [{op:'modal',n:1,min:1,ops:ch.map(x=>{const q=fgPP((ctx.sv||{})[x]||'');return {rot:String(q.d&&(q.d.SpellDescription||q.d.StackDescription)||x).replace(/CARDNAME|NICKNAME/g,'esta carta'),st:q.api?fgCadeia(q.d,q.api,ctx):[{op:'nao',d:x}]};})}];}
-    case 'MultiplyCounter':{if(d.CounterType==='P1P1'&&(d.Defined==='Enchanted'||d.Defined==='Equipped')&&!al&&(!d.Multiplier||d.Multiplier==='2'))return [{op:'dobraCnt',anx:1}];if(d.CounterType==='P1P1'&&al&&!d.TargetMax)return put({op:'dobraCnt',al},[]);return nao('ação MultiplyCounter');}
+    case 'MultiplyCounter':{if(d.CounterType==='P1P1'&&(d.Defined==='Enchanted'||d.Defined==='Equipped')&&!al&&(!d.Multiplier||d.Multiplier==='2'))return [{op:'dobraCnt',anx:1}];if(d.CounterType==='P1P1'&&al&&!d.TargetMax)return put({op:'dobraCnt',al},[]);if(!d.CounterType&&al&&d.TargetMin==='0'&&String((ctx.sv||{})[d.TargetMax]||'').trim()==='Count$Valid Permanent'&&(!d.Multiplier||d.Multiplier==='2'))return [{op:'dobraVarios'}];return nao('ação MultiplyCounter');}
     case 'ChooseCard':{if(d.Cost==='Draw<2/You>'&&d.ChoiceZone==='Hand'&&/DrawnThisTurn/.test(d.Choices||'')){const rp=fgPP((ctx.sv||{})[d.SubAbility]||''),rs=rp.api==='RepeatEach'?fgPP((ctx.sv||{})[rp.d.RepeatSubAbility]||''):{};if(rs.api==='ChangeZone'&&/^PayLife<(\d+)>$/.test(rs.d.UnlessCost||'')){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'sylvan',n:+(d.Amount||2),vida:+rs.d.UnlessCost.match(/\d+/)[0]}];}}return nao('ação ChooseCard');}
     case 'EndTurn':{if(Object.keys(d).some(k=>!/^(AB|DB|SP|Cost|ConditionPlayerTurn|SpellDescription|StackDescription|SubAbility)$/.test(k)))return nao('fim do turno com detalhe');return [{op:'fimTurno',so:d.ConditionPlayerTurn==='True'?1:0}];}
     case 'AddPhase':{if(d.ExtraPhase!=='Combat'||(d.AfterPhase&&d.AfterPhase!=='EndCombat')||Object.keys(d).some(k=>!/^(AB|DB|SP|Cost|ExtraPhase|AfterPhase|SpellDescription|StackDescription|SubAbility)$/.test(k)))return nao('ação AddPhase');return [{op:'combExtra'}];}
@@ -6519,6 +6519,7 @@ function xEfCarta(c,op,n,x){const i=xInfo(c);
   else if(op==='pump'){c.tp=(c.tp||0)+x.p;c.tt=(c.tt||0)+x.t;if(x.kws)c.kt=[...new Set([...(c.kt||[]),...x.kws])];}
   else if(op==='cnt')c.cnt=(c.cnt||0)+n;
   else if(op==='dobraCnt'){if((c.cnt||0)>0)c.cnt*=2;}
+  else if(op==='dobraTudo'){if((c.cnt||0)>0)c.cnt*=2;if(c.mk)for(const q of Object.keys(c.mk))if((c.mk[q]||0)>0)c.mk[q]*=2;}
   else if(op==='destroiF'){if(c.regen){c.regen=0;c.dn=0;c.tap=1;c.atk=0;c.bl='';xLog(c.n+' regenerou');}else xSai(c,'cem');}
   else if(op==='anima')c.ani={p:x.p,t:x.t,kw:x.kws||[],cri:x.cri,perm:x.perm};
   else if(op==='kt')c.kt=[...new Set([...(c.kt||[]),...(x.kws||[x.kw])])];
@@ -6786,6 +6787,12 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
         feito.push('o turno termina');break;}
       case 'combExtra':{const S=X.sala||{};if(S.vez!==me){feito.push('combate adicional só no seu turno');break;}const c=e.campo.find(q=>q.k===it.k);if(c&&c.cbT===S.turno){feito.push('já deu o combate adicional neste turno');break;}if(c)c.cbT=S.turno;const cx=S.cbX&&S.cbX.t===S.turno?S.cbX.n:0,o={cbX:{t:S.turno,n:cx+1}};Object.assign(S,o);xSala(o);feito.push('depois deste combate há uma fase de combate adicional');break;}
       case 'fimComb':{const S=X.sala||{};if(S.fase!==2&&!S.cb){feito.push('não estava em combate');break;}for(const c of e.campo){c.atk=0;c.alv='';c.bl='';}ev({op:'fimComb'});setTimeout(()=>{const S2=X.sala||{};if(S2.turno===S.turno&&(S2.fase===2||S2.cb))xSala({cb:'',fase:3,golpe:null});},700);feito.push('a fase de combate terminou');break;}
+      case 'dobraVarios':{const tem=c=>(c.cnt||0)>0||Object.values(c.mk||{}).some(v=>v>0),L=[...e.campo.filter(tem).map(c=>({c,u:me})),...xOpCampos().flatMap(([cp,u])=>cp.filter(tem).map(c=>({c,u})))];
+        if(!L.length){feito.push('nenhuma permanente com marcador');break;}const res=st.slice(si+1),al2=(it.al||[]).slice(j);
+        setTimeout(async()=>{let ks;if(XBOT)ks=L.filter(x=>x.u===me).map(x=>x.c.k);else ks=await xMarca(`${it.nm}: dobrar os marcadores de quais permanentes?`,L.map(x=>({k:x.c.k,rot:x.c.n+(x.u===me?'':' (oponente)'),on:x.u===me?1:0})),0,L.length)||[];
+          const nv2=[];const ev2=(o,p)=>nv2.push(Object.assign({id:xId(),de:me,para:p||'*'},o));for(const k of ks)xNoAlvo(k,'dobraTudo',0,ev2);for(const o of nv2)xEvia(o);
+          xLog(`${it.nm}: dobrou os marcadores de ${ks.length} permanente(s)`);if(res.length)xFazDepois(res,Object.assign({},it,{al:al2}));else{xSobe();xPintaEu();}},300);
+        feito.push('escolhe permanentes pra dobrar os marcadores');xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
