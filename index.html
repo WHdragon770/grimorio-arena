@@ -5693,7 +5693,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'Tap':case 'Untap':if(!al&&((!d.Defined&&!d.UntapType&&!d.ValidCards)||d.Defined==='Self'||d.Defined==='Enchanted'||d.Defined==='Equipped'))return [{op:'viraSi',up:api==='Untap'?1:0,h:d.Defined==='Enchanted'||d.Defined==='Equipped'?1:0}];if(api==='Untap'&&!al&&d.UntapType&&d.Amount&&fgSpecOk(d.UntapType,ctx)){const n=N('Amount');if(typeof n!=='number')return nao('número');return [{op:'desviraN',n,v:d.UntapType}];}if(!al)return nao('sem alvo');return put({op:api==='Tap'?'vira':'desvira',al},[]);
     case 'Fight':if(d.Defined==='ParentTarget'&&al)return put({op:'luta',al},[]);if(al&&/^Triggered(Card|NewCard)(LKICopy)?$|^Enchanted$/.test(d.Defined||''))return put({op:'luta',al,fk:/^Triggered/.test(d.Defined)?1:0,fe:d.Defined==='Enchanted'?1:0},[]);if(d.Defined&&d.Defined!=='Self')return nao('quem luta');if(!al)return nao('sem alvo');return put({op:'luta',al},[]);
     case 'Sacrifice':{const n=N('Amount');if(n==null)return nao('número');const df=d.Defined||'You',tp=/^Creature/.test(d.SacValid||'')?'creature':'permanent';
-      if(df==='Player.Other'||df==='Player.Opponent'||df==='Opponent')return [{op:'sacr',n,tipo:tp,quem:'each opponent'}];if(df==='Player')return [{op:'sacr',n,tipo:tp,quem:'each player'}];if(al==='target player'||al==='target opponent')return [{op:'sacr',n,tipo:tp,quem:'target'}];if(df==='Self'||d.SacValid==='Self'||d.SacValid==='Card.Self')return [{op:'sacrEsta'}];if(df==='You')return [{op:'sacrEu',n,v:d.SacValid||'Permanent',d:d.SacMessage||d.SacValid||'permanente'}];if(df==='TriggeredPlayer'&&fgSpecOk(d.SacValid||'Permanent',ctx))return [{op:'sacrTP',n,v:d.SacValid||'Permanent'}];return nao('quem sacrifica');}
+      if(df==='Player.Other'||df==='Player.Opponent'||df==='Opponent')return [{op:'sacr',n,tipo:tp,quem:'each opponent'}];if(df==='Player')return [{op:'sacr',n,tipo:tp,quem:'each player'}];if(df==='ChosenPlayer')return [{op:'sacr',n,tipo:tp,quem:'chosen'}];if(al==='target player'||al==='target opponent')return [{op:'sacr',n,tipo:tp,quem:'target'}];if(df==='Self'||d.SacValid==='Self'||d.SacValid==='Card.Self')return [{op:'sacrEsta'}];if(df==='You')return [{op:'sacrEu',n,v:d.SacValid||'Permanent',d:d.SacMessage||d.SacValid||'permanente'}];if(df==='TriggeredPlayer'&&fgSpecOk(d.SacValid||'Permanent',ctx))return [{op:'sacrTP',n,v:d.SacValid||'Permanent'}];return nao('quem sacrifica');}
     case 'Connive':return (!d.Defined||d.Defined==='Self')?[{op:'connive'}]:nao('quem conspira');
     case 'Proliferate':return [{op:'prolif'}];
     case 'AddTurn':return [{op:'extra'}];
@@ -5773,6 +5773,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'TapAll':{const nx=fgPP((ctx.sv||{})[d.SubAbility]||'');const stun=d.RememberTapped&&nx.api==='PutCounter'&&nx.d.CounterType==='STUN'&&nx.d.Defined==='Remembered'?+(nx.d.CounterNum||1):0;if(d.RememberTapped&&!stun)return nao('ação TapAll');
       if(!d.ValidCards||!fgSpecOk(d.ValidCards,ctx))return nao('quais');if(stun)ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];const o=[{op:'viraV',v:d.ValidCards,stun}];
       if(d.Cost&&ctx.__trig!==0){const tk=String(d.Cost).trim().split(/\s+/);if(!tk.every(x=>/^(\d+|[WUBRGC])$/.test(x)))return nao('custo');return [{op:'pagaOu',c:tk.map(x=>'{'+x+'}').join(''),sw:1,st:o}];}return o;}
+    case 'ChoosePlayer':return (d.Choices==='Player.Opponent'&&!d.Random&&(!d.Defined||d.Defined==='You'))?[{op:'escJog'}]:nao('ação ChoosePlayer');
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
@@ -6561,7 +6562,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'destroi':case 'exila':case 'volta':case 'vira':case 'desvira':feito.push(`${{destroi:'destruiu',exila:'exilou',volta:'voltou pra mão',vira:'virou',desvira:'desvirou'}[s.op]} ${xAlvoNome(t)}`);xNoAlvo(t,s.op,0,ev);break;
       case 'pump':if(s.dbl){const c0=xAchaK(t||it.k);if(c0&&xInfo(c0).cri){const v0=xPT(c0);s=Object.assign({},s,{p:/p/.test(s.dbl)?v0.p:s.p,t:/t/.test(s.dbl)?v0.t:s.t});}}feito.push(`${xAlvoNome(t||it.k)} ${s.p>=0?'+':''}${s.p}/${s.t>=0?'+':''}${s.t}${s.kws?' e '+s.kws.join(', '):''}`);xNoAlvo(t||it.k,'pump',0,ev,Object.assign({p:s.p,t:s.t},s.kws?{kws:s.kws}:{}));break;
       case 'prolif':{xProlif();feito.push('proliferar');break;}
-      case 'sacr':{const os=Object.keys(X.ops||{}),q=/^target/.test(s.quem)?[X.op&&os.includes(xOutro())?xOutro():os[0]].filter(Boolean):os;for(const u of q)ev({op:'sacr',n,tipo:s.tipo,nm:it.nm,maior:s.maior||''},u);if(s.quem==='each player')xSacr({n,tipo:s.tipo,nm:it.nm});feito.push(`${s.quem==='each player'?'cada jogador':q.length>1?'cada oponente':'o oponente'} sacrifica ${n} ${s.tipo==='creature'?'criatura':'permanente'}${n>1?'s':''}`);break;}
+      case 'sacr':{const os=Object.keys(X.ops||{}),q=s.quem==='chosen'?[it.jogE||xOutro()].filter(Boolean):/^target/.test(s.quem)?[X.op&&os.includes(xOutro())?xOutro():os[0]].filter(Boolean):os;for(const u of q)ev({op:'sacr',n,tipo:s.tipo,nm:it.nm,maior:s.maior||''},u);if(s.quem==='each player')xSacr({n,tipo:s.tipo,nm:it.nm});feito.push(`${s.quem==='each player'?'cada jogador':q.length>1?'cada oponente':'o oponente'} sacrifica ${n} ${s.tipo==='creature'?'criatura':'permanente'}${n>1?'s':''}`);break;}
       case 'lutaA':it._f=t;break;
       case 'info':feito.push(s.tx);break;
       case 'semMax':e.semMax=1;feito.push('você não tem mais limite de mão');break;
@@ -6678,6 +6679,9 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'hxCor':{let n=0;for(const c of e.campo)if(fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}})){c.hxC=[...new Set([...(c.hxC||[]),...s.cores])];n++;}feito.push(`${n} permanente(s) suas com hexproof contra ${s.cores.join('/')}`);break;}
       case 'sacrTP':{const u=(it.tc||{}).tp||me,o={op:'sacr',n,tipo:'v',v:s.v,nm:it.nm};if(u===me)xSacr(o);else ev(o,u);feito.push(`${u===me?'você':xNomeU(u)} sacrifica ${n} (${s.v})`);break;}
       case 'viraV':{const n=xFilV(s.v,me,c=>{c.tap=1;if(s.stun)c.stun=(c.stun||0)+s.stun;});ev({op:'viraV',v:s.v,stun:s.stun,de:me});feito.push(`virou as permanentes que a carta pede${s.stun?' com '+s.stun+' marcador(es) de atordoamento':''}${n?' ('+n+' suas)':''}`);break;}
+      case 'escJog':{const L=xOpsL().filter(u=>!xMorto(X.ops[u]));if(L.length<=1||XBOT){it.jogE=L[0]||xOutro();feito.push('escolheu '+xNomeU(it.jogE));break;}
+        const res=st.slice(si+1),al2=(it.al||[]).slice(j);setTimeout(async()=>{const a=await xEscolhe(`${it.nm}: escolha um oponente`,L.map(u=>({jog:u,nome:xNomeU(u)})));const u=String(a||'').replace(/^P:/,'')||L[0];xLog(`${it.nm}: escolheu ${xNomeU(u)}`);xFazDepois(res,Object.assign({},it,{al:al2,jogE:u}));},300);
+        feito.push('escolhe um oponente');xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
