@@ -5812,6 +5812,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       return [{op:'modal',n:1,min:1,ops:ch.map(x=>{const q=fgPP((ctx.sv||{})[x]||'');return {rot:String(q.d&&(q.d.SpellDescription||q.d.StackDescription)||x).replace(/CARDNAME|NICKNAME/g,'esta carta'),st:q.api?fgCadeia(q.d,q.api,ctx):[{op:'nao',d:x}]};})}];}
     case 'MultiplyCounter':{if(d.CounterType==='P1P1'&&(d.Defined==='Enchanted'||d.Defined==='Equipped')&&!al&&(!d.Multiplier||d.Multiplier==='2'))return [{op:'dobraCnt',anx:1}];if(d.CounterType==='P1P1'&&al&&!d.TargetMax)return put({op:'dobraCnt',al},[]);return nao('ação MultiplyCounter');}
     case 'ChooseCard':{if(d.Cost==='Draw<2/You>'&&d.ChoiceZone==='Hand'&&/DrawnThisTurn/.test(d.Choices||'')){const rp=fgPP((ctx.sv||{})[d.SubAbility]||''),rs=rp.api==='RepeatEach'?fgPP((ctx.sv||{})[rp.d.RepeatSubAbility]||''):{};if(rs.api==='ChangeZone'&&/^PayLife<(\d+)>$/.test(rs.d.UnlessCost||'')){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'sylvan',n:+(d.Amount||2),vida:+rs.d.UnlessCost.match(/\d+/)[0]}];}}return nao('ação ChooseCard');}
+    case 'EndTurn':{if(Object.keys(d).some(k=>!/^(AB|DB|SP|Cost|ConditionPlayerTurn|SpellDescription|StackDescription|SubAbility)$/.test(k)))return nao('fim do turno com detalhe');return [{op:'fimTurno',so:d.ConditionPlayerTurn==='True'?1:0}];}
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
@@ -6774,6 +6775,12 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'buscaDono':{const u=L0.u||xOutro();if(!u||u===me){st.splice(si+1,0,{op:'busca',n,dest:s.dest,tap:s.tap});break;}ev({op:'buscaB',n,dest:s.dest,tap:s.tap,nm:it.nm},u);feito.push(`${xNomeU(u)} pode buscar ${n} terreno(s) básico(s)`);break;}
       case 'praDono':{const u=s.quem==='jog'?String((it.al||[]).find(a=>/^P:/.test(String(a)))||('P:'+xOutro())).slice(2):(L0.u||xOutro());if(!u||u===me){st.splice(si+1,0,...s.st);break;}const st2=s.st.map(o=>Object.assign({},o,['n','p','t'].reduce((a,q)=>(o[q]&&typeof o[q]==='object'&&(a[q]=rv(o[q])),a),{})));ev({op:'fazPra',st:st2,nm:it.nm},u);feito.push(`${xNomeU(u)} faz a busca no grimório dele`);break;}
       case 'tenta':{const L=xOpsL().filter(u=>!xMorto(X.ops[u]));for(const u of L)ev({op:'tentaB',st:s.st,eu:s.eu,nm:it.nm},u);feito.push(L.length?'cada oponente decide se busca um terreno':'sem oponentes');break;}
+      case 'fimTurno':{const S=X.sala||{};if(S.vez!==me){feito.push(s.so?'não é o seu turno: o turno continua':'(só termina o turno de quem joga)');break;}const tn=S.turno;
+        setTimeout(async()=>{const S2=X.sala||{};if(S2.turno!==tn||S2.vez!==me)return;e.fimT=tn;const P=(S2.pilha||[]).filter(p=>p.id!==it.id);for(const p of P)if(p.de===me&&p.c&&!p.c.tok)e.exi.push(p.c);
+          if(e.mao.length>7&&!e.semMax)await xDescarta(e.mao.length-7,'fim do turno');for(const c of e.campo){c.atk=0;c.bl=0;}
+          const ex=(S2.ext||{})[me]||0;xLog(`${it.nm}: o turno terminou${P.length?` (${P.length} na pilha foram exilados)`:''}`);xSobe();
+          xSala(Object.assign({vez:ex?me:xProx(me),turno:(S2.turno||0)+1,fase:0,cb:'',pilha:[],pri:'',pp:0,rz:''},ex?{ext:Object.assign({},S2.ext,{[me]:ex-1})}:{}));},900);
+        feito.push('o turno termina');break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
