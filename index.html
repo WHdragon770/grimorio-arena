@@ -5683,6 +5683,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       const L=String(d.StaticAbilities||'').split(',').filter(Boolean);if(!L.length)return nao('efeito sem estática');const du=d.Duration||'';const o=[];
       for(const nm of L){const st={};for(const pp of String((ctx.sv||{})[nm]||'').split('|')){const q=pp.indexOf('$');if(q>0)st[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}const md=st.Mode||(nm==='MustAttack'?'MustAttack':'');
         if(md==='Continuous'&&st.Affected==='You'&&st.SetMaxHandSize==='Unlimited'&&Object.keys(st).length<=4){o.push({op:'semMax'});continue;}
+        if(md==='CantBlockBy'&&st.ValidBlocker==='Creature.withoutHaste'&&/^(Card|Creature)\.(Self|EffectSource)$/.test(st.ValidAttacker||'')&&(!du||du==='UntilHostLeavesPlayOrEOT')&&!al){o.push({op:'kt',al:'',kw:'blqHaste'});continue;}
         if(du&&du!=='UntilEndOfCombat')return nao('duração '+du);
         if(md==='CantBeCast'){const vc={'Card':'all','Card.nonCreature':'noncre','Instant,Sorcery':'is'}[st.ValidCard||'Card'];if(!vc)return nao('trava '+st.ValidCard);
           const cs=st.Caster||'Player',quem=cs==='Opponent'?'ops':cs==='Player'?'todos':cs==='You'?'eu':cs==='Player.IsRemembered'&&(al==='target player'||al==='target opponent')?'alvo':null;if(!quem)return nao('trava de quem');
@@ -5949,7 +5950,7 @@ const xReset=c=>{if(c.clO){c.n=c.clO.n;c.img=c.clO.img;if(c.clO.face)c.face=1;el
 /* ---------- leitura da carta (custo, tipo, P/T, palavras-chave, mana, equipar, o que o anexo dá) ---------- */
 const FASES=['Início','Principal 1','Combate','Principal 2','Final'];
 const KWS=['flying','reach','vigilance','haste','deathtouch','lifelink','trample','first strike','double strike','menace','defender','indestructible','hexproof','shroud','infect','wither','flash','fear','intimidate','shadow','skulk','horsemanship','islandwalk','swampwalk','forestwalk','mountainwalk','plainswalk','changeling','banding','flanking'];
-const KPT={shroud:'manto',infect:'infectar',wither:'murchar',flying:'voar',reach:'alcance',vigilance:'vigilância',haste:'ímpeto',deathtouch:'toque mortífero',lifelink:'vínculo com a vida',trample:'atropelar','first strike':'iniciativa','double strike':'golpe duplo',menace:'ameaçar',defender:'defensor',indestructible:'indestrutível',hexproof:'resistência a magia',flash:'lampejo',unblockable:'não pode ser bloqueada',nbloq:'não pode bloquear',fear:'medo',intimidate:'intimidar',shadow:'sombra',skulk:'espreitar',horsemanship:'equitação',islandwalk:'travessia de ilha',swampwalk:'travessia de pântano',forestwalk:'travessia de floresta',mountainwalk:'travessia de montanha',plainswalk:'travessia de planície',changeling:'metamorfo'};
+const KPT={shroud:'manto',infect:'infectar',wither:'murchar',flying:'voar',reach:'alcance',vigilance:'vigilância',haste:'ímpeto',deathtouch:'toque mortífero',lifelink:'vínculo com a vida',trample:'atropelar','first strike':'iniciativa','double strike':'golpe duplo',menace:'ameaçar',defender:'defensor',indestructible:'indestrutível',hexproof:'resistência a magia',flash:'lampejo',unblockable:'não pode ser bloqueada',nbloq:'não pode bloquear',blqHaste:'só bloqueada por ímpeto',fear:'medo',intimidate:'intimidar',shadow:'sombra',skulk:'espreitar',horsemanship:'equitação',islandwalk:'travessia de ilha',swampwalk:'travessia de pântano',forestwalk:'travessia de floresta',mountainwalk:'travessia de montanha',plainswalk:'travessia de planície',changeling:'metamorfo'};
 const BAS={Plains:'W',Island:'U',Swamp:'B',Mountain:'R',Forest:'G'};
 function xKwTx(tx){const s=new Set();for(let l of String(tx||'').split('\n')){l=l.replace(/\([^)]*\)/g,'').trim().toLowerCase().replace(/\.$/,'');if(!l)continue;
   const ps=l.split(/,\s*|\s+and\s+/).map(p=>p.trim()).filter(Boolean);if(ps.length&&ps.every(p=>KWS.includes(p)))ps.forEach(p=>s.add(p));}return s;}
@@ -6629,7 +6630,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
         if(s.op==='luta'&&cg&&!xProtDe(cf,cg)){if(xPT(cg).kw.has('deathtouch')&&pg>0)xNoAlvo(f,'destroi',0,ev);else xDanoF(t,f,pg,ev);}
         feito.push(s.op==='luta'?`${nf} lutou com ${ng} (${pf} x ${pg})`:`${nf} causou ${pf} de dano em ${ng}`);break;}
       case 'anima':xNoAlvo(t||it.k,'anima',0,ev,{p:s.p,t:s.t,kws:s.kws,cri:s.cri,perm:s.perm});feito.push(`${xAlvoNome(t||it.k)} virou ${s.cri?'criatura'+(s.p!=null?` ${s.p}/${s.t}`:''):'outra coisa'}${s.kws.length?' com '+s.kws.join(', '):''}${s.perm?'':' até o fim do turno'}`);break;
-      case 'kt':xNoAlvo(t||it.k,'kt',0,ev,Object.assign({kw:s.kw},s.kws?{kws:s.kws}:{}));feito.push(`${xAlvoNome(t||it.k)} ${s.kw==='unblockable'?'não pode ser bloqueada':'ganhou '+s.kw} neste turno`);break;
+      case 'kt':xNoAlvo(t||it.k,'kt',0,ev,Object.assign({kw:s.kw},s.kws?{kws:s.kws}:{}));feito.push(`${xAlvoNome(t||it.k)} ${s.kw==='unblockable'?'não pode ser bloqueada':s.kw==='nbloq'||s.kw==='blqHaste'?KPT[s.kw]:'ganhou '+(KPT[s.kw]||s.kw)} neste turno`);break;
       case 'nao':feito.push('⚠ o jogo ainda não faz: '+s.d);break;
       case 'doCem':{const ix=e.cem.findIndex(q=>q.k===it.k);if(ix<0){feito.push('a carta saiu do cemitério');break;}const c=e.cem.splice(ix,1)[0];if(s.dest==='campo'){xReset(c);c.tap=s.tap?1:0;c.sk=xInfo(c).cri?1:0;e.campo.push(c);setTimeout(()=>xEntrou(c),450);}else e.mao.push(c);feito.push(`${c.n} voltou do cemitério pr${s.dest==='campo'?'o campo':'a mão'}`);break;}
       case 'cemAlvo':{const nm=it.nm,cx={eu:me,src:it.k||'',sv:{}},dep=it.lembD;if(dep)delete it.lembD;
@@ -6880,6 +6881,7 @@ function xPodeAtk(c){const s=X.sala||{};if(!xVez()||s.fase!==2||s.cb)return fals
 function xProtDe(c,f){if(c.prT&&c.prT.length&&f&&!(f.tok&&!f.cp)){const cs=xCorFonte(f.n);if(c.prT.includes('C')&&!cs.size)return true;for(const q of cs)if((c.prT||[]).includes(q))return true;}const pr=xInfo(c).prot;if(!pr||!pr.size)return false;if(pr.has('*'))return true;if(f.tok&&!f.cp)return false;for(const q of xCorFonte(f.n))if(pr.has(q))return true;return false;}
 function xBlqErr(a,c){const va=xPT(a),vb=xPT(c),ca=xCorFonte(a.n),cb=xCorFonte(c.n),art=/\bArtifact\b/.test(xInfo(c).tipo||'')||!!c.art;
   if(vb.kw.has('nbloq'))return c.n+' não pode bloquear neste turno.';
+  if(va.kw.has('blqHaste')&&!vb.kw.has('haste'))return a.n+' só pode ser bloqueada por criatura com ímpeto neste turno.';
   if(va.kw.has('shadow')!==vb.kw.has('shadow'))return va.kw.has('shadow')?a.n+' tem sombra: só criatura com sombra bloqueia.':c.n+' tem sombra: só bloqueia criatura com sombra.';
   if(va.kw.has('fear')&&!art&&!cb.has('B'))return a.n+' tem medo: só criatura de artefato ou preta bloqueia.';
   if(va.kw.has('intimidate')&&!art&&![...cb].some(x=>ca.has(x)))return a.n+' tem intimidar: só artefato ou criatura que compartilha cor bloqueia.';
