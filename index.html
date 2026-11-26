@@ -5462,6 +5462,16 @@ function fgValid(c,spec,ctx){if(!spec)return true;return String(spec).split(',')
   return t.split('+').every(w=>fgTem(c,w))&&ps.every(p=>fgProp(c,p,ctx));});}
 /* ---------- números (SVar X, Count$) ---------- */
 /* contas que o fgConta não sabia. null = continua sem saber */
+function fgSrc(ctx){const k=ctx&&ctx.src;if(!k)return null;return xAchaK(k)||(((X.sala||{}).pilha||[]).find(p=>p.c&&p.c.k===k)||{}).c||null;}
+/* uma chave Condition* extra: true/false, ou null = não sei */
+function fgCondX(k,v,ctx){const e=X.eu||{campo:[],cem:[],mao:[]};
+  if(k==='Condition'){if(v==='Metalcraft')return e.campo.filter(c=>c.art||/\bArtifact\b/.test(xInfo(c).tipo||'')).length>=3;
+    if(v==='Threshold')return e.cem.length>=7;if(v==='Hellbent')return !e.mao.length;
+    if(v==='Delirium'){const T=new Set();for(const c of e.cem)for(const t of ['Artifact','Battle','Creature','Enchantment','Instant','Kindred','Land','Planeswalker','Sorcery'])if(new RegExp('\\b'+t+'\\b').test(xInfo(c).tipo||''))T.add(t);return T.size>=4;}
+    if(v==='Bargain'){const c=fgSrc(ctx);return !!(c&&c.barg);}
+    return null;}
+  if(k==='ConditionPlayerTurn')return ((X.sala||{}).vez===xUid())===(v==='True');
+  return null;}
 function fgConta2(b,ctx){let m;const e=X.eu||{campo:[],bib:[],cem:[],mao:[]};
   const src=()=>{const k=ctx&&ctx.src;if(!k)return null;return xAchaK(k)||(((X.sala||{}).pilha||[]).find(p=>p.c&&p.c.k===k)||{}).c||null;};
   const sim=(f,a,c)=>{const q=f();return q==null?null:(q?+a:+c);};
@@ -5476,8 +5486,8 @@ function fgConta2(b,ctx){let m;const e=X.eu||{campo:[],bib:[],cem:[],mao:[]};
   if(m=b.match(/^Count\$ThisTurnEntered_Battlefield_(.+)$/))return xTT().ent.filter(c=>fgValid(c,m[1],ctx)).length;
   if(m=b.match(/^Count\$ThisTurnCast_(.+)$/)){if(/OppCtrl/.test(m[1])){if(/YouCtrl/.test(m[1]))return null;const s=X.sala||{},tot=(s.sp&&s.sp.t===s.turno)?s.sp.n:0;if(m[1]!=='Card.OppCtrl')return null;return Math.max(0,tot-xTT().conj.length);}
     const v=m[1].replace(/\.YouCtrl\b|\+YouCtrl\b/g,'');return xTT().conj.filter(c=>fgValid(c,v,ctx)).length;}
-  if(m=b.match(/^Count\$Bargained\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return c?!!c.barg:null;},m[1],m[2]);
-  if(m=b.match(/^Count\$wasCastFromExile\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return c?c.orig==='exi':null;},m[1],m[2]);
+  if(m=b.match(/^Count\$Bargained\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return !!(c&&c.barg);},m[1],m[2]);
+  if(m=b.match(/^Count\$wasCastFromExile\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return !!(c&&c.orig==='exi');},m[1],m[2]);
   return null;}
 function fgConta(v,ctx,fundo){if(v==null||v==='')return 1;v=String(v).trim().replace(/^\+/,'');if(v==='AFLifeLost')return {q:'perdeu'};if(/^-?\d+$/.test(v))return +v;
   if(ctx.dado&&v===ctx.dado)return 'X';if(ctx.dado2&&v===ctx.dado2)return {q:'Y'};
@@ -5515,9 +5525,11 @@ function fgMods(n,mods){for(const md of mods){let q;if(q=md.match(/^Plus\.(-?\d+
   return n;}
 /* condições de passo/estática/ativação. null = não sei ler */
 function fgCond(d,ctx,pre){pre=pre||'';const ip=d[pre+'IsPresent']||d[pre+(pre?'Present':'IsPresent')];
+  if(pre==='Condition'&&d.ConditionDefined==='Self'){const c=fgSrc(ctx)||{},p=String(d.ConditionPresent||'');let ok;if(p==='Card.wasCastFromGraveyard')ok=c.orig==='cem';else if(p==='Card.wasCastFromExile')ok=c.orig==='exi';else return null;if(!ok)return false;d=Object.assign({},d);delete d.ConditionDefined;delete d.ConditionPresent;delete d.ConditionCompare;}
+  if(pre==='Condition'&&d.ConditionDefined)return null;
   if(pre==='Condition'){if(d.ConditionPresent!=null){const n=fgTodos().filter(c=>fgValid(c,d.ConditionPresent,ctx)).length;if(!fgCmp(n,d.ConditionCompare||'GE1'))return false;}
     if(d.ConditionCheckSVar!=null){const n=fgConta(d.ConditionCheckSVar,ctx);if(n==null||n==='X')return null;if(!fgCmp(n,d.ConditionSVarCompare||'GE1'))return false;}
-    for(const k in d)if(k.startsWith('Condition')&&!['ConditionPresent','ConditionCompare','ConditionCheckSVar','ConditionSVarCompare','ConditionDescription'].includes(k))return null;return true;}
+    for(const k in d)if(k.startsWith('Condition')&&!['ConditionPresent','ConditionCompare','ConditionCheckSVar','ConditionSVarCompare','ConditionDescription'].includes(k)){const r=fgCondX(k,d[k],ctx);if(r!==true)return r;}return true;}
   if(d.IsPresent!=null){const n=fgTodos().filter(c=>fgValid(c,d.IsPresent,ctx)).length;if(!fgCmp(n,d.PresentCompare||'GE1'))return false;}
   if(d.CheckSVar!=null){const n=fgConta(d.CheckSVar,ctx);if(n==null||n==='X')return null;if(!fgCmp(n,d.SVarCompare||'GE1'))return false;}
   return true;}
@@ -5540,7 +5552,10 @@ function fgFicha(ts,n){const o=[];for(const t of ts.split(',')){const e=FGTK[t];
 function fgPasso(d,api,ctx){if(d.Condition==='Kicked'||d.Condition==='NotKicked'){const d2=Object.assign({},d),nk=d.Condition==='NotKicked';delete d2.Condition;const r=fgPasso(d2,api,ctx);for(const o of r)if(o.op!=='nao')o.kk=nk?-1:1;return r;}if(/^(Discard|Sacrifice|Draw|Mill)$/.test(api)&&(d.RememberDiscarded||d.RememberSacrificed||d.RememberDrawn||d.RememberMilled)&&!d.__rm){const r=fgPasso(Object.assign({},d,{__rm:1,RememberDiscarded:'',RememberSacrificed:'',RememberDrawn:'',RememberMilled:''}),api,ctx);for(const o of r)if(o.op!=='nao')o.rm=1;return r;}{const TK=/^Triggered(Card|Attacker|Object|NewCardLKICopy)(LKICopy)?$/.test(d.Defined||'')?'tk':/^(TriggeredDefender|TriggeredDefender\.Opponent & Valid Planeswalker\.TriggeredDefender|TriggeredDefendingPlayer)$/.test(d.Defined||'')?'td':'';if(TK&&!d.ValidTgts){const d2=Object.assign({},d,{__m:1});delete d2.Defined;const r=fgPasso0(d2,api,ctx);for(const o of r)if(o.op!=='nao'&&!o.al)o[TK]=1;return r;}}if(!d.ValidTgts&&/^(Targeted|ParentTarget)$/.test(d.Defined||'')){const d2=Object.assign({},d,{__m:1});delete d2.Defined;const r=fgPasso0(d2,api,ctx);for(const o of r)if(o.op!=='nao'&&!o.al)o.mesmo=1;return r;}return fgPasso0(d,api,ctx);}
 function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.StackDescription||api)+(why?' ('+why+')':'')}];
   const cd=fgCond(d,ctx,'Condition');if(cd===false)return [];if(cd===null)return nao('condição');
-  if(d.UnlessCost)return nao('custo do oponente');
+  if(d.UnlessCost){if(api==='Counter'&&(!d.UnlessPayer||d.UnlessPayer==='TargetedController')){const uc=String(d.UnlessCost).trim();let pz=null;
+    if(/^\d+$/.test(uc))pz={g:+uc};else if(/^[A-Za-z]\w*$/.test(uc)){const n=fgConta(uc,ctx);if(typeof n==='number')pz={g:n};}else if(uc==='Discard<1/Hand>')pz={mao:1};
+    if(pz){const d2=Object.assign({},d);delete d2.UnlessCost;const r=fgPasso0(d2,api,ctx);for(const o of r)if(o.op==='anula')o.pz=pz;return r;}}
+  return nao('custo do oponente');}
   const A=fgAlvo(d),al=A&&A.al,put=(x,o)=>{if(A&&A.v)x.v=A.v;o.push(x);return o;},N=k=>{const n=fgConta(d[k],ctx);return n;};
   switch(api){
     case 'DealDamage':{const n=N('NumDmg');if(n==null)return nao('número');const df=d.Defined||'';if(d.DamageSource&&/^Triggered(Card|Attacker)(LKICopy)?$/.test(d.DamageSource)&&al)return put({op:'dano',n,al,fk:1},[]);if(d.DamageSource){if(/^(ParentTarget|Targeted)$/.test(d.DamageSource)&&al&&n&&n.q==='alvo'&&n.f==='p'&&!(n.md||[]).length)return put({op:'morde',al},[]);return nao('fonte');}
@@ -5577,7 +5592,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'TargetOnly':return al?put({op:'lutaA',al},[]):nao('sem alvo');
     case 'Poison':{const n=N('Num');if(n==null)return nao('número');const df=d.Defined||'';if(df==='Player')return [{op:'veneno',n,quem:'todos'}];if(df==='You')return [{op:'veneno',n,quem:'eu'}];
       if(/Opponent/.test(df))return [{op:'veneno',n,quem:'ops'}];if(al==='target player'||al==='target opponent')return [{op:'veneno',n,quem:'alvo'}];return nao('quem');}
-    case 'Counter':return d.TargetType==='Spell'&&!d.ValidTgts?.includes('Activated')?[{op:'anula',al:'spell'}]:nao();
+    case 'Counter':return d.TargetType==='Spell'&&!d.ValidTgts?.includes('Activated')?[{op:'anula',al:'spell',vs:d.ValidTgts&&d.ValidTgts!=='Card'?d.ValidTgts:''}]:nao();
     case 'Pump':{const o=[],a=d.NumAtt?N('NumAtt'):0,b=d.NumDef?N('NumDef'):0;if(a==null||b==null)return nao('número');
       if(!al&&d.Defined&&d.Defined!=='Self')return nao('quem');
       if(a||b)put({op:'pump',al:al||'',p:a,t:b},o);for(const k of (d.KW||'').split(' & ').filter(Boolean)){if(!FGKW[k])return nao('habilidade '+k);put({op:'kt',al:al||'',kw:FGKW[k]},o);}return o;}
@@ -6367,7 +6382,14 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='anulada')e.cem.push(v.c);
   else if(v.op==='mill'){for(let q=0;q<v.n&&e.bib.length;q++)e.cem.push(e.bib.shift());}
   xVarre();}
-function xResolve(it,rest,nv){const e=X.eu;if(it.tipo==='atq'&&xAtqResolve(it,nv)){xVarre();return rest;}
+/* a mágica foi marcada por um "anule a menos que pague": o dono decide agora, na hora de resolver */
+function xPagaOu(it){const e=X.eu,z=it.pz;delete it.pz;
+  if(z.mao){if(!e.mao.length)return true;if(!XBOT&&confirm(`${z.nm}: descartar a mão inteira pra ${it.nm} não ser anulada?`)){const n=e.mao.length;for(const c of e.mao.splice(0))e.cem.push(xReset(c));xLog(`descartou a mão (${n}) pra manter ${it.nm} (${z.nm})`);xDescartou(n);return true;}return false;}
+  const g=Math.max(0,+z.g||0);if(!g)return true;const r=xPaga(e,xCusto('{'+g+'}'));
+  if(!r.ok){xLog(`não tinha {${g}} pra pagar (${z.nm})`);return false;}
+  if(XBOT||confirm(`${z.nm}: pagar {${g}} pra ${it.nm} não ser anulada?`)){const tx=xAplica(e,r);xLog(`pagou {${g}} (${z.nm})${tx?': '+tx:''}, ${it.nm} continua`);return true;}
+  return false;}
+function xResolve(it,rest,nv){const e=X.eu;if(it.pz&&!xPagaOu(it)){if(it.tipo==='mag'&&it.c)e.cem.push(it.c);xLog(`${it.nm} foi anulada`);return rest;}if(it.tipo==='atq'&&xAtqResolve(it,nv)){xVarre();return rest;}
   if(it.tipo==='mag'){const c=it.c,i=xInfo(c);
     if(i.perm){if(it.an&&!xExiste(it.an)){e.cem.push(c);xLog(`${c.n} não resolveu (o alvo saiu do campo)`);return rest;}
       c.sk=(i.cri||/\bVehicle\b/.test(i.tipo))&&!/^(dash|susp|unearth|blitz)$/.test(c.mod||'')?1:0;delete c.fdCast;c.an=it.an||'';c.xv=it.x||0;e.campo.push(c);xLog(`${c.n} resolveu e entrou no campo`);if(c.mod==='bestow')setTimeout(()=>xConcede(c),200);if(c.mod==='mutate')setTimeout(()=>xMuta(c),200);if(i.pw)xLeal(c);setTimeout(()=>xEntrou(c),450);if(c.sq){const n=c.sq;setTimeout(()=>{for(let q=0;q<n;q++)xCopiaF(c,{sq:0,off:0,mkN:0});xLog(`esquadrão: ${n} ficha(s) cópia de ${c.n}`);xSobe();xPintaEu();},700);}if(c.off)setTimeout(()=>{xCopiaF(c,{ptF:[1,1],sq:0,off:0,mkN:0});xLog(`prole: ficha 1/1 cópia de ${c.n}`);xSobe();xPintaEu();},750);if(c.mod==='evoke')setTimeout(()=>{if(e.campo.includes(c)){xMorre(c);xLog(`evocou: ${c.n} foi sacrificada`);xVarre();xSobe();xPintaEu();}},1000);return rest;}
@@ -6458,7 +6480,8 @@ function xFaz(st,it,rest,nv){const e=X.eu,me=xUid(),ou=xOutro(),feito=[];let j=0
       case 'desviraV':{const n=xFilV(s.v,me,c=>{c.tap=0;});ev({op:'desviraV',v:s.v,de:me});feito.push(`desvirou ${n} permanente${n===1?'':'s'}`);break;}
       case 'todos':xTodos(s.tipo);ev({op:'todos',tipo:s.tipo});feito.push('destruiu todas as '+s.tipo);break;
       case 'pumpTodos':e.campo.filter(c=>xCri(c)&&(!s.v||fgValid(c,s.v,{eu:me,src:it.k,sv:{}}))).forEach(c=>{c.tp=(c.tp||0)+s.p;c.tt=(c.tt||0)+s.t;if(s.kw&&s.kw.length)c.kt=[...new Set([...(c.kt||[]),...s.kw])];});feito.push(`suas criaturas${s.p||s.t?' '+s.p+'/'+s.t:''}${s.kw&&s.kw.length?' ganham '+s.kw.join(', '):''}`);break;
-      case 'anula':{const ix=rest.findIndex(p=>'S:'+p.id===t);if(ix<0){feito.push('a mágica alvo já tinha saído');break;}const p=rest[ix];rest=rest.filter((_,q)=>q!==ix);
+      case 'anula':{const ix=rest.findIndex(p=>'S:'+p.id===t);if(ix<0){feito.push('a mágica alvo já tinha saído');break;}const p=rest[ix];if(s.vs&&p.tipo==='mag'&&p.c&&!fgValid(p.c,s.vs,{eu:me,src:'',sv:{}})){feito.push(`${p.nm} não é um alvo válido (${s.vs})`);break;}
+        if(s.pz){p.pz=Object.assign({nm:it.nm},s.pz);feito.push(s.pz.mao?`${p.nm}: o dono descarta a mão ou ela é anulada`:`${p.nm}: o dono paga {${s.pz.g}} ou ela é anulada`);break;}rest=rest.filter((_,q)=>q!==ix);
         if(p.tipo==='mag'){if(p.de===me)e.cem.push(p.c);else ev({op:'anulada',c:p.c},p.de);}feito.push('anulou '+p.nm);break;}
       case 'ficha':if(s.dono==='alvo'&&L0.u&&L0.u!==me){ev({op:'fichaD',nome:s.nome,p:s.p,t:s.t,kw:s.kw,art:s.art,mana:s.mana,n},L0.u);feito.push(`${xNomeU(L0.u)} ganhou ${n} ficha${n>1?'s':''} ${s.nome}${s.p!=null?' '+s.p+'/'+s.t:''}`);break;}if(s.dono==='alvo'&&!L0.u){feito.push('o dono da ficha saiu');break;}
         xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1);feito.push(`criou ${n} ficha${n>1?'s':''} ${s.nome}${s.p!=null?' '+s.p+'/'+s.t:''}`);break;
