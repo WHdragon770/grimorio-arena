@@ -5622,6 +5622,8 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       if(og==='Library'&&(ds==='Battlefield'||ds==='Hand')&&/^Land\.Basic(\+YouCtrl)?$/.test(d.ChangeType||'')&&(!d.DefinedPlayer||d.DefinedPlayer==='You')){const n=N('ChangeNum');if(n==null)return nao('número');return [{op:'busca',n,dest:ds==='Battlefield'?'campo':'mao',tap:d.Tapped==='True'}];}
       if(og==='Graveyard'&&!al&&(!d.Defined||d.Defined==='Self')&&!d.ChangeType&&(ds==='Battlefield'||ds==='Hand'))return [{op:'doCem',dest:ds==='Battlefield'?'campo':'mao',tap:d.Tapped==='True'}];
       if(og==='Graveyard'&&(d.ValidTgts||d.ChangeType)&&(ds==='Battlefield'||ds==='Hand')&&!/Opp|TargetedPlayer/.test(d.ValidTgts||d.ChangeType)&&(!/Other/.test(d.ValidTgts||d.ChangeType)||/YouOwn|YouCtrl/.test(d.ValidTgts||d.ChangeType))){const n=d.TargetMin==='0'&&!d.TargetMax?1:(N('TargetMax')||N('ChangeNum')||1);return [{op:'doCemAlvo',n,v:(d.ValidTgts||d.ChangeType),dest:ds==='Battlefield'?'campo':'mao',tap:d.Tapped==='True'}];}
+      if(og==='Library'&&d.DefinedPlayer&&d.DefinedPlayer!=='You'&&!al){if(d.DefinedPlayer==='Opponent'&&d.RememberSearcher){const sa=fgPP((ctx.sv||{})[d.SubAbility]||'');if(sa.api==='ChangeZone'&&sa.d.ChangeNum==='Count$RememberedSize'){const d2=Object.assign({},d);delete d2.DefinedPlayer;delete d2.SubAbility;delete d2.RememberSearcher;const r=fgPasso0(d2,api,ctx);const d3=Object.assign({},sa.d,{ChangeNum:'1'});delete d3.SubAbility;const r2=fgPasso0(d3,api,ctx);if(r.concat(r2).some(o=>o.op==='nao'))return r.concat(r2);ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'tenta',st:r,eu:r2}];}}
+      if(!/^(TargetedController|ParentTargetedController|TargetedPlayer)$/.test(d.DefinedPlayer))return nao('quem busca');const d2=Object.assign({},d);delete d2.DefinedPlayer;delete d2.SubAbility;const r=fgPasso0(d2,api,ctx);if(r.some(o=>o.op==='nao'))return r;return [{op:'praDono',quem:d.DefinedPlayer==='TargetedPlayer'?'jog':'dono',st:r}];}
       if((og==='Library'||og==='Hand')&&!al&&!d.Defined&&d.ChangeType&&!/IsRemembered|Opp|TargetedPlayer|ChosenType|sharesCreatureTypeWith/.test(d.ChangeType)){
         let n=d.ChangeNum==null?1:N('ChangeNum');if(n==null||n==='X')return nao('número');const dm={Hand:'mao',Battlefield:'campo',Graveyard:'cem',Library:'topo'}[ds];if(!dm)return nao(og+' → '+ds);
         if(ds==='Library'&&d.LibraryPosition!=null&&d.LibraryPosition!=='0')return nao('posição no grimório');
@@ -6544,6 +6546,7 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='carta'){const c=e.campo.find(q=>q.k===v.k);if(c)xEfCarta(c,v.o,v.n,v.x);}
   else if(v.op==='aniq')xAniq(v);
   else if(v.op==='sacr')xSacr(v);
+  else if(v.op==='tentaB'){setTimeout(()=>{const sim=!XBOT&&confirm(`${v.nm} (${xNomeU(v.de)}): buscar um terreno no seu grimório e pôr no campo? Se buscar, ${xNomeU(v.de)} busca mais um.`);xLog(`${v.nm}: você ${sim?'buscou':'não buscou'}`);if(sim){xFazDepois(v.st||[],{nm:v.nm,k:'',al:[],tc:{},sc:{}});xEvia({op:'fazPra',st:v.eu||[],nm:v.nm,para:v.de});}},300);}
   else if(v.op==='buscaB'){xLog(`${v.nm}: você pode buscar ${v.n} terreno(s) básico(s)`);setTimeout(()=>xFazDepois([{op:'busca',n:v.n,dest:v.dest,tap:v.tap}],{nm:v.nm,k:'',al:[],tc:{},sc:{}}),300);}
   else if(v.op==='cmdVolta'){const L=e.campo.filter(c=>c.cmd);L.forEach(c=>xSai(c,'cmdz'));if(L.length)xLog('seus comandantes voltaram pra zona de comando');}
   else if(v.op==='pedeMao'){xEvia({op:'maoVista',nm:v.nm,cartas:e.mao.map(c=>c.n),para:v.de});xLog(`${xNomeU(v.de)} olhou a sua mão (${v.nm})`);}
@@ -6768,6 +6771,8 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
           if(res.length)xFazDepois(res,Object.assign({},it,{al:al2}));else{xSobe();xPintaEu();}},300);
         feito.push(`olha as ${n} cartas do topo`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
       case 'buscaDono':{const u=L0.u||xOutro();if(!u||u===me){st.splice(si+1,0,{op:'busca',n,dest:s.dest,tap:s.tap});break;}ev({op:'buscaB',n,dest:s.dest,tap:s.tap,nm:it.nm},u);feito.push(`${xNomeU(u)} pode buscar ${n} terreno(s) básico(s)`);break;}
+      case 'praDono':{const u=s.quem==='jog'?String((it.al||[]).find(a=>/^P:/.test(String(a)))||('P:'+xOutro())).slice(2):(L0.u||xOutro());if(!u||u===me){st.splice(si+1,0,...s.st);break;}const st2=s.st.map(o=>Object.assign({},o,['n','p','t'].reduce((a,q)=>(o[q]&&typeof o[q]==='object'&&(a[q]=rv(o[q])),a),{})));ev({op:'fazPra',st:st2,nm:it.nm},u);feito.push(`${xNomeU(u)} faz a busca no grimório dele`);break;}
+      case 'tenta':{const L=xOpsL().filter(u=>!xMorto(X.ops[u]));for(const u of L)ev({op:'tentaB',st:s.st,eu:s.eu,nm:it.nm},u);feito.push(L.length?'cada oponente decide se busca um terreno':'sem oponentes');break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
