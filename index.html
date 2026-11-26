@@ -5779,6 +5779,8 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       if(!d.ValidCards||!fgSpecOk(d.ValidCards,ctx))return nao('quais');if(stun)ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];const o=[{op:'viraV',v:d.ValidCards,stun}];
       if(d.Cost&&ctx.__trig!==0){const tk=String(d.Cost).trim().split(/\s+/);if(!tk.every(x=>/^(\d+|[WUBRGC])$/.test(x)))return nao('custo');return [{op:'pagaOu',c:tk.map(x=>'{'+x+'}').join(''),sw:1,st:o}];}return o;}
     case 'ChoosePlayer':return (d.Choices==='Player.Opponent'&&!d.Random&&(!d.Defined||d.Defined==='You'))?[{op:'escJog'}]:nao('ação ChoosePlayer');
+    case 'Clone':{for(const k of Object.keys(d))if(!/^(AB|DB|SP|Cost|ValidTgts|TgtPrompt|Defined|Duration|SpellDescription|StackDescription|SubAbility|AILogic|PrecostDesc|__m|Activator|TargetType|IsCurse)$/.test(k))return nao(k);
+      if(d.Duration!=='UntilEndOfTurn')return nao('duração');const df=d.Defined||'';if(!al&&df!=='Remembered')return nao('quem');return put({op:'clone',al:al||'',lemb:df==='Remembered'?1:0},[]);}
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
@@ -5912,7 +5914,7 @@ const xPool0=()=>({W:0,U:0,B:0,R:0,G:0,C:0});
 const xTotP=p=>Object.values(p||{}).reduce((a,b)=>a+(b||0),0);
 const xSym=s=>String(s||'').replace(/\{([^}]+)\}/g,(m,v)=>typeof SV==='function'?SV(v):m);
 /* tira tudo que é "de mesa" quando a carta sai do campo; chave nova solta anexos antigos */
-const xReset=c=>{if(c.fd&&!c.fdCast){c.n=c.fdN;c.img=c.fdI||'';delete c.fd;delete c.fdN;delete c.fdI;delete c.fdC;}delete c.mod;delete c.ptF;delete c.ani;['fdM','fore','tm','susp','mdOf','idade','hide','barg','gift','trip','rcf','ph','plot','orig','lv','kwL','bst','sela','exh','par','mut','mutL','kwM','mkN','sq','off','cif','rean','stun'].forEach(q=>delete c[q]);return Object.assign(c,{k:xId(),tap:0,cnt:0,face:0,sk:0,atk:0,bl:'',an:'',dn:0,tp:0,tt:0,mk:null,kt:null,alv:'',lt:0,cvf:0,kick:0,jogaAte:null});};
+const xReset=c=>{if(c.clO){c.n=c.clO.n;c.img=c.clO.img;if(c.clO.face)c.face=1;else delete c.face;delete c.clO;}if(c.fd&&!c.fdCast){c.n=c.fdN;c.img=c.fdI||'';delete c.fd;delete c.fdN;delete c.fdI;delete c.fdC;}delete c.mod;delete c.ptF;delete c.ani;['fdM','fore','tm','susp','mdOf','idade','hide','barg','gift','trip','rcf','ph','plot','orig','lv','kwL','bst','sela','exh','par','mut','mutL','kwM','mkN','sq','off','cif','rean','stun'].forEach(q=>delete c[q]);return Object.assign(c,{k:xId(),tap:0,cnt:0,face:0,sk:0,atk:0,bl:'',an:'',dn:0,tp:0,tt:0,mk:null,kt:null,alv:'',lt:0,cvf:0,kick:0,jogaAte:null});};
 
 /* ---------- leitura da carta (custo, tipo, P/T, palavras-chave, mana, equipar, o que o anexo dá) ---------- */
 const FASES=['Início','Principal 1','Combate','Principal 2','Final'];
@@ -6034,7 +6036,8 @@ function xAtrasado(ph){const e=X.eu,s=X.sala||{};if(!e||!e.atr||!e.atr.length)re
   for(const a of ag){xLog(`${a.nm}: efeito atrasado (${ph==='Upkeep'?'manutenção':'final do turno'})`);xFazDepois(a.st,{nm:a.nm,k:a.k,al:[],tc:{},sc:{},lemb:a.lemb});}}
 function xTurno(){const s=X.sala,e=X.eu,me=xUid();if(!s||!e)return;let mud=0;
   const fv=(s.turno||0)+'.'+(s.fase||0);if(e.fv!==fv){e.fv=fv;if(xTotP(e.pool)){e.pool=xPool0();mud=1;}}
-  if(s.turno&&e.tl!==s.turno){e.tl=s.turno;for(const c of e.campo)if(c.ateU&&s.vez===c.ateU&&s.turno>c.ateT){c.tpN=0;c.naN=0;c.ateU='';c.gd='';c.ktN=null;}for(const c of e.campo)if(c.tp||c.tt||c.dn||c.atk||c.bl||c.kt||c.alv||c.regen||c.prT||c.hxC){c.hxC=null;c.tp=0;c.tt=0;c.dn=0;c.atk=0;c.bl='';c.kt=null;c.alv='';c.regen=0;c.prT=null;if(c.ani&&!c.ani.perm)delete c.ani;}mud=1;}
+  if(s.turno&&e.tl!==s.turno){e.tl=s.turno;for(const c of e.campo)if(c.ateU&&s.vez===c.ateU&&s.turno>c.ateT){c.tpN=0;c.naN=0;c.ateU='';c.gd='';c.ktN=null;}for(const c of e.campo)if(c.clO){c.n=c.clO.n;c.img=c.clO.img;if(c.clO.face)c.face=1;else delete c.face;delete c.clO;xLog(c.n+' voltou a ser ela mesma');}
+  for(const c of e.campo)if(c.tp||c.tt||c.dn||c.atk||c.bl||c.kt||c.alv||c.regen||c.prT||c.hxC){c.hxC=null;c.tp=0;c.tt=0;c.dn=0;c.atk=0;c.bl='';c.kt=null;c.alv='';c.regen=0;c.prT=null;if(c.ani&&!c.ani.perm)delete c.ani;}mud=1;}
   if(s.turno&&s.vez&&s.vez!==me&&e.tvO!==s.turno&&X.ops&&X.ops[s.vez]){e.tvO=s.turno;const tp=s.vez;setTimeout(()=>{if(xGatCampo(/^(At the beginning of each (?:opponent's|player's) upkeep, [^\n]+)$/im,'manutenção de '+xNomeU(tp),null,null,{tp}))xSobe();},900);mud=1;}
   if(s.turno&&s.vez===me&&e.tv!==s.turno){e.tv=s.turno;e.ter=0;{const vo=e.exi.filter(q=>q.ph),sa=e.campo.filter(q=>!(q.tok&&!q.cp)&&/^Phasing$/m.test(xInfo(q).tx));for(const q of vo){e.exi.splice(e.exi.indexOf(q),1);delete q.ph;e.campo.push(q);xLog(`${q.n} voltou de fase`);}for(const q of sa){e.campo.splice(e.campo.indexOf(q),1);q.ph=1;e.exi.push(q);xLog(`${q.n} saiu de fase (volta no próximo turno)`);}}e.campo.forEach(c=>{if(c.stun&&c.tap){c.stun--;xLog(`${c.n} não desvirou (tirou um marcador de atordoamento)`);}else c.tap=0;c.sk=0;});
     const cp=s.turno!==1;let t='';
@@ -6689,6 +6692,8 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'escJog':{const L=xOpsL().filter(u=>!xMorto(X.ops[u]));if(L.length<=1||XBOT){it.jogE=L[0]||xOutro();feito.push('escolheu '+xNomeU(it.jogE));break;}
         const res=st.slice(si+1),al2=(it.al||[]).slice(j);setTimeout(async()=>{const a=await xEscolhe(`${it.nm}: escolha um oponente`,L.map(u=>({jog:u,nome:xNomeU(u)})));const u=String(a||'').replace(/^P:/,'')||L[0];xLog(`${it.nm}: escolheu ${xNomeU(u)}`);xFazDepois(res,Object.assign({},it,{al:al2,jogE:u}));},300);
         feito.push('escolhe um oponente');xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
+      case 'clone':{const sc=e.campo.find(q=>q.k===it.k),c0=s.lemb?(it.lemb||[])[0]:xAchaK(t);if(!sc||!c0){feito.push('não tinha o que copiar');break;}if(c0.tok&&!c0.cp){feito.push('o jogo ainda não copia ficha simples');break;}
+        sc.clO=sc.clO||{n:sc.n,img:sc.img||'',face:sc.face?1:0};sc.n=c0.n;sc.img=c0.img||'';if(c0.face)sc.face=1;else delete sc.face;feito.push(`${sc.clO.n} virou uma cópia de ${c0.n} até o fim do turno`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
