@@ -5732,6 +5732,9 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       if(!d1||!d2||d.ChangeNum==='X')return nao('destino '+(d.DestinationZone||'')+'/'+(d.DestinationZone2||''));const all=d.ChangeNum==='All'||d.AnyNumber==='True';
       return [{op:'cava',n,k:all?99:(d.ChangeNum==null?1:+d.ChangeNum||1),v:d.ChangeValid||'Card',d1,d2,tap:d.Tapped==='True'?1:0,ate:all||d.Optional==='True'?1:0,auto:d.ChangeNum==='All'?1:0,lb:lbD}];}
     case 'PeekAndReveal':{const n=N('PeekAmount')||1,sb=d.SubAbility&&fgPP((ctx.sv||{})[d.SubAbility]||'');
+      if(d.RememberPeeked&&sb&&sb.api==='ChooseCard'&&sb.d.ChoiceZone==='Library'&&sb.d.Choices==='Creature.IsRemembered,Land.IsRemembered'){const nm=[d.SubAbility];let q=sb.d,ok=0;const vis=new Set();
+        for(let i=0;i<6&&q.SubAbility&&!vis.has(q.SubAbility);i++){vis.add(q.SubAbility);nm.push(q.SubAbility);const z=fgPP((ctx.sv||{})[q.SubAbility]||'');if(z.api==='Cleanup'){ok=1;break;}if(z.api!=='ChangeZoneAll')break;q=z.d;}
+        if(ok){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),...nm];return [{op:'zimone',n,k:+(sb.d.Amount||2)}];}}
       if(n===1&&sb&&sb.api==='SetState'&&sb.d.Mode==='Transform'&&(!sb.d.Defined||sb.d.Defined==='Self')&&sb.d.ConditionDefined==='Remembered'){ctx.pula=d.SubAbility;return [{op:'espiaTransforma',v:(sb.d.ConditionPresent||'Card').replace(/Card\./g,'')}];}
       if(n===1&&!d.SubAbility)return [{op:'espia',rev:d.NoReveal?0:1}];return nao('olhar o topo');}
     case 'RollDice':{let qd=d.Amount==null?1:(/^\d+$/.test(d.Amount)?+d.Amount:N('Amount')),md=d.Modifier==null?0:(/^-?\d+$/.test(d.Modifier)?+d.Modifier:N('Modifier'));if(qd==='X')qd={q:'X'};if(md==='X')md={q:'X'};
@@ -6755,6 +6758,12 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
           for(const c of vol.reverse()){e.mao.splice(e.mao.indexOf(c),1);e.bib.unshift(c);}if(vol.length)xLog(`${it.nm}: ${vol.length} carta(s) voltaram pro topo do grimório`);
           if(res.length)xFazDepois(res,Object.assign({},it,{al:al2}));else{xSobe();xPintaEu();}},300);
         feito.push(`pode comprar ${s.n} a mais`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
+      case 'zimone':{const L=e.bib.splice(0,n),res=st.slice(si+1),al2=(it.al||[]).slice(j),ok=c=>xInfo(c).cri||xInfo(c).land;
+        setTimeout(async()=>{const C=L.filter(ok);let esc=[];if(C.length){const q=await xMarca(`${it.nm}: escolha até ${s.k} criatura(s)/terreno(s) (terreno entra virado, criatura vai pra mão)`,C.map((c,i)=>({k:c.k,rot:c.n,on:i<s.k?1:0})),0,s.k);esc=(q||[]).map(k=>C.find(c=>c.k===k)).filter(Boolean).slice(0,s.k);}
+          const nm=[];for(const c of esc){if(xInfo(c).land&&!xInfo(c).cri){c.tap=1;e.campo.push(c);setTimeout(()=>xEntrou(c),300);nm.push(c.n+' (campo)');}else{e.mao.push(c);nm.push(c.n+' (mão)');}}
+          const resto=L.filter(c=>!esc.includes(c));e.bib.push(...xEmb(resto));xLog(`${it.nm}: ${nm.length?nm.join(', '):'não pegou nada'}; ${resto.length} pro fundo do grimório`);
+          if(res.length)xFazDepois(res,Object.assign({},it,{al:al2}));else{xSobe();xPintaEu();}},300);
+        feito.push(`olha as ${n} cartas do topo`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
