@@ -5728,6 +5728,10 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'Shuffle':return (!d.Defined||d.Defined==='You')?[{op:'embaralha'}]:nao('grimório de outro');
     case 'ImmediateTrigger':{const ex=fgPP((ctx.sv||{})[d.Execute]||'');if(!ex.api)return nao('gatilho imediato');return fgCadeia(ex.d,ex.api,ctx);}
     case 'Regenerate':if(al)return put({op:'regen',al},[]);if(!d.Defined||d.Defined==='Self')return [{op:'regen',al:''}];return nao('quem regenera');
+    case 'Phases':{if(d.AllValid)return nao('todas saem de fase');if(al)return put({op:'fase',al},[]);if(!d.Defined||d.Defined==='Self')return [{op:'fase',al:''}];return nao('quem sai de fase');}
+    case 'AnimateAll':{const v=d.ValidCards||'';if(!/YouCtrl/.test(v)||!fgSpecOk(v,ctx))return nao('quais permanentes');for(const k of ['Triggers','Abilities','staticAbilities','sVars','RemoveAllAbilities','Replacements','RemoveKeywords','Colors','RemoveCreatureTypes'])if(d[k])return nao('habilidade dada');
+      const du=d.Duration||'';if(du&&du!=='Permanent')return nao('duração');const tp=String(d.Types||'').split(','),cri=tp.includes('Creature');const a=d.Power!=null?N('Power'):null,b=d.Toughness!=null?N('Toughness'):null;if((d.Power!=null&&a==null)||(d.Toughness!=null&&b==null)||a==='X'||b==='X')return nao('número');
+      const kws=[];for(const k of String(d.Keywords||'').split(' & ').filter(Boolean)){if(!FGKW[k])return nao('habilidade '+k);kws.push(FGKW[k]);}return [{op:'animaTodos',v,p:a,t:b,cri:cri?1:0,kws,perm:du?1:0}];}
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
@@ -6408,7 +6412,7 @@ async function xGatTx(c,m,rot,tc){if(/choose (?:one|two|three|one or both|one or
   xLog(`gatilho de ${c.n} (${rot}) foi pra pilha: ${m}`);xEmpilha(Object.assign({id:xId(),de:xUid(),tipo:'etb',tx:m,nm:c.n,img:c.img||'',k:c.k,al},tc?{tc}:{}));}
 function xSai(c,z){if(z==='cem')return xMorre(c);const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;e.campo.splice(ix,1);if(!c.tok){xReset(c);const d0=c.dono0;delete c.dono0;if(d0&&d0!==xUid())xEvia({op:'aoZona',c:JSON.parse(JSON.stringify(c)),z,para:d0});else e[z].push(c);}}
 function xEfCarta(c,op,n,x){const i=xInfo(c);
-  if(op==='destroi'){if(!(i.cri?xPT(c).kw:i.kws).has('indestructible')&&!xUmbra(c)){if(c.regen){c.regen=0;c.dn=0;c.tap=1;c.atk=0;c.bl='';xLog(c.n+' regenerou');}else xSai(c,'cem');}}else if(op==='regen')c.regen=1;
+  if(op==='destroi'){if(!(i.cri?xPT(c).kw:i.kws).has('indestructible')&&!xUmbra(c)){if(c.regen){c.regen=0;c.dn=0;c.tap=1;c.atk=0;c.bl='';xLog(c.n+' regenerou');}else xSai(c,'cem');}}else if(op==='regen')c.regen=1;else if(op==='fase'){const e=X.eu,j=e.campo.indexOf(c);if(j>=0){e.campo.splice(j,1);c.ph=1;c.atk=0;c.bl='';c.tap=c.tap||0;e.exi.push(c);xLog(`${c.n} saiu de fase`);}}
   else if(op==='exila')xSai(c,'exi');else if(op==='volta')xSai(c,'mao');else if(op==='pisca'){const e=X.eu;if(e.campo.includes(c)&&!c.tok&&!c.dono0){xSai(c,'exi');const j=e.exi.indexOf(c);if(j>=0){e.exi.splice(j,1);c.tap=0;c.sk=xInfo(c).cri?1:0;e.campo.push(c);xLog(c.n+' foi exilada e voltou pro campo');setTimeout(()=>xEntrou(c),450);}}else xSai(c,'exi');}
   else if(op==='vira')c.tap=1;else if(op==='desvira')c.tap=0;
   else if(op==='pump'){c.tp=(c.tp||0)+x.p;c.tt=(c.tt||0)+x.t;if(x.kws)c.kt=[...new Set([...(c.kt||[]),...x.kws])];}
@@ -6562,6 +6566,8 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'mortoVivo':xMortoVivo(s.v,s.vs,it.nm);ev({op:'mortoVivo',v:s.v,vs:s.vs,nm:it.nm},'*');feito.push('cada jogador trocou as criaturas do campo pelas do cemitério');break;
       case 'descOp':{const os=Object.keys(X.ops||{}),td=String((it.tc||{}).td||'').replace(/^P:/,''),q=s.quem==='td'?[td||xOutro()].filter(u=>u&&u!==me):os;for(const u of q)ev({op:'descOp',n,nm:it.nm},u);
         if(s.quem==='todos')setTimeout(()=>xDescarta(n,it.nm).then(()=>{xSobe();xPintaEu();}),300);feito.push(`${s.quem==='todos'?'cada jogador':q.length>1?'cada oponente':'o oponente'} descarta ${n>=99?'a mão':n}`);break;}
+      case 'fase':feito.push(`${xAlvoNome(t||it.k)} saiu de fase (volta no próximo turno do dono)`);xNoAlvo(t||it.k,'fase',0,ev);break;
+      case 'animaTodos':{const p=s.p==null?null:rv(s.p),q=s.t==null?null:rv(s.t);let k=0;xFilV(s.v,me,c=>{xEfCarta(c,'anima',0,{p,t:q,kws:s.kws,cri:s.cri,perm:s.perm});k++;});feito.push(`${k} permanente(s) viraram ${s.cri?'criatura ':''}${p!=null?p+'/'+q:''}${s.perm?'':' até o fim do turno'}`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
