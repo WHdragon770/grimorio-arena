@@ -5647,7 +5647,12 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       const a=d.Power!=null?N('Power'):null,b=d.Toughness!=null?N('Toughness'):null;if((d.Power!=null&&a==null)||(d.Toughness!=null&&b==null))return nao('número');
       const kws=[];for(const k of String(d.Keywords||'').split(' & ').filter(Boolean)){if(!FGKW[k])return nao('habilidade '+k);kws.push(FGKW[k]);}
       if(!cri&&a==null&&!kws.length)return [];return put({op:'anima',al:al||'',p:a,t:b,cri:cri?1:0,kws,perm:du?1:0},[]);}
-    case 'Effect':{if(/^Emblem/.test(d.Name||'')&&d.Triggers&&!d.StaticAbilities&&!d.ReplacementEffects&&d.Duration==='Permanent'){const L=[];
+    case 'Effect':{/* emblema estático */if(/^Emblem/.test(d.Name||'')&&d.StaticAbilities&&!d.Triggers&&!d.ReplacementEffects&&d.Duration==='Permanent'){const S=[];
+        for(const nm of String(d.StaticAbilities).split(',')){const r={};for(const pp of String((ctx.sv||{})[nm]||'').split('|')){const q=pp.indexOf('$');if(q>0)r[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}
+          if(r.Mode!=='Continuous'||!r.Affected||!/YouCtrl/.test(r.Affected)||!fgSpecOk(r.Affected,ctx)||Object.keys(r).some(k=>!/^(Mode|Affected|AffectedZone|AddPower|AddToughness|AddKeyword|Description)$/.test(k)))return nao('emblema estático');
+          const kw=String(r.AddKeyword||'').split(' & ').filter(Boolean);if(kw.some(k=>!FGKW[k]))return nao('habilidade do emblema');S.push({v:r.Affected,p:+(r.AddPower||0),t:+(r.AddToughness||0),kw:kw.map(k=>FGKW[k])});}
+        return [{op:'emblema',nm:String(d.Name).replace(/^Emblem\s*[—-]\s*/,'Emblema de '),L:[],st:S}];}
+      if(/^Emblem/.test(d.Name||'')&&d.Triggers&&!d.StaticAbilities&&!d.ReplacementEffects&&d.Duration==='Permanent'){const L=[];
         for(const nm of String(d.Triggers).split(',')){const r={};for(const pp of String((ctx.sv||{})[nm]||'').split('|')){const q=pp.indexOf('$');if(q>0)r[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}
           const ex=fgPP((ctx.sv||{})[r.Execute]||'');if(!ex.api)return nao('emblema');const ops=fgCadeia(ex.d,ex.api,ctx);if(ops.some(o=>o.op==='nao'))return ops;const desc=String(r.TriggerDescription||ex.d.SpellDescription||'').replace(/CARDNAME/g,'o emblema');
           if(r.Mode==='SpellCast'&&(!r.ValidActivatingPlayer||r.ValidActivatingPlayer==='You')&&(!r.ValidCard||fgSpecOk(r.ValidCard,ctx)))L.push({m:'cast',v:r.ValidCard||'Card',ops,desc});
@@ -5962,6 +5967,8 @@ const xExiste=k=>((X.eu||{}).campo||[]).some(c=>c.k===k)||xOpCampos().some(([cp]
 function xLadoCampo(c){if(X.eu&&X.eu.campo.some(q=>q.k===c.k))return X.eu.campo;for(const u in X.ops||{}){const cp=(X.ops[u]||{}).campo||[];if(cp.some(q=>q.k===c.k))return cp;}return [];}
 function xPT(c){const i=xInfo(c);let p=(c.ptF?c.ptF[0]:c.ani&&c.ani.p!=null?c.ani.p:i.p)+(c.cnt||0)+(c.tp||0)+(c.tpN||0),t=(c.ptF?c.ptF[1]:c.ani&&c.ani.t!=null?c.ani.t:i.t)+(c.cnt||0)+(c.tt||0);const kw=new Set(i.kws);(c.kt||[]).forEach(x=>kw.add(x));(c.ktN||[]).forEach(x=>kw.add(x));(c.kwL||[]).forEach(x=>kw.add(x));(c.kwM||[]).forEach(x=>kw.add(x));if(c.ani)c.ani.kw.forEach(x=>kw.add(x));{const sb=xSb(c);if(sb){p+=sb.p;t+=sb.t;sb.kw.forEach(x=>kw.add(x));}}if((i.kwVez&&i.kwVez.length)||(i.kwFora&&i.kwFora.length)){const s=X.sala||{},du=X.eu&&X.eu.campo.includes(c)?xUid():xDonoK(c.k),vz=s.vez&&s.vez===du;(vz?i.kwVez:i.kwFora).forEach(x=>kw.add(x));}let pz=0;
   if(xInfo(c).cri||c.tok){const L=xLadoCampo(c);for(const l of L){if(l.fd)continue;const li=xInfo(l);if(!li.lord)continue;for(const z of li.lord){if(z.o&&l.k===c.k)continue;if(!xFiltro(z.f,c))continue;p+=z.p;t+=z.t;z.kw.forEach(x=>kw.add(x));}}}
+  /* bônus de emblema */{const me0=X.eu&&X.eu.campo.includes(c)?xUid():null,u=me0||Object.keys(X.ops||{}).find(q=>((X.ops[q]||{}).campo||[]).includes(c)),pl=u==null?null:u===xUid()?X.eu:X.ops[u];
+    for(const em of (pl&&pl.emb)||[])for(const z of em.st||[]){let ok=false;try{ok=fgValid(c,z.v,{eu:u,src:'',sv:{}});}catch(er){}if(ok){p+=z.p;t+=z.t;(z.kw||[]).forEach(x=>kw.add(x));}}}
   for(const [a] of xAnx(c.k)){const j=xInfo(a);if(j.da){p+=j.da.p;t+=j.da.t;j.da.kw.forEach(x=>kw.add(x));}if(j.pz)pz=Math.max(pz,j.pz);}
   return {p,t,kw,pz,mod:p!==i.p||t!==i.t};}
 const xCri=c=>(xInfo(c).cri&&!(c.rcf&&c.an&&xAchaK(c.an))&&!(c.bst&&c.an&&xAchaK(c.an))&&!(c.mut&&c.an&&xAchaK(c.an)))||(c.trip!=null&&c.trip===(X.sala||{}).turno)||!!(c.ani&&c.ani.cri);
@@ -6657,7 +6664,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'topoSi':{const c=e.campo.find(q=>q.k===it.k);if(!c){feito.push('a carta já tinha saído');break;}e.campo.splice(e.campo.indexOf(c),1);if(!c.tok){xReset(c);if(s.fundo)e.bib.push(c);else e.bib.unshift(c);}feito.push(`${c.n} foi pro ${s.fundo?'fundo':'topo'} do grimório`);break;}
       case 'vidaFixa':{const u=s.quem==='eu'?me:(String(t||'').startsWith('P:')?String(t).slice(2):xOutro());if(u===me)e.vida=n;else ev({op:'vidaFixa',n},u);feito.push(`a vida de ${u===me?'você':xNomeU(u)} virou ${n}`);break;}
       case 'autoDano':{for(const c of e.campo.slice())if(xInfo(c).cri){const p=xPT(c).p;if(p>0)xEfCarta(c,'dano',p);}ev({op:'autoDano'},'*');feito.push('cada criatura causou a si mesma dano igual ao seu poder');break;}
-      case 'emblema':(e.emb=e.emb||[]).push({nm:s.nm,L:s.L});feito.push('você ganhou o '+s.nm);break;
+      case 'emblema':(e.emb=e.emb||[]).push({nm:s.nm,L:s.L||[],st:s.st||[]});feito.push('você ganhou o '+s.nm);break;
       case 'trocaAlvo':{const P0=rest.length?rest:((X.sala||{}).pilha||[]),p=P0.find(p=>'S:'+p.id===t);if(!p){feito.push('a mágica alvo já tinha saído');break;}const A=(p.al||[]).slice();
         if(s.ima){const ix=A.findIndex(a=>a&&!/^(P:|S:|M#)/.test(a));if(ix<0){feito.push(`${p.nm} não tem alvo que dê pra trocar`);break;}A[ix]=it.k;p.al=A;feito.push(`o alvo de ${p.nm} virou ${it.nm}`);break;}
         if(String(A[0]||'').startsWith('M#')){feito.push(`${p.nm} é modal: o jogo ainda não troca alvo de mágica modal`);break;}const pid=p.id;
