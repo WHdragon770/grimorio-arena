@@ -6735,7 +6735,7 @@ async function xSacr(v){const e=X.eu,ok=c=>v.tipo==='v'?(()=>{try{return fgValid
   xVarre();xSobe();xTudo();}
 function xEvAplica(v){const e=X.eu;
   if(v.op==='compra'){for(let q=0;q<v.n;q++)if(e.bib.length)e.mao.push(e.bib.shift());}
-  else if(v.op==='vida')e.vida+=(v.sk&&v.d<0)?-xDnT(0-xEscF(v.sk,-v.d,v.de)):v.d;
+  else if(v.op==='vida')e.vida+=(v.sk&&v.d<0)?-xDnT(xEscF(v.sk,-v.d,v.de)):v.d;
   else if(v.op==='carta'){const c=e.campo.find(q=>q.k===v.k);if(c){X.__dsn=v.sn||'';xEfCarta(c,v.o,v.n,v.x);X.__dsn='';}}
   else if(v.op==='aniq')xAniq(v);
   else if(v.op==='pilhas'){setTimeout(async()=>{let a;if(XBOT)a=xFofSep(v.cartas||[]);else{const ks=await xMarca(`${v.nm} de ${xNomeU(v.de)}: separe em 2 pilhas. Marque as cartas da pilha 1 (o resto é a pilha 2); ${xNomeU(v.de)} escolhe uma`,(v.cartas||[]).map((n,i)=>({k:String(i),rot:n})),0,(v.cartas||[]).length);a=(ks||[]).map(Number);}
