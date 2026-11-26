@@ -5695,7 +5695,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       const a=d.Power!=null?N('Power'):null,b=d.Toughness!=null?N('Toughness'):null;if((d.Power!=null&&a==null)||(d.Toughness!=null&&b==null))return nao('número');
       const kws=[];for(const k of String(d.Keywords||'').split(' & ').filter(Boolean)){if(!FGKW[k])return nao('habilidade '+k);kws.push(FGKW[k]);}
       if(!cri&&a==null&&b==null&&!kws.length)return [];return put({op:'anima',al:al||'',p:a,t:b,cri:cri?1:0,kws,perm:du?1:0},[]);}
-    case 'Effect':{{const sa=String((ctx.sv||{})[d.StaticAbilities]||'');if(d.RememberObjects==='Self'&&/^Mode\$ NumLoyaltyAct\b/.test(sa)&&/ValidCard\$ Card\.EffectSource/.test(sa)&&!d.Triggers&&!d.ReplacementEffects){const m=sa.match(/Additional\$ (\d+)/);if(m)return [{op:'pwMais',n:+m[1]}];}}/* mana extra no turno */if(d.Triggers&&!d.StaticAbilities&&!d.ReplacementEffects&&!d.Duration&&!String(d.Triggers).includes(',')){const r={};for(const pp of String((ctx.sv||{})[d.Triggers]||'').split('|')){const q=pp.indexOf('$');if(q>0)r[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}
+    case 'Effect':{if(d.ValidTgts==='Player'&&d.RememberObjects==='Targeted'&&/^STCantBeCast,STCantBeActivated$/.test(d.StaticAbilities||'')&&/Mode\$ CantBeCast \| ValidCard\$ Instant,Sorcery/.test(String((ctx.sv||{}).STCantBeCast||''))&&/ValidSA\$ Activated\.!ManaAbility/.test(String((ctx.sv||{}).STCantBeActivated||'')))return put({op:'abey',al:'target player'},[]);{const sa=String((ctx.sv||{})[d.StaticAbilities]||'');if(d.RememberObjects==='Self'&&/^Mode\$ NumLoyaltyAct\b/.test(sa)&&/ValidCard\$ Card\.EffectSource/.test(sa)&&!d.Triggers&&!d.ReplacementEffects){const m=sa.match(/Additional\$ (\d+)/);if(m)return [{op:'pwMais',n:+m[1]}];}}/* mana extra no turno */if(d.Triggers&&!d.StaticAbilities&&!d.ReplacementEffects&&!d.Duration&&!String(d.Triggers).includes(',')){const r={};for(const pp of String((ctx.sv||{})[d.Triggers]||'').split('|')){const q=pp.indexOf('$');if(q>0)r[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}
         const ex=fgPP((ctx.sv||{})[r.Execute]||'');if(r.Mode==='TapsForMana'&&ex.api==='Mana'&&ex.d.Defined==='TriggeredActivator'&&/^[WUBRGC]$/.test(ex.d.Produced||'')&&r.ValidCard&&fgSpecOk(r.ValidCard,ctx))return [{op:'maisMana',v:r.ValidCard,cor:ex.d.Produced,n:+(ex.d.Amount||1)}];}
       /* emblema estático */if(/^Emblem/.test(d.Name||'')&&d.StaticAbilities&&!d.Triggers&&!d.ReplacementEffects&&d.Duration==='Permanent'){const S=[];
         for(const nm of String(d.StaticAbilities).split(',')){const r={};for(const pp of String((ctx.sv||{})[nm]||'').split('|')){const q=pp.indexOf('$');if(q>0)r[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}
@@ -6337,7 +6337,7 @@ function xPode(i){const s=X.sala||{};if(!s.turno)return 'Sorteiem quem começa a
 /* ---------- jogar carta ---------- */
 const xMDFC=c=>{if(c.face||c.tok)return null;const r=acharDB(c.n);if(!r||!Array.isArray(r[10]))return null;const b=r[10];if(!b[1]&&!(/\bLand\b/.test(b[2]||'')&&!/\btransform\b/i.test(r[6]||'')))return null;return {n:b[0],custo:b[1]||'',land:/\bLand\b/.test(b[2]||'')};};
 const xMTE=c=>{if(c.face||c.tok)return '';const m=String(xInfo(c).tx).match(/^More Than Meets the Eye ((?:\{[^}]+\})+)/m);return m?m[1]:'';};
-async function xConjura(z,k,cv,cus,mod){const e=X.eu,c=e[z].find(q=>q.k===k);if(!c)return;const i=xInfo(c),cvc=cv===1?xMTE(c):(cus||c.cuAlt||(c.gratisAte!=null&&z==='exi'&&((X.sala||{}).turno||0)<=c.gratisAte?'{0}':''));
+async function xConjura(z,k,cv,cus,mod){const e=X.eu,c=e[z].find(q=>q.k===k);if(!c)return;if(e.abeyT!=null&&e.abeyT===((X.sala||{}).turno||0)&&/Instant|Sorcery/.test(xInfo(c).tipo||''))return xAv('Abeyance: não pode conjurar instantâneas nem feitiços neste turno.');const i=xInfo(c),cvc=cv===1?xMTE(c):(cus||c.cuAlt||(c.gratisAte!=null&&z==='exi'&&((X.sala||{}).turno||0)<=c.gratisAte?'{0}':''));
   if(i.land&&!i.cri){const er=xPode({inst:0});if(er)return xAv(er);if(e.ter>=1)return xAv('Você já jogou um terreno neste turno.');
     e[z].splice(e[z].indexOf(c),1);xReset(c);if(cv===2)c.face=1;e.campo.push(c);e.ter++;xLog('jogou o terreno '+xNomeF(c));setTimeout(()=>xEntrou(c),300);xSobe();return xPintaEu();}
   const er=xPode(c.semVel?{inst:1}:i);if(er)return xAv(er);
@@ -6567,7 +6567,7 @@ function xHabs(c){if(c.tok&&!c.cp)return [];const hk=c.n+(c.face?'|v':'');if(XH.
     l.push({ex,cu:m[1],tx:m[2],t:/\{T\}/.test(m[1]),sac:/sacrifice/i.test(m[1]),mana:m[1].replace(/\{T\}|sacrifice this (?:card|land|creature|artifact|enchantment|permanent|token|equipment)|, /gi,'')});}
   if(fh)l.push(...fh);if(fh||fgPronto(c.n))XH.set(hk,l);return l;}
 function xHabOk(c,hb){if(hb.pw)return false;if(hb.fg&&fgPodeHab(c,hb))return false;if(hb.t){if(c.tap)return false;if(xInfo(c).cri&&c.sk&&!xPT(c).kw.has('haste'))return false;}return true;}
-async function xAtiva(k,j){const e=X.eu,c=e.campo.find(q=>q.k===k);if(!c)return;const hb=xHabs(c)[j];if(!hb)return;const s=X.sala||{};
+async function xAtiva(k,j){const e=X.eu,c=e.campo.find(q=>q.k===k);if(!c)return;if(e.abeyT!=null&&e.abeyT===((X.sala||{}).turno||0))return xAv('Abeyance: não pode ativar habilidades (exceto de mana) neste turno.');/* Abeyance: não pode ativar (campo) */const hb=xHabs(c)[j];if(!hb)return;const s=X.sala||{};
   if(hb.pw){const er=xPode({inst:0});if(er)return xAv(er);if(c.lt===s.turno&&!(c.ltX&&c.ltX.t===s.turno&&c.ltX.n>0))return xAv('Esse planeswalker já usou uma habilidade neste turno.');const L=(c.mk||{}).lealdade||0;if(L+hb.cu<0)return xAv(`Lealdade ${L} não paga ${hb.rot}.`);}
   else{if(!s.turno)return xAv('Sorteiem quem começa antes.');if((s.pilha||[]).length&&s.pri!==xUid())return xAv('Espere sua vez de responder na pilha.');if(hb.ex&&(c.exh||[]).includes(hb.cu+hb.tx))return xAv(c.n+': habilidade de exaurir já usada (só 1 vez).');if(hb.fg){const er=fgPodeHab(c,hb);if(er)return xAv(c.n+': '+er);}if(!xHabOk(c,hb))return xAv(c.tap?'Já está virada.':'Enjoo de invocação: não pode usar {T} neste turno.');}
   const r=hb.pw?{ok:true,pool:e.pool,tap:[],vida:0}:xPaga(e,xCusto(hb.mana||''),0);if(!r.ok)return xAv('Falta mana: '+r.falta.join(', '));
@@ -6660,6 +6660,7 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='tiranoS'){const S=[];for(let g=0;g<200;g++){const L=e.campo.filter(c=>!S.includes(c));if(!L.length)break;const c=L[Math.floor(Math.random()*L.length)];S.push(c.n);xMorre(c);if(xInfo(c).land)break;}xLog(`${v.nm} (${xNomeU(v.de)}): sacrificou ao acaso ${S.length?S.join(', '):'nada'}`);xVarre();xSobe();xPintaEu();}
   else if(v.op==='blightV'){setTimeout(()=>xBlight(v.n,v.nm+' ('+xNomeU(v.de)+')'),300);}
   else if(v.op==='danoTodosX'){xTodosDano(v.n,v.x);xVarre();xSobe();xPintaEu();}
+  else if(v.op==='abeyV'){e.abeyT=v.t;xLog(`${xNomeU(v.de)}: você não pode conjurar instantâneas/feitiços nem ativar habilidades (exceto de mana) neste turno`);}
   else if(v.op==='sacr')xSacr(v);
   else if(v.op==='pedeTopo'){const e=X.eu,ex=[],vai=[];if(v.ate){while(e.bib.length){const c=e.bib.shift();if(xInfo(c).land&&!xInfo(c).cri)ex.push(c);else{vai.push(c);break;}}}else for(const c of e.bib.splice(0,v.n||1))(xInfo(c).land&&!xInfo(c).cri?ex:vai).push(c);e.exi.push(...ex);
     xLog(`${v.nm} (${xNomeU(v.de)}): exilou ${[...ex,...vai].map(c=>c.n).join(', ')||'nada'} do topo do seu grimório`);if(vai.length)xEvia({op:'topoVem',cs:JSON.parse(JSON.stringify(vai)),nm:v.nm,para:v.de});xSobe();}
@@ -6997,6 +6998,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'thunder':{const r=1+Math.floor(Math.random()*20);if(r<=9){ev({op:'danoTodos',n:s.n1});xTodosDano(s.n1);feito.push(`d20: ${r} → ${s.n1} de dano em cada criatura`);break;}if(r===20){ev({op:'danoTodos',n:s.n3});feito.push(`d20: 20 → ${s.n3} de dano em cada criatura dos oponentes`);break;}
         const T=[...e.campo.filter(c=>xCri(c)).map(c=>({c,lado:'Seu',u:me})),...xOpCampos().flatMap(([cp,u])=>cp.filter(c=>xCri(c)).map(c=>({c,lado:xNomeU(u),u})))];const res=st.slice(si+1),al2=(it.al||[]).slice(j);
         setTimeout(async()=>{let q=T.filter(x=>x.u===me).sort((a,b)=>xPT(b.c).p+xPT(b.c).t-xPT(a.c).p-xPT(a.c).t)[0]||T[0];if(!XBOT&&T.length>1){const k=await xEscolhe(`${it.nm}: d20 ${r} — escolha a criatura que NÃO toma ${s.n2} de dano`,T.map(x=>({c:x.c,lado:x.lado})));q=T.find(x=>x.c.k===k)||q;}const x=q?q.c.k:'';xEvia({op:'danoTodosX',n:s.n2,x});xTodosDano(s.n2,x);xLog(`${it.nm}: d20 ${r} → ${s.n2} de dano em cada criatura menos ${q?q.c.n:'nenhuma'}`);xVarre();xSobe();xPintaEu();if(res.length)xFazDepois(res,Object.assign({},it,{al:al2}));},300);return rest;}
+      case 'abey':{const u=String(t||'').startsWith('P:')?String(t).slice(2):ou;const tn=(X.sala||{}).turno||0;if(u===me)e.abeyT=tn;else ev({op:'abeyV',t:tn},u);feito.push(`${u===me?'você':xNomeU(u)} não pode conjurar instantâneas/feitiços nem ativar habilidades (exceto de mana) neste turno`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
@@ -7451,7 +7453,7 @@ function xAnima(el){const vis=X._vis=X._vis||new Set(),pri=!X._visOk;el.querySel
 for(const nm of ['xPintaEu','xPintaOp']){const f0=window[nm]||eval(nm);eval(nm+'=function(...a){xGuarda(document.querySelector("#x1-eu"));xGuarda(document.querySelector("#x1-op"));X._mud=0;const r=f0.apply(this,a);if(X._mud&&document.body.classList.contains("x1-L"))requestAnimationFrame(()=>xMede());return r;}');}
 
 /* ---------- vigiar, descartar, sacrificar o seu, castigo, masmorra ---------- */
-async function xAtivaMao(k,j){const e=X.eu,c=e.mao.find(q=>q.k===k);if(!c)return;const hb=fgHabsCem(c,'Hand')[j];if(!hb)return;const s=X.sala||{};
+async function xAtivaMao(k,j){const e=X.eu,c=e.mao.find(q=>q.k===k);if(!c)return;if(e.abeyT!=null&&e.abeyT===((X.sala||{}).turno||0))return xAv('Abeyance: não pode ativar habilidades (exceto de mana) neste turno.');/* Abeyance: não pode ativar (mão) */const hb=fgHabsCem(c,'Hand')[j];if(!hb)return;const s=X.sala||{};
   if(!s.turno)return xAv('Sorteiem quem começa antes.');if((s.pilha||[]).length&&s.pri!==xUid())return xAv('Espere sua vez de responder na pilha.');if(hb.fg.cu.nao)return xAv(`${c.n}: o jogo ainda não paga esse custo (${hb.fg.cu.nao}).`);
   {const er=fgPodeHab(c,hb);if(er)return xAv(c.n+': '+er);}
   const r=xPaga(e,xCusto(hb.mana||''),0);if(!r.ok)return xAv('Falta mana: '+r.falta.join(', '));
@@ -7459,7 +7461,7 @@ async function xAtivaMao(k,j){const e=X.eu,c=e.mao.find(q=>q.k===k);if(!c)return
   if(!(await fgPagaEx(c,hb))){xSobe();return xPintaEu();}
   const pg=xAplica(e,r);xLog(`ativou ${c.n} da mão: ${hb.cu}: ${hb.tx}${al.length?' → '+al.map(xAlvoNome).join(', '):''}${pg?' · '+pg:''}`);
   xEmpilha({id:xId(),de:xUid(),tipo:'hab',tx:hb.tx,nm:c.n,img:c.img||'',k:c.k,al});xSobe();xPintaEu();}
-async function xAtivaCem(k,j){const e=X.eu,c=e.cem.find(q=>q.k===k);if(!c)return;const hb=fgHabsCem(c)[j];if(!hb)return;const s=X.sala||{};
+async function xAtivaCem(k,j){const e=X.eu,c=e.cem.find(q=>q.k===k);if(!c)return;if(e.abeyT!=null&&e.abeyT===((X.sala||{}).turno||0))return xAv('Abeyance: não pode ativar habilidades (exceto de mana) neste turno.');/* Abeyance: não pode ativar (cemitério) */const hb=fgHabsCem(c)[j];if(!hb)return;const s=X.sala||{};
   if(!s.turno)return xAv('Sorteiem quem começa antes.');if((s.pilha||[]).length&&s.pri!==xUid())return xAv('Espere sua vez de responder na pilha.');if(hb.fg.cu.nao)return xAv(`${c.n}: o jogo ainda não paga esse custo (${hb.fg.cu.nao}).`);
   {const er=fgPodeHab(c,hb);if(er)return xAv(c.n+': '+er);}
   const r=xPaga(e,xCusto(hb.mana||''),0);if(!r.ok)return xAv('Falta mana: '+r.falta.join(', '));
