@@ -5446,7 +5446,7 @@ function fgTem(c,w){const i=xInfo(c);
   return new RegExp('\\b'+w+'\\b').test((i.tipo||'')+(c.tok?' '+c.n:''));}
 function fgProp(c,p,ctx){let m;
   if(p==='YouCtrl'||p==='YouOwn')return fgDono(c)===ctx.eu;if(p==='OppCtrl'||p==='YouDontCtrl'||p==='OppOwn')return fgDono(c)!==ctx.eu;
-  if(p==='Other')return c.k!==ctx.src;if(p==='Self')return c.k===ctx.src;if(p==='tapped')return !!c.tap;if(p==='untapped')return !c.tap;
+  if(p==='ChosenType'||p==='IsChosenType'||p==='nonChosenType'||p==='IsNotChosenType'){if(c.k==='__x')return true;const sc=fgSrc(ctx),T=sc&&sc.tipoE;const tem=!!T&&fgTem(c,T);return /^(nonChosenType|IsNotChosenType)$/.test(p)?!tem:tem;}if(p==='Other')return c.k!==ctx.src;if(p==='Self')return c.k===ctx.src;if(p==='tapped')return !!c.tap;if(p==='untapped')return !c.tap;
   if(p==='attacking')return !!c.atk;if(p==='blocking')return !!c.bl;if(p==='token')return !!c.tok;if(p==='nonToken')return !c.tok;
   if(p==='Equipped')return fgTodos().some(q=>q.an===c.k&&xInfo(q).equip);if(p==='harnessed')return !!c.harn;if(p==='Enchanted'||p==='enchanted')return fgTodos().some(q=>q.an===c.k&&xInfo(q).aura);
   if(m=p.match(/^(power|toughness|cmc)(LT|LE|EQ|GE|GT|NE)(-?\d+|X)$/)){const v=m[3]==='X'?fgConta('X',ctx):+m[3];if(v==null)return true;const n=m[1]==='cmc'?xMVc(c):xInfo(c).cri?xPT(c)[m[1]==='power'?'p':'t']:0;return fgCmp(n,m[2]+v);}
@@ -5753,6 +5753,7 @@ const n=N('DigNum'),sub=fgPP((ctx.sv||{})[d.SubAbility]||''),mp=sub.api==='Effec
       if(!d1||!d2||d.ChangeNum==='X')return nao('destino '+(d.DestinationZone||'')+'/'+(d.DestinationZone2||''));const all=d.ChangeNum==='All'||d.AnyNumber==='True';
       return [{op:'cava',n,k:all?99:(d.ChangeNum==null?1:+d.ChangeNum||1),v:d.ChangeValid||'Card',d1,d2,tap:d.Tapped==='True'?1:0,ate:all||d.Optional==='True'?1:0,auto:d.ChangeNum==='All'?1:0,lb:lbD}];}
     case 'PeekAndReveal':{const n=N('PeekAmount')||1,sb=d.SubAbility&&fgPP((ctx.sv||{})[d.SubAbility]||'');
+      if(n===1&&d.RevealValid&&d.RevealOptional==='True'&&d.RememberRevealed&&sb&&sb.api==='ChangeZone'&&sb.d.Defined==='TopOfLibrary'&&sb.d.Destination==='Hand'&&sb.d.ConditionPresent===d.RevealValid&&fgSpecOk(d.RevealValid,ctx)){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'topoTipo',v:d.RevealValid}];}
       if(d.RememberPeeked&&sb&&sb.api==='ChooseCard'&&sb.d.ChoiceZone==='Library'&&sb.d.Choices==='Creature.IsRemembered,Land.IsRemembered'){const nm=[d.SubAbility];let q=sb.d,ok=0;const vis=new Set();
         for(let i=0;i<6&&q.SubAbility&&!vis.has(q.SubAbility);i++){vis.add(q.SubAbility);nm.push(q.SubAbility);const z=fgPP((ctx.sv||{})[q.SubAbility]||'');if(z.api==='Cleanup'){ok=1;break;}if(z.api!=='ChangeZoneAll')break;q=z.d;}
         if(ok){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),...nm];return [{op:'zimone',n,k:+(sb.d.Amount||2)}];}}
@@ -6142,6 +6143,9 @@ function xEtbRep(c){if(c.tok&&!c.cp)return;const i=xInfo(c),t=xNorm(i.tx,c.n).re
 async function xEtbEsc(c){if(c.tok&&!c.cp)return;const e=X.eu,t=xNorm(xInfo(c).tx,c.n).replace(/\([^)]*\)/g,'');let m;
   if(m=t.match(/^Hideaway(?: (\d+))?\s*$/im)){const n=+(m[1]||4),L=e.bib.slice(0,n);if(L.length){let kk=L[0].k;if(!XBOT&&L.length>1)kk=await xEscolhe(`Hideaway ${n}: escolha a carta pra esconder embaixo de ${c.n}`,L.map(x=>({c:x,lado:'Topo'})));const q=L.find(x=>x.k===kk)||L[0];e.bib.splice(0,L.length);L.filter(x=>x!==q).forEach(x=>e.bib.push(x));e.exi.push(xReset(q));q.hdOf=c.n;c.hide=q.k;xLog(`${c.n}: escondeu 1 carta (hideaway ${n}), ${L.length-1} pro fundo`);xSobe();xPintaEu();}}
   if(m=t.match(/^Fabricate (\d+)/im)){const n=+m[1],ct=XBOT?1:confirm(`Fabricar ${n}: OK = ${n} marcador(es) +1/+1 em ${c.n} · Cancelar = ${n} Servo(s) 1/1`);if(ct){c.cnt=(c.cnt||0)+n;xLog(`${c.n}: fabricar ${n}, ${n} marcador(es) +1/+1`);}else xFicha('Servo',1,1,[],1,0,n);xSobe();xPintaEu();}
+  if(/^As (?:this [a-z]+|[^,\n]+?) enters(?: the battlefield)?, choose a creature type\.?\s*$/im.test(t)&&!c.tipoE){const C={};for(const q of [...e.campo,...e.mao,...e.bib,...e.cem])if(xInfo(q).cri){const st=String(xInfo(q).tipo||'').split(/[—-]/)[1]||'';for(const w of st.trim().split(/\s+/).filter(Boolean))C[w]=(C[w]||0)+1;}
+    const top=Object.entries(C).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);let T=top[0]||'Human';if(!XBOT){const r=prompt(`${c.n}: escolha um tipo de criatura${top.length?' (mais comuns no seu deck: '+top.slice(0,5).join(', ')+')':''}`,T);if(r&&r.trim())T=r.trim().replace(/^./,x=>x.toUpperCase());}
+    c.tipoE=T;xLog(`${c.n}: escolheu o tipo ${T}`);xSobe();xPintaEu();}
   if(/^Exploit\b/im.test(t)){const L=e.campo.filter(q=>xInfo(q).cri);let v=null;if(XBOT)v=L.filter(q=>q.tok).sort((a,b)=>xPT(a).p-xPT(b).p)[0]||null;else if(L.length){const kk=await xEscolhe(`Explorar: sacrificar uma criatura com ${c.n}? (fechar = não)`,L.map(q=>({c:q,lado:'Seu'})));v=L.find(q=>q.k===kk)||null;}
     if(v){xLog(`${c.n} explorou ${v.n}`);xMorre(v);xVarre();const g=t.match(/^When this (?:card|creature) exploits a creature, ([^\n]+)$/im);if(g)setTimeout(()=>xGatTx(c,g[1],'explorou'),300);xSobe();xPintaEu();}}}
 function xEntrou(c){if(!X.eu.campo.includes(c))return;xTT().ent.push(c);c.etT=(X.sala||{}).turno;xEtbRep(c);xEtbEsc(c);xP3Etb(c);if(!c.tok||c.cp)xGatilho(c);
@@ -6859,6 +6863,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
         setTimeout(async()=>{const k=L.length===1||XBOT?L[0].k:await xEscolhe(`${it.nm}: qual comandante?`,L.map(c=>({c,lado:'Comando'})));const c=L.find(q=>q.k===k);if(!c||!e.cmdz.includes(c))return;e.cmdz.splice(e.cmdz.indexOf(c),1);
           if(s.op==='cmdMao'){e.mao.push(c);xLog(`${it.nm}: ${c.n} foi da zona de comando pra mão`);}else{xReset(c);c.tap=0;c.sk=0;c.voltaCmd=(X.sala||{}).turno||0;e.campo.push(c);xLog(`${it.nm}: ${c.n} entrou no campo com ímpeto (volta pra zona de comando no fim do turno)`);setTimeout(()=>xEntrou(c),300);}xSobe();xPintaEu();},300);
         feito.push(s.op==='cmdMao'?'põe seu comandante na mão':'põe seu comandante no campo até o fim do turno');break;}
+      case 'topoTipo':{const c=e.bib[0];if(!c){feito.push('grimório vazio');break;}let ok=false;try{ok=fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){}if(ok&&(XBOT||confirm(`${it.nm}: o topo é ${c.n}. Revelar e pôr na mão?`))){e.bib.shift();e.mao.push(c);feito.push(`revelou ${c.n} e pôs na mão`);}else feito.push('olhou o topo');break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
