@@ -5608,6 +5608,8 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       if(d.AnyNumber==='True'&&d.RememberRevealed&&d.RevealValid&&sb&&sb.api==='ChangeZone'&&sb.d.Origin==='Graveyard'&&sb.d.Destination==='Hand'&&sb.d.ChangeNum==='X'&&String((ctx.sv||{}).X||'').trim()==='Remembered$Amount'&&fgSpecOk(d.RevealValid,ctx)&&fgSpecOk(sb.d.ChangeType,ctx)){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'revCem',v:d.RevealValid.replace(/\+YouCtrl/,''),t:sb.d.ChangeType}];}
       return nao('Reveal');}
     case 'ChangeZone':{const og=d.Origin||'',ds=d.Destination||'';
+      if(og==='Library'&&ds==='Exile'&&!al&&!d.Defined&&/^Land(\.YouOwn)?$/.test(d.ChangeType||'')&&!d.SubAbility){const n=N('ChangeNum')||1;return [{op:'tutor',v:'Land',n,dest:'exiS',dif:d.DifferentNames==='True'?1:0,ate:1,tap:0}];}
+      if(og==='Exile'&&ds==='Battlefield'&&!al&&d.ChangeType==='Card.ExiledWithSource'&&d.AtRandom==='True')return [{op:'exiSCampo',tap:d.Tapped==='True'?1:0}];
       if(og==='Hand'&&ds==='Exile'&&d.RememberChanged&&!al&&d.SubAbility&&/^Count\$ValidHand Card/.test(String((ctx.sv||{})[d.ChangeNum]||''))){const dg=fgPP((ctx.sv||{})[d.SubAbility]||''),rp=dg.d&&dg.d.SubAbility&&fgPP((ctx.sv||{})[dg.d.SubAbility]||'');
         if(dg.api==='Dig'&&dg.d.DestinationZone==='Hand'&&dg.d.ChangeNum==='All'&&rp&&rp.api==='ChangeZoneAll'&&rp.d.Origin==='Exile'&&rp.d.Destination==='Library'){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility,dg.d.SubAbility];return [{op:'scrollRack'}];}}
       if(og==='Hand'&&ds==='Battlefield'&&d.Defined==='Self'&&!al&&!d.SubAbility)return [{op:'maoCampoSelf',tap:d.Tapped==='True'?1:0}];
@@ -6043,7 +6045,7 @@ function xPT(c){const i=xInfo(c);let p=(c.ptF?c.ptF[0]:c.ani&&c.ani.p!=null?c.an
   if(xInfo(c).cri||c.tok){const L=xLadoCampo(c);for(const l of L){if(l.fd)continue;const li=xInfo(l);if(!li.lord)continue;for(const z of li.lord){if(z.o&&l.k===c.k)continue;if(!xFiltro(z.f,c))continue;p+=z.p;t+=z.t;z.kw.forEach(x=>kw.add(x));}}}
   /* bônus de emblema */{const me0=X.eu&&X.eu.campo.includes(c)?xUid():null,u=me0||Object.keys(X.ops||{}).find(q=>((X.ops[q]||{}).campo||[]).includes(c)),pl=u==null?null:u===xUid()?X.eu:X.ops[u];
     for(const em of (pl&&pl.emb)||[])for(const z of em.st||[]){let ok=false;try{ok=fgValid(c,z.v,{eu:u,src:'',sv:{}});}catch(er){}if(ok){p+=z.p;t+=z.t;(z.kw||[]).forEach(x=>kw.add(x));}}}
-  for(const [a] of xAnx(c.k)){const j=xInfo(a);if(j.da){p+=j.da.p;t+=j.da.t;j.da.kw.forEach(x=>kw.add(x));}if(j.pz)pz=Math.max(pz,j.pz);}
+  for(const [a] of xAnx(c.k)){const j=xInfo(a);if(j.da){const mu=xDaMul(a);p+=j.da.p*mu;t+=j.da.t*mu;j.da.kw.forEach(x=>kw.add(x));}if(j.pz)pz=Math.max(pz,j.pz);}
   return {p,t,kw,pz,mod:p!==i.p||t!==i.t};}
 const xCri=c=>(xInfo(c).cri&&!(c.rcf&&c.an&&xAchaK(c.an))&&!(c.bst&&c.an&&xAchaK(c.an))&&!(c.mut&&c.an&&xAchaK(c.an)))||(c.trip!=null&&c.trip===(X.sala||{}).turno)||!!(c.ani&&c.ani.cri);
 
@@ -6579,6 +6581,7 @@ function xEfCarta(c,op,n,x){const i=xInfo(c);
   else if(op==='pumpProx'){c.tpN=(c.tpN||0)+x.p;c.ateU=x.u;c.ateT=x.tn;}else if(op==='naoAtaca'){c.naN=1;c.ateU=x.u;c.ateT=x.tn;}else if(op==='goad'){c.gd=x.u;c.ateU=x.u;c.ateT=x.tn;}
   else if(op==='dano'){if(i.pw&&!i.cri){c.mk=Object.assign({},c.mk);c.mk.lealdade=(c.mk.lealdade||0)-n;}else if(i.cri){c.dn=(c.dn||0)+n;xTomouDano(c,n);}}
   xVarre();}
+function xDaMul(a){const tx=String(xInfo(a).tx||'');if(!/for each land on the battlefield with the same name as the exiled card/i.test(tx))return 1;const ex=[X.eu,...Object.values(X.ops||{})].filter(Boolean).flatMap(q=>q.exi||[]).find(q=>q.exS===a.k);if(!ex)return 0;let n=0;for(const [cp] of fgCampos())n+=cp.filter(q=>q.n===ex.n&&xInfo(q).land).length;return n;}
 function xTomouDano(c,n){if(!c||!(n>0)||!X.eu||!X.eu.campo.includes(c))return;const tc={tk:c.k,dano:n,qtd:n};
   xGatCampo(/^Whenever (?:a|an|another) ([^,\n]+?) you control is dealt damage, ([^\n]+)$/im,'tomou dano',(m,q)=>!(/another/i.test(m[0])&&q===c)&&xFiltro(m[1],c),null,tc);
   xGatCampo(/^Whenever (?:this [a-z]+|[^,\n]+?) is dealt damage, ([^\n]+)$/im,'tomou dano',(m,q)=>q===c&&!/you control is dealt|each|^Whenever (?:a|an|another) /i.test(m[0]),null,tc);}
@@ -6911,6 +6914,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
           let O=E.slice();if(!XBOT&&E.length>1){O=[];let R=E.slice();while(R.length>1){const k=await xEscolhe(`${it.nm}: qual fica ${O.length?'logo abaixo':'no topo'}? (${O.length+1}/${E.length})`,R.map(c=>({c,lado:'Topo'})));const c=R.find(q=>q.k===k)||R[0];O.push(c);R=R.filter(q=>q!==c);}O.push(...R);}
           e.bib.unshift(...O);xLog(`${it.nm}: trocou ${n} carta(s) da mão pelas ${T.length} do topo`);xSobe();xPintaEu();if(res.length)xFazDepois(res,Object.assign({},it,{al:al2}));},300);return rest;}
       case 'auraFicha':{const a=e.campo.find(q=>q.k===(it.tc||{}).tk);if(!a||!/\bAura\b/.test(xInfo(a).tipo||'')){feito.push('o encantamento não é Aura');break;}const tk=e.campo.filter(q=>q.tok&&xInfo(q).cri).slice(-1)[0];if(!tk){feito.push('sem ficha pra anexar');break;}if(s.opc&&!XBOT&&!confirm(`${it.nm}: anexar ${a.n} à ficha ${tk.n}?`)){feito.push(`${a.n} ficou onde estava`);break;}a.an=tk.k;feito.push(`${a.n} foi anexada a ${tk.n}`);break;}
+      case 'exiSCampo':{const L=e.exi.filter(c=>c.exS&&c.exS===it.k);if(!L.length){feito.push('não tem carta exilada por ela');break;}const c=L[Math.floor(Math.random()*L.length)];e.exi.splice(e.exi.indexOf(c),1);delete c.exS;xReset(c);c.tap=s.tap;e.campo.push(c);setTimeout(()=>xEntrou(c),300);feito.push(`${c.n} (ao acaso) entrou no campo${s.tap?' virado':''}`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
@@ -6976,7 +6980,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
         setTimeout(async()=>{let ks;if(!U.length)ks=[];else if(XBOT)ks=U.slice().sort((a,b)=>(s.dest==='campo'&&xInfo(a).land?-1:0)||xMVc(b)-xMVc(a)).slice(0,n).map(c=>c.k);
           else{ks=null;while(!ks)ks=await xMarca(`${nm}: buscar ${s.ate?'até ':''}${n} (${s.og==='mao'?'da mão':'do grimório'})`,(s.dif?U:L).map(c=>({k:c.k,rot:c.n})),s.ate||!L.length?0:Math.min(n,L.length),n);}
           let pg=ks.map(k=>og.find(c=>c.k===k)).filter(Boolean);if(s.dif){const v2=new Set();pg=pg.filter(c=>!v2.has(c.n)&&v2.add(c.n));}
-          pg.forEach((c,q)=>{og.splice(og.indexOf(c),1);const d=s.dest==='misto'?(q===0?'campo':'mao'):s.dest==='artCampo'?(/\bArtifact\b/.test(xInfo(c).tipo||'')&&(XBOT||confirm(`${nm}: ${c.n} é artefato. Pôr no campo? (se não, vai pra mão)`))?'campo':'mao'):s.dest;if(d==='campo'){c.tap=s.tap?1:0;e.campo.push(c);xEntrou(c);}else if(d==='mao')e.mao.push(c);else if(d==='cem')e.cem.push(c);});
+          pg.forEach((c,q)=>{og.splice(og.indexOf(c),1);const d=s.dest==='misto'?(q===0?'campo':'mao'):s.dest==='artCampo'?(/\bArtifact\b/.test(xInfo(c).tipo||'')&&(XBOT||confirm(`${nm}: ${c.n} é artefato. Pôr no campo? (se não, vai pra mão)`))?'campo':'mao'):s.dest;if(d==='campo'){c.tap=s.tap?1:0;e.campo.push(c);xEntrou(c);}else if(d==='mao')e.mao.push(c);else if(d==='cem')e.cem.push(c);else if(d==='exiS'){c.exS=kc;e.exi.push(c);}});
           if(s.og!=='mao')xEmb(e.bib);if(s.dest==='topo')pg.forEach(c=>e.bib.unshift(c));
           xLog(`${nm}: ${pg.length?(s.dest==='topo'?'buscou e pôs no topo ':'buscou ')+(s.dest==='topo'&&!XBOT?pg.map(c=>c.n).join(', '):s.dest==='topo'?pg.length+' carta':pg.map(c=>c.n).join(', ')):'não achou nada'}${s.og!=='mao'?' e embaralhou':''}`);xSobe();xPintaEu();},300);feito.push('busca');break;}
       case 'busca':{const pega=[],vi=new Set();for(const pas of [0,1])for(const c of e.bib){if(pega.length>=n)break;if(!/^(Snow-Covered )?(Plains|Island|Swamp|Mountain|Forest|Wastes)$/.test(c.n)||pega.includes(c)||(!pas&&vi.has(c.n)))continue;vi.add(c.n);pega.push(c);}
