@@ -5462,7 +5462,7 @@ function fgProp(c,p,ctx){let m;
   fgAv('filtro do Forge ainda não lido: '+p);return true;}
 function fgSpecOk(spec,ctx){let av=0;const o=fgAv;fgAv=()=>{av++;};const dm={n:'__x',k:'__x'};try{for(const alt of String(spec).split(',')){const a=alt.trim(),j=a.indexOf('.');if(!a)return false;for(const p of (j<0?[]:a.slice(j+1).split('+').filter(Boolean)))fgProp(dm,p,ctx||{eu:'eu',src:'',sv:{}});}}catch(e){av++;}finally{fgAv=o;}return !av;}
 function fgValid(c,spec,ctx){if(!spec)return true;return String(spec).split(',').some(alt=>{const a=alt.trim(),j=a.indexOf('.'),t=j<0?a:a.slice(0,j),ps=j<0?[]:a.slice(j+1).split('+').filter(Boolean);
-  if(t==='Player'||t==='Opponent'||t==='Any')return t==='Any'?(xInfo(c).cri||xInfo(c).pw):false;
+  if(t==='Player'||t==='Opponent'||t==='Any')return t==='Any'?((xInfo(c).cri||xInfo(c).pw)&&ps.every(p=>/^!?[A-Z][a-z]+$/.test(p)&&!/^!?(Other|Self)$/.test(p)?(p[0]==='!')!==fgTem(c,p.replace('!','')):fgProp(c,p,ctx))):false;
   return t.split('+').every(w=>fgTem(c,w))&&ps.every(p=>fgProp(c,p,ctx));});}
 /* ---------- números (SVar X, Count$) ---------- */
 /* contas que o fgConta não sabia. null = continua sem saber */
@@ -5561,7 +5561,7 @@ const FGTG={'Any':'any target','Creature':'target creature','Creature.YouCtrl':'
   'Artifact,Enchantment':'target artifact or enchantment','Artifact':'target artifact','Enchantment':'target enchantment','Permanent.nonLand':'target nonland permanent','Land':'target land','Creature,Player':'target creature or player'};
 function fgAlvo(d){const vt=d.ValidTgts;if(!vt)return null;if(FGTG[vt])return {al:FGTG[vt],v:/^(Any|Player|Opponent)$/.test(vt)?'':vt};
   const b=vt.split(',').map(x=>x.split('.')[0]);if(b.every(x=>x==='Creature'))return {al:'target creature',v:vt};
-  if(b.includes('Player')||b.includes('Opponent'))return {al:b.some(x=>x!=='Player'&&x!=='Opponent')?'any target':'target player',v:vt};
+  if(b.includes('Any'))return {al:'any target',v:vt};if(b.includes('Player')||b.includes('Opponent'))return {al:b.some(x=>x!=='Player'&&x!=='Opponent')?'any target':'target player',v:vt};
   return {al:'target permanent',v:vt};}
 /* ---------- passos (API do Forge -> ops do X1) ---------- */
 const FGKW={'Infect':'infect','Shadow':'shadow','Fear':'fear','Flying':'flying','Reach':'reach','Vigilance':'vigilance','Haste':'haste','Deathtouch':'deathtouch','Lifelink':'lifelink','Trample':'trample','First Strike':'first strike','Double Strike':'double strike','Menace':'menace','Indestructible':'indestructible','Hexproof':'hexproof','HIDDEN Unblockable':'unblockable','Defender':'defender',"HIDDEN CARDNAME can't block.":'nbloq',"CARDNAME can't block.":'nbloq'};
@@ -5592,7 +5592,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
   return nao('custo do oponente');}
   const A=fgAlvo(d),al=A&&A.al,put=(x,o)=>{if(A&&A.v)x.v=A.v;o.push(x);return o;},N=k=>{const n=fgConta(d[k],ctx);return n;};
   switch(api){
-    case 'DealDamage':{const n=N('NumDmg');if(n==null)return nao('número');const df=d.Defined||'';if(d.DamageSource&&/^Triggered(Card|Attacker)(LKICopy)?$/.test(d.DamageSource)&&al)return put({op:'dano',n,al,fk:1},[]);if(d.DamageSource){if(/^(ParentTarget|Targeted)$/.test(d.DamageSource)&&al&&n&&n.q==='alvo'&&n.f==='p'&&!(n.md||[]).length)return put({op:'morde',al},[]);return nao('fonte');}
+    case 'DealDamage':{const n=N('NumDmg');if(n==null)return nao('número');const df=d.Defined||'';if(d.DamageSource&&/^Triggered(Card|Attacker|Target)(LKICopy)?$/.test(d.DamageSource)&&!al){d=Object.assign({},d);delete d.DamageSource;}if(d.DamageSource==='TriggeredTarget'&&al)return put({op:'dano',n,al,fk:1},[]);if(d.DamageSource&&/^Triggered(Card|Attacker)(LKICopy)?$/.test(d.DamageSource)&&al)return put({op:'dano',n,al,fk:1},[]);if(d.DamageSource){if(/^(ParentTarget|Targeted)$/.test(d.DamageSource)&&al&&n&&n.q==='alvo'&&n.f==='p'&&!(n.md||[]).length)return put({op:'morde',al},[]);return nao('fonte');}
       if(!al&&/^(Targeted|ParentTarget)Controller$/.test(df))return [{op:'danoDono',n}];if(!al&&df==='TriggeredSourceController')return [{op:'danoTc',n}];if(al)return put({op:'dano',n,al},[]);if(d.__m&&!df)return [{op:'dano',n,al:''}];if(df==='Opponent'||df==='Player.Opponent')return [{op:'dano',n,al:'each opponent'}];if(df==='Player')return [{op:'dano',n,al:'each player'}];if(df==='You')return [{op:'perdeEu',n}];return nao();}
     case 'DamageAll':{const n=N('NumDmg');if(n==null)return nao('número');const o=[];if(d.ValidCards==='Creature')o.push({op:'dano',n,al:'each creature'});else if(d.ValidCards&&/^Creature\b/.test(d.ValidCards)&&fgSpecOk(d.ValidCards,ctx))o.push({op:'dano',n,al:'each creature',v:d.ValidCards});else if(d.ValidCards)return nao('quais criaturas');
       if(d.ValidPlayers==='Player')o.push({op:'dano',n,al:'each player'});else if(/Opponent/.test(d.ValidPlayers||''))o.push({op:'dano',n,al:'each opponent'});return o.length?o:nao();}
@@ -6116,7 +6116,7 @@ function xTurno(){const s=X.sala,e=X.eu,me=xUid();if(!s||!e)return;let mud=0;
     if(cp){if(xDraga())t=' e dragou no lugar da compra';else if(e.bib.length){const d=e.bib.shift();d.cT=s.turno;e.mao.push(d);t=' e comprou 1';xMilagre(d);}else t=' e não tinha carta pra comprar (grimório vazio = derrota)';}else t=' (quem começa não compra no 1º turno)';
     xLog(`começou o turno ${s.turno}: desvirou tudo${t}`);if(cp)setTimeout(()=>xGatCampo(/^(At the beginning of your draw step, [^\n]+)$/im,'etapa de compra'),900);setTimeout(()=>xAtrasado('Upkeep'),760);setTimeout(()=>xGatCampo(/^At the beginning of your upkeep, ([^\n]+)$/im,'manutenção'),700);setTimeout(()=>xGatCampo(/^(At the beginning of each player's upkeep, [^\n]+)$/im,'manutenção',null,null,{tp:xUid()}),720);if(e.exi.some(q=>q.susp))setTimeout(xTempo,1100);if(e.exi.some(q=>q.reb))setTimeout(xRebote,1300);if(e.campo.some(xCuL))setTimeout(xCumul,1500);if(s.dn)setTimeout(xDiaNoite,1800);if(e.campo.some(q=>xInfo(q).saga))setTimeout(async()=>{for(const q of e.campo.filter(q=>xInfo(q).saga))await xLore(q);},2100);if(e.campo.some(q=>/^(Vanishing|Fading) \d/im.test(xInfo(q).tx||'')))setTimeout(xDesvanece,1700);if(s.ini&&s.ini.u===me){xLog('manutenção com a iniciativa');setTimeout(()=>xVenture('Iniciativa',1),900);}if(!(s.fase>0))xSala({fase:1});mud=1;}
   for(const g of [s.golpe,...(s.golpes||[])])if(g&&g.para===me&&e.gv!==g.id){e.gv=g.id;e.vida+=(g.vg||0)-(g.dano||0);if(g.ven)e.ven=(e.ven||0)+g.ven;if(g.cmd){e.dcm=e.dcm||{};e.dcm[g.de]=(e.dcm[g.de]||0)+g.cmd;e.dc=Math.max(e.dc||0,...Object.values(e.dcm));}
-    for(const c of e.campo.slice()){if((g.mortos||[]).includes(c.k)){xMorre(c);}else{if(g.dn&&g.dn[c.k])c.dn=(c.dn||0)+g.dn[c.k];if(g.cm&&g.cm[c.k])c.cnt=(c.cnt||0)-g.cm[c.k];c.bl='';}}
+    for(const c of e.campo.slice()){if((g.mortos||[]).includes(c.k)){xMorre(c);}else{if(g.dn&&g.dn[c.k]){c.dn=(c.dn||0)+g.dn[c.k];xTomouDano(c,g.dn[c.k]);}if(g.cm&&g.cm[c.k])c.cnt=(c.cnt||0)-g.cm[c.k];c.bl='';}}
     for(const [k,d] of Object.entries(g.pw||{})){const c=e.campo.find(q=>q.k===k);if(c)xEfCarta(c,'dano',d);}
     if((g.dano||0)>0&&s.ini&&s.ini.u===me&&g.de&&g.de!==me){const ni={u:g.de,id:xId()};s.ini=ni;X.iniV=ni.id;xSala({ini:ni});xLog('levou dano de combate e perdeu a iniciativa');}
     if((g.dano||0)>0&&s.mon&&s.mon.u===me&&g.de&&g.de!==me){const nm={u:g.de,id:xId()};s.mon=nm;xSala({mon:nm});xLog('levou dano de combate e perdeu o monarca');}
@@ -6513,7 +6513,7 @@ function xAlvoNome(t){t=String(t||'');if(t.startsWith('M#'))return 'modo '+t.sli
 async function xPedeAlvos(st,nome,k){const al=[];let mm='';st=st.slice();st=st.flatMap(s=>(s.op==='pagaOu'||s.op==='sacOu')&&Array.isArray(s.st)?[s,...s.st]:[s]);{const mi=st.findIndex(s=>s.op==='modal');if(mi>=0){const md=st[mi],ix=await xModo(nome,md);if(!ix||!ix.length)return null;st.splice(mi,1,...ix.flatMap(q=>md.ops[q].st||[]));mm='M#'+ix.join(',');xLog(`${nome}: escolheu ${ix.map(q=>md.ops[q].rot).join(' + ')}`);}}
   for(const s of st){if(!xPrecisaAlvo(s))continue;
     let l=s.op==='voltaSP'?[...((X.sala&&X.sala.pilha)||[]).filter(p=>p.tipo==='mag'&&p.de!==xUid()).map(p=>({st:p})),...xAlvosEf('target nonland permanent',nome).filter(a=>a.c&&fgValid(a.c,s.v,{eu:xUid(),src:k||'',sv:{}}))]:s.op==='trocaAlvo'?((X.sala&&X.sala.pilha)||[]).filter(p=>s.hab||p.tipo==='mag').map(p=>({st:p})):s.op==='exiS'?((X.sala&&X.sala.pilha)||[]).filter(p=>p.tipo==='mag').map(p=>({st:p})):(s.op==='anula'||s.op==='copiaS'||s.op==='devolveS')?((X.sala&&X.sala.pilha)||[]).filter(p=>p.tipo==='mag').map(p=>({st:p})):xAlvosEf(s.al,nome);
-    if(s.v){const ctx={eu:xUid(),src:k||'',sv:{}},vs=String(s.v).split(',').map(x=>x.trim().split('.')[0]);l=l.filter(a=>a.c?fgValid(a.c,s.v,ctx):a.jog!=null?(vs.includes('Player')||(vs.includes('Opponent')&&a.jog!==xUid())):true);}
+    if(s.v){const ctx={eu:xUid(),src:k||'',sv:{}},vs=String(s.v).split(',').map(x=>x.trim().split('.')[0]);l=l.filter(a=>a.c?fgValid(a.c,s.v,ctx):a.jog!=null?(vs.includes('Player')||vs.includes('Any')||(vs.includes('Opponent')&&a.jog!==xUid())):true);}
     if(!l.length){xAv(`${nome}: sem alvo válido (${s.op==='anula'?'nenhuma mágica na pilha':s.al}).`);return null;}
     const a=await xEscolhe(`${nome}: escolha o alvo`,l);if(!a)return null;al.push(a);}if(mm)al.unshift(mm);return al;}
 // ward: alvo do oponente com Ward. Paga ou a mágica/habilidade é anulada. true = segue.
@@ -6575,8 +6575,11 @@ function xEfCarta(c,op,n,x){const i=xInfo(c);
   else if(op==='anima')c.ani={p:x.p,t:x.t,kw:x.kws||[],cri:x.cri,perm:x.perm};
   else if(op==='kt')c.kt=[...new Set([...(c.kt||[]),...(x.kws||[x.kw])])];
   else if(op==='pumpProx'){c.tpN=(c.tpN||0)+x.p;c.ateU=x.u;c.ateT=x.tn;}else if(op==='naoAtaca'){c.naN=1;c.ateU=x.u;c.ateT=x.tn;}else if(op==='goad'){c.gd=x.u;c.ateU=x.u;c.ateT=x.tn;}
-  else if(op==='dano'){if(i.pw&&!i.cri){c.mk=Object.assign({},c.mk);c.mk.lealdade=(c.mk.lealdade||0)-n;}else if(i.cri)c.dn=(c.dn||0)+n;}
+  else if(op==='dano'){if(i.pw&&!i.cri){c.mk=Object.assign({},c.mk);c.mk.lealdade=(c.mk.lealdade||0)-n;}else if(i.cri){c.dn=(c.dn||0)+n;xTomouDano(c,n);}}
   xVarre();}
+function xTomouDano(c,n){if(!c||!(n>0)||!X.eu||!X.eu.campo.includes(c))return;const tc={tk:c.k,dano:n,qtd:n};
+  xGatCampo(/^Whenever (?:a|an|another) ([^,\n]+?) you control is dealt damage, ([^\n]+)$/im,'tomou dano',(m,q)=>!(/another/i.test(m[0])&&q===c)&&xFiltro(m[1],c),null,tc);
+  xGatCampo(/^Whenever (?:this [a-z]+|[^,\n]+?) is dealt damage, ([^\n]+)$/im,'tomou dano',(m,q)=>q===c&&!/you control is dealt|each|^Whenever (?:a|an|another) /i.test(m[0]),null,tc);}
 function xFilV(v,de,f){let n=0;for(const c of X.eu.campo.slice()){let ok=false;try{ok=fgValid(c,v,{eu:de,src:'',sv:{}});}catch(er){}if(ok){n++;f(c);}}return n;}
 function xTodos(tipo){const e=X.eu;for(const c of e.campo.slice()){const i=xInfo(c),art=/Artifact/.test(i.tipo||'')||!!c.art,en=/Enchantment/.test(i.tipo||'');
   const ok=tipo==='creatures'?i.cri:tipo==='artifacts'?art:tipo==='enchantments'?en:tipo==='lands'?i.land:tipo==='planeswalkers'?i.pw:!i.land;if(ok)xEfCarta(c,'destroi');}}
@@ -7040,7 +7043,7 @@ function xDano(){const e=X.eu,s=X.sala,me=xUid();if(!s||!Object.keys(X.ops||{}).
     for(const [t,n,f] of hit)if(n>0&&!xProtDe(t.c,f.c)){t.dmg+=n;(f.dc=f.dc||[]).push([t,t.dmg>(f.kw.has('deathtouch')?1:t.T)]);if(f.kw.has('infect')||f.kw.has('wither'))t.mm+=n;if(f.kw.has('deathtouch'))t.dt=1;}
     for(const x of [...A,...B])if(!x.morto&&!x.kw.has('indestructible')&&(x.dmg>=x.T||(x.dt&&x.dmg>0)))x.morto=1;}
   if(xtra.length)xLog([...new Set(xtra)].join(' · '));
-  for(const a of A){if(a.morto)a.c.__atk=1;a.c.atk=0;a.c.alv='';delete a.c.band;if(a.c.cvf&&!a.morto)xConv(a.c);if(a.morto)xMorre(a.c);else{a.c.dn=Math.max(0,a.dmg-a.mm-(a.bon||0));if(a.mm)a.c.cnt=(a.c.cnt||0)-a.mm;}}
+  for(const a of A){if(a.morto)a.c.__atk=1;a.c.atk=0;a.c.alv='';delete a.c.band;if(a.c.cvf&&!a.morto)xConv(a.c);if(a.morto)xMorre(a.c);else{a.c.dn=Math.max(0,a.dmg-a.mm-(a.bon||0));if(a.dmg>0)xTomouDano(a.c,a.dmg);if(a.mm)a.c.cnt=(a.c.cnt||0)-a.mm;}}
   {const H=A.filter(a=>a.hp&&!a.c.tok||a.hp);const mx=new Map();for(const a of H){xGatCampo(/Whenever (?:a|another) ((?:nontoken )?[A-Za-z -]*?)creature you control deals combat damage to a player, ([^\n]+)/i,a.c.n+' causou dano',(m,c)=>(!/another/i.test(m[0])||c!==a.c)&&xFiltro(m[1],a.c),null,{dano:a.hp,p:xPT(a.c).p,td:'P:'+a.hu});}
    const gr=/Whenever one or more ((?:[A-Za-z -]*?))s? you control deal combat damage to a player, ([^\n]+)/i;for(const c of X.eu.campo.slice()){const m=xNorm(xInfo(c).tx,c.n).match(gr);if(!m)continue;const Q=H.filter(a=>xFiltro(m[1].replace(/creature/i,''),a.c));if(Q.length)setTimeout(()=>xGatTx(c,m[2],'dano de combate',{dano:Q.reduce((x,a)=>x+a.hp,0),p:0}),600);}}
    for(const a of A)if(a.hp){const m=xNorm(xInfo(a.c).tx,a.c.n).match(/(?:Whenever this (?:card|creature) deals|and whenever (?:it|this card) deals) combat damage to a player, ([^\n]+)/i);if(m)setTimeout(()=>xGatTx(a.c,m[1],'dano de combate',{dano:a.hp,p:xPT(a.c).p,td:'P:'+a.hu}),500);for(const q of X.eu.exi.filter(q=>q.cif&&q.cif===a.c.k))setTimeout(()=>xTempestade(q,1,String(xInfo(q).tx).replace(/^Cipher[^\n]*\n?/m,''),0,'cifra'),600);}
