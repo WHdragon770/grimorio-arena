@@ -5940,7 +5940,7 @@ function xAplica(e,r){e.pool=r.pool;r.tap.forEach(([c])=>c.tap=1);if(r.vida)e.vi
 /* ---------- sincronizar ---------- */
 function xGanhouVida(n){{const tu=(X.sala||{}).turno;if(X.eu.vgtT!==tu){X.eu.vgtT=tu;X.eu.vgt=0;}X.eu.vgt+=n;}for(const c of X.eu.campo.slice()){if(c.tok&&!c.cp)continue;const m=xNorm(xInfo(c).tx,c.n).match(/Whenever you gain life, ([^\n]+)/i);if(m)xGatTx(c,m[1],'ganhou vida',{vida:n});}}
 function xSobe(){clearTimeout(X.tm);X.tm=setTimeout(()=>{const e=X.eu;if(!e||!X.cod)return;if(e.__vv!=null&&e.vida>e.__vv)xGanhouVida(e.vida-e.__vv);e.__vv=e.vida;const me=xUid(),r=xRef();
-  r.collection('pub').doc(me).set(xLimpo({nome:e.nome,deck:e.deck,vida:e.vida,ven:e.ven,pc:e.pc||{},dc:e.dc,imp:e.imp,mull:e.mull,nb:e.bib.length,nm:e.mao.length,campo:e.campo,cem:e.cem,exi:e.exi,cmdz:e.cmdz,pool:e.pool,ter:e.ter,tv:e.tv,tl:e.tl,gv:e.gv,fv:e.fv,evs:e.evs,ts:Date.now()})).catch(er=>xAv('Não sincronizou ('+(er.code||'erro')+')'));
+  r.collection('pub').doc(me).set(xLimpo({nome:e.nome,deck:e.deck,vida:e.vida,ven:e.ven,pc:e.pc||{},dc:e.dc,imp:e.imp,mull:e.mull,nb:e.bib.length,nm:e.mao.length,campo:e.campo,cem:e.cem,exi:e.exi,cmdz:e.cmdz,pool:e.pool,ter:e.ter,tv:e.tv,tl:e.tl,gv:e.gv,fv:e.fv,evs:e.evs,prevC:e.prevC||[],atr:e.atr||[],ts:Date.now()})).catch(er=>xAv('Não sincronizou ('+(er.code||'erro')+')'));
   r.collection('priv').doc(me).set(xLimpo({bib:e.bib,mao:e.mao,ts:Date.now()})).catch(()=>{});},200);}
 function xLog(t){if(!X.cod)return;xRef().collection('log').add({uid:xUid(),nome:X.eu?X.eu.nome:ctNome(xEuU()),t:String(t).slice(0,300),ts:Date.now()}).catch(()=>{});}
 function xSaiLocal(){if(!XBOT){const fs=document.querySelectorAll('.x1-botfr');if(fs.length){fs.forEach(f=>f.remove());window.__xmk=null;}}X.un.forEach(f=>{try{f();}catch(e){}});X.un=[];X.cod='';X.sala=null;X.eu=null;X.ops={};X.foco='';X.log=[];}
@@ -5963,7 +5963,7 @@ async function xEntra(cod){xSaiLocal();if(xEsBot(cod)&&!window.__xmk&&!XBOT){try
       await r.update({jog:xEsBot(cod)?window.__xmk.au(me):firebase.firestore.FieldValue.arrayUnion(me),['nomes.'+me]:ctNome(xEuU())});}
     const [p,q]=await Promise.all([r.collection('priv').doc(me).get(),r.collection('pub').doc(me).get()]);
     if(p.exists&&q.exists){const a=q.data(),b=p.data();X.eu={nome:a.nome,deck:a.deck,vida:a.vida,ven:a.ven||0,pc:a.pc||{},dc:a.dc||0,imp:a.imp||0,mull:a.mull||0,campo:a.campo||[],cem:a.cem||[],exi:a.exi||[],cmdz:a.cmdz||[],bib:b.bib||[],mao:b.mao||[],
-      pool:Object.assign(xPool0(),a.pool),ter:a.ter||0,tv:a.tv||0,tl:a.tl||0,gv:a.gv||'',fv:a.fv||'',evs:a.evs||[]};}
+      pool:Object.assign(xPool0(),a.pool),ter:a.ter||0,tv:a.tv||0,tl:a.tl||0,gv:a.gv||'',fv:a.fv||'',evs:a.evs||[],prevC:a.prevC||[],atr:a.atr||[]};}
     if(X.cod!==cod)return;xOuve();xPinta();if(xEsBot(cod)&&!XBOT&&!$('#x1-botf')){const ds=BK.lst.filter(x=>x.cmd&&x.c&&x.c.length);for(let b=0;b<(d.nbot||1);b++){const f=document.createElement('iframe');f.id=b?'x1-botf'+b:'x1-botf';f.className='x1-botfr';f.hidden=true;f.title='bot';
       const dk=b?ds[Math.random()*ds.length|0].id:(d.botDeck||'');f.src=location.pathname+'?bot='+cod+(b?'&u=bot'+(b+1):'')+'&deck='+encodeURIComponent(dk)+'#x1/'+cod;setTimeout(()=>document.body.appendChild(f),b*700);}}}
   catch(e){X.cod='';xPinta('Não deu pra entrar ('+(e.code||e)+')');}}
