@@ -5597,6 +5597,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'Destroy':if(!al)return nao('sem alvo');return put({op:'destroi',al},[]);
     case 'DestroyAll':{const t={'Creature':'creatures','Artifact':'artifacts','Enchantment':'enchantments','Land':'lands','Permanent.nonLand':'nonland permanents','Planeswalker':'planeswalkers'}[d.ValidCards||''];if(t)return [{op:'todos',tipo:t}];const v=d.ValidCards||'';if(!v||/Player|Opponent/.test(v)||!fgSpecOk(v,ctx))return nao('quais');return [{op:'mataV',v}];}
     case 'ChangeZone':{const og=d.Origin||'',ds=d.Destination||'';
+      if((og==='Graveyard'||og==='Hand')&&ds==='Exile'&&!al&&!d.Defined&&d.ChangeType&&!/Opp|TargetedPlayer|Remembered|Chosen/.test(d.ChangeType)&&fgSpecOk(d.ChangeType,ctx)){const n=d.ChangeNum==null?1:N('ChangeNum');if(typeof n!=='number')return nao('número');return [{op:'escZona',z:og==='Hand'?'mao':'cem',v:d.ChangeType,n,opc:d.Mandatory==='True'?0:1}];}
       if(og==='Battlefield'&&ds==='Library'&&!al&&d.Defined==='Self'&&(d.LibraryPosition==='0'||d.LibraryPosition==='-1'))return [{op:'topoSi',fundo:d.LibraryPosition==='-1'?1:0}];
       if(og==='Hand'&&ds==='Library'&&!al&&!d.Defined&&!d.ChangeType&&(d.LibraryPosition==null||d.LibraryPosition==='0')){const n=N('ChangeNum');if(typeof n!=='number')return nao('número');return [{op:'maoTopo',n}];}
       if(og==='Graveyard'&&ds==='Battlefield'&&d.GainControl==='True'&&d.RememberChanged&&(d.Defined==='Enchanted'||/^Creature$/.test(d.ValidTgts||''))){const pl=[];let sb=d.SubAbility;for(let q=0;q<5&&sb;q++){pl.push(sb);sb=(fgPP((ctx.sv||{})[sb]||'').d||{}).SubAbility;}if(pl.length)ctx.pula=pl;return [{op:'reanima'}];}
@@ -5669,12 +5670,12 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
         return nao('estática '+md);}
       return o;}
     case 'CopyPermanent':{for(const k of Object.keys(d))if(!/^(AB|DB|SP|Cost|ValidTgts|TgtPrompt|TargetType|Defined|AddKeywords|AtEOT|TokenTapped|TokenAttacking|NonLegendary|NumCopies|SpellDescription|StackDescription|SubAbility|PrecostDesc|ActivationLimit|SorcerySpeed|IsCurse|AILogic|Planeswalker|Ultimate|__m|Activator|ActivationZone|TargetMin|TargetMax|AnyPlayer|Condition.*|TgtZone|SetPower|SetToughness|AddTypes|PumpKeywords|PumpDuration|Choices|ChoiceTitle|SetColor|SetCreatureTypes)$/.test(k))return nao(k);if(d.PumpDuration&&d.PumpDuration!=='EOT')return nao('duração');if(d.AddTypes&&!/^(Creature|[A-Z][a-z]+)( & (Creature|[A-Z][a-z]+))*$/.test(d.AddTypes))return nao('tipos');if(d.Choices&&(!/YouCtrl/.test(d.Choices)||!fgSpecOk(d.Choices,ctx)))return nao('Choices');
-      const df=d.Defined||'';if(!al&&!d.__m&&df!=='Self'&&!d.Choices)return nao('quem');const n=d.NumCopies?N('NumCopies'):1;if(n==null)return nao('número');
+      const df=d.Defined||'';if(!al&&!d.__m&&df!=='Self'&&!d.Choices&&!(df==='Remembered'&&!al))return nao('quem');const n=d.NumCopies?N('NumCopies'):1;if(n==null)return nao('número');
       const kws=[];for(const k of String(d.AddKeywords||'').split(' & ').filter(Boolean)){if(!FGKW[k])return nao('habilidade '+k);kws.push(FGKW[k]);}
       const eot=d.AtEOT?({Sacrifice:'sac',Exile:'exi'})[d.AtEOT]:'';if(eot==null)return nao('fim do turno '+d.AtEOT);
       const pkw=[];for(const k of String(d.PumpKeywords||'').split(' & ').filter(Boolean)){if(!FGKW[k])return nao('habilidade '+k);pkw.push(FGKW[k]);}
       const pt=d.SetPower!=null||d.SetToughness!=null?[d.SetPower!=null?N('SetPower'):null,d.SetToughness!=null?N('SetToughness'):null]:null;if(pt&&pt.some(x=>x!=null&&typeof x!=='number'))return nao('número');
-      return put({op:'copiaP',al:al||'',n,kws,eot,tap:d.TokenTapped?1:0,atk:d.TokenAttacking?1:0,pkw,pt,cri:/\bCreature\b/.test(d.AddTypes||'')?1:0,esc:d.Choices||''},[]);}
+      return put({op:'copiaP',al:al||'',n,kws,eot,tap:d.TokenTapped?1:0,atk:d.TokenAttacking?1:0,pkw,pt,cri:/\bCreature\b/.test(d.AddTypes||'')?1:0,esc:d.Choices||'',lemb:df==='Remembered'?1:0},[]);}
     case 'GainControl':{if(!al&&!d.__m||d.GainControl||d.AllValid||d.ExchangeControl)return nao();const lc=d.LoseControl||'';if(lc&&lc!=='EOT'&&!/^LeavesPlay,LoseControl$/.test(lc))return nao('duração do controle');const kw=(d.AddKWs||'').split(' & ').filter(Boolean);if(kw.some(k=>!FGKW[k]))return nao('habilidade');
       {const o={op:'controle',eot:lc==='EOT'?1:0,desv:d.Untap==='True'?1:0,kws:kw.map(k=>FGKW[k])};return al?put(Object.assign(o,{al}),[]):[o];}}
     case 'UntapAll':{const v=d.ValidCards||'';if(!v||d.Defined||!fgSpecOk(v,ctx))return nao('quais');return [{op:'desviraV',v}];}
@@ -6646,6 +6647,11 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
         setTimeout(async()=>{const tx=p.tx!=null?p.tx:xInfo(p.c).tx,ops=xEfeitos(tx,p.nm,p.nf,p.k||(p.c&&p.c.k));if(!ops.some(xPrecisaAlvo))return xLog(`${p.nm} não tem alvo pra trocar`);const al=await xPedeAlvos(ops,`${it.nm}: novos alvos de ${p.nm}`,p.k);if(!al)return;
           const PL=((X.sala||{}).pilha||[]).slice(),q=PL.find(x=>x.id===pid);if(!q)return xLog(`${p.nm} já saiu da pilha`);q.al=al;xSala({pilha:PL});xLog(`${it.nm}: ${p.nm} agora mira ${al.map(a=>xAlvoNome(a)).join(', ')}`);},300);
         feito.push(`escolhe novos alvos pra ${p.nm}`);break;}
+      case 'escZona':{const cx={eu:me,src:it.k||'',sv:{}},L=e[s.z].filter(c=>{try{return fgValid(c,s.v.replace(/\.(YouCtrl|YouOwn)\b|\+(YouCtrl|YouOwn)\b/g,''),cx);}catch(er){return false;}}),res=st.slice(si+1),al2=(it.al||[]).slice(j),nn=n;
+        if(!L.length){feito.push(`nenhuma carta pra exilar ${s.z==='mao'?'da mão':'do cemitério'}`);it.lemb=[];break;}
+        setTimeout(async()=>{const q=await xMarca(`${it.nm}: exilar ${s.opc?'até ':''}${nn} carta(s) ${s.z==='mao'?'da mão':'do cemitério'}`,L.map((c,i)=>({k:c.k,rot:c.n,on:i<nn?1:0})),s.opc?0:Math.min(nn,L.length),Math.min(nn,L.length));
+          const P=(q||[]).map(k=>e[s.z].find(c=>c.k===k)).filter(Boolean).slice(0,nn);P.forEach(c=>{e[s.z].splice(e[s.z].indexOf(c),1);e.exi.push(c);});if(P.length)xLog(`${it.nm}: exilou ${P.map(c=>c.n).join(', ')}`);
+          if(res.length&&(P.length||!s.opc))xFazDepois(res,Object.assign({},it,{al:al2,lemb:P}));else{xSobe();xPintaEu();}},300);feito.push(`exila ${nn} carta(s) ${s.z==='mao'?'da mão':'do cemitério'}`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
@@ -6684,7 +6690,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'pc':{e.pc=Object.assign({},e.pc,{[s.t]:((e.pc||{})[s.t]||0)+n});feito.push(`+${n} ${PCN[s.t]||s.t} (agora ${e.pc[s.t]})`);break;}
       case 'copiaP':{if(s.esc&&!s.__e){const L=e.campo.filter(c=>{try{return fgValid(c,s.esc,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}});if(!L.length){feito.push('nada pra copiar');break;}
           setTimeout(async()=>{const k=L.length===1||XBOT?L[0].k:await xEscolhe(`${it.nm}: copiar qual?`,L.map(c=>({c,lado:'Seu'})));xFazDepois([Object.assign({},s,{__e:1,al:'target permanent'})],Object.assign({},it,{al:[k||L[0].k]}));},300);feito.push('escolhe o que copiar');break;}
-        const k=t||it.k,c0=X.eu.campo.find(q=>q.k===k)||xAchaK(k);if(!c0){feito.push('a carta pra copiar saiu');break;}const a0=s.atk?X.eu.campo.find(q=>q.k===it.k):null;
+        const k=s.lemb?((it.lemb||[])[0]||{}).k:t||it.k,c0=s.lemb?(it.lemb||[])[0]:X.eu.campo.find(q=>q.k===k)||xAchaK(k);if(!c0){feito.push('a carta pra copiar saiu');break;}const a0=s.atk?X.eu.campo.find(q=>q.k===it.k):null;
         for(let i=0;i<Math.max(1,n);i++){const q=xCopiaF(c0,Object.assign({tap:s.tap||s.atk?1:0},s.atk?{atk:1,sk:0,alv:(a0&&a0.alv)||(c0.alv)||''}:{},s.eot==='sac'?{sacF:1}:s.eot==='exi'?{exF:1}:{}));if(s.kws.length)q.kt=[...s.kws];if(s.pkw&&s.pkw.length)q.kt=[...new Set([...(q.kt||[]),...s.pkw])];if(s.pt){q.ptF=[s.pt[0]!=null?s.pt[0]:xPT(c0).p,s.pt[1]!=null?s.pt[1]:xPT(c0).t];}if(s.cri&&!xInfo(q).cri)q.ani={p:q.ptF?q.ptF[0]:0,t:q.ptF?q.ptF[1]:0,cri:1,kw:s.kws||[],perm:1};}
         feito.push(`criou ${Math.max(1,n)} ficha(s) cópia de ${c0.n}${s.kws.length?' com '+s.kws.join(', '):''}${s.atk?' atacando':s.tap?' virada':''}${s.eot?(s.eot==='sac'?' (sacrifica':' (exila')+' no fim do turno)':''}`);break;}
       case 'mataV':{const n=xFilV(s.v,me,c=>xEfCarta(c,'destroi'));ev({op:'mataV',v:s.v,de:me});feito.push(`destruiu os permanentes que a carta pede${n?' ('+n+' seus)':''}`);break;}
