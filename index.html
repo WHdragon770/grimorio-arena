@@ -5618,7 +5618,8 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       if(og==='Stack'&&ds==='Library'&&d.Shuffle==='True'&&!al&&(!d.Defined||d.Defined==='Self'||d.Defined==='Parent'))return [{op:'embSelf'}];
       if(og==='Battlefield'&&al&&ds==='Exile'&&d.RememberChanged&&d.SubAbility){const sb=fgPP((ctx.sv||{})[d.SubAbility]||'');if(sb.api==='ChangeZone'&&sb.d.Defined==='Remembered'&&sb.d.Origin==='Exile'&&sb.d.Destination==='Battlefield'&&!sb.d.SubAbility||sb.api==='ChangeZone'&&sb.d.Defined==='Remembered'&&sb.d.Origin==='Exile'&&sb.d.Destination==='Battlefield'&&/^(DB)?Cleanup$/.test(sb.d.SubAbility||'')){ctx.pula=d.SubAbility;const nT=Math.max(1,+d.TargetMax||1);return Array.from({length:nT},()=>put({op:'pisca',al,tap:sb.d.Tapped==='True'?1:0},[])[0]);}}
       if(og==='Battlefield'&&al&&(ds==='Exile'||ds==='Hand'))return put({op:ds==='Exile'?'exila':'volta',al},[]);
-      if(og==='Library'&&(ds==='Battlefield'||ds==='Hand')&&/^Land\.Basic(\+YouCtrl)?$/.test(d.ChangeType||'')){const n=N('ChangeNum');if(n==null)return nao('número');return [{op:'busca',n,dest:ds==='Battlefield'?'campo':'mao',tap:d.Tapped==='True'}];}
+      if(og==='Library'&&(ds==='Battlefield'||ds==='Hand')&&/^Land\.Basic(\+YouCtrl)?$/.test(d.ChangeType||'')&&/^(TargetedController|ParentTargetedController|Player\.IsRemembered)$/.test(d.DefinedPlayer||'')){const n=d.DefinedPlayer==='Player.IsRemembered'?1:N('ChangeNum');if(n==null||typeof n!=='number')return nao('número');return [{op:'buscaDono',n,dest:ds==='Battlefield'?'campo':'mao',tap:d.Tapped==='True'}];}
+      if(og==='Library'&&(ds==='Battlefield'||ds==='Hand')&&/^Land\.Basic(\+YouCtrl)?$/.test(d.ChangeType||'')&&(!d.DefinedPlayer||d.DefinedPlayer==='You')){const n=N('ChangeNum');if(n==null)return nao('número');return [{op:'busca',n,dest:ds==='Battlefield'?'campo':'mao',tap:d.Tapped==='True'}];}
       if(og==='Graveyard'&&!al&&(!d.Defined||d.Defined==='Self')&&!d.ChangeType&&(ds==='Battlefield'||ds==='Hand'))return [{op:'doCem',dest:ds==='Battlefield'?'campo':'mao',tap:d.Tapped==='True'}];
       if(og==='Graveyard'&&(d.ValidTgts||d.ChangeType)&&(ds==='Battlefield'||ds==='Hand')&&!/Opp|TargetedPlayer/.test(d.ValidTgts||d.ChangeType)&&(!/Other/.test(d.ValidTgts||d.ChangeType)||/YouOwn|YouCtrl/.test(d.ValidTgts||d.ChangeType))){const n=d.TargetMin==='0'&&!d.TargetMax?1:(N('TargetMax')||N('ChangeNum')||1);return [{op:'doCemAlvo',n,v:(d.ValidTgts||d.ChangeType),dest:ds==='Battlefield'?'campo':'mao',tap:d.Tapped==='True'}];}
       if((og==='Library'||og==='Hand')&&!al&&!d.Defined&&d.ChangeType&&!/IsRemembered|Opp|TargetedPlayer|ChosenType|sharesCreatureTypeWith/.test(d.ChangeType)){
@@ -5756,6 +5757,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'RepeatEach':{{const sb=fgPP((ctx.sv||{})[d.RepeatSubAbility]||''),nx=fgPP((ctx.sv||{})[d.SubAbility]||'');
         if(d.RepeatPlayers==='Player.Opponent'&&sb.api==='ChooseCard'&&nx.api==='SacrificeAll'&&nx.d.ValidCards==='Card.IsRemembered'&&/RememberedPlayerCtrl\+cmcEQX|greatestPowerControlledByRemembered/.test(sb.d.Choices||'')){
           ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility];return [{op:'sacr',n:1,tipo:/Planeswalker/.test(sb.d.Choices)?'cp':'creature',quem:'each opponent',maior:/greatestPower/.test(sb.d.Choices)?'pow':'mv'}];}}
+      {const rp1=fgPP((ctx.sv||{})[d.RepeatSubAbility]||'');if(d.RepeatPlayers==='Player'&&d.RepeatSubAbility&&rp1.api==='ChangeZone'&&rp1.d.DefinedPlayer==='Player.IsRemembered'&&rp1.d.Origin==='Library'&&rp1.d.Destination==='Battlefield'&&rp1.d.ChangeType==='Land.Basic'&&String((ctx.sv||{})[rp1.d.ChangeNum]||'').trim()==='RememberedLKI$Valid Card.RememberedPlayerCtrl')return [{op:'buscaDono',n:1,dest:'campo',tap:rp1.d.Tapped==='True'}];}
       const rpT={Player:'todos',Opponent:'op','Player.Opponent':'op'}[d.RepeatPlayers||''];if(!rpT||d.RepeatCards||d.DefinedCards)return nao('ação RepeatEach');
       const sub=fgPP((ctx.sv||{})[d.RepeatSubAbility]||'');if(!sub.api||sub.d.SubAbility)return nao('ação RepeatEach');const c2=Object.assign({},ctx,{rp:1}),q=sub.d,st=[],nn=k=>{const v=fgConta(q[k],c2);return v==='X'?{q:'X'}:v;};
       if(sub.api==='LoseLife'&&/^(Player\.IsRemembered|Remembered)$/.test(q.Defined||'')){const v=nn('LifeAmount');if(v==null)return nao('número');st.push({op:'rpPerde',n:v});}
@@ -6542,6 +6544,7 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='carta'){const c=e.campo.find(q=>q.k===v.k);if(c)xEfCarta(c,v.o,v.n,v.x);}
   else if(v.op==='aniq')xAniq(v);
   else if(v.op==='sacr')xSacr(v);
+  else if(v.op==='buscaB'){xLog(`${v.nm}: você pode buscar ${v.n} terreno(s) básico(s)`);setTimeout(()=>xFazDepois([{op:'busca',n:v.n,dest:v.dest,tap:v.tap}],{nm:v.nm,k:'',al:[],tc:{},sc:{}}),300);}
   else if(v.op==='cmdVolta'){const L=e.campo.filter(c=>c.cmd);L.forEach(c=>xSai(c,'cmdz'));if(L.length)xLog('seus comandantes voltaram pra zona de comando');}
   else if(v.op==='pedeMao'){xEvia({op:'maoVista',nm:v.nm,cartas:e.mao.map(c=>c.n),para:v.de});xLog(`${xNomeU(v.de)} olhou a sua mão (${v.nm})`);}
   else if(v.op==='maoVista'){const L=v.cartas||[];xLog(`${v.nm}: mão de ${xNomeU(v.de)}: ${L.length?L.join(', '):'vazia'}`);xAv(`${v.nm} — mão de ${xNomeU(v.de)}: ${L.length?L.join(', '):'vazia'}`);}
@@ -6764,6 +6767,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
           const resto=L.filter(c=>!esc.includes(c));e.bib.push(...xEmb(resto));xLog(`${it.nm}: ${nm.length?nm.join(', '):'não pegou nada'}; ${resto.length} pro fundo do grimório`);
           if(res.length)xFazDepois(res,Object.assign({},it,{al:al2}));else{xSobe();xPintaEu();}},300);
         feito.push(`olha as ${n} cartas do topo`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
+      case 'buscaDono':{const u=L0.u||xOutro();if(!u||u===me){st.splice(si+1,0,{op:'busca',n,dest:s.dest,tap:s.tap});break;}ev({op:'buscaB',n,dest:s.dest,tap:s.tap,nm:it.nm},u);feito.push(`${xNomeU(u)} pode buscar ${n} terreno(s) básico(s)`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
