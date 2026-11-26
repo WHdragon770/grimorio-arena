@@ -5476,7 +5476,7 @@ function fgCondX(k,v,ctx){const e=X.eu||{campo:[],cem:[],mao:[]};
     return null;}
   if(k==='ConditionPlayerTurn')return ((X.sala||{}).vez===xUid())===(v==='True');
   return null;}
-function fgConta2(b,ctx){let m;const e=X.eu||{campo:[],bib:[],cem:[],mao:[]};
+function fgConta2(b,ctx){let m;const e=X.eu||{campo:[],bib:[],cem:[],mao:[]};if(b==='TriggeredCard$CardNumColors')return {q:'tc',f:'nc'};if(/^TriggeredSpellAbility\$CardManaCost(LKI)?$/.test(b))return {q:'tc',f:'mv'};
   const src=()=>{const k=ctx&&ctx.src;if(!k)return null;return xAchaK(k)||(((X.sala||{}).pilha||[]).find(p=>p.c&&p.c.k===k)||{}).c||null;};
   const sim=(f,a,c)=>{const q=f();return q==null?null:(q?+a:+c);};
   if(m=b.match(/^Count\$Devotion\.(White|Blue|Black|Red|Green)$/)){const L={White:'W',Blue:'U',Black:'B',Red:'R',Green:'G'}[m[1]];let n=0;
@@ -5739,7 +5739,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       return [{op:'copiaS',al:'spell',vs,volta}];}
     case 'Discover':{const n=N('Num');if(typeof n!=='number')return nao('número');return [{op:'descobre',n}];}
     case 'Protection':{if(d.Gains!=='Choice'||!/^(AnyColor|AnyColor,Colorless|Colorless,AnyColor)$/.test(d.Choices||'')||!al)return nao('proteção');return put({op:'protCor',al,inc:/Colorless/.test(d.Choices)?1:0},[]);}
-    case 'Earthbend':{const n=N('Num');if(typeof n!=='number')return nao('número');return [{op:'terra',n}];}
+    case 'Earthbend':{const n=N('Num');if(n==null||n==='X')return nao('número');return [{op:'terra',n}];}
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
@@ -6064,7 +6064,7 @@ function xMorre(c){const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;const tc0=x
 function xExtort(){const e=X.eu,n=e.campo.filter(q=>/^Extort\b/im.test(xInfo(q).tx)).length;let f=0;for(let j=0;j<n;j++){const cu=xCusto('{W/B}'),r=xPaga(e,cu,0);if(!r.ok)break;if(!XBOT&&!confirm('Extorquir: pagar {W/B} pra drenar 1 de cada oponente?'))break;xAplica(e,r);f++;}
   if(f){const os=Object.keys(X.ops||{}).filter(u=>!xMorto(xPub(u)));os.forEach(u=>xEvia({op:'vida',d:-f,para:u}));e.vida+=f*os.length;xLog(`extorquir x${f}: cada oponente perdeu ${f}, você ganhou ${f*os.length}`);xSobe();}}
 function xCastou(c){xTT().conj.push(c);setTimeout(xExtort,350);const i=xInfo(c),s=X.sala||{},sp=(s.sp&&s.sp.t===s.turno)?s.sp.n:0;{const cp=X.eu.copiaProx;if(cp&&cp.t===s.turno&&fgValid(c,cp.v,{eu:xUid(),src:'',sv:{}})){X.eu.copiaProx=null;xLog(`${cp.nm}: copiou ${c.n}`);const tx=xInfo(c).tx;setTimeout(()=>xTempestade(c,1,tx,0,'cópia'),450);}else if(cp&&cp.t!==s.turno)X.eu.copiaProx=null;}if(X.sala){s.sp={t:s.turno,n:sp+1};xSala({sp:s.sp});}
-  xGatCampo(/Whenever you cast (an? |your first |one or more )?([^,]*?) ?spells?(?: [^,]*)?, ([^\n]+)/i,'conjurou '+c.n,m=>xFiltro(m[2],c));
+  xGatCampo(/Whenever you cast (an? |your first |one or more )?([^,]*?) ?spells?(?: [^,]*)?, ([^\n]+)/i,'conjurou '+c.n,m=>xFiltro(m[2],c),null,Object.assign({},xTc(c)||{},{tk:c.k,mv:xMVc(c),nc:xCorFonte(c.n).size}));
   if(!i.cri)for(const o of X.eu.campo)if(xInfo(o).cri&&/^Prowess\b/im.test(xInfo(o).tx)){o.tp=(o.tp||0)+1;o.tt=(o.tt||0)+1;xLog(`${o.n}: prowess +1/+1 até o fim do turno`);}return sp;}
 const xCiclo=c=>{const m=String(xInfo(c).tx).match(/^Cycling ((?:\{[^}]+\})+)/m);return m?m[1]:'';};
 const xTCiclo=c=>{const m=String(xInfo(c).tx).match(/^((?:Basic )?[A-Z][a-z]+)cycling ((?:\{[^}]+\})+)/m);return m&&m[1]!=='C'?[m[2],m[1].toLowerCase()]:null;};
