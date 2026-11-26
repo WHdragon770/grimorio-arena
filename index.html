@@ -5815,6 +5815,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'EndTurn':{if(Object.keys(d).some(k=>!/^(AB|DB|SP|Cost|ConditionPlayerTurn|SpellDescription|StackDescription|SubAbility)$/.test(k)))return nao('fim do turno com detalhe');return [{op:'fimTurno',so:d.ConditionPlayerTurn==='True'?1:0}];}
     case 'AddPhase':{if(d.ExtraPhase!=='Combat'||(d.AfterPhase&&d.AfterPhase!=='EndCombat')||Object.keys(d).some(k=>!/^(AB|DB|SP|Cost|ExtraPhase|AfterPhase|SpellDescription|StackDescription|SubAbility)$/.test(k)))return nao('ação AddPhase');return [{op:'combExtra'}];}
     case 'EndCombatPhase':{if(Object.keys(d).some(k=>!/^(AB|DB|SP|Cost|SpellDescription|StackDescription|SubAbility)$/.test(k)))return nao('fim do combate com detalhe');return [{op:'fimComb'}];}
+    case 'MoveCounter':{if(d.Source==='Self'&&d.CounterType==='P1P1'&&d.CounterNum==='Any'&&d.ValidDefined==='Creature.Other'&&!al)return [{op:'moveCnt'}];return nao('ação MoveCounter');}
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
@@ -6793,6 +6794,13 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
           const nv2=[];const ev2=(o,p)=>nv2.push(Object.assign({id:xId(),de:me,para:p||'*'},o));for(const k of ks)xNoAlvo(k,'dobraTudo',0,ev2);for(const o of nv2)xEvia(o);
           xLog(`${it.nm}: dobrou os marcadores de ${ks.length} permanente(s)`);if(res.length)xFazDepois(res,Object.assign({},it,{al:al2}));else{xSobe();xPintaEu();}},300);
         feito.push('escolhe permanentes pra dobrar os marcadores');xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
+      case 'moveCnt':{const c=e.campo.find(q=>q.k===it.k);if(!c||!(c.cnt>0)){feito.push('sem marcadores pra mover');break;}if(XBOT){feito.push('não moveu marcadores');break;}
+        setTimeout(async()=>{const nv2=[];const ev2=(o,p)=>nv2.push(Object.assign({id:xId(),de:me,para:p||'*'},o));let tot=0;
+          while(c.cnt>0&&e.campo.includes(c)){const L=[...e.campo.filter(q=>q!==c&&xCri(q)).map(q=>({c:q,lado:'Seu'})),...xOpCampos().flatMap(([cp,u])=>cp.filter(xCri).map(q=>({c:q,lado:xNomeU(u)})))];if(!L.length)break;
+            if(!confirm(`${it.nm}: mover marcadores +1/+1 (tem ${c.cnt})?`))break;const k=await xEscolhe(`${it.nm}: mover pra qual criatura?`,L);if(!k)break;
+            const n=Math.max(0,Math.min(c.cnt,parseInt(prompt(`Quantos marcadores mover? (1 a ${c.cnt})`,String(c.cnt))||'0',10)||0));if(!n)break;c.cnt-=n;tot+=n;xNoAlvo(k,'cnt',n,ev2);xLog(`${it.nm}: moveu ${n} marcador(es) +1/+1 pra ${xAlvoNome(k)}`);}
+          for(const o of nv2)xEvia(o);if(tot){xVarre();xSobe();xPintaEu();}},300);
+        feito.push('pode mover marcadores +1/+1');break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
