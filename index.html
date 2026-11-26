@@ -5783,7 +5783,7 @@ const n=N('DigNum'),sub=fgPP((ctx.sv||{})[d.SubAbility]||''),mp=sub.api==='Effec
         if(ok){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),...nm];return [{op:'zimone',n,k:+(sb.d.Amount||2)}];}}
       if(n===1&&sb&&sb.api==='SetState'&&sb.d.Mode==='Transform'&&(!sb.d.Defined||sb.d.Defined==='Self')&&sb.d.ConditionDefined==='Remembered'){ctx.pula=d.SubAbility;return [{op:'espiaTransforma',v:(sb.d.ConditionPresent||'Card').replace(/Card\./g,'')}];}
       if(n===1&&!d.SubAbility)return [{op:'espia',rev:d.NoReveal?0:1}];return nao('olhar o topo');}
-    case 'RollDice':{let qd=d.Amount==null?1:(/^\d+$/.test(d.Amount)?+d.Amount:N('Amount')),md=d.Modifier==null?0:(/^-?\d+$/.test(d.Modifier)?+d.Modifier:N('Modifier'));if(qd==='X')qd={q:'X'};if(md==='X')md={q:'X'};
+    case 'RollDice':{if(d.Sides==='20'&&d.UseHighestRoll==='True'&&String((ctx.sv||{})[d.Amount]||'').trim()==='PlayerCountOpponents$HasPropertyDefending'&&String((ctx.sv||{}).X||'').trim()==='Count$CardPower'&&/1-9:\w+,10-19:\w+,20:\w+/.test(d.ResultSubAbilities||''))return [{op:'mastiff'}];let qd=d.Amount==null?1:(/^\d+$/.test(d.Amount)?+d.Amount:N('Amount')),md=d.Modifier==null?0:(/^-?\d+$/.test(d.Modifier)?+d.Modifier:N('Modifier'));if(qd==='X')qd={q:'X'};if(md==='X')md={q:'X'};
       if(qd==null||md==null||typeof qd==='number'&&!(qd>=1&&qd<=20)||d.ResultSVar&&d.ResultSubAbilities||d.OtherSVar&&!d.ChosenSVar)return nao('vários dados ou modificador');
       const fa=+(d.Sides||6),br=[],ex={q:qd,md,ig:+(d.IgnoreLower||0),esc:d.ChosenSVar?1:0};if(d.ResultSVar||d.ChosenSVar){ctx.dado=d.ResultSVar||d.ChosenSVar;if(d.OtherSVar)ctx.dado2=d.OtherSVar;return [Object.assign({op:'dado',f:fa,br:[],v:1},ex)];}
       for(const pr of String(d.ResultSubAbilities||'').split(',').filter(Boolean)){const m=pr.match(/^(\d+)(?:-(\d+))?:(.+)$|^Else:(.+)$/);if(!m)return nao('tabela do dado');
@@ -6988,6 +6988,9 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'delina':{const c0=e.campo.find(q=>q.k===t);if(!c0){feito.push('sem alvo');break;}const dl=e.campo.find(q=>q.k===it.k),alv=(dl&&dl.alv)||c0.alv||'';const R=[];
         for(let g=0;g<30;g++){const r=1+Math.floor(Math.random()*20);const q=xCopiaF(c0,{tap:1,atk:1,sk:0,alv});q.exCb=1;q.nLeg=1;R.push(r);if(r<15)break;if(!XBOT&&!confirm(`${it.nm}: tirou ${r} no d20 — repetir (outra cópia atacando)?`))break;}
         feito.push(`d20: ${R.join(', ')} → ${R.length} cópia(s) de ${c0.n} virada(s) e atacando (exiladas no fim do combate)`);break;}
+      case 'mastiff':{const c=e.campo.find(q=>q.k===it.k);const p=c?Math.max(0,xPT(c).p):0;const D=[...new Set(e.campo.filter(q=>q.atk&&/^P:/.test(q.alv||'')).map(q=>q.alv.slice(2)))];const R=Array.from({length:Math.max(1,D.length)},()=>1+Math.floor(Math.random()*20)),r=Math.max(...R);
+        let tx;if(r<=9){e.vida-=p;tx=`${p} de dano em você`;}else if(r<=19){const u=c&&/^P:/.test(c.alv||'')?c.alv.slice(2):ou;if(u&&u!==me)ev({op:'vida',d:-p},u);tx=`${p} de dano em ${xNomeU(u)}`;}else{for(const u of xOpsL().filter(u=>!xMorto(X.ops[u])))ev({op:'vida',d:-p},u);tx=`${p} de dano em cada oponente`;}
+        feito.push(`d20: ${R.join(', ')} (fica ${r}) → ${tx}`);break;}
       case 'vence':ev({op:'perdeJogo',nm:it.nm});feito.push('VENCEU O JOGO');break;
       case 'perdeJogo':e.vida=0;feito.push('perdeu o jogo');break;
       case 'vigia':setTimeout(()=>xVigia(n,it.nm),300);feito.push('vigiar '+n);break;
