@@ -577,6 +577,13 @@ P.append(("'Shroud':'shroud',", "'Hexproof':'hexproof','HIDDEN Unblockable'", "'
 # ---------- L50. Mais habilidades dadas que o bloqueio já entende: intimidar, espreitar, equitação, travessias ----------
 P.append(("'Landwalk:Forest':'forestwalk',", "'Hexproof':'hexproof','Shroud':'shroud',", "'Hexproof':'hexproof','Shroud':'shroud','Intimidate':'intimidate','Skulk':'skulk','Horsemanship':'horsemanship','Landwalk:Forest':'forestwalk','Landwalk:Island':'islandwalk','Landwalk:Swamp':'swampwalk','Landwalk:Mountain':'mountainwalk','Landwalk:Plains':'plainswalk','Wither':'wither',", 'troca'))
 
+# ---------- L51. Força e resistência trocadas até o fim do turno (KW HIDDEN ... power and toughness are switched) ----------
+# Twisted Image, Inside Out, Fluctuator?, Merfolk Thaumaturgist, Strange Inversion, Transmutation...
+P.append(("'HIDDEN CARDNAME\\'s power and toughness are switched':'swPT',", "'Hexproof':'hexproof','Shroud':'shroud',", "'Hexproof':'hexproof','Shroud':'shroud','HIDDEN CARDNAME\\'s power and toughness are switched':'swPT',", 'troca'))
+P.append(("if(kw.has('swPT'))", "  if(c.kD&&c.kD.t===((X.sala||{}).turno||0))for(const x of c.kD.kw)kw.delete(x);\n  return {p,t,kw,pz,",
+"  if(c.kD&&c.kD.t===((X.sala||{}).turno||0))for(const x of c.kD.kw)kw.delete(x);\n  if(kw.has('swPT')){const z=p;p=t;t=z;kw.delete('swPT');}\n  return {p,t,kw,pz,", 'troca'))
+
+P.append(("swPT:'força e resistência trocadas',", "intimidate:'intimidar',", "intimidate:'intimidar',swPT:'força e resistência trocadas',", 'troca'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
