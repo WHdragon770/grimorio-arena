@@ -311,7 +311,7 @@ P.append(("b.match(/^Count\\$Landfall\\.", "  if(b==='Count$TopOfLibraryCMC')ret
 # self blink com RememberChanged + DBReturn Defined Remembered Exile→Battlefield (Transformed/Tapped/GainControl)
 P.append(("/* exila e volta a própria */", "    case 'ChangeZone':{",
 """    case 'ChangeZone':/* exila e volta a própria */if(d.Origin==='Battlefield'&&d.Destination==='Exile'&&!al&&!d.Defined&&!d.ChangeType&&d.RememberChanged==='True'&&d.SubAbility){const sb=fgPP((ctx.sv||{})[d.SubAbility]||'');const sd=sb.d||{};
-      if(sb.api==='ChangeZone'&&sd.Defined==='Remembered'&&sd.Origin==='Exile'&&sd.Destination==='Battlefield'&&Object.keys(sd).every(k=>/^(DB|Defined|Origin|Destination|Transformed|Tapped|GainControl|SubAbility|StackDescription|SpellDescription)$/.test(k))){const sb2=sd.SubAbility?fgPP((ctx.sv||{})[sd.SubAbility]||''):null;
+      if(sb.api==='ChangeZone'&&sd.Defined==='Remembered'&&sd.Origin==='Exile'&&sd.Destination==='Battlefield'&&Object.keys(sd).every(k=>/^(DB|Defined|Origin|Destination|Transformed|Tapped|GainControl|ForgetOtherRemembered|SubAbility|StackDescription|SpellDescription)$/.test(k))){const sb2=sd.SubAbility?fgPP((ctx.sv||{})[sd.SubAbility]||''):null;
         if(!sb2||(sb2.api==='Cleanup'&&!sb2.d.SubAbility)){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility,sd.SubAbility].filter(Boolean);return [{op:'piscaS',tf:sd.Transformed==='True'?1:0,tap:sd.Tapped==='True'?1:0}];}}}
 """, 'antes'))
 P.append(("if(x&&x.tf)c.face=c.face?0:1;", "c.sk=xInfo(c).cri?1:0;e.campo.push(c);xLog(c.n+' foi exilada e voltou pro campo');",
@@ -634,6 +634,23 @@ P.append(("/* compara com outra SVar */", "function fgPasso(d,api,ctx){/* Define
       if(!nu&&typeof c==='number')d=Object.assign({},d,{ConditionSVarCompare:m[1]+c});}}/* Defined A & Self */""", 'troca'))
 P.append(("typeof n==='object')return null;const r0=fgCmp(", "if(d.ConditionCheckSVar!=null){const n=fgConta(d.ConditionCheckSVar,ctx);if(n==null||n==='X')return null;if(!fgCmp(n,d.ConditionSVarCompare||'GE1'))return false;}",
 "if(d.ConditionCheckSVar!=null){const n=fgConta(d.ConditionCheckSVar,ctx);if(n==null||n==='X'||typeof n==='object')return null;const r0=fgCmp(n,d.ConditionSVarCompare||'GE1');if(r0===null)return null;if(!r0)return false;}", 'troca'))
+
+# ---------- L57. Jace, Vryn's Prodigy e cia: a volta transformada pode ter ForgetOtherRemembered (mudança no L23) ----------
+# Jace Vryn's Prodigy, Kytheon Hero of Akros, Liliana Heretical Healer?, Grist Voracious Larva, Sorin of House Markov...
+
+# ---------- L58. BUG: "exile alvo até esta sair do campo" (Duration UntilHostLeavesPlay) na carta do oponente exilava pra sempre ----------
+# Banisher Priest, Brutal Cathar, Portable Hole, Skyclave Apparition?, Static Prison?, Ossification, Fiend Hunter (gatilho único)...
+P.append(("op:'exAteG'", "      if(og==='Battlefield'&&ds==='Exile'&&d.Duration==='UntilHostLeavesPlay'&&al&&/YouCtrl/.test(d.ValidTgts||'')",
+"      if(og==='Battlefield'&&ds==='Exile'&&d.Duration==='UntilHostLeavesPlay'&&al&&!d.Defined&&!/YouCtrl/.test(d.ValidTgts||'')&&!Object.keys(d).some(k=>/^(Remember|Imprint|Condition)/.test(k)))return put({op:'exAteG',al},[]);\n      if(og==='Battlefield'&&ds==='Exile'&&d.Duration==='UntilHostLeavesPlay'&&al&&/YouCtrl/.test(d.ValidTgts||'')", 'troca'))
+P.append(("case 'exAteG':", "      case 'sacrEsta':{",
+"""      case 'exAteG':{const host=e.campo.find(q=>q.k===it.k);if(!host){feito.push(`não exilou (${it.nm} já saiu do campo)`);break;}if(!t){feito.push('sem alvo');break;}const nm0=xAlvoNome(t),c=e.campo.find(q=>q.k===t);
+        if(c){xSai(c,'exi');const q=e.exi.find(z=>z.k===c.k)||e.exi[e.exi.length-1];if(q&&!c.tok){q.exAte=it.k;q.exS=it.k;}}else{host.exO=1;xNoAlvo(t,'exAteO',0,ev,{h:it.k});}feito.push(`exilou ${nm0} até ${it.nm} sair do campo`);break;}
+""", 'antes'))
+P.append(("if(op==='exAteO'){", "function xEfCarta(c,op,n,x){const i=xInfo(c);",
+"function xEfCarta(c,op,n,x){const i=xInfo(c);if(op==='exAteO'){const k=c.k,tk=c.tok;xSai(c,'exi');const q=X.eu.exi.find(z=>z.k===k)||X.eu.exi[X.eu.exi.length-1];if(q&&!tk&&x&&x.h){q.exAte=x.h;q.exS=x.h;}return;}", 'troca'))
+P.append(("function xExAteVolta(k,rem){", "function xExAteVolta(k){const e=X.eu;",
+"function xExAteVolta(k,rem){if(!rem&&k){const h=X.eu&&X.eu.campo.find(q=>q.k===k);if(h&&h.exO){delete h.exO;xEvia({op:'exAteV',k});}}const e=X.eu;", 'troca'))
+P.append(("v.op==='exAteV'", "  else if(v.op==='aniq')xAniq(v);", "  else if(v.op==='aniq')xAniq(v);\n  else if(v.op==='exAteV')xExAteVolta(v.k,1);", 'troca'))
 
 
 def aplica(s):
