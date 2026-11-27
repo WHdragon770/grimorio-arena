@@ -591,6 +591,19 @@ P.append(("ht:{sp:", "return d.TargetType==='Spell'&&!d.ValidTgts?.includes('Act
 P.append(("(s.ht&&p.tipo==='mag'?", "s.op==='anula'&&s.hab?((X.sala&&X.sala.pilha)||[]).filter(p=>p.tipo!=='mag'&&p.de!==xUid())",
 "s.op==='anula'&&s.hab?((X.sala&&X.sala.pilha)||[]).filter(p=>(s.ht&&p.tipo==='mag'?!!s.ht.sp&&(!s.ht.spv||!!(p.c&&(()=>{try{return fgValid(p.c,s.ht.spv,{eu:xUid(),src:'',sv:{}});}catch(er){return false;}})())):p.tipo!=='mag')&&p.de!==xUid())", 'troca'))
 
+# ---------- L53. Proteção: na própria carta (cor à escolha) e contra cor(es) fixa(s), na própria ou no alvo ----------
+# Cartel Aristocrat, Knight of Dawn, Pristine Skywise, Keeper of Kookus, Grotesque Hybrid, Goblin Wizard, Obsidian Acolyte, Crimson Acolyte...
+P.append(("/* proteção fixa / da própria */", "    case 'Protection':{if(d.Gains!=='Choice'",
+"""    case 'Protection':/* proteção fixa / da própria */if(!d.Duration&&(!d.Defined||d.Defined==='Self')&&!Object.keys(d).some(k=>/^(Remember|Condition|Defined.+|TargetMin)/.test(k))){const CM={white:'W',blue:'U',black:'B',red:'R',green:'G'},self=!al;
+      if(d.Gains==='Choice'&&/^(AnyColor|AnyColor,Colorless|Colorless,AnyColor)$/i.test(d.Choices||'')&&self)return [{op:'protCor',si:1,inc:/Colorless/i.test(d.Choices)?1:0}];
+      const g=String(d.Gains||'').split(',').map(x=>x.trim().toLowerCase());if(g[0]&&g.every(x=>CM[x])){const o={op:'protF',cores:g.map(x=>CM[x])};return self?[Object.assign(o,{si:1})]:put(Object.assign(o,{al}),[]);}}
+""", 'antes'))
+P.append(("if(op==='protF'){", "function xEfCarta(c,op,n,x){const i=xInfo(c);",
+"function xEfCarta(c,op,n,x){const i=xInfo(c);if(op==='protF'){c.prT=[...new Set([...(c.prT||[]),...((x||{}).cores||[])])];return;}", 'troca'))
+P.append(("case 'protF':", "      case 'sacrEsta':{",
+"""      case 'protF':{if(!t){feito.push('sem alvo');break;}const CN={W:'branco',U:'azul',B:'preto',R:'vermelho',G:'verde'};xNoAlvo(t,'protF',0,ev,{cores:s.cores});feito.push(`${xAlvoNome(t)} ganha proteção contra ${s.cores.map(x=>CN[x]).join(' e ')} até o fim do turno`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
