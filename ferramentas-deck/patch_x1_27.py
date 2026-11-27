@@ -546,6 +546,19 @@ P.append(("ev({op:'daV',v:s.v,pa:me,desv:s.desv,eot:s.eot,kws:s.kws},u)", "for(c
 P.append(("eot:v.eot?1:0,desv:v.desv,kws:v.kws,para:v.pa", "xEvia({op:'recebe',c:JSON.parse(JSON.stringify(c)),dn:c.dono0||xUid(),eot:0,desv:v.desv,para:v.pa});",
 "xEvia({op:'recebe',c:JSON.parse(JSON.stringify(c)),dn:c.dono0||xUid(),eot:v.eot?1:0,desv:v.desv,kws:v.kws,para:v.pa});", 'troca'))
 
+# ---------- L47. Efeito com gatilhos "neste turno": quando uma criatura sua entra / morre / ataca ----------
+# First Day of Class, Warhost's Frenzy, Waltz of Rage, The Last Ronin?, Song of Blood, Indulge...
+P.append(("|OneOff|Phase|ValidPlayer|Origin|Destination)$/", "Execute|TriggerDescription|TriggerZones|OneOff|Phase|ValidPlayer)$/",
+"Execute|TriggerDescription|TriggerZones|OneOff|Phase|ValidPlayer|Origin|Destination)$/", 'troca'))
+P.append(("m:'entra',v:r.ValidCard", "else return nao(emb?'gatilho do emblema':'efeito com Triggers');",
+"""else if(r.Mode==='ChangesZone'&&r.Destination==='Battlefield'&&(!r.Origin||r.Origin==='Any')&&/YouCtrl/.test(r.ValidCard||'')&&fgSpecOk(r.ValidCard,ctx))L.push({re:{d:ex.d,api:ex.api,sv:ctx.sv},m:'entra',v:r.ValidCard,ops,desc,uma:r.OneOff==='True'?1:0});
+          else if(r.Mode==='ChangesZone'&&r.Origin==='Battlefield'&&r.Destination==='Graveyard'&&/YouCtrl|YouOwn/.test(r.ValidCard||'')&&fgSpecOk(String(r.ValidCard).replace(/[.+](YouCtrl|YouOwn)\\b/g,''),ctx))L.push({re:{d:ex.d,api:ex.api,sv:ctx.sv},m:'morre',v:String(r.ValidCard).replace(/[.+](YouCtrl|YouOwn)\\b/g,''),ops,desc,uma:r.OneOff==='True'?1:0});
+          else if(r.Mode==='Attacks'&&/YouCtrl/.test(r.ValidCard||'')&&fgSpecOk(r.ValidCard,ctx))L.push({re:{d:ex.d,api:ex.api,sv:ctx.sv},m:'ataca',v:r.ValidCard,ops,desc,uma:r.OneOff==='True'?1:0});else return nao(emb?'gatilho do emblema':'efeito com Triggers');""", 'troca'))
+P.append(("if(g.v){let ok=false;", "if(m==='cast'){let ok=false;", "if(g.v){let ok=false;", 'troca'))
+P.append(("xEmbDispara('entra',c);", "function xEntrou(c){if(!X.eu.campo.includes(c))return;", "function xEntrou(c){if(!X.eu.campo.includes(c))return;xEmbDispara('entra',c);", 'troca'))
+P.append(("xEmbDispara('morre',c);", "(xTT().morL=xTT().morL||[]).push({c,eu:1});", "(xTT().morL=xTT().morL||[]).push({c,eu:1});xEmbDispara('morre',c);", 'troca'))
+P.append(("xEmbDispara('ataca',c);", "    const tx=xAtqTx(c);if(!tx)continue;let al=[];", "    xEmbDispara('ataca',c);const tx=xAtqTx(c);if(!tx)continue;let al=[];", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
