@@ -5473,6 +5473,10 @@ function fgProp(c,p,ctx){let m;
   if(p==='greatestCMC')return fgTodos().every(q=>xMVc(q)<=xMVc(c));
   if(p==='ThisTurnEntered')return c.etT===(X.sala||{}).turno;
   if(p[0]==='!')return !fgProp(c,p.slice(1),ctx);
+  if(p==='wasDealtDamageThisTurn')return !!c.dn||c.dnT===((X.sala||{}).turno||0);if(p==='inZoneBattlefield'||p==='inRealZoneBattlefield')return c.k==='__x'||xExiste(c.k);
+  if(p==='modified')return !!(c.cnt||(c.mk&&Object.values(c.mk).some(v=>+v>0))||fgTodos().some(q=>q.an===c.k&&(xInfo(q).equip||xInfo(q).aura)));if(p==='equipped')return fgTodos().some(q=>q.an===c.k&&xInfo(q).equip);
+  if(p==='attackingYou')return !!c.atk&&c.alv==='P:'+(ctx&&ctx.eu||xUid());if(p==='attackedThisCombat')return !!c.atk;if(p==='faceDown')return !!c.fd;
+  if(p==='hasABasicLandType')return /\b(Plains|Island|Swamp|Mountain|Forest)\b/.test(xInfo(c).tipo||'');if(p==='canProduceMana')return !!(xInfo(c).land||xManaC(c));
   if(m=p.match(/^named(.+)$/))return fgN(c.n)===m[1];
   if(m=p.match(/^non(.+)$/))return !fgTem(c,m[1]);
   if(/^[A-Z]/.test(p))return fgTem(c,p);
@@ -6905,7 +6909,7 @@ function xEfCarta(c,op,n,x){const i=xInfo(c);if(op==='exMorre'){c.exM=(X.sala||{
   else if(op==='anima'){c.ani={p:x.p,t:x.t,kw:x.kws||[],cri:x.cri,perm:x.perm};if(x.sem)Object.assign(c.ani,{sem:1,tp:x.tp||'',ct:x.ct||'',rt:x.rt||0,rc:x.rc||0});if(x.gan)c.ani.gan=x.gan;if(x.cor!=null){c.ani.cor=x.cor;c.ani.ow=x.ow?1:0;}}
   else if(op==='kt')c.kt=[...new Set([...(c.kt||[]),...(x.kws||[x.kw])])];
   else if(op==='pumpProx'){c.tpN=(c.tpN||0)+x.p;c.ateU=x.u;c.ateT=x.tn;}else if(op==='pumpPp'){c.pP=(c.pP||0)+(x.p||0);c.pT=(c.pT||0)+(x.t||0);}else if(op==='ktPp'){c.pK=[...new Set([...(c.pK||[]),...(x.kws||[])])];}else if(op==='pumpH'){c.hB=[...(c.hB||[]),{s:x.s,m:x.m,p:x.p||0,t:x.t||0,kws:x.kws||[]}];}else if(op==='pumpN'){c.tpN=(c.tpN||0)+(x.p||0);c.ttN=(c.ttN||0)+(x.t||0);c.ateU=x.u;c.ateT=x.tn;}else if(op==='ktN'){c.ktN=[...new Set([...(c.ktN||[]),...(x.kws||[])])];c.ateU=x.u;c.ateT=x.tn;}else if(op==='naoAtaca'){c.naN=1;c.ateU=x.u;c.ateT=x.tn;}else if(op==='goad'){c.gd=x.u;c.ateU=x.u;c.ateT=x.tn;}
-  else if(op==='dano'){if(xGidS(c,n))return;if(xPvD(c,null,null,0)){xLog(`dano em ${c.n} prevenido`);return;}n=xEscD(c,null,n);if(!(n>0))return;if(i.cri&&X.eu&&X.eu.campo.includes(c)&&X.eu.surT&&X.eu.surT===((X.sala||{}).turno||0)&&X.__dsn&&xSurBR(X.__dsn)){xLog(`Surge of Salvation: dano de ${X.__dsn} em ${c.n} prevenido`);return;}if(i.pw&&!i.cri&&!(c.ani&&c.ani.cri)){c.mk=Object.assign({},c.mk);c.mk.lealdade=(c.mk.lealdade||0)-n;}else if(i.cri||(c.ani&&c.ani.cri)){c.dn=(c.dn||0)+n;xTomouDano(c,n);}}
+  else if(op==='dano'){if(xGidS(c,n))return;if(xPvD(c,null,null,0)){xLog(`dano em ${c.n} prevenido`);return;}n=xEscD(c,null,n);if(!(n>0))return;if(i.cri&&X.eu&&X.eu.campo.includes(c)&&X.eu.surT&&X.eu.surT===((X.sala||{}).turno||0)&&X.__dsn&&xSurBR(X.__dsn)){xLog(`Surge of Salvation: dano de ${X.__dsn} em ${c.n} prevenido`);return;}if(i.pw&&!i.cri&&!(c.ani&&c.ani.cri)){c.mk=Object.assign({},c.mk);c.mk.lealdade=(c.mk.lealdade||0)-n;}else if(i.cri||(c.ani&&c.ani.cri)){c.dnT=(X.sala||{}).turno||0;c.dn=(c.dn||0)+n;xTomouDano(c,n);}}
   xVarre();}
 function xManaC(c){const i=xInfo(c);if(/any of the exiled card's colors/i.test(i.tx||'')){const ex=[X.eu,...Object.values(X.ops||{})].filter(Boolean).flatMap(q=>q.exi||[]).find(q=>q.exS===c.k);const L=ex?[...xCorFonte(ex.n)]:[];return L.length?L:null;}return i.mana;}
 function xDaMul(a){const tx=String(xInfo(a).tx||'');if(!/for each land on the battlefield with the same name as the exiled card/i.test(tx))return 1;const ex=[X.eu,...Object.values(X.ops||{})].filter(Boolean).flatMap(q=>q.exi||[]).find(q=>q.exS===a.k);if(!ex)return 0;let n=0;for(const [cp] of fgCampos())n+=cp.filter(q=>q.n===ex.n&&xInfo(q).land).length;return n;}
