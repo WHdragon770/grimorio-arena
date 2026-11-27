@@ -5478,7 +5478,7 @@ function fgProp(c,p,ctx){let m;
   if(p==='Outlaw')return /\b(Assassin|Mercenary|Pirate|Rogue|Warlock)\b/.test(xInfo(c).tipo||'');if(p==='EnchantedBy'||p==='EquippedBy'){const sc=xAchaK(ctx.src);return !!sc&&sc.an===c.k;}
   if(p==='IsCommander')return !!c.cmd;if(p==='Other')return c.k!==ctx.src;if(p==='Self')return c.k===ctx.src;if(p==='tapped')return !!c.tap;if(p==='untapped')return !c.tap;
   if(p==='attacking')return !!c.atk;if(p==='blocking')return !!c.bl;if(p==='token')return !!c.tok;if(p==='nonToken')return !c.tok;
-  if(p==='Equipped')return fgTodos().some(q=>q.an===c.k&&xInfo(q).equip);if(p==='harnessed')return !!c.harn;if(p==='IsSolved')return !!c.solv;if(p==='Enchanted'||p==='enchanted')return fgTodos().some(q=>q.an===c.k&&xInfo(q).aura);
+  if(p==='Equipped')return fgTodos().some(q=>q.an===c.k&&xInfo(q).equip);if(p==='harnessed')return !!c.harn;if(p==='IsSolved')return !!c.solv;if(p==='IsRingbearer')return !!(X.eu&&X.eu.anelK===c.k&&(X.eu.campo||[]).includes(c));if(p==='Enchanted'||p==='enchanted')return fgTodos().some(q=>q.an===c.k&&xInfo(q).aura);
   if(m=p.match(/^(power|toughness|cmc)(LT|LE|EQ|GE|GT|NE)(-?\d+|X)$/)){const v=m[3]==='X'?fgConta('X',ctx):+m[3];if(v==null)return true;const n=m[1]==='cmc'?xMVc(c):xCri(c)?xPT(c)[m[1]==='power'?'p':'t']:0;return fgCmp(n,m[2]+v);}
   if(m=p.match(/^with(.+)$/))return xCri(c)?xPT(c).kw.has(m[1].replace(/([a-z])([A-Z])/g,'$1 $2').toLowerCase()):false;
   if(m=p.match(/^counters_(LT|LE|EQ|GE|GT|NE)(\d+)_(\w+)$/)){const n=m[3]==='P1P1'?Math.max(0,c.cnt||0):((c.mk||{})[m[3].toLowerCase()]||0);return fgCmp(n,m[1]+m[2]);}
@@ -6059,6 +6059,7 @@ if(d.Defined&&d.Defined!=='You')return nao('grimório de outro');const v=d.Valid
     case 'ChoosePlayer':return (d.Choices==='Player.Opponent'&&!d.Random&&(!d.Defined||d.Defined==='You'))?[{op:'escJog'}]:nao('ação ChoosePlayer');
     case 'Clone':{for(const k of Object.keys(d))if(!/^(AB|DB|SP|Cost|ValidTgts|TgtPrompt|Defined|Duration|SpellDescription|StackDescription|SubAbility|AILogic|PrecostDesc|__m|Activator|TargetType|IsCurse)$/.test(k))return nao(k);
       if(d.Duration!=='UntilEndOfTurn')return nao('duração');const df=d.Defined||'';if(!al&&df!=='Remembered')return nao('quem');return put({op:'clone',al:al||'',lemb:df==='Remembered'?1:0},[]);}
+    case 'RingTemptsYou':return Object.keys(d).every(k=>/^(DB|AB|SP|SubAbility|SpellDescription|StackDescription|Cost)$/.test(k))?[{op:'anel'}]:nao('ação RingTemptsYou');
     case 'AlterAttribute':{if(d.Attributes==='Suspected'&&(!d.Duration)&&Object.keys(d).every(k=>/^(DB|AB|SP|Attributes|Defined|ValidTgts|TgtPrompt|Activate|SubAbility|SpellDescription|StackDescription|Cost|TargetMin|TargetMax|AILogic|IsCurse)$/.test(k))){const v=d.Activate==='False'?0:1;
       if(al)return put({op:'sspt',v,al},[]);const df=d.Defined||'Self';const o=df==='Self'?{si:1}:(df==='Enchanted'||df==='Equipped')?{anx:1}:(df==='Targeted'||df==='ParentTarget')?{mesmo:1}:/^Triggered(Card|Attacker|Object)(LKICopy)?$/.test(df)?{tk:1}:null;if(o)return [Object.assign({op:'sspt',v,al:''},o)];}}
     case 'AlterAttribute':if(d.Attributes==='Solved'&&(!d.Defined||d.Defined==='Self')&&!d.SubAbility)return [{op:'solve'}];return (d.Attributes==='Harnessed'&&(!d.Defined||d.Defined==='Self'))?[{op:'harn'}]:nao('ação AlterAttribute');
@@ -6409,6 +6410,15 @@ function xTurno(){const s=X.sala,e=X.eu,me=xUid();if(!s||!e)return;let mud=0;
 /* ---------- gatilhos genéricos ---------- */
 function xTc(c){try{const v=xPT(c);return {p:v.p,t:v.t,mv:xMVc(c),cnt:c.cnt||0,mk:c.mk||null,atk:(c.atk||c.__atk)?1:0};}catch(e){return null;}}
 /* Cases: no seu final de turno, confere a condição do "To solve" (Forge: Phase End of Turn → AlterAttribute Solved) */
+/* O Anel tenta você: sobe o nível (até 4), escolhe o Ring-bearer, as habilidades viram gatilhos do emblema "O Um Anel" */
+const ANEL_TX=['é lendário e não pode ser bloqueado por criatura com mais força','quando ataca: compra 1 e descarta 1','quando é bloqueado: quem bloqueou é sacrificado no fim do combate','quando dá dano de combate a um jogador: cada oponente perde 3'];
+async function xAnel(nm){const e=X.eu;e.anel=Math.min(4,(e.anel||0)+1);const C=e.campo.filter(c=>xCri(c)||xInfo(c).cri);let c=null;
+  if(C.length===1)c=C[0];else if(C.length){if(XBOT)c=C.slice().sort((a,b)=>xPT(b).p-xPT(a).p)[0];else{const k=await xEscolhe(`${nm}: o Anel tenta você (nível ${e.anel}). Quem vira o Ring-bearer?`,C.map(x=>({c:x,lado:'Seu campo'})));c=C.find(x=>x.k===k)||C[0];}}
+  if(c)e.anelK=c.k;e.emb=(e.emb||[]).filter(m=>m.nm!=='O Um Anel');const L=[];
+  if(e.anel>=2)L.push({m:'ataca',v:'Card.IsRingbearer',ops:[{op:'compra',n:1,quem:'eu'},{op:'descarta',n:1}],desc:'Ring-bearer atacou: compra 1 e descarta 1'});
+  if(e.anel>=4)L.push({m:'danoJ',v:'Card.IsRingbearer',ops:[{op:'perde',n:3,quem:'op'}],desc:'Ring-bearer deu dano de combate: cada oponente perde 3'});
+  e.emb.push({nm:'O Um Anel',L,st:[]});xLog(`${nm}: o Anel tentou você (nível ${e.anel})${c?', Ring-bearer: '+xNomeF(c):', sem criatura pra ser o Ring-bearer'}. Ativo: ${ANEL_TX.slice(0,e.anel).join('; ')}`);
+  xGatCampo(/^Whenever the Ring tempts you, ([^\n]+)$/im,'o Anel tentou você');if(c)xGatCampo(/^Whenever you choose a creature as your Ring-bearer, ([^\n]+)$/im,'você escolheu o Ring-bearer');xSobe();xPintaEu();}
 function xCasos(){const me=xUid();let n=0;for(const c of X.eu.campo){if(c.solv||!/^To solve —/m.test(xInfo(c).tx||''))continue;const s=FG.get(fgN(c.n));if(!s)continue;
   for(const t of s.T||[]){const r={};for(const pp of String(t).split('|')){const q=pp.indexOf('$');if(q>0)r[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}const ex=fgPP((s.sv||{})[r.Execute]||'');if(ex.api!=='AlterAttribute'||ex.d.Attributes!=='Solved')continue;
     const d=Object.assign({},r);for(const k of ['IsPresent','IsPresent2'])if(d[k]==='Card.Self+!IsSolved'){delete d[k];if(k==='IsPresent2')delete d.PresentCompare2;}if(d.IsPresent2){d.IsPresent=d.IsPresent2;d.PresentCompare=d.PresentCompare2;delete d.IsPresent2;delete d.PresentCompare2;}
@@ -7303,6 +7313,7 @@ function xFaz0(st,it,rest,nv){st=(st||[]).slice();X.__tcA=it.tc||null;X.__alA=it
           if(c){xLog(`${it.nm}: sacrificou ${c.n}`);const sc0=xTc(c);xMorre(c);xFazDepois([...s.st,...res],Object.assign({},it,{al:al2,sc:sc0}));}else{xLog(`${it.nm}: não sacrificou`);if(res.length)xFazDepois(res,Object.assign({},it,{al:al2.slice(pula)}));else{xSobe();xPintaEu();}}},300);
         feito.push('pode sacrificar pra fazer o efeito');xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
       case 'maisMana':{const tn=(X.sala||{}).turno||0;(e.mm=(e.mm||[]).filter(q=>q.t===tn)).push({v:s.v,cor:s.cor,n:s.n,t:tn});feito.push(`até o fim do turno, cada ${s.v} virado pra mana dá {${s.cor}} a mais (pra todos)`);break;}
+      case 'anel':{setTimeout(()=>xAnel(it.nm),300);feito.push('o Anel tenta você');break;}
       case 'solve':{const c=e.campo.find(q=>q.k===it.k);if(c&&!c.solv){c.solv=1;feito.push(`${c.n}: caso resolvido, a parte Solved está ativa`);}break;}
       case 'harn':{const c=e.campo.find(q=>q.k===it.k);if(c){c.harn=1;feito.push(`${c.n} foi harnessed: a habilidade ∞ está ativa`);}break;}
       case 'anexaAlvo':{const eq=e.campo.find(q=>q.k===it.k);if(!eq||!t||!xAchaK(t)){feito.push('não deu pra anexar');break;}eq.an=t;feito.push(`${eq.n} foi anexado a ${xAlvoNome(t)}`);break;}
