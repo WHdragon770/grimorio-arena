@@ -1075,8 +1075,12 @@ P.append(("e.exi.filter(q=>q.exAteM===k)", "if(!e||!k||!e.exi.some(q=>q.exAte===
 # ---------- L94. "destrói/devolve aquela criatura no fim do combate" (DelayedTrigger EndCombat lembrando TriggeredTarget/Attacker/Blocker): Basiliscos, Venomous Dragonfly, Ohran Viper, Aether Membrane, Wall of Tears... ----------
 # os gatilhos de bloqueio e de dano em criatura põem a outra criatura em tc.tk, e o atrasa guarda o tc → DelayTriggerRemembered vira TriggeredCard (tk)
 P.append(("/* L94 atrasado fim do combate */", "  /* AtEOT em ficha/pump */",
-"""  /* L94 atrasado fim do combate */if(api==='DelayedTrigger'&&d.Mode==='Phase'&&d.Phase==='EndCombat'&&/^Triggered(Target|Attacker|Blocker|Card)(LKICopy)?$/.test(d.RememberObjects||'')&&(!d.ValidPlayer||/^(Player|You)$/.test(d.ValidPlayer))&&!d.SubAbility&&!d.ThisTurn){const ex=fgPP((ctx.sv||{})[d.Execute]||'');if(ex.api&&/^DelayTriggerRemembered(LKI)?$/.test(ex.d.Defined||'')&&!ex.d.SubAbility&&!/DelayTrigger/.test(JSON.stringify(Object.assign({},ex.d,{Defined:''})))){const st=fgCadeia(Object.assign({},ex.d,{Defined:'TriggeredCard'}),ex.api,ctx);if(!st.some(o=>o.op==='nao'||o.si)&&st.every(o=>o.tk))return [{op:'atrasa',ph:'EndC',st}];}}
+"""  /* L94 atrasado fim do combate */if(api==='DelayedTrigger'&&d.Mode==='Phase'&&d.Phase==='EndCombat'&&/^Triggered(Target|Attacker|Blocker|Card)(LKICopy)?$/.test(d.RememberObjects||'')&&(!d.ValidPlayer||/^(Player|You)$/.test(d.ValidPlayer))&&!d.SubAbility&&!d.ThisTurn){const ex=fgPP((ctx.sv||{})[d.Execute]||'');if(ex.api&&/^DelayTriggerRemembered(LKI)?$/.test(ex.d.Defined||'')&&!ex.d.SubAbility&&!/DelayTrigger/.test(JSON.stringify(Object.assign({},ex.d,{Defined:''})))){const st=fgCadeia(Object.assign({},ex.d,{Defined:'TriggeredCard'}),ex.api,ctx);if(!st.some(o=>o.op==='nao'||(o.si&&o.op!=='saiV'))&&st.every(o=>o.tk))return [{op:'atrasa',ph:'EndC',st}];}}
 """, 'antes'))
+
+# ---------- L95. BUG: saiV com si+tk/td (ChangeZone Defined$ TriggeredCard...) olhava o si primeiro e mandava a PRÓPRIA carta: Storm Cauldron, Dissipation Field, Hixus, Grasping Giant, Cunning Evasion, Aether Membrane ----------
+P.append(("if((s.tk||s.td)&&t){", "      case 'saiV':{const ZN={mao:'pra mão',cem:'pro cemitério',exi:'pro exílio'}[s.z];if(s.si){",
+"      case 'saiV':{const ZN={mao:'pra mão',cem:'pro cemitério',exi:'pro exílio'}[s.z];if((s.tk||s.td)&&t){const c=e.campo.find(q=>q.k===t);if(c){xSai(c,s.z);feito.push(`${c.n} foi ${ZN}`);}else if(xExiste(t)&&s.z!=='cem'){xNoAlvo(t,s.z==='mao'?'volta':'exila',0,ev);feito.push(`${xAlvoNome(t)} foi ${ZN}`);}else feito.push('a carta do gatilho já tinha saído');break;}if(s.si){", 'troca'))
 
 
 def aplica(s):
