@@ -866,6 +866,20 @@ P.append(("xFilV(s.v,me,c=>{if(xCri(c))xEfCarta(c,'dano',n);});", "xFilV(s.v,me,
 P.append(('const c0=xAchaK(t||it.k);if(c0&&xCri(c0)){const v0=xPT(c0);', 'const c0=xAchaK(t||it.k);if(c0&&xInfo(c0).cri){const v0=xPT(c0);', 'const c0=xAchaK(t||it.k);if(c0&&xCri(c0)){const v0=xPT(c0);', 'troca'))
 P.append(("else if(q.op==='rpPumpVen'){if(u===me){const v=e.ven||0;e.campo.forEach(c=>{if(xCri(c)){", "else if(q.op==='rpPumpVen'){if(u===me){const v=e.ven||0;e.campo.forEach(c=>{if(xInfo(c).cri){", "else if(q.op==='rpPumpVen'){if(u===me){const v=e.ven||0;e.campo.forEach(c=>{if(xCri(c)){", 'troca'))
 P.append(("case 'autoDano':{for(const c of e.campo.slice())if(xCri(c)){", "case 'autoDano':{for(const c of e.campo.slice())if(xInfo(c).cri){", "case 'autoDano':{for(const c of e.campo.slice())if(xCri(c)){", 'troca'))
+# ---------- L76. Animada = criatura também em: filtro de poder/resistência/habilidade, maior poder, poder da própria carta, vínculo/toque mortal/infectar de quem causa dano, "criatura morreu", shroud/hexproof, sacrifício e P/R na tela ----------
+# Mutavault, Hissing Quagmire (toque mortal), Restless Vents, Celestial Colonnade, Mishra's Factory, Lavaclaw Reaches...
+P.append(("const n=m[1]==='cmc'?xMVc(c):xCri(c)?xPT(c)[m[1]==='power'?'p':'t']:0;", "const n=m[1]==='cmc'?xMVc(c):xInfo(c).cri?xPT(c)[m[1]==='power'?'p':'t']:0;", "const n=m[1]==='cmc'?xMVc(c):xCri(c)?xPT(c)[m[1]==='power'?'p':'t']:0;", 'troca'))
+P.append(('if(m=p.match(/^with(.+)$/))return xCri(c)?xPT(c).kw', 'if(m=p.match(/^with(.+)$/))return xInfo(c).cri?xPT(c).kw', 'if(m=p.match(/^with(.+)$/))return xCri(c)?xPT(c).kw', 'troca'))
+P.append(("if(p==='greatestPower'||p==='leastPower'){if(!xCri(c))return false;const P=xPT(c).p,L=fgTodos().filter(q=>xCri(q))", "if(p==='greatestPower'||p==='leastPower'){if(!xInfo(c).cri)return false;const P=xPT(c).p,L=fgTodos().filter(q=>xInfo(q).cri)", "if(p==='greatestPower'||p==='leastPower'){if(!xCri(c))return false;const P=xPT(c).p,L=fgTodos().filter(q=>xCri(q))", 'troca'))
+P.append(('const c=xAchaK(ctx.src);n=c&&xCri(c)?xPT(c)', 'const c=xAchaK(ctx.src);n=c&&xInfo(c).cri?xPT(c)', 'const c=xAchaK(ctx.src);n=c&&xCri(c)?xPT(c)', 'troca'))
+P.append(('kw=sc&&xCri(sc)?xPT(sc).kw:new Set();', 'kw=sc&&xInfo(sc).cri?xPT(sc).kw:new Set();', 'kw=sc&&xCri(sc)?xPT(sc).kw:new Set();', 'troca'))
+P.append(("const cg=xAchaK(t);if(cg&&xCri(cg)){xNoAlvo(t,'cnt',-n,ev);", "const cg=xAchaK(t);if(cg&&xInfo(cg).cri){xNoAlvo(t,'cnt',-n,ev);", "const cg=xAchaK(t);if(cg&&xCri(cg)){xNoAlvo(t,'cnt',-n,ev);", 'troca'))
+P.append(('const cnt=c.cnt||0,i=xInfo(c),cr0=!!i.cri||!!(c.ani&&c.ani.cri),tx=xNorm(i.tx,c.n),tok=c.tok&&!c.cp;', 'const cnt=c.cnt||0,i=xInfo(c),tx=xNorm(i.tx,c.n),tok=c.tok&&!c.cp;', 'const cnt=c.cnt||0,i=xInfo(c),cr0=!!i.cri||!!(c.ani&&c.ani.cri),tx=xNorm(i.tx,c.n),tok=c.tok&&!c.cp;', 'troca'))
+P.append(('  if(cr0){xTT().mor++;', '  if(i.cri){xTT().mor++;', '  if(cr0){xTT().mor++;', 'troca'))
+P.append(("const i=xInfo(c),kw=xCri(c)?xPT(c).kw:i.kws;if(kw.has('shroud'))", "const i=xInfo(c),kw=i.cri?xPT(c).kw:i.kws;if(kw.has('shroud'))", "const i=xInfo(c),kw=xCri(c)?xPT(c).kw:i.kws;if(kw.has('shroud'))", 'troca'))
+P.append(("v.tipo==='cp'?(xCri(c)||xInfo(c).pw):v.tipo==='creature'?xCri(c):v.tipo==='permanent'?true:v.tipo==='nc'?!xCri(c)&&!xInfo(c).land:", "v.tipo==='cp'?(xInfo(c).cri||xInfo(c).pw):v.tipo==='creature'?xInfo(c).cri:v.tipo==='permanent'?true:v.tipo==='nc'?!xInfo(c).cri&&!xInfo(c).land:", "v.tipo==='cp'?(xCri(c)||xInfo(c).pw):v.tipo==='creature'?xCri(c):v.tipo==='permanent'?true:v.tipo==='nc'?!xCri(c)&&!xInfo(c).land:", 'troca'))
+P.append(('  if(cp){const i=xInfo(c);\n    if(i.cri||xCri(c)){const v=xPT(c);', '  if(cp){const i=xInfo(c);\n    if(i.cri){const v=xPT(c);', '  if(cp){const i=xInfo(c);\n    if(i.cri||xCri(c)){const v=xPT(c);', 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
