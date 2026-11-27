@@ -507,6 +507,12 @@ P.append(("case 'lembEsV':", "      case 'sacrEsta':{",
         feito.push(L.length?'escolhe dentre as cartas':'nenhuma carta assim entre elas');xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
 """, 'antes'))
 
+# ---------- L41. Animate nas cartas lembradas / do gatilho (via fgLembT), sem AtEOT ----------
+P.append(("fgLembT(d,'Animate',ctx)", "const df=d.Defined||'';if(!al&&df&&df!=='Self')return nao('quem');",
+"const df=d.Defined||'';if(!al&&df&&df!=='Self'){if(!d.AtEOT&&!d.Duration){const r=fgLembT(d,'Animate',ctx);if(r)return r;}if(!d.AtEOT&&d.Duration==='Permanent'){const r=fgLembT(d,'Animate',ctx);if(r)return r;}return nao('quem');}", 'troca'))
+P.append(("['pump','kt','nDesv','cnt','regen','anima']", "['pump','kt','nDesv','cnt','regen'].includes(x.op)&&!x.al))return null;return r.map(x=>Object.assign(x,{[k]:1}));};",
+"['pump','kt','nDesv','cnt','regen','anima'].includes(x.op)&&!x.al))return null;return r.map(x=>Object.assign(x,{[k]:1}));};", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
