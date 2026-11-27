@@ -5802,6 +5802,8 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
       const L=String(d.StaticAbilities||'').split(',').filter(Boolean);if(!L.length)return nao('efeito sem estática');const du=d.Duration||'';const o=[];
       for(const nm of L){const st={};for(const pp of String((ctx.sv||{})[nm]||'').split('|')){const q=pp.indexOf('$');if(q>0)st[pp.slice(0,q).trim()]=pp.slice(q+1).trim();}const md=st.Mode||(nm==='MustAttack'?'MustAttack':'');
         if(md==='Continuous'&&st.Affected==='You'&&st.SetMaxHandSize==='Unlimited'&&Object.keys(st).length<=4){o.push({op:'semMax'});continue;}
+        if(md==='Continuous'&&st.Affected==='You'&&/^\d+$/.test(st.AdjustLandPlays||'')&&!du&&Object.keys(st).every(k=>/^(Mode|Affected|AdjustLandPlays|Description|EffectZone)$/.test(k))){o.push({op:'terX',n:+st.AdjustLandPlays});continue;}
+        if(md==='CantRegenerate'&&/^Card\.IsRemembered$/.test(st.ValidCard||'')&&!du&&Object.keys(st).every(k=>/^(Mode|ValidCard|Description|EffectZone)$/.test(k))){const ro=d.RememberObjects||'';if(ro==='Self'&&!al){o.push({op:'nRegen',al:'',si:1});continue;}if(ro==='Targeted'&&al){o.push({op:'nRegen',al});continue;}if(!al&&(ro==='ParentTarget'||ro==='Targeted')){o.push({op:'nRegen',al:'',mesmo:1});continue;}}
         if(md==='CantBlockBy'&&st.ValidBlocker==='Creature.withoutHaste'&&/^(Card|Creature)\.(Self|EffectSource)$/.test(st.ValidAttacker||'')&&(!du||du==='UntilHostLeavesPlayOrEOT')&&!al){o.push({op:'kt',al:'',kw:'blqHaste'});continue;}
         if(md==='CantChangeLife'&&(st.ValidPlayer||'You')==='You'&&du==='UntilYourNextTurn'&&Object.keys(st).every(k=>/^(Mode|ValidPlayer|Description)$/.test(k))){o.push({op:'vidaT'});continue;}
         if((md==='CanAttackDefender'||md==='AssignNoCombatDamage')&&/^(Card|Creature)\.(Self|EffectSource)$/.test(st.ValidCard||'')&&(!du||du==='UntilHostLeavesPlayOrEOT')&&!al&&Object.keys(st).every(k=>/^(Mode|ValidCard|Description|EffectZone)$/.test(k))){o.push(md==='CanAttackDefender'?{op:'debuff',kw:['defender'],al:'',si:1}:{op:'semDanoC'});continue;}
@@ -6514,7 +6516,7 @@ function xPode(i){const s=X.sala||{};if(!s.turno)return 'Sorteiem quem começa a
 const xMDFC=c=>{if(c.face||c.tok)return null;const r=acharDB(c.n);if(!r||!Array.isArray(r[10]))return null;const b=r[10];if(!b[1]&&!(/\bLand\b/.test(b[2]||'')&&!/\btransform\b/i.test(r[6]||'')))return null;return {n:b[0],custo:b[1]||'',land:/\bLand\b/.test(b[2]||'')};};
 const xMTE=c=>{if(c.face||c.tok)return '';const m=String(xInfo(c).tx).match(/^More Than Meets the Eye ((?:\{[^}]+\})+)/m);return m?m[1]:'';};
 async function xConjura(z,k,cv,cus,mod){const e=X.eu,c=e[z].find(q=>q.k===k);if(!c)return;if(e.abeyT!=null&&e.abeyT===((X.sala||{}).turno||0)&&/Instant|Sorcery/.test(xInfo(c).tipo||''))return xAv('Abeyance: não pode conjurar instantâneas nem feitiços neste turno.');const i=xInfo(c),cvc=cv===1?xMTE(c):(cus||c.cuAlt||(c.gratisAte!=null&&z==='exi'&&((X.sala||{}).turno||0)<=c.gratisAte?'{0}':''));
-  if(i.land&&!i.cri){const er=xPode({inst:0});if(er)return xAv(er);if(e.ter>=1)return xAv('Você já jogou um terreno neste turno.');
+  if(i.land&&!i.cri){const er=xPode({inst:0});if(er)return xAv(er);if(e.ter>=xTerMax())return xAv('Você já jogou os terrenos que pode neste turno.');
     e[z].splice(e[z].indexOf(c),1);xReset(c);if(cv===2)c.face=1;e.campo.push(c);e.ter++;xLog('jogou o terreno '+xNomeF(c));setTimeout(()=>xEntrou(c),300);xSobe();return xPintaEu();}
   const er=xPode(c.semVel?{inst:1}:i);if(er)return xAv(er);
   const rd=fgReduz(c);let cs=fgAplRed(xCusto(cvc||i.custo),rd);if(c.qCor&&z==='exi'){cs.g+=cs.pips.length;cs.pips=[];}if(c.custoMais&&z==='exi')cs.g+=c.custoMais;if(z==='mao'&&e.omni&&!i.land&&!cvc){cs=xCusto('{0}');xLog(`${c.n}: de graça (emblema)`);}{delete c.altP;const am=z==='mao'&&!cvc&&i.tx.match(/^You may pay ((?:\{[^}]+\})+) rather than pay this spell's mana cost\.?$/m);if(am){const ca=fgAplRed(xCusto(am[1]),rd);let usa=false;if(XBOT)usa=!xPaga(e,cs).ok&&xPaga(e,ca).ok;else usa=confirm(`${c.n}: pagar ${am[1]} em vez do custo normal?`);if(usa){cs=ca;c.altP=1;xLog(`${c.n}: custo alternativo ${am[1]}`);}}}if(rd.tx.length)xLog(`custo de ${c.n}: ${rd.tx.join(', ')}`);const imp=z==='cmdz'?(c.ti||0)*2:0;let x=0;if(cs.x){if(XBOT){while(x<30&&xPaga(e,cs,cs.x*(x+1)+imp).ok)x++;if(!x)return;}else{x=parseInt(prompt(`Valor de X pra ${c.n}?`,'1'),10);if(isNaN(x)||x<0)return;}}
@@ -6634,6 +6636,8 @@ const xN=w=>{w=String(w||'').toLowerCase();return /^\d+$/.test(w)?+w:X1NUM[w]!=n
 const X1ALV="(any target|target creature or planeswalker|target creature or player|target player or planeswalker|target creature an opponent controls|target creature you don't control|target creature you control|target nonland permanent|target artifact or enchantment|target creature|target artifact|target enchantment|target planeswalker|target permanent|target land|target opponent|target player|each opponent|each other creature|each creature your opponents control|each creature|each player)";
 const xNorm=(tx,n)=>{let t=String(tx||'');for(const v of [n,String(n||'').split(' // ')[0],String(n||'').split(',')[0]])if(v&&v.length>2)t=t.split(v).join('this card');t=t.replace(/\b([Tt])his (?:land|Vehicle|vehicle|Equipment|equipment|Aura|aura|Spacecraft|spacecraft)\b/g,'$1his card');{const a=String(n||'').split(' // ')[0];const m=!a.includes(',')&&a.match(/^([A-Z][a-z]{2,}) (?:the|of)\b/);if(m)t=t.replace(new RegExp('\\b'+m[1]+'\\b(?![ ,]+(?:the|of)\\b)','g'),'this card');}return t;};
 const xMax=()=>(X.sala&&X.sala.max)||2;
+/* quantos terrenos pode jogar neste turno: 1 + estáticas "additional land(s) on each of your turns" + efeito deste turno (e.terX) */
+function xTerMax(){const e=X.eu,t=(X.sala||{}).turno||0,W={an:1,one:1,two:2,three:3};let n=1+((e&&e.terX&&e.terX.t===t)?e.terX.n:0);for(const c of (e&&e.campo)||[]){if(c.tok&&!c.cp)continue;const m=xNorm(xInfo(c).tx||'',c.n).match(/You may play (an|one|two|three) additional lands? on each of your turns/i);if(m)n+=W[m[1].toLowerCase()];}return n;}
 function xFimJogo(s,me){if(!s.turno||X.fimF===s.turno+'.'+(s.jog||[]).join())return;const j=s.jog||[];if(j.length<2)return;const v=xVivos();if(v.length>1)return;
   X.fimF=s.turno+'.'+j.join();X.auto=0;const ganhei=v[0]===me,el=document.createElement('div');el.className='x1-fim'+(ganhei?' win':'');
   const mo=j.filter(u=>!v.includes(u)).map(u=>{const p=xPub(u)||{};return `${h(xNomeU(u))}: ${p.vida<=0?'vida '+p.vida:(p.dc||0)>=21?'21 de dano de comandante':'10 de veneno'}`;}).join(' · ');
@@ -6797,13 +6801,14 @@ async function xGatTx(c,m,rot,tc){if(/choose (?:one|two|three|one or both|one or
   xLog(`gatilho de ${c.n} (${rot}) foi pra pilha: ${m}`);xEmpilha(Object.assign({id:xId(),de:xUid(),tipo:'etb',tx:m,nm:c.n,img:c.img||'',k:c.k,al},tc?{tc}:{}));}
 function xSai(c,z){if(z==='cem')return xMorre(c);const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;xExAteVolta(c.k);/*s*/e.campo.splice(ix,1);if(!c.tok){xReset(c);const d0=c.dono0;delete c.dono0;if(d0&&d0!==xUid())xEvia({op:'aoZona',c:JSON.parse(JSON.stringify(c)),z,para:d0});else e[z].push(c);}}
 function xEfCarta(c,op,n,x){const i=xInfo(c);
-  if(op==='destroi'){if(!xPT(c).kw.has('indestructible')&&!xUmbra(c)){if(c.regen){c.regen=0;c.dn=0;c.tap=1;c.atk=0;c.bl='';xLog(c.n+' regenerou');}else xSai(c,'cem');}}else if(op==='regen')c.regen=1;else if(op==='fase'){const e=X.eu,j=e.campo.indexOf(c);if(j>=0){e.campo.splice(j,1);c.ph=1;c.atk=0;c.bl='';c.tap=c.tap||0;e.exi.push(c);xLog(`${c.n} saiu de fase`);}}
+  if(op==='destroi'){if(!xPT(c).kw.has('indestructible')&&!xUmbra(c)){if(c.regen&&c.nRg!==((X.sala||{}).turno||0)){c.regen=0;c.dn=0;c.tap=1;c.atk=0;c.bl='';xLog(c.n+' regenerou');}else xSai(c,'cem');}}else if(op==='regen')c.regen=1;else if(op==='fase'){const e=X.eu,j=e.campo.indexOf(c);if(j>=0){e.campo.splice(j,1);c.ph=1;c.atk=0;c.bl='';c.tap=c.tap||0;e.exi.push(c);xLog(`${c.n} saiu de fase`);}}
   else if(op==='exila')xSai(c,'exi');else if(op==='volta')xSai(c,'mao');else if(op==='exiFim'||op==='exiFimT'){const e=X.eu;if(e.campo.includes(c)){const tk=c.tok&&!c.cp,d0=c.dono0;xSai(c,'exi');if(!tk&&!d0){const q=e.exi.find(z=>z.n===c.n&&!z.voltaF)||e.exi[e.exi.length-1];if(q){q.voltaF=op==='exiFimT'?2:1;q.voltaT=(X.sala||{}).turno||0;}}xLog(c.n+' foi exilada (volta no final do turno)');}}else if(op==='pisca'){const e=X.eu;if(e.campo.includes(c)&&!c.tok&&!c.dono0){xSai(c,'exi');const j=e.exi.indexOf(c);if(j>=0){e.exi.splice(j,1);c.tap=0;c.sk=xInfo(c).cri?1:0;e.campo.push(c);xLog(c.n+' foi exilada e voltou pro campo');setTimeout(()=>xEntrou(c),450);}}else xSai(c,'exi');}
   else if(op==='tamiyo'){c.tam=x||null;}
   else if(op==='tesouro'){c.trs=1;c.atk=0;c.bl='';c.alv='';c.dn=0;c.tap=c.tap||0;delete c.kt;xLog(`${c.n} virou um Tesouro`);}
   else if(op==='elk'){c.elk=1;delete c.trs;delete c.kt;delete c.ani;delete c.ptF;xLog(`${c.n} virou um Alce 3/3`);}
   else if(op==='malakir'){if(!c.tok){c.eb=1;c.ebM=(X.sala||{}).turno||0;}}
   else if(op==='debuff'){const tn=(X.sala||{}).turno||0;if(!c.kD||c.kD.t!==tn)c.kD={t:tn,kw:[]};c.kD.kw=[...new Set([...c.kD.kw,...((x||{}).kw||[])])];}
+  else if(op==='nRegen')c.nRg=(X.sala||{}).turno||0;
   else if(op==='vira')c.tap=1;else if(op==='desvira')c.tap=0;
   else if(op==='pump'){c.tp=(c.tp||0)+x.p;c.tt=(c.tt||0)+x.t;if(x.kws)c.kt=[...new Set([...(c.kt||[]),...x.kws])];}
   else if(op==='cnt')c.cnt=(c.cnt||0)+n;
@@ -6813,7 +6818,7 @@ function xEfCarta(c,op,n,x){const i=xInfo(c);
       xLog(`${c.n} foi pro grimório (${pos==='emb'?'embaralhado':pos===-1?'fundo':pos?(pos+1)+'ª do topo':'topo'})`);}
     if((x||{}).warp&&e.bib.length){const t=e.bib[0],it=xInfo(t);xLog(`revelou ${t.n} do topo do grimório`);if(!it.land||it.perm||it.cri||/\b(Artifact|Creature|Enchantment|Land|Planeswalker|Battle)\b/.test(it.tipo||'')){if(/\b(Artifact|Creature|Enchantment|Land|Planeswalker|Battle)\b/.test(it.tipo||'')){e.bib.shift();t.tap=0;t.sk=it.cri?1:0;e.campo.push(t);xLog(`${t.n} é permanente: entrou no campo`);setTimeout(()=>xEntrou(t),300);}}}}}
   else if(op==='dobraTudo'){if((c.cnt||0)>0)c.cnt*=2;if(c.mk)for(const q of Object.keys(c.mk))if((c.mk[q]||0)>0)c.mk[q]*=2;}
-  else if(op==='destroiF'){if(c.regen){c.regen=0;c.dn=0;c.tap=1;c.atk=0;c.bl='';xLog(c.n+' regenerou');}else xSai(c,'cem');}
+  else if(op==='destroiF'){if(c.regen&&c.nRg!==((X.sala||{}).turno||0)){c.regen=0;c.dn=0;c.tap=1;c.atk=0;c.bl='';xLog(c.n+' regenerou');}else xSai(c,'cem');}
   else if(op==='anima'){c.ani={p:x.p,t:x.t,kw:x.kws||[],cri:x.cri,perm:x.perm};if(x.sem)Object.assign(c.ani,{sem:1,tp:x.tp||'',ct:x.ct||'',rt:x.rt||0,rc:x.rc||0});if(x.gan)c.ani.gan=x.gan;}
   else if(op==='kt')c.kt=[...new Set([...(c.kt||[]),...(x.kws||[x.kw])])];
   else if(op==='pumpProx'){c.tpN=(c.tpN||0)+x.p;c.ateU=x.u;c.ateT=x.tn;}else if(op==='naoAtaca'){c.naN=1;c.ateU=x.u;c.ateT=x.tn;}else if(op==='goad'){c.gd=x.u;c.ateU=x.u;c.ateT=x.tn;}
@@ -7359,6 +7364,8 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
         setTimeout(async()=>{const k=await xEscolhe(`${it.nm}: reforçar ${q} em qual (resistência ${mn})?`,L.map(c=>({c,lado:'Campo'})));const c=L.find(z=>z.k===k)||L[0];xEfCarta(c,'cnt',q);xLog(`${it.nm}: reforçar ${q} em ${c.n}`);xSobe();xPintaEu();},300);feito.push(`reforçar ${q}`);break;}
       case 'debuff':{const k=t||it.k;if(!k){feito.push('sem a criatura');break;}xNoAlvo(k,'debuff',0,ev,{kw:s.kw});feito.push(`${xAlvoNome(k)} perdeu ${s.kw.join(', ')} até o fim do turno`);break;}
       case 'semDanoC':{const c=e.campo.find(q=>q.k===it.k);if(!c){feito.push('a criatura saiu');break;}c.nCD=(X.sala||{}).turno||0;feito.push(`${c.n} não causa dano de combate neste turno`);break;}
+      case 'terX':{const tn=(X.sala||{}).turno||0;if(!e.terX||e.terX.t!==tn)e.terX={t:tn,n:0};e.terX.n+=s.n;feito.push(`pode jogar ${s.n} terreno${s.n>1?'s':''} adicional${s.n>1?'is':''} neste turno`);break;}
+      case 'nRegen':{const k=t||it.k;if(!k){feito.push('sem a criatura');break;}xNoAlvo(k,'nRegen',0,ev);feito.push(`${xAlvoNome(k)} não pode ser regenerada neste turno`);break;}
       case 'sacrEsta':{const c=e.campo.find(q=>q.k===it.k);if(c){xMorre(c);feito.push('sacrificou '+c.n);}break;}
       case 'sacrEu':if(s.rm&&si<st.length-1){const res=st.slice(si+1),al2=(it.al||[]).slice(j),s0=s;setTimeout(async()=>{const r=await xSacrEu(s0,it.nm,it.k);xFazDepois(res,Object.assign({},it,{rem:r||0,al:al2}));},300);feito.push(`sacrifica ${n} ${s.d||''}`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
         setTimeout(()=>xSacrEu(s,it.nm,it.k),300);feito.push(`sacrifica ${n} ${s.d||''}`);break;
@@ -7941,7 +7948,7 @@ function xVisDado(f,r){if(xVisRM.matches)return;document.querySelectorAll('.x1-d
 function xVisLeque(){const m=document.querySelector('#x1-eu .x1-mao');if(!m)return;const cs=[...m.querySelectorAll(':scope>.x1-c')],n=cs.length,mid=(n-1)/2,st=Math.min(5,30/Math.max(1,n));
   const e=X.eu,s=X.sala||{};
   cs.forEach((b,i)=>{const d=i-mid;b.style.setProperty('--r',(d*st).toFixed(2));b.style.setProperty('--y',(d*d*st*.32).toFixed(1));
-    let ok=false;try{const c=e.mao.find(q=>q.k===b.dataset.k),fi=c&&xInfo(c);if(fi&&s.turno){if(fi.land&&!fi.cri)ok=!xPode({inst:0})&&!(e.ter>=1);else ok=!xPode(fi)&&xPaga(e,xCusto(fi.custo||''),0).ok;}}catch(er){}
+    let ok=false;try{const c=e.mao.find(q=>q.k===b.dataset.k),fi=c&&xInfo(c);if(fi&&s.turno){if(fi.land&&!fi.cri)ok=!xPode({inst:0})&&!(e.ter>=xTerMax());else ok=!xPode(fi)&&xPaga(e,xCusto(fi.custo||''),0).ok;}}catch(er){}
     b.classList.toggle('pode',ok);});}
 function xVisVez(){const s=X.sala||{},me=xUid(),eu=document.querySelector('#x1-eu'),op=document.querySelector('#x1-op');if(eu)eu.classList.toggle('vez',!!s.turno&&s.vez===me);if(op)op.classList.toggle('vez',!!s.turno&&!!s.vez&&s.vez!==me&&op.classList.contains('x1-lado'));}
 function xVisFase(){const s=X.sala||{},me=xUid(),P=s.pilha||[];if(!s.turno){XV.turno=null;return;}
@@ -8002,7 +8009,7 @@ for(const nm of ['xPintaEu','xPintaOp']){const f0=eval(nm);eval(nm+'=function(..
         dmgN=qd(hb.tx,c.n);const n=(X.sala.pilha||[]).length;try{await xAtiva(c.k,j);}finally{mal=0;dmgN=0;}if(c.tap||(X.sala.pilha||[]).length>n)return 1;}}
     return 0;}
   async function joga(){const e=X.eu;
-    if(e.ter<1){const ts=e.mao.filter(c=>{const i=xInfo(c);return i.land&&!i.cri;});if(ts.length){await xConjura('mao',ts[0].k);return 1;}}
+    if(e.ter<xTerMax()){const ts=e.mao.filter(c=>{const i=xInfo(c);return i.land&&!i.cri;});if(ts.length){await xConjura('mao',ts[0].k);return 1;}}
     const l=[...e.mao.map(c=>['mao',c]),...e.cmdz.map(c=>['cmdz',c])].filter(([z,c])=>!xInfo(c).land&&pode(e,c,z)&&!(inst(c)&&(tem(c,'anula')||tem(c,'pump')))&&!(ehMal(xInfo(c).tx,c.n)&&!((X.op||{}).campo||[]).length&&!/any target|player/i.test(xInfo(c).tx))).sort((a,b)=>custoT(b[1])-custoT(a[1]));
     for(const [z,c] of l){const i=xInfo(c);if(await solta(z,c,{mal:i.aura?(ruim(i.tx)||/enchanted creature (can't|gets -)/i.test(i.tx)):ehMal(i.tx,c.n)}))return 1;}
     // equipar o que estiver solto na criatura mais forte
