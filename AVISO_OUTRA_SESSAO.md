@@ -12,11 +12,11 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 3. Rode seu cob/tL1/mec e confira que nada caiu. Depois pode apagar este aviso e a pasta `ferramentas-deck/`.
 
 ## Números (medidor do Deck: todos os 34480 scripts do Forge, partes SP/AB/capítulo/gatilho sem op nao)
-- Antes (01d0d5e): 26629 (77.2%) · Agora: **27419 (79.5%)**, +790 cartas
+- Antes (01d0d5e): 26629 (77.2%) · Agora: **27442 (79.6%)**, +813 cartas
 - Cartas dos decks: 1342 → 1344 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (18 seções do patch)
+## O que mudou (20 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -35,6 +35,10 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L16.** Perder habilidade até o fim do turno (Debuff): c.kD = {t: turno, kw: [...]}, tirado no xPT (ex.: Grozoth, Gargoyle Sentinel, Tidewater Minion, Emerald Charm, Vertigo, Gravity Well, Soul Sear, Smite the Deathless, Canopy Dragon, Crash Landing...)
 - **L17.** "Não pode ser bloqueada neste turno" via Effect: a própria (RememberObjects Self), o alvo da parte anterior, o atacante do gatilho, todas as suas (ex.: Dreadlight Monstrosity, Creeping Tar Pit, Border Guardian, Agent of Horizons, Blitzball Stadium, Kiora of Salt and Sand, Trygon Prime, Glaring Spotlight, Keeper of Keys...)
 - **L18.** Estáticas de Effect na própria carta até o fim do turno (UntilHostLeavesPlayOrEOT): pode atacar com defensor, não causa dano de combate (ex.: Wall of Wonder, Walking Wall, Mobile Fort, Mirror Wall, Kozilek's Pathfinder, Spin Engine, Laccolith Whelp/Warrior, Farrel's Zealot, Tin Street Dodger...)
+- **L19.** Terrenos adicionais: "play an additional land on each of your turns" (Azusa, Exploration, Oracle of Mul Daya...) e AdjustLandPlays neste turno (Effect) (ex.: Explore, Growth Spiral, Journey of Discovery, Summer Bloom, Azusa's Many Journeys, This World Belongs to Me, Way of the Paradox... + estáticas Azusa, Exploration, Dryad of the Ilysian Grove)
+- **L20.** "Não pode ser regenerada neste turno" (Effect CantRegenerate): alvo da parte anterior, alvo próprio, a própria (ex.: Carbonize, Disintegrate, Scorching Lava, Gravebind, Orcish Healer, Furnace Brood, Whippoorwill, Engulfing Flames, Clergy/Knight of the Holy Nimbus)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
+- O limite de terreno por turno era fixo em 1 (Azusa, Exploration, Oracle of Mul Daya não funcionavam): agora é `xTerMax()` (L19), que soma as estáticas "additional land(s) on each of your turns" e os efeitos "neste turno".
+- A criatura não perdia habilidade nunca: agora `c.kD` (L16) tira as palavras-chave até o fim do turno, dentro do xPT.
