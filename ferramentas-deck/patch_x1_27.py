@@ -523,6 +523,10 @@ P.append(("|Source)(LKICopy)?$/.test(d.Defined||'')||(/^TriggeredTarget(LKICopy)
 P.append(("d.Defined==='TriggeredAttackers'&&d.IsCurse!=='True'", "if(!al&&d.Defined&&d.Defined!=='Self'){const r=fgLembT(d,'Pump',ctx);if(r)return r;return nao('quem');}",
 "if(!al&&d.Defined==='TriggeredAttackers'&&d.IsCurse!=='True'){const d2=Object.assign({},d,{ValidCards:'Creature.attacking+YouCtrl'});delete d2.Defined;delete d2.SubAbility;const r=fgPasso0(d2,'PumpAll',ctx);if(!r.some(o=>o.op==='nao'))return r;}if(!al&&d.Defined&&d.Defined!=='Self'){const r=fgLembT(d,'Pump',ctx);if(r)return r;return nao('quem');}", 'troca'))
 
+# ---------- L44. "Você ganha vida" com alvo jogador (a conta usa o alvo): Gerrard Capashen, Kithkin Zealot, Spoils of Evil ----------
+P.append(("d.Defined==='You'&&/^target (opponent|player)$/.test(al||'')", "if(d.Defined==='Player'&&!al)return [{op:'ganhaJ',n,todos:1}];",
+"if(d.Defined==='Player'&&!al)return [{op:'ganhaJ',n,todos:1}];if(d.Defined==='You'&&/^target (opponent|player)$/.test(al||''))return put({op:'ganha',n,al},[]);", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
