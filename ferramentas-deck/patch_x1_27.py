@@ -767,6 +767,17 @@ P.append(("case 'descUn':", "      case 'sacrEsta':{",
         feito.push(`descarta ${q} a não ser que descarte 1 ${s.v}`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
 """, 'antes'))
 
+# ---------- L68. Descarte pelo jogador do gatilho/alvo (TriggeredTarget/TriggeredPlayer/TargetedController/TriggeredCardController...), inclusive ao acaso ----------
+# Skullknocker Ogre, Headless Specter, Urgoros, Necrogen Mists, Doom Foretold, Gloomlance, Dinrova Horror, Recoil, Blightning, Carnival, Oppression, Bereavement...
+P.append(("op:'descQ'", "if(df!=='You'&&!/^You$/.test(d.Defined||''))return nao('descarte de outro jogador');",
+"{const q=df==='TargetedPlayer'?'alvo':fgQuemJ(df),so=df==='TargetedPlayer'?'P':/^(Parent)?Targeted(Controller|Owner)$/.test(df)?'C':'';if(q&&!al&&!d.RememberDiscarded&&!d.DiscardValid&&(!d.Mode||/^(TgtChoose|Hand|Random)$/.test(d.Mode))){const n=d.Mode==='Hand'?99:(N('NumCards')??1);if(typeof n==='number')return [{op:'descQ',n,q,so,rnd:d.Mode==='Random'?1:0}];}}if(df!=='You'&&!/^You$/.test(d.Defined||''))return nao('descarte de outro jogador');", 'troca'))
+P.append(("case 'descQ':", "      case 'sacrEsta':{",
+"""      case 'descQ':{if(s.so){const t0=String(ult||(it.al||[])[0]||'');if((s.so==='P')!==t0.startsWith('P:'))break;}const u=xQuemJ(s.q,it,ult);if(!u){feito.push('sem jogador pro descarte');break;}const tx=`${u===me?'você':xNomeU(u)} descarta ${n>=99?'a mão':n}${s.rnd?' ao acaso':''}`;
+        if(u!==me){ev({op:'descOp',n,nm:it.nm,rnd:s.rnd},u);feito.push(tx);break;}if(s.rnd||n>=99){const L=[];for(let q=0;q<n&&e.mao.length;q++)L.push(...e.mao.splice(Math.floor(Math.random()*e.mao.length),1));L.forEach(c=>e.cem.push(c));if(L.length)xDescartou(L.length);feito.push(tx+(L.length?': '+L.map(c=>c.n).join(', '):''));break;}setTimeout(()=>xDescarta(n,it.nm).then(()=>{xSobe();xPintaEu();}),300);feito.push(tx);break;}
+""", 'antes'))
+P.append(("v.op==='descOp'&&v.rnd", "  else if(v.op==='descOp'){if(v.n>=99){",
+"  else if(v.op==='descOp'&&v.rnd){const L=[];for(let q=0;q<v.n&&e.mao.length;q++)L.push(...e.mao.splice(Math.floor(Math.random()*e.mao.length),1));L.forEach(c=>e.cem.push(c));if(L.length){xLog(`descartou ao acaso: ${L.map(c=>c.n).join(', ')} (${v.nm})`);xDescartou(L.length);}xSobe();xPintaEu();}\n  else if(v.op==='descOp'){if(v.n>=99){", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
