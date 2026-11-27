@@ -955,12 +955,15 @@ P.append(("if(md.cn){try{", "const mx=Math.min(md.n,it.length),mn=Math.min(md.mi
 "if(md.cn){try{const r=fgConta(md.cn,{eu:xUid(),src:'',sv:md.csv||{}});if(typeof r==='number'&&r>=0)md=Object.assign({},md,{n:r,min:Math.min(md.min,r)});}catch(er){}}const mx=Math.min(md.n,it.length),mn=Math.min(md.min,mx);", 'troca'))
 
 # ---------- L85. BUG: filtros do Forge em minúscula que o fgProp não conhecia caíam no fgAv e davam TRUE (aceitava qualquer carta) ----------
-# Fatal Blow / Ogre Siegebreaker / Orzhov Euthanist (wasDealtDamageThisTurn), War Machine / Avenging Arsenal (modified), Whiplash (equipped), Blessed Reversal (attackingYou), Breeches (inZoneBattlefield), Slimefoot's Survey (hasABasicLandType), Rishadan Brigand (canProduceMana), Clockwork Steed (attackedThisCombat)...
+# Fatal Blow / Ogre Siegebreaker / Orzhov Euthanist (wasDealtDamageThisTurn), War Machine / Avenging Arsenal (modified), Whiplash (equipped), Blessed Reversal (attackingYou), Breeches (inZoneBattlefield), Slimefoot's Survey (hasABasicLandType), Rishadan Brigand (canProduceMana), Clockwork Steed (attackedThisCombat), blocked/unblocked, blockingSource/blockedBySource, hasKeywordX, basePowerEQ1, suspended, foretold...
 P.append(("if(p==='wasDealtDamageThisTurn')", "  if(m=p.match(/^named(.+)$/))return fgN(c.n)===m[1];",
 """  if(p==='wasDealtDamageThisTurn')return !!c.dn||c.dnT===((X.sala||{}).turno||0);if(p==='inZoneBattlefield'||p==='inRealZoneBattlefield')return c.k==='__x'||xExiste(c.k);
   if(p==='modified')return !!(c.cnt||(c.mk&&Object.values(c.mk).some(v=>+v>0))||fgTodos().some(q=>q.an===c.k&&(xInfo(q).equip||xInfo(q).aura)));if(p==='equipped')return fgTodos().some(q=>q.an===c.k&&xInfo(q).equip);
   if(p==='attackingYou')return !!c.atk&&c.alv==='P:'+(ctx&&ctx.eu||xUid());if(p==='attackedThisCombat')return !!c.atk;if(p==='faceDown')return !!c.fd;
   if(p==='hasABasicLandType')return /\\b(Plains|Island|Swamp|Mountain|Forest)\\b/.test(xInfo(c).tipo||'');if(p==='canProduceMana')return !!(xInfo(c).land||xManaC(c));
+  if(p==='blocked'||p==='unblocked'){const b=fgTodos().some(q=>q.bl===c.k);return p==='blocked'?b:(!!c.atk&&!b);}if(p==='blockingSource')return !!c.bl&&c.bl===ctx.src;if(p==='blockedBySource'||p==='blockedBySourceLKI'){const sc=xAchaK(ctx.src);return !!sc&&sc.bl===c.k;}
+  if(m=p.match(/^hasKeyword(\\w+)$/)){const w=FGKW[m[1]]||m[1].toLowerCase();return (xCri(c)?xPT(c).kw:xInfo(c).kws||new Set()).has(w);}if(m=p.match(/^base(Power|Toughness)(LT|LE|EQ|GE|GT|NE)(-?\\d+)$/)){const i0=xInfo(c);return xCri(c)&&fgCmp(+(m[1]==='Power'?i0.p:i0.t)||0,m[2]+m[3]);}
+  if(p==='suspended')return !!c.susp;if(p==='foretold')return c.fore!=null;
   if(m=p.match(/^named(.+)$/))return fgN(c.n)===m[1];""", 'troca'))
 P.append(("c.dnT=(X.sala||{}).turno||0;c.dn=(c.dn||0)+n;", "else if(i.cri||(c.ani&&c.ani.cri)){c.dn=(c.dn||0)+n;", "else if(i.cri||(c.ani&&c.ani.cri)){c.dnT=(X.sala||{}).turno||0;c.dn=(c.dn||0)+n;", 'troca'))
 
