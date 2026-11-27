@@ -570,6 +570,10 @@ P.append(("case 'sacrQ':", "      case 'sacrEsta':{",
       case 'venQ':{const u=xQuemJ(s.q,it,ult);if(!u){feito.push('sem jogador pro veneno');break;}if(u===me)e.ven=(e.ven||0)+n;else ev({op:'ven',n},u);feito.push(`${u===me?'você':xNomeU(u)} recebe ${n} marcador(es) de veneno`);break;}
 """, 'antes'))
 
+# ---------- L49. Shroud como habilidade dada (Pump KW Shroud): o motor de alvos já respeita ----------
+# Minotaur Illusionist, Giant Crab, Advanced Hoverguard, Benevolent Bodyguard?...
+P.append(("'Shroud':'shroud',", "'Hexproof':'hexproof','HIDDEN Unblockable'", "'Hexproof':'hexproof','Shroud':'shroud','HIDDEN Unblockable'", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
