@@ -835,6 +835,19 @@ P.append(("case 'pumpH':", "      case 'pumpN':case 'ktN':{",
 """      case 'pumpH':{const k=t||it.k;if(!k){feito.push('sem alvo');break;}xNoAlvo(k,'pumpH',0,ev,{s:it.k,m:s.m,p:s.p,t:s.t,kws:s.kws});feito.push(`${xAlvoNome(k)} ${s.p||s.t?(s.p>=0?'+':'')+s.p+'/'+(s.t>=0?'+':'')+s.t+' ':''}${s.kws&&s.kws.length?'ganha '+s.kws.map(x=>KPT[x]||x).join(', ')+' ':''}${s.m==='tap'?'enquanto '+it.nm+' ficar virada':'enquanto você controlar '+it.nm}`);break;}
 """, 'antes'))
 
+# ---------- L74. BUG: carta animada não contava como criatura nos filtros (fgTem) nem no "destrua todas as criaturas"; e o Animate ignorava a cor (Colors$/OverwriteColors$): terreno-criatura "verde" continuava incolor pra proteção, "destrua criatura não preta" etc. ----------
+# Celestial Colonnade, Raging Ravine, Creeping Tar Pit, Golgari Keyrune, Genju of the Spires, Cave of the Frost Dragon, Mutavault (Colorless)...
+P.append(("/* cor no animar */", "  /* AtEOT em ficha/pump */",
+"""  /* cor no animar */if(api==='Animate'&&d.Colors&&!ctx.__cor){const cs=String(d.Colors).split(',').map(x=>x.trim());let cor='';for(const x of cs){if(x==='Colorless')continue;if(!FGCOR[x]){cor=null;break;}cor+=FGCOR[x];}if(cor!=null&&(cs.length===1||!cs.includes('Colorless'))){ctx.__cor=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__cor;}if(r.some(o=>o.op==='nao'))return r;return r.map(o=>o.op==='anima'?Object.assign({},o,{cor,ow:d.OverwriteColors==='True'?1:0}):o);}}
+""", 'antes'))
+P.append(("if(x.cor!=null){c.ani.cor=", "if(x.gan)c.ani.gan=x.gan;}",
+"if(x.gan)c.ani.gan=x.gan;if(x.cor!=null){c.ani.cor=x.cor;c.ani.ow=x.ow?1:0;}}", 'troca'))
+P.append(("gan:s.gan,cor:s.cor,ow:s.ow});", "rt:s.rt,rc:s.rc,gan:s.gan});", "rt:s.rt,rc:s.rc,gan:s.gan,cor:s.cor,ow:s.ow});", 'troca'))
+P.append(("if(c.ani&&c.ani.cor!=null){", "function fgCores(c){if(c.tok&&!c.cp)return new Set(c.cor?String(c.cor).split(''):[]);return new Set(String(xInfo(c).custo||'').match(/[WUBRG]/g)||[]);}",
+"function fgCores(c){const b=c.tok&&!c.cp?new Set(c.cor?String(c.cor).split(''):[]):new Set(String(xInfo(c).custo||'').match(/[WUBRG]/g)||[]);if(c.ani&&c.ani.cor!=null){const n=new Set(String(c.ani.cor).split('').filter(Boolean));if(c.ani.ow)return n;n.forEach(x=>b.add(x));}return b;}", 'troca'))
+
+P.append(("if(w==='Creature')return !!i.cri||!!(c.ani&&c.ani.cri);", "if(w==='Creature')return !!i.cri;", "if(w==='Creature')return !!i.cri||!!(c.ani&&c.ani.cri);", 'troca'))
+P.append(("const ok=tipo==='creatures'?xCri(c):", "const ok=tipo==='creatures'?i.cri:", "const ok=tipo==='creatures'?xCri(c):", 'troca'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
