@@ -16,7 +16,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (57 seções do patch)
+## O que mudou (58 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -74,6 +74,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L60.** BUG: Pump/PumpAll "até o seu próximo turno" (Duration UntilYourNextTurn) acabava no fim do turno (ex.: Liliana the Last Hope, Blue Dragon, Wasp Shrinking Savior, Rootwise Survivor?, For the Common Good, Karvanista, Mouth of the Storm...)
 - **L61.** BUG: "ganhe o controle enquanto esta estiver no campo" (LoseControl LeavesPlay) era controle pra sempre (ex.: Mind Flayer, Vodalian Mindsinger, Roil Elemental, Old Man of the Sea?, Rubinia Soulsinger?, Merieke Ri Berit...)
 - **L62.** BUG: dano dividido entre alvos (DividedAsYouChoose) dava o total em CADA alvo (Arc Lightning 3+3+3) (ex.: Arc Lightning, Forked Lightning, Fireball?, Fiery Justice, Cone of Flame?, Ignite Disorder, Rolling Thunder?, Inferno Titan...)
+- **L63.** BUG: "se a criatura morrer neste turno, exile em vez disso" (ReplaceDyingDefined) era ignorado no dano e no pump (ex.: Reduce to Ashes, Magma Spray, Scorching Dragonfire, Wilt in the Heat, Lava Coil?, Fiery Temper?, Khaaaaaaaaaaaannn!, Pump: Feed the Swarm? ...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
@@ -88,3 +89,4 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **Bug antigo corrigido (L60):** Pump/PumpAll "até o seu próximo turno" (`Duration$ UntilYourNextTurn`) acabava no fim do turno (Liliana, the Last Hope -2/-1, Blue Dragon...). Agora vira `pumpN`/`ktN`/`pumpTodosN`, que usam o `tpN`/`ktN`/`ateU` que já existiam (do `pumpProx`) e um `ttN` novo pra resistência, limpos no começo do próximo turno de quem lançou.
 - **Bug antigo corrigido (L61):** "ganhe o controle enquanto esta estiver no campo" (`LoseControl$ LeavesPlay,LoseControl`: Mind Flayer, Roil Elemental, Vodalian Mindsinger...) era controle pra sempre. Agora o `entrega`/`recebe` leva `h` (a carta que tomou), a carta roubada guarda `ctlH`, e quando a que tomou sai do campo o `xExAteVolta` devolve pro dono.
 - **Bug antigo corrigido (L62):** dano dividido entre alvos (`DividedAsYouChoose` com `TargetMax`) dava o total em cada alvo (Arc Lightning fazia 3+3+3). Agora vira `danoDiv`: o total fica em `it.dvR` e cada alvo recebe uma parte (o jogador escolhe no `prompt`, o bot divide igual, o último leva o resto), convertido em `dano` antes do cabeçalho do passo.
+- **Bug antigo corrigido (L63):** "se a criatura morrer neste turno, exile em vez disso" (`ReplaceDyingDefined$ Targeted` em DealDamage/Pump: Magma Spray, Scorching Dragonfire, Reduce to Ashes...) era ignorado. Agora o op leva `exM`, o alvo ganha `c.exM` (turno) antes do dano e o `xMorre` exila no lugar.
