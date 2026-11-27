@@ -574,6 +574,9 @@ P.append(("case 'sacrQ':", "      case 'sacrEsta':{",
 # Minotaur Illusionist, Giant Crab, Advanced Hoverguard, Benevolent Bodyguard?...
 P.append(("'Shroud':'shroud',", "'Hexproof':'hexproof','HIDDEN Unblockable'", "'Hexproof':'hexproof','Shroud':'shroud','HIDDEN Unblockable'", 'troca'))
 
+# ---------- L50. Mais habilidades dadas que o bloqueio já entende: intimidar, espreitar, equitação, travessias ----------
+P.append(("'Landwalk:Forest':'forestwalk',", "'Hexproof':'hexproof','Shroud':'shroud',", "'Hexproof':'hexproof','Shroud':'shroud','Intimidate':'intimidate','Skulk':'skulk','Horsemanship':'horsemanship','Landwalk:Forest':'forestwalk','Landwalk:Island':'islandwalk','Landwalk:Swamp':'swampwalk','Landwalk:Mountain':'mountainwalk','Landwalk:Plains':'plainswalk','Wither':'wither',", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
