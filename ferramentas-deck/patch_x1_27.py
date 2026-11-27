@@ -391,6 +391,27 @@ P.append(("case 'sspt':", "      case 'sacrEsta':{",
 """      case 'sspt':{const k=t||it.k;if(!k){feito.push('sem a criatura');break;}xNoAlvo(k,'sspt',0,ev,{v:s.v});feito.push(`${xAlvoNome(k)} ${s.v?'ficou suspeita (ameaça, não pode bloquear)':'deixou de ser suspeita'}`);break;}
 """, 'antes'))
 
+# ---------- L29. Contas: NMinus.K (K menos o número), Count$Random.A.B, conjurada do cemitério, vida e mão do jogador do gatilho (TriggeredTarget) ----------
+# The Stone Brain, Lolth, Stroke of Luck, Flametongue Kavu Avatar, Rainbow Knights, Ashuza's Breath, Increasing Savagery, Secrets of the Key, Scytheclaw, Quietus Spike, Sword of War and Peace, Shimian Specter...
+P.append(("md.match(/^NMinus\\.(\\d+)$/)", "else if(md==='HalfDown')n=Math.floor(n/2);",
+"else if(q=md.match(/^NMinus\\.(\\d+)$/))n=+q[1]-n;else if(md==='HalfDown')n=Math.floor(n/2);", 'troca'))
+P.append(("b.match(/^Count\\$Random\\.", "  if(b==='Count$TopOfLibraryCMC')return {q:'topoMV',md};",
+"""  if(m=b.match(/^Count\\$Random\\.(\\d+)\\.(\\d+)$/))return {q:'rand',a:+m[1],b:+m[2],md};
+  if(m=b.match(/^Count\\$wasCastFromGraveyard\\.(\\d+)\\.(\\d+)$/))return {q:'deCem',a:+m[1],b:+m[2],md};
+  if(m=b.match(/^TriggeredTarget\\$(LifeTotal|CardsInHand)$/))return {q:'tdJ',f:m[1]==='LifeTotal'?'vida':'nm',md};
+""", 'antes'))
+P.append(("v.q==='rand'?", ":v.q==='remV'?",
+""":v.q==='rand'?v.a+Math.floor(Math.random()*(v.b-v.a+1)):v.q==='deCem'?(((it.c||xAchaK(it.k)||{}).orig==='cem')?v.a:v.b):v.q==='tdJ'?(()=>{const P=String((it.tc||{}).td||'');if(!P.startsWith('P:'))return 0;const u=P.slice(2);if(u===xUid())return v.f==='vida'?X.eu.vida:X.eu.mao.length;const o=(X.ops||{})[u]||{};return v.f==='vida'?(o.vida||0):(o.nm||0);})()""", 'antes'))
+
+# ---------- L30. TriggeredSource = a criatura que causou o dano (o gatilho "uma criatura sua causa dano de combate a um jogador" passa tk), e Defined "A & Self" vira duas partes ----------
+# Stensia, White Widow, Yelena Belova, Vraska Swarm's Eminence, Conclave Sledge-Captain, Necropolis Regent, Quilled Greatwurm, X-23, Juniper Order Ranger, Captain America, Alaborn Zealot, Loyal Sentry
+P.append(("Triggered(Card|Attacker|Blocker|Object|NewCardLKICopy|Source)(LKICopy)?$/.test(d.Defined||'')?'tk'", "{const TK=/^Triggered(Card|Attacker|Blocker|Object|NewCardLKICopy)(LKICopy)?$/.test(d.Defined||'')?'tk'",
+"{const TK=/^Triggered(Card|Attacker|Blocker|Object|NewCardLKICopy|Source)(LKICopy)?$/.test(d.Defined||'')?'tk'", 'troca'))
+P.append(("/* Defined A & Self */", "function fgPasso(d,api,ctx){",
+"""function fgPasso(d,api,ctx){/* Defined A & Self */{const m=!d.ValidTgts&&/^(PutCounter|Pump|Untap|Tap|Destroy|Regenerate)$/.test(api)&&String(d.Defined||'').match(/^(Triggered(?:Card|Attacker|Blocker|Source)(?:LKICopy)?) & Self$/);if(m){const a=fgPasso(Object.assign({},d,{Defined:m[1]}),api,ctx);if(a.some(o=>o.op==='nao'))return a;const b=fgPasso(Object.assign({},d,{Defined:'Self'}),api,ctx);if(b.some(o=>o.op==='nao'))return b;return [...a,...b];}}""", 'troca'))
+P.append(("xFiltro(m[1],a.c),null,{dano:a.hp,p:xPT(a.c).p,td:'P:'+a.hu,tk:a.c.k", "xFiltro(m[1],a.c),null,{dano:a.hp,p:xPT(a.c).p,td:'P:'+a.hu});",
+"xFiltro(m[1],a.c),null,{dano:a.hp,p:xPT(a.c).p,td:'P:'+a.hu,tk:a.c.k,tku:xUid()});", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
