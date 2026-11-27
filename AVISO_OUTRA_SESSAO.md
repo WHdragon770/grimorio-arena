@@ -12,11 +12,11 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 3. Rode seu cob/tL1/mec e confira que nada caiu. Depois pode apagar este aviso e a pasta `ferramentas-deck/`.
 
 ## Números (medidor do Deck: todos os 34480 scripts do Forge, partes SP/AB/capítulo/gatilho sem op nao)
-- Antes (01d0d5e): 26629 (77.2%) · Agora: **27980 (81.1%)**, +1351 cartas
+- Antes (01d0d5e): 26629 (77.2%) · Agora: **28004 (81.2%)**, +1375 cartas
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (45 seções do patch)
+## O que mudou (46 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -62,6 +62,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L47.** Efeito com gatilhos "neste turno": quando uma criatura sua entra / morre / ataca (ex.: First Day of Class, Warhost's Frenzy, Waltz of Rage, The Last Ronin?, Song of Blood, Indulge...)
 - **L48.** Sacrificar / veneno pelo jogador do gatilho (TriggeredTarget, TriggeredCardController, TriggeredAttackerController...) (ex.: Demon of Loathing, Killmonger, Destructive Urge, Burning Sands, Funeral March, Necrogen Rotpriest, Marsh Viper, Pit Scorpion...)
 - **L49.** Shroud como habilidade dada (Pump KW Shroud): o motor de alvos já respeita (ex.: Minotaur Illusionist, Giant Crab, Advanced Hoverguard, Benevolent Bodyguard?...)
+- **L51.** Força e resistência trocadas até o fim do turno (KW HIDDEN ... power and toughness are switched) (ex.: Twisted Image, Inside Out, Fluctuator?, Merfolk Thaumaturgist, Strange Inversion, Transmutation...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
