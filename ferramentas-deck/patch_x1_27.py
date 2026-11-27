@@ -906,6 +906,19 @@ P.append(("case 'AddTurn':{", "    case 'AddTurn':return [{op:'extra'}];",
 P.append(("const ux=String(t||'').startsWith('P:')", "      case 'extra':{const sx=X.sala||{};xSala({ext:Object.assign({},sx.ext,{[me]:((sx.ext||{})[me]||0)+1})});feito.push('vai jogar um turno extra');break;}",
 """      case 'extra':{const ux=String(t||'').startsWith('P:')?String(t).slice(2):me,nn=typeof n==='number'?n:1;if(!(nn>0)){feito.push('nenhum turno extra');break;}const sx=X.sala||{};xSala({ext:Object.assign({},sx.ext,{[ux]:((sx.ext||{})[ux]||0)+nn})});feito.push(`${ux===me?'vai jogar':xNomeU(ux)+' vai jogar'} ${nn>1?nn+' turnos extras':'um turno extra'}`);break;}""", 'troca'))
 
+# ---------- L80. BUG: "ponha no campo virada e atacando" (ChangeZone Attacking$ True) entrava parada ----------
+# Minion of the Mighty, Arni Metalbrow, Preeminent Captain, Paladin Elizabeth Taggerdy, Warcry Phoenix, Nemesis Phoenix, Phoenix Chick, Grim Reaper?, Alesha...
+P.append(("/* entra atacando */", "  /* AtEOT em ficha/pump */",
+"""  /* entra atacando */if(api==='ChangeZone'&&d.Attacking==='True'&&d.Destination==='Battlefield'&&!ctx.__atq){ctx.__atq=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__atq;}return r.map(o=>/^(tutor|doCem|doCemAlvo)$/.test(o.op)&&(o.dest==='campo'||o.op!=='tutor'&&!o.dest)?Object.assign({},o,{atq:1}):o);}
+""", 'antes'))
+P.append(("const xAtq=c=>", "function xLadoCampo(c){",
+"""const xAtq=c=>{const s=X.sala||{};c.tap=1;if(s.fase===2&&xVez()){const a=(((X.eu||{}).campo||[]).find(q=>q.atk&&q.alv&&q!==c)||{}).alv;c.atk=2;c.alv=a||('P:'+xOutro());xLog(`${c.n} entrou atacando`);}};
+""", 'antes'))
+P.append(("e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.atq)xAtq(c);setTimeout", "e.campo.push(c);if(s.wc)xWc(c,s.wc);setTimeout(()=>xEntrou(c),450);", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.atq)xAtq(c);setTimeout(()=>xEntrou(c),450);", 'troca'))
+P.append(("e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.atq)xAtq(c);if(s.cnt){", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.cnt){", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.atq)xAtq(c);if(s.cnt){", 'troca'))
+P.append(("if(d==='campo'){c.tap=s.tap?1:0;e.campo.push(c);if(s.atq)xAtq(c);xEntrou(c);}", "confirm(`${nm}: ${c.n} é artefato. Pôr no campo? (se não, vai pra mão)`))?'campo':'mao'):s.dest;if(d==='campo'){c.tap=s.tap?1:0;e.campo.push(c);xEntrou(c);}",
+"confirm(`${nm}: ${c.n} é artefato. Pôr no campo? (se não, vai pra mão)`))?'campo':'mao'):s.dest;if(d==='campo'){c.tap=s.tap?1:0;e.campo.push(c);if(s.atq)xAtq(c);xEntrou(c);}", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
