@@ -929,6 +929,20 @@ P.append(("b==='PlayerCountPropertyYou$HasPropertyBeenAttackedThisCombat'", "  i
   if(b==='PlayerCountOpponents$HighestCardsInHand')return {q:'opMax',f:'nm',md};""", 'troca'))
 P.append(("if(v.f==='ven')return o.ven||0;", "if(v.f==='vida')return o.vida||0;if(v.f==='nm')return o.nm||0;", "if(v.f==='vida')return o.vida||0;if(v.f==='nm')return o.nm||0;if(v.f==='ven')return o.ven||0;if(v.f==='cem')return (o.cem||[]).length;", 'troca'))
 P.append(("v.q==='fuiAtk'?", ":v.q==='rand'?", ":v.q==='fuiAtk'?(xOpCampos().some(([cp])=>cp.some(c=>c.atk&&c.alv==='P:'+xUid()))?1:0)", 'antes'))
+# ---------- L82. BUG: ficha "ganha ímpeto até o fim do turno" (Token PumpKeywords) vinha sem; "ganha a sua escolha de X ou Y" (Pump KWChoice) não dava nada; "volta pro campo transformada" (ChangeZone Transformed) voltava pela frente ----------
+# Sokenzan, Mardu Monument, Old Hob, Alleycat Blues, Siege-Gang Lieutenant, Legion Warboss; Veteran Warleader, Alchemist's Gift, Assassin Initiate, Urza's Avenger; Startled Awake, Ojer Taq, Radiant Grace, Accursed Witch...
+P.append(("/* ficha com habilidade até o fim do turno */", "  /* AtEOT em ficha/pump */",
+"""  /* ficha com habilidade até o fim do turno */if(api==='Token'&&d.PumpKeywords&&!ctx.__tpk){const ks=String(d.PumpKeywords).split(' & ').map(x=>FGKW[x.trim()]);const du=d.PumpDuration||'EOT';ctx.__tpk=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__tpk;}if(r.some(o=>o.op==='nao')||ks.some(x=>!x)||!/^(EOT|EndOfTurn|Permanent)$/.test(du))return r;return r.map(o=>o.op==='ficha'?Object.assign({},o,du==='Permanent'?{kw:[...new Set([...(o.kw||[]),...ks])]}:{ktE:ks}):o);}
+  /* habilidade à escolha */if(api==='Pump'&&d.KWChoice&&!ctx.__kc){const ks=String(d.KWChoice).split(',').map(x=>FGKW[x.trim()]);ctx.__kc=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__kc;}if(r.some(o=>o.op==='nao')||ks.some(x=>!x)||d.Duration)return r;const p0=r.length===1&&r[0].op==='pump'?r[0]:null;if(p0&&p0.al)return [...r,{op:'ktEsc',ks,mesmo:1}];if(!r.length&&!d.ValidTgts&&(!d.Defined||d.Defined==='Self'))return [{op:'ktEsc',ks,si:1}];return r;}
+  /* volta transformada */if(api==='ChangeZone'&&d.Transformed==='True'&&d.Destination==='Battlefield'&&!ctx.__trf){ctx.__trf=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__trf;}return r.map(o=>/^(doCem|doCemAlvo)$/.test(o.op)?Object.assign({},o,{trf:1}):o);}
+""", 'antes'))
+P.append(("...(xx&&xx.ktE?{kt:xx.ktE}:{}),", "...(xx&&xx.tkD?{tkD:xx.tkD}:{}),", "...(xx&&xx.tkD?{tkD:xx.tkD}:{}),...(xx&&xx.ktE?{kt:xx.ktE}:{}),", 'troca'))
+P.append(("case 'ktEsc':", "      case 'pumpN':case 'ktN':{",
+"""      case 'ktEsc':{const k=t||it.k;if(!k){feito.push('sem alvo');break;}let kw=s.ks[0];if(!XBOT&&s.ks.length>1){const r=prompt(`${it.nm}: qual habilidade? ${s.ks.map((x,i)=>(i+1)+' = '+(KPT[x]||x)).join(', ')}`,'1');const q=parseInt(r,10);if(q>=1&&q<=s.ks.length)kw=s.ks[q-1];}xNoAlvo(k,'kt',0,ev,{kws:[kw]});feito.push(`${xAlvoNome(k)} ganha ${KPT[kw]||kw} até o fim do turno`);break;}
+""", 'antes'))
+P.append(("if(s.trf){c.face=1;c.sk=xInfo(c).cri?1:0;}if(s.atq)xAtq(c);setTimeout", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.atq)xAtq(c);setTimeout(()=>xEntrou(c),450);", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.trf){c.face=1;c.sk=xInfo(c).cri?1:0;}if(s.atq)xAtq(c);setTimeout(()=>xEntrou(c),450);", 'troca'))
+P.append(("if(s.trf){c.face=1;c.sk=xInfo(c).cri?1:0;}if(s.atq)xAtq(c);if(s.cnt){", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.atq)xAtq(c);if(s.cnt){", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.trf){c.face=1;c.sk=xInfo(c).cri?1:0;}if(s.atq)xAtq(c);if(s.cnt){", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
