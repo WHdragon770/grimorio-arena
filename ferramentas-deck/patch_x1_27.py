@@ -704,6 +704,19 @@ P.append(("if(s.op==='danoDiv'){", "    const pa=xPrecisaAlvo(s),t=pa?(it.al||[]
       if(t0&&it.dvR>0){if(!nx)q=it.dvR;else if(XBOT)q=Math.max(1,Math.ceil(it.dvR/(nx+1)));else{const r=prompt(`${it.nm}: quanto dos ${it.dvR} de dano vai em ${xAlvoNome(t0)}? (sobra pelo menos 1 pra cada um dos outros ${nx} alvo(s))`,String(Math.max(1,it.dvR-nx)));q=Math.max(1,Math.min(it.dvR-nx,parseInt(r,10)||1));}}it.dvR-=q;s=Object.assign({},s,{op:'dano',n:q});}
 """, 'antes'))
 
+# ---------- L63. BUG: "se a criatura morrer neste turno, exile em vez disso" (ReplaceDyingDefined) era ignorado no dano e no pump ----------
+# Reduce to Ashes, Magma Spray, Scorching Dragonfire, Wilt in the Heat, Lava Coil?, Fiery Temper?, Khaaaaaaaaaaaannn!, Pump: Feed the Swarm? ...
+P.append(("/* exila se morrer */", "  /* AtEOT em ficha/pump */",
+"""  /* exila se morrer */if((api==='DealDamage'||api==='Pump')&&/^(Targeted|ThisTargetedCard)(\\.Creature)?$/.test(d.ReplaceDyingDefined||'')){const d2=Object.assign({},d);delete d2.ReplaceDyingDefined;const r=fgPasso0(d2,api,ctx);if(r.some(o=>o.op==='nao'))return r;const L=r.filter(o=>o.al&&/^(dano|danoDiv|pump)$/.test(o.op));if(!L.length)return r.length?nao('exilar se morrer'):r;return r.map(o=>L.includes(o)?Object.assign({},o,{exM:1}):o);}
+""", 'antes'))
+P.append(("if(s.exM){const t0=", "    const pa=xPrecisaAlvo(s),t=pa?(it.al||[])[j++]",
+"""    if(s.exM){const t0=(it.al||[])[j];if(t0&&!/^[PS]:/.test(t0))xNoAlvo(t0,'exMorre',0,ev);}
+""", 'antes'))
+P.append(("if(op==='exMorre'){", "function xEfCarta(c,op,n,x){const i=xInfo(c);",
+"function xEfCarta(c,op,n,x){const i=xInfo(c);if(op==='exMorre'){c.exM=(X.sala||{}).turno||0;return;}", 'troca'))
+P.append(("if(c.exM&&c.exM===", "function xMorre(c){const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;",
+"function xMorre(c){const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;if(c.exM&&c.exM===((X.sala||{}).turno||0)){delete c.exM;xLog(`${c.n} seria morta: foi exilada no lugar`);return xSai(c,'exi');}", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
