@@ -16,7 +16,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (59 seções do patch)
+## O que mudou (60 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -76,6 +76,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L62.** BUG: dano dividido entre alvos (DividedAsYouChoose) dava o total em CADA alvo (Arc Lightning 3+3+3) (ex.: Arc Lightning, Forked Lightning, Fireball?, Fiery Justice, Cone of Flame?, Ignite Disorder, Rolling Thunder?, Inferno Titan...)
 - **L63.** BUG: "se a criatura morrer neste turno, exile em vez disso" (ReplaceDyingDefined) era ignorado no dano e no pump (ex.: Reduce to Ashes, Magma Spray, Scorching Dragonfire, Wilt in the Heat, Lava Coil?, Fiery Temper?, Khaaaaaaaaaaaannn!, Pump: Feed the Swarm? ...)
 - **L64.** BUG: "volta do cemitério com marcador" (WithCountersType) era ignorado: +1/+1, -1/-1, marcador de habilidade, finalidade (ex.: Sand Golem, Generous Revival, Gallia, Persist, Aberrant Return, Metamorphosis Fanatic, Unbreakable Bond, Mirko, Rydia, Admiral Brass, Wolfbat, Season of the Burrow...)
+- **L65.** BUG: "não pode ser regenerada" (Destroy/DestroyAll NoRegen) era ignorado fora do gatilho (ex.: Fatal Blow, Death Bomb, Grotesque Hybrid, Wrath of God, Damnation, Day of Judgment, Terror, Doom Blade?, Smother, Incinerate (dano)...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
@@ -92,3 +93,4 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **Bug antigo corrigido (L62):** dano dividido entre alvos (`DividedAsYouChoose` com `TargetMax`) dava o total em cada alvo (Arc Lightning fazia 3+3+3). Agora vira `danoDiv`: o total fica em `it.dvR` e cada alvo recebe uma parte (o jogador escolhe no `prompt`, o bot divide igual, o último leva o resto), convertido em `dano` antes do cabeçalho do passo.
 - **Bug antigo corrigido (L63):** "se a criatura morrer neste turno, exile em vez disso" (`ReplaceDyingDefined$ Targeted` em DealDamage/Pump: Magma Spray, Scorching Dragonfire, Reduce to Ashes...) era ignorado. Agora o op leva `exM`, o alvo ganha `c.exM` (turno) antes do dano e o `xMorre` exila no lugar.
 - **Bug antigo corrigido (L64):** "volta do cemitério com marcador" (`WithCountersType` em doCem/doCemAlvo) era ignorado. Agora o op leva `wc` e o `xWc` põe +1/+1 ou -1/-1 (`cnt`), atordoamento (`stun`), marcador de habilidade (`kwC`, novo, somado no xPT) ou finalidade (`fin`, novo: o `xMorre` exila no lugar). Persist volta 1/1, Metamorphosis Fanatic dá vínculo com a vida.
+- **Bug antigo corrigido (L65):** "não pode ser regenerada" (`NoRegen$ True` em Destroy/DestroyAll: Wrath of God, Damnation, Terror...) só era lido no gatilho do L24. Agora o `destroi` com alvo leva `nr` (marca `nRg` no alvo antes) e o `todos` passa `nr` pro `xTodos` em todos os jogadores.
