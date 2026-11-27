@@ -1036,6 +1036,30 @@ P.append(("else if(v.op==='criDanoDono'){", "  else if(v.op==='pumpVen'){",
 """  else if(v.op==='criDanoDono'){const q=e.campo.filter(c=>xCri(c)).length;if(q){e.vida-=q*v.n;xLog(`suas ${q} criatura(s) te causaram ${q*v.n} de dano`);}xSobe();xPintaEu();}
 """, 'antes'))
 
+# ---------- L92. "devolva a carta exilada por esta" (ChangeZone Defined$ ExiledWith, Exile → Hand/Battlefield/Graveyard): Journey to Nowhere, Leonin Relic-Warder, Parallax Tide, Champions (behold), Ugin's Labyrinth... ----------
+# o exila agora marca exS = a carta que exilou; op exComVolta procura no exílio de todo mundo (evento). + custo "behold um X e exile" (RaiseCost BeholdExile<1/X>) no xConjura
+P.append(("xNoAlvo(t,s.op,0,ev,s.op==='exila'&&it.k?{s:it.k}:undefined);break;", "vira:'virou',desvira:'desvirou'}[s.op]} ${xAlvoNome(t)}`);xNoAlvo(t,s.op,0,ev);break;",
+"vira:'virou',desvira:'desvirou'}[s.op]} ${xAlvoNome(t)}`);xNoAlvo(t,s.op,0,ev,s.op==='exila'&&it.k?{s:it.k}:undefined);break;", 'troca'))
+P.append(("if(x&&x.s&&!tk0&&X.eu.exi.includes(c))c.exS=x.s;", "  else if(op==='exila')xSai(c,'exi');else if(op==='volta')",
+"  else if(op==='exila'){const tk0=c.tok;xSai(c,'exi');if(x&&x.s&&!tk0&&X.eu.exi.includes(c))c.exS=x.s;}else if(op==='volta')", 'troca'))
+P.append(("/* L92 ExiledWith volta */", "  /* AtEOT em ficha/pump */",
+"""  /* L92 ExiledWith volta */if(api==='ChangeZone'&&d.Defined==='ExiledWith'&&d.Origin==='Exile'&&/^(Hand|Battlefield|Graveyard)$/.test(d.Destination||'')&&!d.SubAbility&&!d.GainControl&&!d.Tapped&&!Object.keys(d).some(k=>/^(Remember|Imprint|Attach|WithCounters|ForgetOtherRemembered)/.test(k)))return [{op:'exComVolta',z:{Hand:'mao',Battlefield:'campo',Graveyard:'cem'}[d.Destination]}];
+""", 'antes'))
+P.append(("case 'exComVolta':", "      case 'sacrEsta':{",
+"""      case 'exComVolta':{if(!it.k){feito.push('não sei qual carta exilou');break;}ev({op:'exComVolta',s:it.k,z:s.z});const q=xExComVolta(it.k,s.z);feito.push(q?`${q} voltou ${{mao:'pra mão',campo:'pro campo',cem:'pro cemitério'}[s.z]}`:'a carta exilada (se tinha) volta');break;}
+""", 'antes'))
+P.append(("function xExComVolta(", "function xEfCarta(c,op,n,x){",
+"""function xExComVolta(s0,z){const e=X.eu;if(!e||!s0)return '';const L=e.exi.filter(q=>q.exS===s0);for(const q of L){e.exi.splice(e.exi.indexOf(q),1);delete q.exS;delete q.exAte;if(z==='campo'){q.tap=0;q.sk=xInfo(q).cri?1:0;e.campo.push(q);setTimeout(()=>xEntrou(q),300);}else e[z].push(q);xLog(`${q.n} voltou ${{mao:'pra mão',campo:'pro campo',cem:'pro cemitério'}[z]} (a carta que a exilou saiu)`);}if(L.length){xSobe();xPintaEu();}return L.map(q=>q.n).join(', ');}
+""", 'antes'))
+P.append(("else if(v.op==='exComVolta')", "  else if(v.op==='pumpVen'){", "  else if(v.op==='exComVolta')xExComVolta(v.s,v.z);\n", 'antes'))
+P.append(("/* L92 behold */", "  if(/^Conspire\\b/m.test(i.tx)&&!XBOT){",
+"""  /* L92 behold */{const sb=(((FG.get(fgN(c.n))||{}).S)||[]).map(String).find(l=>/Mode\\$ RaiseCost/.test(l)&&/Cost\\$ BeholdExile<1\\/[^>]+>/.test(l));if(sb){const T=sb.match(/BeholdExile<1\\/([^>]+)>/)[1],ok=q=>{if(q===c)return false;try{return fgValid(q,T,{eu:xUid(),src:c.k,sv:{}});}catch(er){return false;}};const L=[...e.campo.filter(ok).map(q=>({c:q,lado:'Seu'})),...e.mao.filter(ok).map(q=>({c:q,lado:'Mão'}))];if(!L.length)return xAv(`${c.n}: precisa mostrar e exilar um ${T} (seu, do campo ou da mão)`);let kk=L[0].c.k;if(L.length>1&&!XBOT){kk=await xEscolhe(`${c.n}: mostrar e exilar qual ${T}?`,L);if(!kk)return;}xt.bh=L.find(q=>q.c.k===kk).c;}}
+""", 'antes'))
+P.append(("if(xt.bh){const b=xt.bh", "if(xt.cas&&e.campo.includes(xt.cas)){xMorre(xt.cas);xLog(`baixa: sacrificou ${xt.cas.n}`);}else xt.cas=null;",
+"if(xt.cas&&e.campo.includes(xt.cas)){xMorre(xt.cas);xLog(`baixa: sacrificou ${xt.cas.n}`);}else xt.cas=null;if(xt.bh){const b=xt.bh;if(e.campo.includes(b))xSai(b,'exi');else if(e.mao.includes(b)){e.mao.splice(e.mao.indexOf(b),1);e.exi.push(xReset(b));}if(e.exi.includes(b))b.exS=c.k;xLog(`${c.n}: mostrou e exilou ${b.n}`);}", 'troca'))
+
+P.append(("if(/^BeholdExile</.test(d.Cost||''))continue;", "      const ruim=Object.keys(d).find(k=>!FGRED_OK.has(k));if(ruim){",
+"      if(/^BeholdExile</.test(d.Cost||''))continue;const ruim=Object.keys(d).find(k=>!FGRED_OK.has(k));if(ruim){", 'troca'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
