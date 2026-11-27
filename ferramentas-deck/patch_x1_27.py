@@ -584,6 +584,13 @@ P.append(("if(kw.has('swPT'))", "  if(c.kD&&c.kD.t===((X.sala||{}).turno||0))for
 "  if(c.kD&&c.kD.t===((X.sala||{}).turno||0))for(const x of c.kD.kw)kw.delete(x);\n  if(kw.has('swPT')){const z=p;p=t;t=z;kw.delete('swPT');}\n  return {p,t,kw,pz,", 'troca'))
 
 P.append(("swPT:'força e resistência trocadas',", "intimidate:'intimidar',", "intimidate:'intimidar',swPT:'força e resistência trocadas',", 'troca'))
+# ---------- L52. Anular mágica e/ou habilidade ativada/disparada (TargetType Spell,Activated,Triggered) ----------
+# Disallow, Overcharged Amalgam, Sister of Silence, Sublime Epiphany, Spider-Sense, Louisoix's Sacrifice, Subcommander T'Pol, Mirrorshell Crab...
+P.append(("ht:{sp:", "return d.TargetType==='Spell'&&!d.ValidTgts?.includes('Activated')?",
+"""{const TT=String(d.TargetType||'').split(',');if(TT[0]&&TT.every(x=>/^(Spell(\\.(Instant|Sorcery|nonCreature))?|Instant|Sorcery|Activated|Triggered)$/.test(x))&&TT.some(x=>/^(Activated|Triggered)$/.test(x))&&/^(Card|Emblem|Card,Emblem)$/.test(d.ValidTgts||'')&&!d.Defined&&!Object.keys(d).some(k=>/^(Remember|Condition|TargetValidTargeting|TargetMin|TargetMax|IsPresent)/.test(k))){const sp=TT.filter(x=>!/^(Activated|Triggered)$/.test(x)).map(x=>x.replace(/^Spell\\.?/,'')||'Card');const o={op:'anula',al:'spell',hab:1,ht:{sp:sp.length?1:0,spv:sp.includes('Card')?'':sp.join(',')}};if(d.UnlessCost){if(!/^\\d+$/.test(d.UnlessCost))return nao('custo pra não anular');o.pz={g:+d.UnlessCost};}return [o];}}return d.TargetType==='Spell'&&!d.ValidTgts?.includes('Activated')?""", 'troca'))
+P.append(("(s.ht&&p.tipo==='mag'?", "s.op==='anula'&&s.hab?((X.sala&&X.sala.pilha)||[]).filter(p=>p.tipo!=='mag'&&p.de!==xUid())",
+"s.op==='anula'&&s.hab?((X.sala&&X.sala.pilha)||[]).filter(p=>(s.ht&&p.tipo==='mag'?!!s.ht.sp&&(!s.ht.spv||!!(p.c&&(()=>{try{return fgValid(p.c,s.ht.spv,{eu:xUid(),src:'',sv:{}});}catch(er){return false;}})())):p.tipo!=='mag')&&p.de!==xUid())", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
