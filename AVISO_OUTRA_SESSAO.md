@@ -12,11 +12,11 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 3. Rode seu cob/tL1/mec e confira que nada caiu. Depois pode apagar este aviso e a pasta `ferramentas-deck/`.
 
 ## Números (medidor do Deck: todos os 34480 scripts do Forge, partes SP/AB/capítulo/gatilho sem op nao)
-- Antes (01d0d5e): 26629 (77.2%) · Agora: **27684 (80.3%)**, +1055 cartas
-- Cartas dos decks: 1342 → 1346 de 1378
+- Antes (01d0d5e): 26629 (77.2%) · Agora: **27707 (80.4%)**, +1078 cartas
+- Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (33 seções do patch)
+## O que mudou (34 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -50,6 +50,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L31.** Gatilhos de emblema/efeito "no começo da sua manutenção" e "da sua etapa final" (antes só conjurou e início do combate) (ex.: Liliana, the Last Hope, Kiora, the Crashing Wave, Ajani, Adversary of Tyrants, Chandra, Awakened Inferno, Chandra, Fire of Kaladesh, Teyo, Tezzeret, Artifice Master, Garruk, Unleashed...)
 - **L33.** Ficha com P/T = quantos X você controla (TokenScript ..._total_artifacts etc.): antes virava 0/0 e morria. c.tkD guarda o filtro, xPT soma na hora (ex.: Urza's Saga (Construct), Hallowed Haunting, Sai Master Thopterist? (gnome soldier), Ezuri's Predation?, Treefolk total_forests/lands, Sculpture...)
 - **L34.** "Ganha {T}: Add X" (habilidade de mana dada por Animate): vai pra gan.mn e o xGanI soma no mana da carta (ex.: Urza's Saga (capítulo I), e quem dá habilidade de mana simples de virar)
+- **L35.** Condições "se {C} foi gasto pra conjurar" (ConditionManaSpent: c.msC guarda as cores gastas) e "se é sua fase principal" (ConditionPhases Main1/Main2, ConditionPlayerTurn, Addendum) (ex.: Boros Fury-Shield, Firespout, Repel Intruders, River's Grasp, Invert the Skies, Torrent of Souls, Moraug, Waves of Aggression, Full Throttle, Precognitive Perception, Arrester's Zeal, Unbreakable Formation...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
