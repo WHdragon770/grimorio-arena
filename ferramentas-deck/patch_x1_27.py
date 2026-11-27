@@ -1177,6 +1177,24 @@ P.append(("X.__itA=null;X.__alA=v.alA||[];X.__tcA=v.tcA||null;", "X.__itA=null;i
 # ---------- L106. contas: Count$Bargain.A.B (igual Bargained) e Count$LastStateBattlefieldWithFallback V (= Count$Valid no campo): Torch the Tower, Jaws of Stone, Volcanic Wind ----------
 P.append(("Count\\$(?:Bargained|Bargain)\\.", "if(m=b.match(/^Count\\$Bargained\\.(\\d+)\\.(\\d+)$/))", "if(m=b.match(/^Count\\$LastStateBattlefieldWithFallback (.+)$/))return fgTodos().filter(c=>fgValid(c,m[1],ctx)).length;\n  if(m=b.match(/^Count\\$(?:Bargained|Bargain)\\.(\\d+)\\.(\\d+)$/))", 'troca'))
 
+# ---------- L107. conta compras e descartes do turno: Count$YouDrewThisTurn e PlayerCountPropertyYou$CardsDiscardedThisTurn (Fractal Anomaly, Fists of Flame, Change of Fortune, Dihada's Ploy, Jiang Yanggu) ----------
+# modo 'todas' (novo): troca todas as ocorrências (as 20 compras do motor)
+P.append(("xCmp1(e)", "e.mao.push(e.bib.shift())", "xCmp1(e)", 'todas'))
+P.append(("function xCmp1(e){", "function xDescartou(q){", "function xCmp1(e){const c=e.bib.shift();xTT().cmp=(xTT().cmp||0)+1;return e.mao.push(c);}\n", 'antes'))
+P.append(("xTT().dsc=(xTT().dsc||0)+q;", "function xDescartou(q){q=q||1;", "function xDescartou(q){q=q||1;xTT().dsc=(xTT().dsc||0)+q;", 'troca'))
+P.append(("Count\\$YouDrewThisTurn$", "if(m=b.match(/^Count\\$LastStateBattlefieldWithFallback (.+)$/))", "if(b==='Count$YouDrewThisTurn')return {q:'cmpT'};if(b==='PlayerCountPropertyYou$CardsDiscardedThisTurn')return {q:'dscT'};/* Count\\$YouDrewThisTurn$ */\n  if(m=b.match(/^Count\\$LastStateBattlefieldWithFallback (.+)$/))", 'troca'))
+
+P.append(("v.q==='cmpT'?", "v.q==='Y'?(it.y||0):", "v.q==='Y'?(it.y||0):v.q==='cmpT'?(xTT().cmp||0):v.q==='dscT'?(xTT().dsc||0):", 'troca'))
+
+# ---------- L108. BUG: ficha com RememberTokens não guardava a ficha como "lembrada": "crie uma 0/0 e ponha X marcadores nela" fazia a 0/0 MORRER sem os marcadores (29 cartas cobertas: Body of Research, Snarl Song, Deekah, Fractal Anomaly, Animal Friend, Primo, Gimbal...) ----------
+P.append(("/* L108 ficha lembrada */", "  /* AtEOT em ficha/pump */",
+"""  /* L108 ficha lembrada */if(api==='Token'&&d.RememberTokens==='True'&&!ctx.__rmt){ctx.__rmt=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__rmt;}return r.map(o=>o&&o.op==='ficha'?Object.assign({},o,{rm:1}):o);}
+""", 'antes'))
+P.append(("const k0=new Set(e.campo.map(c=>c.k));xFicha(", 'xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1,s);xFichaPos(e,n,s);feito.push(`criou',
+'{const k0=new Set(e.campo.map(c=>c.k));xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1,s);if(s.rm)it.lemb=[...(it.lemb||[]),...e.campo.filter(c=>!k0.has(c.k))];}xFichaPos(e,n,s);feito.push(`criou', 'troca'))
+P.append(("if(u===me){const k1=new Set(", 'if(u===me){xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1,s);xFichaPos(e,n,s);}',
+'if(u===me){const k1=new Set(e.campo.map(c=>c.k));xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1,s);if(s.rm)it.lemb=[...(it.lemb||[]),...e.campo.filter(c=>!k1.has(c.k))];xFichaPos(e,n,s);}', 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
@@ -1185,6 +1203,11 @@ def aplica(s):
             if modo == 'troca' and anc in s and anc not in novo:
                 falhou.append(('SUSPEITA (marca já existe mas a âncora da troca continua): '+marca, s.count(anc)))
             pulados.append(marca); continue
+        if modo == 'todas':
+            if not s.count(anc): falhou.append((marca, 0)); continue
+            s = s.replace(anc, novo); feitos.append(marca)
+            if marca not in s: falhou.append(('MARCA NÃO APARECE no texto novo: '+marca, 1))
+            continue
         if s.count(anc) != 1:
             falhou.append((marca, s.count(anc))); continue
         if modo in ('antes', 'depois') and anc.strip() and anc.strip() in novo:
