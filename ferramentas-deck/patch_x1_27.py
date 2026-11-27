@@ -807,6 +807,16 @@ P.append(("case 'pumpPp':", "      case 'pumpN':case 'ktN':{",
       case 'pumpTodosPp':{let q=0;e.campo.filter(c=>xCri(c)&&(!s.v||fgValid(c,s.v,{eu:me,src:it.k,sv:{}}))).forEach(c=>{c.pP=(c.pP||0)+(s.p||0);c.pT=(c.pT||0)+(s.t||0);if(s.kw&&s.kw.length)c.pK=[...new Set([...(c.pK||[]),...s.kw])];q++;});feito.push(`${q} criatura(s) suas ${s.p||s.t?(s.p>=0?'+':'')+s.p+'/'+(s.t>=0?'+':'')+s.t:''}${s.kw&&s.kw.length?' ganham '+s.kw.map(x=>KPT[x]||x).join(', '):''} pra sempre`);break;}
 """, 'antes'))
 
+# ---------- L72. BUG: "exile todas ... até esta carta sair do campo" (ChangeZoneAll Duration UntilHostLeavesPlay) exilava pra sempre ----------
+# Temporary Lockdown, Consulate Crackdown, Aligned Hedron Network, Planar Guide?...
+P.append(("/* exílio em massa temporário */", "  /* AtEOT em ficha/pump */",
+"""  /* exílio em massa temporário */if(api==='ChangeZoneAll'&&d.Duration==='UntilHostLeavesPlay'){const d2=Object.assign({},d);delete d2.Duration;const r=fgPasso0(d2,api,ctx);if(r.length===1&&r[0].op==='zonas'&&r[0].og==='campo'&&r[0].ds==='exi')return [Object.assign({},r[0],{ate:1})];if(d.Origin==='Battlefield')return nao('exílio até sair do campo');return r;}
+""", 'antes'))
+P.append(("case 'zonas':{if(s.ate){", "      case 'zonas':{const os=",
+"      case 'zonas':{if(s.ate){s=Object.assign({},s,{h:it.k});const hh=e.campo.find(q=>q.k===it.k);if(hh)hh.exO=1;}const os=", 'troca'))
+P.append(("if(v.h&&v.ds==='exi'){", "  if(v.og==='campo'){for(const c of e.campo.slice())if(ok(c)){n++;xSai(c,v.ds);}}",
+"  if(v.og==='campo'){for(const c of e.campo.slice())if(ok(c)&&c.k!==v.h){n++;const k0=c.k;xSai(c,v.ds);if(v.h&&v.ds==='exi'){const z=e.exi.find(q=>q.k===k0)||e.exi[e.exi.length-1];if(z)z.exAte=v.h;}}}", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
