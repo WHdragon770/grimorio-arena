@@ -513,6 +513,16 @@ P.append(("fgLembT(d,'Animate',ctx)", "const df=d.Defined||'';if(!al&&df&&df!=='
 P.append(("['pump','kt','nDesv','cnt','regen','anima']", "['pump','kt','nDesv','cnt','regen'].includes(x.op)&&!x.al))return null;return r.map(x=>Object.assign(x,{[k]:1}));};",
 "['pump','kt','nDesv','cnt','regen','anima'].includes(x.op)&&!x.al))return null;return r.map(x=>Object.assign(x,{[k]:1}));};", 'troca'))
 
+# ---------- L42. TriggeredTarget como carta (quem levou o dano do gatilho "deals damage to a creature") em Pump/Tap/Untap/PutCounter/Animate/Debuff ----------
+# Matsu-Tribe Birdstalker, Matsu-Tribe Sniper, Queen of Ice, Ogre Siegebreaker?, Kashi-Tribe Warriors, Hand of Cruelty...
+P.append(("|Source)(LKICopy)?$/.test(d.Defined||'')||(/^TriggeredTarget(LKICopy)?$/", "{const TK=/^Triggered(Card|Attacker|Blocker|Object|NewCardLKICopy|Source)(LKICopy)?$/.test(d.Defined||'')?'tk'",
+"{const TK=(/^Triggered(Card|Attacker|Blocker|Object|NewCardLKICopy|Source)(LKICopy)?$/.test(d.Defined||'')||(/^TriggeredTarget(LKICopy)?$/.test(d.Defined||'')&&/^(Pump|Tap|Untap|PutCounter|Animate|Debuff)$/.test(api)))?'tk'", 'troca'))
+
+# ---------- L43. Pump nos atacantes do gatilho (Defined TriggeredAttackers, não-maldição) = PumpAll nas suas atacantes ----------
+# Frontier Warmonger, Yuriko, Blade of the Mighty?, e gatilhos "sempre que uma ou mais criaturas suas atacam, elas ganham..."
+P.append(("d.Defined==='TriggeredAttackers'&&d.IsCurse!=='True'", "if(!al&&d.Defined&&d.Defined!=='Self'){const r=fgLembT(d,'Pump',ctx);if(r)return r;return nao('quem');}",
+"if(!al&&d.Defined==='TriggeredAttackers'&&d.IsCurse!=='True'){const d2=Object.assign({},d,{ValidCards:'Creature.attacking+YouCtrl'});delete d2.Defined;delete d2.SubAbility;const r=fgPasso0(d2,'PumpAll',ctx);if(!r.some(o=>o.op==='nao'))return r;}if(!al&&d.Defined&&d.Defined!=='Self'){const r=fgLembT(d,'Pump',ctx);if(r)return r;return nao('quem');}", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
