@@ -1015,6 +1015,14 @@ P.append(("const CPr={'each color':", "const kw=(d.KW||'').split(' & ').filter(B
 
 P.append(("'suas criaturas':'criaturas ('+s.v+')'}", "if(s.kw&&s.kw.length)c.kt=[...new Set([...(c.kt||[]),...s.kw])];});feito.push(`suas criaturas",
 "if(s.kw&&s.kw.length)c.kt=[...new Set([...(c.kt||[]),...s.kw])];});feito.push(`${/YouCtrl|YouOwn/.test(s.v||'')||s.so?'suas criaturas':'criaturas ('+s.v+')'}", 'troca'))
+# ---------- L90. Mesmo buraco do L89 no pumpTodosPp (pra sempre) e pumpTodosN (até o seu próximo turno): Sleep, Mouth of the Storm, V'Ger, Behold the Unspeakable, Breaching Leviathan, Tangle, Spore Cloud ----------
+P.append(("ev({op:'pumpTodosV',md:'Pp'", "      case 'pumpTodosPp':{let q=0;",
+"      case 'pumpTodosPp':{if(!/YouCtrl|YouOwn/.test(s.v||''))ev({op:'pumpTodosV',md:'Pp',p:s.p||0,t:s.t||0,kw:s.kw||[],v:s.v||'',src:it.k||''});let q=0;", 'troca'))
+P.append(("ev({op:'pumpTodosV',md:'N'", "      case 'pumpTodosN':{const tn=(X.sala||{}).turno||0;let q=0;",
+"      case 'pumpTodosN':{const tn=(X.sala||{}).turno||0;if(!/YouCtrl|YouOwn/.test(s.v||''))ev({op:'pumpTodosV',md:'N',p:s.p||0,t:s.t||0,kw:s.kw||[],v:s.v||'',src:it.k||'',tn});let q=0;", 'troca'))
+P.append(("if(v.md==='Pp'){c.pP=", "q++;const v0=v.dbl?xPT(c):null;c.tp=(c.tp||0)+",
+"q++;if(v.md==='Pp'){c.pP=(c.pP||0)+(v.p||0);c.pT=(c.pT||0)+(v.t||0);if(v.kw&&v.kw.length)c.pK=[...new Set([...(c.pK||[]),...v.kw])];continue;}if(v.md==='N'){c.tpN=(c.tpN||0)+(v.p||0);c.ttN=(c.ttN||0)+(v.t||0);if(v.kw&&v.kw.length)c.ktN=[...new Set([...(c.ktN||[]),...v.kw])];c.ateU=v.de;c.ateT=v.tn||0;continue;}const v0=v.dbl?xPT(c):null;c.tp=(c.tp||0)+", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
