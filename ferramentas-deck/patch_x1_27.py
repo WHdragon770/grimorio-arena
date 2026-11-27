@@ -307,6 +307,29 @@ P.append(("b.match(/^Count\\$Landfall\\.", "  if(b==='Count$TopOfLibraryCMC')ret
     const L=(xTT().morL||[]).filter(z=>!so||z.eu);return fgMods(L.filter(z=>{try{return fgValid(z.c,v2,ctx);}catch(er){return false;}}).length,md);}
 """, 'antes'))
 
+# ---------- L23. Exilar a própria carta e devolver (pode voltar transformada / virada): Flickering Spirit, Dion, sagas que viram criatura (Fable of the Mirror-Breaker, Era of Enlightenment, Jugan Defends the Temple...) ----------
+# self blink com RememberChanged + DBReturn Defined Remembered Exile→Battlefield (Transformed/Tapped/GainControl)
+P.append(("/* exila e volta a própria */", "    case 'ChangeZone':{",
+"""    case 'ChangeZone':/* exila e volta a própria */if(d.Origin==='Battlefield'&&d.Destination==='Exile'&&!al&&!d.Defined&&!d.ChangeType&&d.RememberChanged==='True'&&d.SubAbility){const sb=fgPP((ctx.sv||{})[d.SubAbility]||'');const sd=sb.d||{};
+      if(sb.api==='ChangeZone'&&sd.Defined==='Remembered'&&sd.Origin==='Exile'&&sd.Destination==='Battlefield'&&Object.keys(sd).every(k=>/^(DB|Defined|Origin|Destination|Transformed|Tapped|GainControl|SubAbility|StackDescription|SpellDescription)$/.test(k))){const sb2=sd.SubAbility?fgPP((ctx.sv||{})[sd.SubAbility]||''):null;
+        if(!sb2||(sb2.api==='Cleanup'&&!sb2.d.SubAbility)){ctx.pula=[...(Array.isArray(ctx.pula)?ctx.pula:ctx.pula?[ctx.pula]:[]),d.SubAbility,sd.SubAbility].filter(Boolean);return [{op:'piscaS',tf:sd.Transformed==='True'?1:0,tap:sd.Tapped==='True'?1:0}];}}}
+""", 'antes'))
+P.append(("if(x&&x.tf)c.face=c.face?0:1;", "c.sk=xInfo(c).cri?1:0;e.campo.push(c);xLog(c.n+' foi exilada e voltou pro campo');",
+"if(x&&x.tf)c.face=c.face?0:1;if(x&&x.tap)c.tap=1;if(x&&x.tf)delete c.mk;", 'antes'))
+P.append(("case 'piscaS':", "      case 'sacrEsta':{",
+"""      case 'piscaS':{const c=e.campo.find(q=>q.k===it.k);if(!c){feito.push('a carta já saiu do campo');break;}xEfCarta(c,'pisca',0,{tf:s.tf,tap:s.tap});feito.push(`exilou e devolveu ${c.n}${s.tf?' transformada':''}`);break;}
+""", 'antes'))
+
+# ---------- L24. Destroy da criatura do gatilho (TriggeredTarget = quem levou o dano) e NoRegen nos Defined gerais; o gatilho "deals damage to a creature" agora passa a criatura ----------
+# Voracious Cobra, Sporogenic Infection, Death Pits of Rath, Toxin Sliver, Phage the Untouchable, Cosmic Horror, Aether Storm, Creepy Doll...
+P.append(("/* Destroy: TriggeredTarget e NoRegen */", "    case 'Destroy':if(!al&&!d.__m){",
+"""    case 'Destroy':/* Destroy: TriggeredTarget e NoRegen */if(!al&&!d.__m&&!Object.keys(d).some(k=>/^(Unless|Condition|Remember)/.test(k))&&(!d.NoRegen||/^(True|False)$/.test(d.NoRegen))){const df=d.Defined||'';
+      const o=df==='Self'?{al:'',si:1}:(df==='Enchanted'||df==='Equipped')?{al:'',anx:1}:/^Triggered(Card|Attacker|Source|Object|Target)(LKICopy)?$/.test(df)?{al:'',tk:1}:(df==='Targeted'||df==='ParentTarget')?{al:'',mesmo:1}:null;
+      if(o&&(d.NoRegen==='True'||/^TriggeredTarget/.test(df)))return [...(d.NoRegen==='True'?[Object.assign({op:'nRegen'},o)]:[]),Object.assign({op:'destroi'},o)];}
+""", 'antes'))
+P.append(("xGatTx(a.c,m[2],'dano em criatura',", "else setTimeout(()=>xGatTx(a.c,m[2],'dano em criatura'),500);}",
+"else setTimeout(()=>xGatTx(a.c,m[2],'dano em criatura',Object.assign({},xTc(t.c),{tk:t.c.k,tku:t.u})),500);}", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
