@@ -1231,6 +1231,10 @@ P.append(("const rsp=xEspera(s,st,si,it,j,1,'P:'+u);", "      case 'sacrTP':{con
 P.append(("if(s.rm)it.rem=q;feito.push(`${u===me?'você':xNomeU(u)} comprou ${q}`)", "else ev({op:'compra',n:q},u);feito.push(`${u===me?'você':xNomeU(u)} comprou ${q}`);break;}",
 "else ev({op:'compra',n:q},u);if(s.rm)it.rem=q;feito.push(`${u===me?'você':xNomeU(u)} comprou ${q}`);break;}", 'troca'))
 
+# ---------- L113. descQ no PRÓPRIO jogador com lembrado (Apathy, Skullknocker Ogre quando é você): ao acaso agora guarda it.lemb; escolhido espera o descarte e continua ----------
+P.append(("if(s.rm)it.lemb=L.slice();feito.push(tx+", "L.forEach(c=>e.cem.push(c));if(L.length)xDescartou(L.length);feito.push(tx+(L.length?': '+L.map(c=>c.n).join(', '):''));break;}setTimeout(()=>xDescarta(n,it.nm).then(()=>{xSobe();xPintaEu();}),300);feito.push(tx);break;}",
+"L.forEach(c=>e.cem.push(c));if(L.length)xDescartou(L.length);if(s.rm)it.lemb=L.slice();feito.push(tx+(L.length?': '+L.map(c=>c.n).join(', '):''));break;}{const rsp=xEspera(s,st,si,it,j,1,'P:'+me);setTimeout(()=>{xDescarta.ult=[];xDescarta(n,it.nm).then(()=>{if(rsp)xSacrRes({id:rsp,cs:(xDescarta.ult||[]).slice()});xSobe();xPintaEu();});},300);feito.push(tx);if(rsp){xLog(`${it.nm} resolveu: ${feito.join(' · ')} (o resto depois)`);return rest;}}break;}", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
