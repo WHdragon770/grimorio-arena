@@ -5891,7 +5891,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'Connive':return (!d.Defined||d.Defined==='Self')?[{op:'connive'}]:nao('quem conspira');
     case 'Proliferate':return [{op:'prolif'}];
     case 'Intensify':{const n=/^\d+$/.test(d.Amount||'1')?+(d.Amount||1):null;if(n==null)return nao('intensidade X');if(d.AllDefined){const mm=String(d.AllDefined).match(/^Card\.YouOwn\+named(.+)$/);return mm?[{op:'intens',n,nm:mm[1]}]:nao('intensificar '+d.AllDefined);}return (!d.Defined||d.Defined==='Self')?[{op:'intens',n}]:nao('intensificar '+d.Defined);}
-    case 'AddTurn':return [{op:'extra'}];
+    case 'AddTurn':{const n=d.NumTurns==null?1:N('NumTurns');if(n==null)return nao('número de turnos');if(al&&/^(Player|Opponent)$/.test(d.ValidTgts||''))return put({op:'extra',n,al},[]);if(d.Defined&&d.Defined!=='You')return nao('turno extra pra outro');return [{op:'extra',n}];}
     case 'SetState':return (d.Mode==='Transform'&&(!d.Defined||d.Defined==='Self'))?[{op:'transforma'}]:nao('estado '+(d.Mode||''));
     case 'Charm':{const ch=(d.Choices||'').split(',').map(x=>x.trim()).filter(Boolean),n=+(d.CharmNum||1),mn=d.MinCharmNum!=null?+d.MinCharmNum:n;
       return [{op:'modal',n,min:mn,ops:ch.map(x=>{const q=fgPP((ctx.sv||{})[x]||'');return {rot:String(q.d.SpellDescription||x).replace(/CARDNAME|NICKNAME/g,'esta carta'),st:q.api?fgCadeia(q.d,q.api,ctx):[{op:'nao',d:x}]};})}];}
@@ -7040,7 +7040,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
     if(pa&&(!t||(!/^[PS]:/.test(t)&&!xExiste(t)))){feito.push('o alvo saiu');continue;}
     if(s.ex&&t){const c=xAchaK(t),i=c&&xInfo(c);it.exc=c&&xCri(c)?Math.max(0,(+n||0)-Math.max(0,xPT(c).t-(c.dn||0))):c&&i.pw?Math.max(0,(+n||0)-((c.mk||{}).lealdade||0)):0;}if(s.ra&&s.op==='dano')it.rn=(it.rn||0)+(+n||0)*(/^each/.test(s.al||'')?(Object.keys(X.ops||{}).filter(u=>!xMorto(X.ops[u])).length+(s.al==='each player'?1:0)):1);
     switch(s.op){
-      case 'extra':{const sx=X.sala||{};xSala({ext:Object.assign({},sx.ext,{[me]:((sx.ext||{})[me]||0)+1})});feito.push('vai jogar um turno extra');break;}
+      case 'extra':{const ux=String(t||'').startsWith('P:')?String(t).slice(2):me,nn=typeof n==='number'?n:1;if(!(nn>0)){feito.push('nenhum turno extra');break;}const sx=X.sala||{};xSala({ext:Object.assign({},sx.ext,{[ux]:((sx.ext||{})[ux]||0)+nn})});feito.push(`${ux===me?'vai jogar':xNomeU(ux)+' vai jogar'} ${nn>1?nn+' turnos extras':'um turno extra'}`);break;}
       case 'connive':{if(e.bib.length)e.mao.push(e.bib.shift());const n0=e.cem.length,kc=it.k;setTimeout(async()=>{await xDescarta(1,it.nm);const d=e.cem.slice(n0)[0],c=e.campo.find(q=>q.k===kc);if(d&&!xInfo(d).land&&c){c.cnt=(c.cnt||0)+1;xLog(`${c.n} conspirou: descartou ${d.n} (não é terreno), +1 marcador +1/+1`);}else xLog(`conspirou${d?': descartou '+d.n+' (terreno, sem marcador)':''}`);xDescartou(1);xSobe();xPintaEu();},300);feito.push('conspirou (compra 1, descarta 1)');break;}
       case 'compra':{let q0=0;for(let q=0;q<n;q++)if(e.bib.length){e.mao.push(e.bib.shift());q0++;}if(s.rm)it.rem=q0;}if(s.quem==='todos')ev({op:'compra',n});feito.push((s.quem==='todos'?'cada jogador comprou ':'comprou ')+n);break;
       case 'ganha':e.vida+=n;feito.push(`ganhou ${n} de vida`);break;
