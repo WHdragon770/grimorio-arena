@@ -5470,6 +5470,7 @@ function fgProp(c,p,ctx){let m;
   if(p==='ExiledWithSource'){if(c.k==='__x')return true;const s0=ctx.src||(X.__itA||{}).k;return !!c.exS&&c.exS===s0;}
   if(p==='sameName'||p==='NotDefinedTargeted'||p==='Attached'||p==='TriggeredTarget'){if(c.k==='__x')return true;const A=(X.__alA||[]).filter(a=>a&&!/^[PSM][:#]/.test(String(a))),t0=xAchaK(A[0]);
     if(p==='sameName')return !!t0&&t0.n===c.n;if(p==='NotDefinedTargeted')return !A.includes(c.k);if(p==='Attached')return !!c.an&&(c.an===A[0]||c.an===ctx.src);return String(((ctx&&ctx.tc)||X.__tcA||{}).td||'')===c.k;}
+  if(m=p.match(/^AttachedTo (.+)$/)){if(c.k==='__x')return true;if(!c.an)return false;if(m[1]==='Targeted'){const A=(X.__alA||[]).filter(a=>a&&!/^[PSM][:#]/.test(String(a)));return c.an===A[0];}const h=xAchaK(c.an);return !!h&&fgValid(h,m[1],ctx);}
   if(p==='IsRemembered'&&X.__itA&&c.k!=='__x'){const L=X.__itA.lemb||[];return L.some(q=>q===c.k||(q&&q.k===c.k));}
   if(p==='StrictlyOther')return c.k!==ctx.src;if(p==='StrictlySelf')return c.k===ctx.src;if(p==='HasCounters')return !!(c.cnt||(c.mk&&Object.values(c.mk).some(v=>+v>0)));if(p==='MonoColor')return fgCores(c).size===1;
   if(p==='Outlaw')return /\b(Assassin|Mercenary|Pirate|Rogue|Warlock)\b/.test(xInfo(c).tipo||'');if(p==='EnchantedBy'||p==='EquippedBy'){const sc=xAchaK(ctx.src);return !!sc&&sc.an===c.k;}
