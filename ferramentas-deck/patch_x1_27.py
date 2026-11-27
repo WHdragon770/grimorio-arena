@@ -330,6 +330,40 @@ P.append(("/* Destroy: TriggeredTarget e NoRegen */", "    case 'Destroy':if(!al
 P.append(("xGatTx(a.c,m[2],'dano em criatura',", "else setTimeout(()=>xGatTx(a.c,m[2],'dano em criatura'),500);}",
 "else setTimeout(()=>xGatTx(a.c,m[2],'dano em criatura',Object.assign({},xTc(t.c),{tk:t.c.k,tku:t.u})),500);}", 'troca'))
 
+# ---------- L25. Seek (Alchemy): N cartas aleatórias do grimório que batem no filtro vão pra mão ----------
+# Oasis of Renewal, Surge of Acclaim, Gate to Seatower, Soulstealer Axe, Blightwing Whelp, Frenzied Geistblaster, Excogitator Sphinx, Skyshroud Lookout, Hollowhenge Wrangler...
+P.append(("case 'Seek':{", "    case 'Cleanup':case 'StoreSVar':return [];",
+"""    case 'Seek':{if(d.Destination&&d.Destination!=='Hand')return nao('Seek pra outra zona');if(Object.keys(d).some(k=>/^(Remember|Imprint|Condition|Unless|Defined|Optional)/.test(k)))return nao('ação Seek');
+      let v=String(d.Type||'Card'),ok=true;v=v.replace(/(cmc|power|toughness)(EQ|LE|GE|LT|GT|NE)([A-Za-z]\\w*)/g,(m0,a,b,c)=>{const q=fgConta(c,ctx);if(typeof q!=='number'){ok=false;return m0;}return a+b+q;});
+      if(!ok||/MostProminent|Chosen|Remembered|Triggered|Targeted/.test(v)||!fgSpecOk(v,ctx))return nao('filtro do Seek');const n=d.Num==null?1:N('Num');if(n==null)return nao('número');return [{op:'seek',v,n}];}
+""", 'antes'))
+P.append(("case 'seek':", "      case 'sacrEsta':{",
+"""      case 'seek':{const q=Math.max(0,+n||0),L=e.bib.filter(c=>{try{return fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}}),P=[];
+        for(let z=0;z<q&&L.length;z++){const c=L.splice(Math.floor(Math.random()*L.length),1)[0];e.bib.splice(e.bib.indexOf(c),1);e.mao.push(c);P.push(c.n);}
+        feito.push(P.length?`buscou (seek) ${P.join(', ')}`:'seek: nenhuma carta assim no grimório');break;}
+""", 'antes'))
+
+# ---------- L26. Olhar/revelar o topo (PeekAndReveal) lembrando a carta, e as partes seguintes: "se a lembrada é X" e mover a lembrada do grimório ----------
+# Mudbutton Clanger, Kithkin Zephyrnaut, Plane-Merge Elf, Wolf-Skull Shaman, Risen Reef, Skyclave Aerialist, Brutal/Callous/Feral Deceiver, Bucolic Ranch, Squeaking Pie Grubfellows...
+P.append(("/* olhar o topo lembrando */", "    case 'PeekAndReveal':{const n=N('PeekAmount')||1,",
+"""    case 'PeekAndReveal':/* olhar o topo lembrando */if(!ctx.__pk){ctx.__pk=1;let r0;try{r0=fgPasso0(d,api,ctx);}finally{delete ctx.__pk;}if(!r0.some(o=>o.op==='nao'))return r0;}{const sb=d.SubAbility&&fgPP((ctx.sv||{})[d.SubAbility]||'');if(!ctx.__pk&&(d.RememberRevealed||d.RememberPeeked)&&!(sb&&/^(Repeat|TwoPiles)$/.test(sb.api))&&(!d.Defined||d.Defined==='You')&&Object.keys(d).every(k=>/^(DB|AB|SP|PeekAmount|NoReveal|RememberRevealed|RememberPeeked|RevealValid|RevealOptional|Defined|SubAbility|SpellDescription|StackDescription|AILogic|Cost|ActivationLimit|PrecostDesc|SorcerySpeed)$/.test(k))){
+      const n=d.PeekAmount==null?1:N('PeekAmount'),v=d.RevealValid||'';if((typeof n==='number'||n==='X')&&!(v&&(/Chosen|Remembered|Triggered|Targeted/.test(v)||!fgSpecOk(v,ctx)))){ctx.peekL=1;
+      return [{op:'peek',n,v,nr:d.NoReveal==='True'&&!d.RememberRevealed?1:0,opc:d.RevealOptional==='True'?1:0}];}}}
+""", 'antes'))
+P.append(("/* depois de olhar o topo: lembradas */", "o.mesmo=1;return r;}return fgPasso0(d,api,ctx);}",
+"""o.mesmo=1;return r;}{const r=fgPasso0(d,api,ctx);if(!ctx.peekL||!r.some(o=>o.op==='nao'))return r;/* depois de olhar o topo: lembradas */
+    const ck=Object.keys(d).filter(k=>k.startsWith('Condition'));
+    if(ck.length&&d.ConditionDefined==='Remembered'&&ck.every(k=>['ConditionDefined','ConditionPresent','ConditionCompare','ConditionDescription'].includes(k))&&fgSpecOk(d.ConditionPresent||'Card',ctx)&&fgCmp(0,d.ConditionCompare||'GE1')!==null){const d2=Object.assign({},d);for(const k of ck)delete d2[k];delete d2.SubAbility;const r2=fgPasso(d2,api,ctx);if(r2.some(o=>o.op==='nao'))return r2;return [{op:'se',d:'n',q:{q:'remV',v:d.ConditionPresent||'Card',md:[]},cmp:d.ConditionCompare||'GE1',st:r2}];}
+    if(!ck.length&&api==='ChangeZone'&&d.Origin==='Library'&&/^(Remembered|TopOfLibrary)$/.test(d.Defined||'')&&{Hand:1,Battlefield:1,Graveyard:1,Exile:1}[d.Destination]&&Object.keys(d).every(k=>/^(DB|Defined|Origin|Destination|Optional|ForgetChanged|Tapped|SubAbility|SpellDescription|StackDescription)$/.test(k)))
+      return [{op:'lembZ',z:{Hand:'mao',Battlefield:'campo',Graveyard:'cem',Exile:'exi'}[d.Destination],topo:d.Defined==='TopOfLibrary'?1:0,tap:d.Tapped==='True'?1:0,opc:d.Optional==='True'?1:0,fg:d.ForgetChanged==='True'?1:0}];
+    return r;}}""", 'troca'))
+P.append(("case 'peek':", "      case 'sacrEsta':{",
+"""      case 'peek':{const q=Math.max(0,+n||0),T=e.bib.slice(0,q);let L=T;if(!s.nr){L=s.v?T.filter(c=>{try{return fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}}):T;if(L.length&&s.opc&&!XBOT&&!confirm(`${it.nm}: revelar ${L.map(c=>c.n).join(', ')} do topo?`))L=[];}
+        it.lemb=L.slice();if(s.nr){if(T.length&&!XBOT)xAv(`${it.nm}: o topo do seu grimório é ${T.map(c=>c.n).join(', ')}`);feito.push(T.length?'olhou o topo do grimório':'grimório vazio');}else feito.push(L.length?`revelou ${L.map(c=>c.n).join(', ')} do topo`:'não revelou nada');break;}
+      case 'lembZ':{const L=s.topo?e.bib.slice(0,1):(it.lemb||[]).filter(c=>e.bib.includes(c)),M=[];for(const c of L){if(s.opc&&!XBOT&&!confirm(`${it.nm}: pôr ${c.n} ${{mao:'na mão',campo:'no campo',cem:'no cemitério',exi:'no exílio'}[s.z]}?`))continue;e.bib.splice(e.bib.indexOf(c),1);if(s.z==='campo'){xReset(c);c.tap=s.tap?1:0;c.sk=xInfo(c).cri?1:0;e.campo.push(c);setTimeout(()=>xEntrou(c),300);}else e[s.z].push(c);M.push(c.n);}
+        if(s.fg&&M.length)it.lemb=(it.lemb||[]).filter(c=>!L.includes(c)||e.bib.includes(c));feito.push(M.length?`${M.join(', ')} do topo → ${{mao:'mão',campo:'campo',cem:'cemitério',exi:'exílio'}[s.z]}`:'nada mudou de zona');break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
