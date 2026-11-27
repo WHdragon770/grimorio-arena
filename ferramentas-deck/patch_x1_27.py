@@ -786,6 +786,14 @@ P.append(("case 'compraOps':", "      case 'sacrEsta':{",
 """      case 'compraOps':ev({op:'compra',n});feito.push(`cada oponente comprou ${n}`);break;
 """, 'antes'))
 
+# ---------- L70. "crie uma ficha e anexe este Equipamento a ela" (Attach Defined$ Remembered depois de Token RememberTokens) ----------
+# Field-Tested Frying Pan, Midnight Angel Armor, Citizen's Crowbar, Shining Armor?, Kaldra Compleat?...
+P.append(("op:'anexaFicha'", "return nao('ação Attach');}",
+"if(d.Defined==='Remembered'&&(!d.Object||d.Object==='Self')&&!d.ConditionDefined&&!al)return [{op:'anexaFicha'}];return nao('ação Attach');}", 'troca'))
+P.append(("case 'anexaFicha':", "      case 'auraFicha':{",
+"""      case 'anexaFicha':{const eq=e.campo.find(q=>q.k===it.k),tk=e.campo.filter(q=>q.tok&&xInfo(q).cri).slice(-1)[0];if(!eq||!tk){feito.push('não deu pra anexar');break;}eq.an=tk.k;feito.push(`${eq.n} foi anexado a ${tk.n}`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
