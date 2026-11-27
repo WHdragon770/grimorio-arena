@@ -604,6 +604,19 @@ P.append(("case 'protF':", "      case 'sacrEsta':{",
 """      case 'protF':{if(!t){feito.push('sem alvo');break;}const CN={W:'branco',U:'azul',B:'preto',R:'vermelho',G:'verde'};xNoAlvo(t,'protF',0,ev,{cores:s.cores});feito.push(`${xAlvoNome(t)} ganha proteção contra ${s.cores.map(x=>CN[x]).join(' e ')} até o fim do turno`);break;}
 """, 'antes'))
 
+# ---------- L54. Contas do jogador do gatilho (TriggeredPlayer$CardsInHand/LifeTotal) e dano em jogador do gatilho (Defined TriggeredPlayer/TriggeredCardController/...) ----------
+# Wheel of Torture, Storm World, Dreamborn Muse, Price of Knowledge, Fevered Visions, Antagonism, Mogis, Heat of Battle, Battle Strain, Emberwilde Captain, Meglonoth...
+P.append(("b.match(/^TriggeredPlayer\\$(LifeTotal|CardsInHand)$/)", "  if(m=b.match(/^TriggeredTarget\\$(LifeTotal|CardsInHand)$/))return {q:'tdJ',f:m[1]==='LifeTotal'?'vida':'nm',md};",
+"  if(m=b.match(/^TriggeredTarget\\$(LifeTotal|CardsInHand)$/))return {q:'tdJ',f:m[1]==='LifeTotal'?'vida':'nm',md};\n  if(m=b.match(/^TriggeredPlayer\\$(LifeTotal|CardsInHand)$/))return {q:'tdJ',f:m[1]==='LifeTotal'?'vida':'nm',tp:1,md};", 'troca'))
+P.append(("const P=v.tp?", "v.q==='tdJ'?(()=>{const P=String((it.tc||{}).td||'');",
+"v.q==='tdJ'?(()=>{const P=v.tp?((it.tc||{}).tp?'P:'+(it.tc||{}).tp:''):String((it.tc||{}).td||'');", 'troca'))
+P.append(("op:'danoQ'", "    case 'DealDamage':/* dano: Self / td / controlador da anexada */",
+"""    case 'DealDamage':/* dano no jogador do gatilho */if(!al&&!d.DamageSource&&d.Defined&&!/^(Self|TriggeredTarget|Targeted.*|ParentTarget.*)$/.test(d.Defined)&&!Object.keys(d).some(k=>/^(Remember|Condition|Unless|DamageMap|DividedAsYouChoose|ExcessSVar)/.test(k))){const q=fgQuemJ(d.Defined);if(q&&q!=='alvo'){const n=N('NumDmg');if(n!=null)return [{op:'danoQ',n,q}];}}
+""", 'antes'))
+P.append(("case 'danoQ':", "      case 'sacrEsta':{",
+"""      case 'danoQ':{const u=xQuemJ(s.q,it,ult);if(!u||!(n>0)){feito.push(u?'sem dano':'sem jogador pro dano');break;}xNoAlvo('P:'+u,'dano',n,ev);feito.push(`${n} de dano em ${u===me?'você':xNomeU(u)}`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
