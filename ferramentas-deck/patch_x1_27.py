@@ -1273,6 +1273,16 @@ P.append(("case 'viraEsc':", "      case 'sacrEsta':{",
 """      case 'viraEsc':{const L=e.campo.filter(c=>!c.tap&&(()=>{try{return fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}})()),res=st.slice(si+1),al2=(it.al||[]).slice(j);setTimeout(async()=>{let ks=L.map(c=>c.k);if(!XBOT&&L.length){ks=await xMarca(`${it.nm}: vire quantas quiser`,L.map(c=>({k:c.k,rot:c.n})),0,L.length)||[];}const M=L.filter(c=>ks.includes(c.k));M.forEach(c=>{c.tap=1;});xLog(`${it.nm}: virou ${M.length} (${M.map(c=>c.n).join(', ')||'nenhuma'})`);xSobe();xPintaEu();if(res.length)xFazDepois(res,Object.assign({},it,{al:al2,rem:M.length,lemb:M}));},300);feito.push('vire quantas criaturas quiser');xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
 """, 'antes'))
 
+# ---------- L117. BUG: busca (Rampant Growth, Cultivate, Emergent Sequence...) punha o terreno no campo SEM xEntrou: não disparava landfall nem contava como "entrou neste turno" ----------
+# + ThisTurnEntered vira conta da hora do passo ({q:'entT'}); + passo lembT sem nada lembrado usa o último alvo (Rise and Shine, Cyclone Sire, Candela: o alvo virava 0/0 e morria)
+P.append(("e.campo.push(c);xEntrou(c);}else e.mao.push(c);});xEmb(e.bib);it.lemb=pega;", "if(s.dest==='campo'||(s.dest==='misto'&&q===0)){c.tap=s.tap?1:0;e.campo.push(c);}else e.mao.push(c);});xEmb(e.bib);it.lemb=pega;",
+"if(s.dest==='campo'||(s.dest==='misto'&&q===0)){c.tap=s.tap?1:0;e.campo.push(c);xEntrou(c);}else e.mao.push(c);});xEmb(e.bib);it.lemb=pega;", 'troca'))
+P.append(("return {q:'entT',v:m[1]};", "if(m=b.match(/^Count\\$ThisTurnEntered_Battlefield_(.+)$/))return xTT().ent.filter(c=>fgValid(c,m[1],ctx)).length;",
+"if(m=b.match(/^Count\\$ThisTurnEntered_Battlefield_(.+)$/))return {q:'entT',v:m[1]};", 'troca'))
+P.append(("v.q==='entT'?", "v.q==='cmpT'?(xTT().cmp||0):", "v.q==='entT'?xTT().ent.filter(c=>{try{return fgValid(c,v.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}}).length:v.q==='cmpT'?(xTT().cmp||0):", 'troca'))
+P.append(("(it.lemb||(ult&&xAchaK(ult)?[xAchaK(ult)]:[]))", "    if(s.lembT||s.vT){const L=s.lembT?(it.lemb||[]).filter(c=>xExiste(c.k))",
+"    if(s.lembT||s.vT){const L=s.lembT?(it.lemb||(ult&&xAchaK(ult)?[xAchaK(ult)]:[])).filter(c=>xExiste(c.k))", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
