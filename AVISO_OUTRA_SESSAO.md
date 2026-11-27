@@ -16,7 +16,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (55 seções do patch)
+## O que mudou (56 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -72,6 +72,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L58.** BUG: "exile alvo até esta sair do campo" (Duration UntilHostLeavesPlay) na carta do oponente exilava pra sempre (ex.: Banisher Priest, Brutal Cathar, Portable Hole, Skyclave Apparition?, Static Prison?, Ossification, Fiend Hunter (gatilho único)...)
 - **L59.** BUG: "exile/sacrifique no fim do turno" (AtEOT) era ignorado em fichas e no Pump: a ficha ficava pra sempre (ex.: Geist of Saint Traft, Daring Piracy, War Effort, Angelic Favor, Faerie Aerie, L'Rell, Invocation of Saint Traft, Pyric Salamander, Deathknell Kami, Fatal Frenzy, Lowland Oaf...)
 - **L60.** BUG: Pump/PumpAll "até o seu próximo turno" (Duration UntilYourNextTurn) acabava no fim do turno (ex.: Liliana the Last Hope, Blue Dragon, Wasp Shrinking Savior, Rootwise Survivor?, For the Common Good, Karvanista, Mouth of the Storm...)
+- **L61.** BUG: "ganhe o controle enquanto esta estiver no campo" (LoseControl LeavesPlay) era controle pra sempre (ex.: Mind Flayer, Vodalian Mindsinger, Roil Elemental, Old Man of the Sea?, Rubinia Soulsinger?, Merieke Ri Berit...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
@@ -84,3 +85,4 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **Bug antigo corrigido (L58):** "exile alvo até esta sair do campo" (`Duration$ UntilHostLeavesPlay`) só voltava se o alvo fosse seu; na criatura do oponente (Banisher Priest, Brutal Cathar, Portable Hole...) virava exílio pra sempre. Agora o dono marca `exAte` na carta exilada (`xEfCarta` op `exAteO`) e, quando a carta que exilou sai, o `xExAteVolta` avisa todo mundo (`xEvia` op `exAteV`).
 - **Bug antigo corrigido (L59):** `AtEOT` (exile/sacrifique/destrua no fim do turno) era ignorado em `Token` e `Pump`: a ficha do Geist of Saint Traft, Daring Piracy, War Effort... ficava pra sempre, e o Crazed Armodon/Pyric Salamander nunca morriam. Agora a ficha nasce com `exF`/`sacF`/`desF` (o fim do turno já tratava `exF`/`sacF`; `desF` é novo e destrói via `xEfCarta`), e o Pump marca o alvo com o op `fimF`. 3 cartas que contavam como prontas agora aparecem como não feitas (Force of Rage: sacrifica na manutenção; Junkyo Bell e Soulshriek: pump X que dá 0 na leitura).
 - **Bug antigo corrigido (L60):** Pump/PumpAll "até o seu próximo turno" (`Duration$ UntilYourNextTurn`) acabava no fim do turno (Liliana, the Last Hope -2/-1, Blue Dragon...). Agora vira `pumpN`/`ktN`/`pumpTodosN`, que usam o `tpN`/`ktN`/`ateU` que já existiam (do `pumpProx`) e um `ttN` novo pra resistência, limpos no começo do próximo turno de quem lançou.
+- **Bug antigo corrigido (L61):** "ganhe o controle enquanto esta estiver no campo" (`LoseControl$ LeavesPlay,LoseControl`: Mind Flayer, Roil Elemental, Vodalian Mindsinger...) era controle pra sempre. Agora o `entrega`/`recebe` leva `h` (a carta que tomou), a carta roubada guarda `ctlH`, e quando a que tomou sai do campo o `xExAteVolta` devolve pro dono.
