@@ -364,6 +364,33 @@ P.append(("case 'peek':", "      case 'sacrEsta':{",
         if(s.fg&&M.length)it.lemb=(it.lemb||[]).filter(c=>!L.includes(c)||e.bib.includes(c));feito.push(M.length?`${M.join(', ')} do topo → ${{mao:'mão',campo:'campo',cem:'cemitério',exi:'exílio'}[s.z]}`:'nada mudou de zona');break;}
 """, 'antes'))
 
+# ---------- L27. "Você pode pagar <custo>; quando fizer, ..." (ImmediateTrigger): custos de carta (devolver, descartar, exilar do cemitério, virar, moer, sacrificar N) e mana híbrida ----------
+# Undead Butler, Doombot Harbinger?, Kroxa and Kunoros, Dokuchi Silencer, Tether Technician, Meanders Guide, Sutina, The Fire Nation Drill, Spider-Man To the Rescue, Rodolf Duskbringer, Slinza, Evereth...
+P.append(("function fgCustoK(", "function fgQuemJ(df){",
+"""/* custo de carta "pagável" (pagaK): devolver/sacrificar/virar/descartar/exilar do cemitério/moer */
+function fgCustoK(uc,ctx){uc=String(uc||'').trim();let m;if(m=uc.match(/^(Return|Sac|tapXType|Discard|ExileFromGrave)<(\\d+)\\/([^/>]+)(?:\\/[^>]*)?>$/)){const t={Return:'volta',Sac:'sac',tapXType:'tap',Discard:'desc',ExileFromGrave:'exiCem'}[m[1]];let v=m[3].replace(/;/g,',');if(t==='desc'&&v==='Random')return {t:'descR',n:+m[2]};if(v==='Hand')v='Card';if(/TopGraveyard|Triggered|Remembered|Chosen/.test(v)||!fgSpecOk(v,ctx))return null;return +m[2]>0?{t,n:+m[2],v}:null;}
+  if(m=uc.match(/^Mill<(\\d+)>$/))return {t:'mill',n:+m[1]};return null;}
+""", 'antes'))
+P.append(("const K=fgCustoK(d.Cost,ctx);", "return [{op:'sacOu',v:mS[1],st}];}const tk=String(d.Cost).trim().split(/\\s+/);if(!tk.every(x=>/^(\\d+|[WUBRGC])$/.test(x)))return nao('custo');",
+"""return [{op:'sacOu',v:mS[1],st}];}{const K=fgCustoK(d.Cost,ctx);if(K){const st=fgCadeia(ex.d,ex.api,ctx);if(st.some(o=>o.op==='nao'))return st;return [{op:'pagaK',k:K,sw:1,st}];}}const tk=String(d.Cost).trim().split(/\\s+/);if(!tk.every(x=>/^(\\d+|[WUBRGC]|[WUBRG]{2})$/.test(x)))return nao('custo');""", 'troca'))
+P.append(("x.length===2&&!/\\d/.test(x)?'{'", "return [{op:'pagaOu',c:tk.map(x=>'{'+x+'}').join(''),sw:1,st}];}return fgCadeia(ex.d,ex.api,ctx);}",
+"return [{op:'pagaOu',c:tk.map(x=>x.length===2&&!/\\d/.test(x)?'{'+x[0]+'/'+x[1]+'}':'{'+x+'}').join(''),sw:1,st}];}return fgCadeia(ex.d,ex.api,ctx);}", 'troca'))
+
+# ---------- L28. Suspeito (Suspected): c.sspt → ameaça e não pode bloquear, sai quando muda de zona ou "deixa de ser suspeito" ----------
+# Repeat Offender, It Doesn't Add Up, Caught Red-Handed, Person of Interest, Rubblebelt Braggart, Frantic Scapegoat, Hot Pursuit, Absolving Lammasu, Incriminating Impetus, Reasonable Doubt, Clandestine Meddler...
+P.append(("['fdM','fore','tm','susp','sspt',", "['fdM','fore','tm','susp',", "['fdM','fore','tm','susp','sspt',", 'troca'))
+P.append(("if(c.sspt){kw.add('menace')", "  if(c.kD&&c.kD.t===((X.sala||{}).turno||0))for(const x of c.kD.kw)kw.delete(x);",
+"  if(c.sspt){kw.add('menace');kw.add('nbloq');}\n", 'antes'))
+P.append(("op==='sspt')", "  else if(op==='vira')c.tap=1;else if(op==='desvira')c.tap=0;",
+"  else if(op==='sspt'){if((x||{}).v)c.sspt=1;else delete c.sspt;}\n", 'antes'))
+P.append(("case 'AlterAttribute':{if(d.Attributes==='Suspected'", "    case 'AlterAttribute':return (d.Attributes==='Harnessed'",
+"""    case 'AlterAttribute':{if(d.Attributes==='Suspected'&&(!d.Duration)&&Object.keys(d).every(k=>/^(DB|AB|SP|Attributes|Defined|ValidTgts|TgtPrompt|Activate|SubAbility|SpellDescription|StackDescription|Cost|TargetMin|TargetMax|AILogic|IsCurse)$/.test(k))){const v=d.Activate==='False'?0:1;
+      if(al)return put({op:'sspt',v,al},[]);const df=d.Defined||'Self';const o=df==='Self'?{si:1}:(df==='Enchanted'||df==='Equipped')?{anx:1}:(df==='Targeted'||df==='ParentTarget')?{mesmo:1}:/^Triggered(Card|Attacker|Object)(LKICopy)?$/.test(df)?{tk:1}:null;if(o)return [Object.assign({op:'sspt',v,al:''},o)];}}
+""", 'antes'))
+P.append(("case 'sspt':", "      case 'sacrEsta':{",
+"""      case 'sspt':{const k=t||it.k;if(!k){feito.push('sem a criatura');break;}xNoAlvo(k,'sspt',0,ev,{v:s.v});feito.push(`${xAlvoNome(k)} ${s.v?'ficou suspeita (ameaça, não pode bloquear)':'deixou de ser suspeita'}`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
