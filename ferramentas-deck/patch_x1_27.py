@@ -848,6 +848,18 @@ P.append(("if(c.ani&&c.ani.cor!=null){", "function fgCores(c){if(c.tok&&!c.cp)re
 
 P.append(("if(w==='Creature')return !!i.cri||!!(c.ani&&c.ani.cri);", "if(w==='Creature')return !!i.cri;", "if(w==='Creature')return !!i.cri||!!(c.ani&&c.ani.cri);", 'troca'))
 P.append(("const ok=tipo==='creatures'?xCri(c):", "const ok=tipo==='creatures'?i.cri:", "const ok=tipo==='creatures'?xCri(c):", 'troca'))
+# ---------- L75. BUG: carta animada (terreno-criatura) não levava dano, não era alvo de "criatura alvo" nos efeitos e ficava fora de "dano em cada criatura" ----------
+# Mutavault, Celestial Colonnade, Raging Ravine, Mishra's Factory, Gideon (criatura no turno), Gearhulks animados?... contra Lightning Bolt, Pyroclasm, Murder...
+P.append(("else if(i.cri||(c.ani&&c.ani.cri)){c.dn=", "if(i.pw&&!i.cri){c.mk=Object.assign({},c.mk);c.mk.lealdade=(c.mk.lealdade||0)-n;}else if(i.cri){c.dn=",
+"if(i.pw&&!i.cri&&!(c.ani&&c.ani.cri)){c.mk=Object.assign({},c.mk);c.mk.lealdade=(c.mk.lealdade||0)-n;}else if(i.cri||(c.ani&&c.ani.cri)){c.dn=", 'troca'))
+P.append(("const ok=(c,lado)=>{const i=xInfo(c),cri=xCri(c),", "const ok=(c,lado)=>{const i=xInfo(c),cri=i.cri,", "const ok=(c,lado)=>{const i=xInfo(c),cri=xCri(c),", 'troca'))
+P.append(("const ok=tp==='creature'?xCri(c):", "const ok=tp==='creature'?i.cri:tp==='land'", "const ok=tp==='creature'?xCri(c):tp==='land'", 'troca'))
+P.append(("if(x==='noncreature')return !xCri(c);", "if(x==='noncreature')return !i.cri;if(x==='creature'||x==='creatures')return i.cri;", "if(x==='noncreature')return !xCri(c);if(x==='creature'||x==='creatures')return xCri(c);", 'troca'))
+P.append(("if(c.k!==menos&&xCri(c))xEfCarta", "if(c.k!==menos&&xInfo(c).cri)xEfCarta(c,'dano',n);}", "if(c.k!==menos&&xCri(c))xEfCarta(c,'dano',n);}", 'troca'))
+P.append(("xFilV(v.v,v.de,c=>{if(xCri(c))xEfCarta(c,'dano',v.n);});else xTodosDano", "xFilV(v.v,v.de,c=>{if(xInfo(c).cri)xEfCarta(c,'dano',v.n);});else xTodosDano(v.n);X.__dsn='';}else if(v.op==='danoTodos')v.v?xFilV(v.v,v.de,c=>{if(xInfo(c).cri)xEfCarta(c,'dano',v.n);})",
+"xFilV(v.v,v.de,c=>{if(xCri(c))xEfCarta(c,'dano',v.n);});else xTodosDano(v.n);X.__dsn='';}else if(v.op==='danoTodos')v.v?xFilV(v.v,v.de,c=>{if(xCri(c))xEfCarta(c,'dano',v.n);})", 'troca'))
+P.append(("else if(v.op==='autoDano'){for(const c of e.campo.slice())if(xCri(c)){", "else if(v.op==='autoDano'){for(const c of e.campo.slice())if(xInfo(c).cri){", "else if(v.op==='autoDano'){for(const c of e.campo.slice())if(xCri(c)){", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
