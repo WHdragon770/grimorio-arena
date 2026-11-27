@@ -12,11 +12,11 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 3. Rode seu cob/tL1/mec e confira que nada caiu. Depois pode apagar este aviso e a pasta `ferramentas-deck/`.
 
 ## Números (medidor do Deck: todos os 34480 scripts do Forge, partes SP/AB/capítulo/gatilho sem op nao)
-- Antes (01d0d5e): 26629 (77.2%) · Agora: **28053 (81.4%)**, +1424 cartas
+- Antes (01d0d5e): 26629 (77.2%) · Agora: **28047 (81.3%)**, +1418 cartas
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (49 seções do patch)
+## O que mudou (51 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -66,6 +66,8 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L52.** Anular mágica e/ou habilidade ativada/disparada (TargetType Spell,Activated,Triggered) (ex.: Disallow, Overcharged Amalgam, Sister of Silence, Sublime Epiphany, Spider-Sense, Louisoix's Sacrifice, Subcommander T'Pol, Mirrorshell Crab...)
 - **L53.** Proteção: na própria carta (cor à escolha) e contra cor(es) fixa(s), na própria ou no alvo (ex.: Cartel Aristocrat, Knight of Dawn, Pristine Skywise, Keeper of Kookus, Grotesque Hybrid, Goblin Wizard, Obsidian Acolyte, Crimson Acolyte...)
 - **L54.** Contas do jogador do gatilho (TriggeredPlayer$CardsInHand/LifeTotal) e dano em jogador do gatilho (Defined TriggeredPlayer/TriggeredCardController/...) (ex.: Wheel of Torture, Storm World, Dreamborn Muse, Price of Knowledge, Fevered Visions, Antagonism, Mogis, Heat of Battle, Battle Strain, Emberwilde Captain, Meglonoth...)
+- **L55.** PlayerCountOpponents$Highest (CardsInHand / LifeTotal / Valid X.YouCtrl): o maior entre os oponentes (ex.: Beza the Bounding Spring, Teachings of the Archaics, Sunset Revelry, Scholar of New Horizons, Claim Jumper, Emeritus of Truce...)
+- **L56.** BUG: condição comparando com outra SVar (ConditionSVarCompare GTY) descartava o passo calado; e conta só da execução também (ex.: Claim Jumper, Scholar of New Horizons, Knight of the White Orchid, Weathered Wayfarer?, Gift of Estates, Land Tax?...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
@@ -74,3 +76,4 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **Bug antigo corrigido (L21):** `Count$Compare Y GE1.A.B` com Y que só se sabe na hora (alvo, marcadores) escolhia sempre o "senão" calado (fgCmp em objeto). Agora vira `{q:'cmp'}` e o rv resolve na hora; os resultados também podem ser SVar.
 - **Bug antigo corrigido (L32):** gatilho de emblema guardava as contas da hora em que ganhou o emblema (Liliana, the Last Hope dava sempre 2 zumbis). Agora o emblema guarda o script (`g.re`) e reprocessa na hora que dispara.
 - **Bug antigo corrigido (L33):** ficha com P/T variável (`..._total_artifacts`, Construct do Urza's Saga, Spirit do Hallowed Haunting) virava 0/0 e morria. Agora `c.tkD` guarda o filtro e o xPT soma na hora; a info vai junto no `fichaD`.
+- **Bug antigo corrigido (L56):** condição `ConditionCheckSVar` comparando com outra SVar (`GTY`, `LEX`) ou com conta que só se sabe na hora fazia o `fgCond` descartar o passo calado (Pelt Collector nunca ganhava marcador, Claim Jumper nunca pegava a 2ª Plains). Agora vira `se` com `{q:'cmp'}` resolvido na hora. Por isso 9 cartas que contavam como prontas (o passo sumia) agora aparecem como não feitas, que é o certo: Advice from the Fae, Agadeem Occultist, Chaos Moon, Disrupting Shoal, Glissa Sunseeker, Hisoka Minamo Sensei, Peer Pressure, Survival Cache, Titan's Presence.
