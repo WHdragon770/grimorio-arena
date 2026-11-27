@@ -1163,6 +1163,12 @@ P.append(("/* L103 pump vazio segura o alvo */", "  /* AtEOT em ficha/pump */",
 """  /* L103 pump vazio segura o alvo */if(api==='Pump'&&d.ValidTgts&&!ctx.__pz){ctx.__pz=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__pz;}if(!r.length){const A=fgAlvo(d);if(A&&A.al)return [Object.assign({op:'pump',al:A.al,p:0,t:0},A.v?{v:A.v}:{})];}return r;}
 """, 'antes'))
 
+# ---------- L104. BUG: xFilV filtrava com src:'' → "outra" (Other/StrictlyOther) sempre batia e "esta"/"presa a esta" nunca: Elspeth Tirel (ult), Myojin of Cleansing Fire, Deathbringer Regent, Death-Rattle Oni se DESTRUÍAM; Dread Cacodemon/Thundermare se viravam ----------
+# agora usa a carta que o xFaz está resolvendo (X.__itA.k); no xEvAplica o X.__itA é zerado (lá não tem item)
+P.append(("src:(X.__itA&&X.__itA.k)||''", "function xFilV(v,de,f){let n=0;for(const c of X.eu.campo.slice()){let ok=false;try{ok=fgValid(c,v,{eu:de,src:'',sv:{}});",
+"function xFilV(v,de,f){let n=0;for(const c of X.eu.campo.slice()){let ok=false;try{ok=fgValid(c,v,{eu:de,src:(X.__itA&&X.__itA.k)||'',sv:{}});", 'troca'))
+P.append(("X.__itA=null;if(v.alA)", "function xEvAplica(v){const e=X.eu;if(v.alA)X.__alA=v.alA;", "function xEvAplica(v){const e=X.eu;X.__itA=null;if(v.alA)X.__alA=v.alA;", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
