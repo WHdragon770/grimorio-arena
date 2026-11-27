@@ -212,6 +212,47 @@ P.append(("case 'sacL':", "      case 'sacrEsta':{",
         L.forEach(c=>xMorre(c));feito.push(L.length?'sacrificou '+L.map(c=>c.n).join(', '):'nada pra sacrificar');break;}
 """, 'antes'))
 
+# ---------- L15. Adaptar N (só se não tem +1/+1) e Reforçar N (na sua criatura de menor resistência) ----------
+# Pteramander, Zegana, Incubation Druid, Growth-Chamber Guardian, Biogenic Ooze? (Adapt); Abzan Skyarch, Dromoka's Gift, Elite Scaleguard (Bolster)...
+P.append(("if(d.Adapt!=null){", "if(!d.CounterType)return nao('tipo de marcador');",
+"if(d.Adapt!=null){const m=N('Adapt');if(m==null)return nao('número');if(d.Defined&&d.Defined!=='Self')return nao('quem');return [{op:'adapt',n:m}];}if(d.Bolster!=null){const m=N('Bolster');if(m==null)return nao('número');return [{op:'bolster',n:m}];}", 'antes'))
+P.append(("case 'adapt':", "      case 'sacrEsta':{",
+"""      case 'adapt':{const c=e.campo.find(q=>q.k===it.k),q=Math.max(0,+n||0);if(!c){feito.push('a criatura saiu');break;}if((c.cnt||0)>0){feito.push(`${c.n} já tem marcador +1/+1, não adaptou`);break;}xEfCarta(c,'cnt',q);feito.push(`${c.n} adaptou ${q}`);break;}
+      case 'bolster':{const q=Math.max(0,+n||0),C=e.campo.filter(c=>xCri(c));if(!C.length){feito.push('nenhuma criatura pra reforçar');break;}const mn=Math.min(...C.map(c=>xPT(c).t)),L=C.filter(c=>xPT(c).t===mn);
+        if(L.length===1||XBOT){xEfCarta(L[0],'cnt',q);feito.push(`reforçar ${q}: ${L[0].n}`);break;}
+        setTimeout(async()=>{const k=await xEscolhe(`${it.nm}: reforçar ${q} em qual (resistência ${mn})?`,L.map(c=>({c,lado:'Campo'})));const c=L.find(z=>z.k===k)||L[0];xEfCarta(c,'cnt',q);xLog(`${it.nm}: reforçar ${q} em ${c.n}`);xSobe();xPintaEu();},300);feito.push(`reforçar ${q}`);break;}
+""", 'antes'))
+
+# ---------- L16. Perder habilidade até o fim do turno (Debuff): c.kD = {t: turno, kw: [...]}, tirado no xPT ----------
+# Grozoth, Gargoyle Sentinel, Tidewater Minion, Emerald Charm, Vertigo, Gravity Well, Soul Sear, Smite the Deathless, Canopy Dragon, Crash Landing...
+P.append(("c.kD&&c.kD.t===", "  return {p,t,kw,pz,mod:p!==i.p||t!==i.t};}",
+"  if(c.kD&&c.kD.t===((X.sala||{}).turno||0))for(const x of c.kD.kw)kw.delete(x);\n", 'antes'))
+P.append(("op==='debuff'){", "  else if(op==='vira')c.tap=1;else if(op==='desvira')c.tap=0;",
+"  else if(op==='debuff'){const tn=(X.sala||{}).turno||0;if(!c.kD||c.kD.t!==tn)c.kD={t:tn,kw:[]};c.kD.kw=[...new Set([...c.kD.kw,...((x||{}).kw||[])])];}\n", 'antes'))
+P.append(("case 'Debuff':{", "    case 'Cleanup':case 'StoreSVar':return [];",
+"""    case 'Debuff':{if(d.Duration&&d.Duration!=='UntilEndOfTurn')return nao('duração');const ks=String(d.Keywords||'').split(' & ').filter(Boolean),kw=ks.map(k=>FGKW[k]);if(!ks.length||kw.some(x=>!x))return nao('habilidade perdida');
+      if(al)return put({op:'debuff',kw,al},[]);if(d.ValidTgts)return nao('alvo');if(d.Defined&&d.Defined!=='Self')return nao('quem');return [d.Defined==='Self'?{op:'debuff',kw,al:'',si:1}:{op:'debuff',kw,al:''}];}
+""", 'antes'))
+P.append(("case 'debuff':", "      case 'sacrEsta':{",
+"""      case 'debuff':{const k=t||it.k;if(!k){feito.push('sem a criatura');break;}xNoAlvo(k,'debuff',0,ev,{kw:s.kw});feito.push(`${xAlvoNome(k)} perdeu ${s.kw.join(', ')} até o fim do turno`);break;}
+""", 'antes'))
+
+# ---------- L17. "Não pode ser bloqueada neste turno" via Effect: a própria (RememberObjects Self), o alvo da parte anterior, o atacante do gatilho, todas as suas ----------
+# Dreadlight Monstrosity, Creeping Tar Pit, Border Guardian, Agent of Horizons, Blitzball Stadium, Kiora of Salt and Sand, Trygon Prime, Glaring Spotlight, Keeper of Keys...
+P.append(("ro==='Self'){o.push({op:'kt',al:'',kw:'unblockable',si:1})", "if(/IsRemembered/.test(va)&&al){o.push({op:'kt',al,kw:'unblockable'});continue;}",
+"if(/IsRemembered/.test(va)&&!al){const ro=d.RememberObjects||'';if(ro==='Self'){o.push({op:'kt',al:'',kw:'unblockable',si:1});continue;}if((ro==='Targeted'&&!d.ValidTgts)||ro==='ParentTarget'){o.push({op:'kt',al:'',kw:'unblockable',mesmo:1});continue;}if(/^TriggeredAttacker(LKICopy)?$/.test(ro)){o.push({op:'kt',al:'',kw:'unblockable',tk:1});continue;}}if(va==='Creature.YouCtrl'){o.push({op:'pumpTodos',p:0,t:0,kw:['unblockable'],v:'Creature.YouCtrl'});continue;}", 'depois'))
+
+# ---------- L18. Estáticas de Effect na própria carta até o fim do turno (UntilHostLeavesPlayOrEOT): pode atacar com defensor, não causa dano de combate ----------
+# Wall of Wonder, Walking Wall, Mobile Fort, Mirror Wall, Kozilek's Pathfinder, Spin Engine, Laccolith Whelp/Warrior, Farrel's Zealot, Tin Street Dodger...
+P.append(("(md==='CanAttackDefender'||md==='AssignNoCombatDamage')", "        if(du&&du!=='UntilEndOfCombat')return nao('duração '+du);",
+"""        if((md==='CanAttackDefender'||md==='AssignNoCombatDamage')&&/^(Card|Creature)\\.(Self|EffectSource)$/.test(st.ValidCard||'')&&(!du||du==='UntilHostLeavesPlayOrEOT')&&!al&&Object.keys(st).every(k=>/^(Mode|ValidCard|Description|EffectZone)$/.test(k))){o.push(md==='CanAttackDefender'?{op:'debuff',kw:['defender'],al:'',si:1}:{op:'semDanoC'});continue;}
+        if(du==='UntilHostLeavesPlayOrEOT'&&!al&&/EffectSource/.test(st.ValidAttacker||st.ValidCard||st.Affected||'')&&!/IsRemembered|Other/.test(st.ValidAttacker||st.ValidCard||st.Affected||'')){}else
+""", 'antes'))
+P.append(("c.nCD===(s.turno||0)", "P:pvOk(c,u)?0:Math.max(0,v.p)", "P:(pvOk(c,u)||c.nCD===(s.turno||0))?0:Math.max(0,v.p)", 'troca'))
+P.append(("case 'semDanoC':", "      case 'sacrEsta':{",
+"""      case 'semDanoC':{const c=e.campo.find(q=>q.k===it.k);if(!c){feito.push('a criatura saiu');break;}c.nCD=(X.sala||{}).turno||0;feito.push(`${c.n} não causa dano de combate neste turno`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
