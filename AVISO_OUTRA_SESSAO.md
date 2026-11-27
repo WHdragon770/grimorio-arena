@@ -12,11 +12,11 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 3. Rode seu cob/tL1/mec e confira que nada caiu. Depois pode apagar este aviso e a pasta `ferramentas-deck/`.
 
 ## Números (medidor do Deck: todos os 34480 scripts do Forge, partes SP/AB/capítulo/gatilho sem op nao)
-- Antes (01d0d5e): 26629 (77.2%) · Agora: **28081 (81.4%)**, +1452 cartas
+- Antes (01d0d5e): 26629 (77.2%) · Agora: **28098 (81.5%)**, +1469 cartas
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (63 seções do patch)
+## O que mudou (64 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -80,6 +80,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L66.** Ficha pro jogador-alvo (TokenOwner Targeted/TargetedPlayer) ia pro "outro jogador" e não pro alvo escolhido (multiplayer) (ex.: Hunted Horror, Ox Drover, Forbidden Orchard, Cybernetica Datasmith, Prismari Command, Gravedig?, Brigid's Command...)
 - **L67.** BUG: "você pode" (Optional) em sacrificar/moer/descartar/comprar era obrigatório; "descarte N a não ser que descarte um X" (UnlessType) descartava N sempre (ex.: Yawgmoth Demon, God-Eternal Bontu, Crawling Sensation, Hedge Shredder, Glacial Dragonhunt, Evie Frye, Sibilant Spirit, Infiltration Lens; Compulsive Research, Thirst for Identity, Practical Research...)
 - **L68.** Descarte pelo jogador do gatilho/alvo (TriggeredTarget/TriggeredPlayer/TargetedController/TriggeredCardController...), inclusive ao acaso (ex.: Skullknocker Ogre, Headless Specter, Urgoros, Necrogen Mists, Doom Foretold, Gloomlance, Dinrova Horror, Recoil, Blightning, Carnival, Oppression, Bereavement...)
+- **L69.** Comprar: cada oponente (Opponent/Player.Opponent/Player.Other), o jogador-alvo de antes (TargetedPlayer), "você e o do gatilho" (ex.: Words of Wisdom, Archival Whorl, Valiant Batrider, Cut a Deal, Clockwork Fox, Master of the Feast, Memory Worm, Diviner Spirit, Black Widow, Tenuous Truce...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
