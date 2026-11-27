@@ -1079,8 +1079,16 @@ P.append(("/* L94 atrasado fim do combate */", "  /* AtEOT em ficha/pump */",
 """, 'antes'))
 
 # ---------- L95. BUG: saiV com si+tk/td (ChangeZone Defined$ TriggeredCard...) olhava o si primeiro e mandava a PRÓPRIA carta: Storm Cauldron, Dissipation Field, Hixus, Grasping Giant, Cunning Evasion, Aether Membrane ----------
-P.append(("if((s.tk||s.td)&&t){", "      case 'saiV':{const ZN={mao:'pra mão',cem:'pro cemitério',exi:'pro exílio'}[s.z];if(s.si){",
-"      case 'saiV':{const ZN={mao:'pra mão',cem:'pro cemitério',exi:'pro exílio'}[s.z];if((s.tk||s.td)&&t){const c=e.campo.find(q=>q.k===t);if(c){xSai(c,s.z);feito.push(`${c.n} foi ${ZN}`);}else if(xExiste(t)&&s.z!=='cem'){xNoAlvo(t,s.z==='mao'?'volta':'exila',0,ev);feito.push(`${xAlvoNome(t)} foi ${ZN}`);}else feito.push('a carta do gatilho já tinha saído');break;}if(s.si){", 'troca'))
+# e si+mesmo (o cabeçalho põe si antes de mesmo): Grey Knight Paragon, Meticulous Excavation
+P.append(("const t0=s.mesmo&&!s.tk&&!s.td?ult:t;", "      case 'saiV':{const ZN={mao:'pra mão',cem:'pro cemitério',exi:'pro exílio'}[s.z];if(s.si){",
+"      case 'saiV':{const ZN={mao:'pra mão',cem:'pro cemitério',exi:'pro exílio'}[s.z];const t0=s.mesmo&&!s.tk&&!s.td?ult:t;if((s.tk||s.td||s.mesmo)&&t0){const c=e.campo.find(q=>q.k===t0);if(c){xSai(c,s.z);feito.push(`${c.n} foi ${ZN}`);}else if(xExiste(t0)&&s.z!=='cem'){xNoAlvo(t0,s.z==='mao'?'volta':'exila',0,ev);feito.push(`${xAlvoNome(t0)} foi ${ZN}`);}else feito.push('a carta do gatilho já tinha saído');break;}if(s.si){", 'troca'))
+
+# ---------- L96. BUG: Branch com ValidTgts perdia o alvo (os ramos usam Defined$ Targeted = mesmo): Grey Knight Paragon se exilava, Meticulous Excavation, Rancid Earth, Epicenter. op alvoB só escolhe o alvo ----------
+P.append(("[{op:'alvoB',al,v:d.ValidTgts}]", "return [{op:'se',d:'n',q:v,cmp:m[1]+m[2],st:T},{op:'se',d:'n',q:v,cmp:NG[m[1]]+m[2],st:F}];}",
+"return [...(al?[{op:'alvoB',al,v:d.ValidTgts}]:[]),{op:'se',d:'n',q:v,cmp:m[1]+m[2],st:T},{op:'se',d:'n',q:v,cmp:NG[m[1]]+m[2],st:F}];}", 'troca'))
+P.append(("if(!nm)return al?[{op:'alvoB'", "const nm=ok?d.TrueSubAbility:d.FalseSubAbility;if(!nm)return [];const q=fgPP((ctx.sv||{})[nm]||'');if(!q.api)return nao('passo '+nm);return fgCadeia(q.d,q.api,ctx);}",
+"const nm=ok?d.TrueSubAbility:d.FalseSubAbility;if(!nm)return al?[{op:'alvoB',al,v:d.ValidTgts}]:[];const q=fgPP((ctx.sv||{})[nm]||'');if(!q.api)return nao('passo '+nm);return [...(al?[{op:'alvoB',al,v:d.ValidTgts}]:[]),...fgCadeia(q.d,q.api,ctx)];}", 'troca'))
+P.append(("case 'alvoB':", "      case 'sacrEsta':{", "      case 'alvoB':break;\n", 'antes'))
 
 
 def aplica(s):
