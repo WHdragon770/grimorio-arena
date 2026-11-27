@@ -921,8 +921,8 @@ P.append(("if(d==='campo'){c.tap=s.tap?1:0;e.campo.push(c);if(s.atq)xAtq(c);xEnt
 
 # ---------- L81. BUG: condição "CheckSVar$ X | SVarCompare$ GE1" (sem o prefixo Condition) era ignorada em 92 cartas: o efeito acontecia sempre ----------
 # Tectonic Edge, Just Fate, Command of Unsummoning, Heavy Fog, Tapestry of the Ages, Endless Atlas, Glistening Sphere, Cult Conscript, Proctor of Potential, Rally the Troops...
-P.append(("/* CheckSVar = condição */", "function fgPasso(d,api,ctx){/* compara com outra SVar */",
-"function fgPasso(d,api,ctx){/* CheckSVar = condição */if(d.CheckSVar&&!d.ConditionCheckSVar){d=Object.assign({},d,{ConditionCheckSVar:d.CheckSVar,ConditionSVarCompare:d.SVarCompare||'GE1'});delete d.CheckSVar;delete d.SVarCompare;}/* compara com outra SVar */", 'troca'))
+P.append(("/* CheckSVar = condição; AB", "function fgPasso(d,api,ctx){/* compara com outra SVar */",
+"function fgPasso(d,api,ctx){/* CheckSVar = condição; AB já é checado na ativação pelo fgCond */if(d.CheckSVar&&!d.ConditionCheckSVar&&d.AB==null){d=Object.assign({},d,{ConditionCheckSVar:d.CheckSVar,ConditionSVarCompare:d.SVarCompare||'GE1'});delete d.CheckSVar;delete d.SVarCompare;}/* compara com outra SVar */", 'troca'))
 
 P.append(("b==='PlayerCountPropertyYou$HasPropertyBeenAttackedThisCombat'", "  if(b==='PlayerCountOpponents$HighestCardsInHand')return {q:'opMax',f:'nm',md};",
 """  if(b==='PlayerCountPropertyYou$HasPropertyBeenAttackedThisCombat')return {q:'fuiAtk',md};if(b==='PlayerCountOpponents$HighestCounters.Poison')return {q:'opMax',f:'ven',md};if(b==='PlayerCountOpponents$HighestCardsInGraveyard')return {q:'opMax',f:'cem',md};
