@@ -1023,6 +1023,19 @@ P.append(("ev({op:'pumpTodosV',md:'N'", "      case 'pumpTodosN':{const tn=(X.sa
 P.append(("if(v.md==='Pp'){c.pP=", "q++;const v0=v.dbl?xPT(c):null;c.tp=(c.tp||0)+",
 "q++;if(v.md==='Pp'){c.pP=(c.pP||0)+(v.p||0);c.pT=(c.pT||0)+(v.t||0);if(v.kw&&v.kw.length)c.pK=[...new Set([...(c.pK||[]),...v.kw])];continue;}if(v.md==='N'){c.tpN=(c.tpN||0)+(v.p||0);c.ttN=(c.ttN||0)+(v.t||0);if(v.kw&&v.kw.length)c.ktN=[...new Set([...(c.ktN||[]),...v.kw])];c.ateU=v.de;c.ateT=v.tn||0;continue;}const v0=v.dbl?xPT(c):null;c.tp=(c.tp||0)+", 'troca'))
 
+# ---------- L91. Defined$ TargetedCard (= o alvo do pai, igual Targeted): Will of the Sultai; "cada criatura causa N de dano ao seu controlador" (RepeatEach Creature + DealDamage RememberedController): Rakdos Charm ----------
+P.append(("if(d.Defined==='TargetedCard')d=Object.assign({},d,{Defined:'Targeted'});", "function fgPasso(d,api,ctx){/* CheckSVar = condição; AB já é checado na ativação pelo fgCond */",
+"function fgPasso(d,api,ctx){if(d.Defined==='TargetedCard')d=Object.assign({},d,{Defined:'Targeted'});/* CheckSVar = condição; AB já é checado na ativação pelo fgCond */", 'troca'))
+P.append(("/* L91 cada criatura dano no dono */", "  /* AtEOT em ficha/pump */",
+"""  /* L91 cada criatura dano no dono */if(api==='RepeatEach'&&/^Creature$/.test(d.RepeatCards||'')&&d.RepeatSubAbility&&!d.RepeatPlayers){const r=fgPP((ctx.sv||{})[d.RepeatSubAbility]||'');if(r.api==='DealDamage'&&r.d.Defined==='RememberedController'&&r.d.DamageSource==='Remembered'&&/^\\d+$/.test(r.d.NumDmg||'')&&!r.d.SubAbility)return [{op:'criDanoDono',n:+r.d.NumDmg}];}
+""", 'antes'))
+P.append(("case 'criDanoDono':", "      case 'sacrEsta':{",
+"""      case 'criDanoDono':{ev({op:'criDanoDono',n:s.n});const q=e.campo.filter(c=>xCri(c)).length;if(q)e.vida-=q*s.n;feito.push(`cada criatura causou ${s.n} de dano ao seu controlador (você: ${q*s.n})`);break;}
+""", 'antes'))
+P.append(("else if(v.op==='criDanoDono'){", "  else if(v.op==='pumpVen'){",
+"""  else if(v.op==='criDanoDono'){const q=e.campo.filter(c=>xCri(c)).length;if(q){e.vida-=q*v.n;xLog(`suas ${q} criatura(s) te causaram ${q*v.n} de dano`);}xSobe();xPintaEu();}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
