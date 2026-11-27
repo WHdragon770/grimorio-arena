@@ -967,6 +967,13 @@ P.append(("if(p==='wasDealtDamageThisTurn')", "  if(m=p.match(/^named(.+)$/))ret
   if(m=p.match(/^named(.+)$/))return fgN(c.n)===m[1];""", 'troca'))
 P.append(("c.dnT=(X.sala||{}).turno||0;c.dn=(c.dn||0)+n;", "else if(i.cri||(c.ani&&c.ani.cri)){c.dn=(c.dn||0)+n;", "else if(i.cri||(c.ani&&c.ani.cri)){c.dnT=(X.sala||{}).turno||0;c.dn=(c.dn||0)+n;", 'troca'))
 
+# ---------- L86. BUG: filtros em Maiúscula que o fgProp não conhecia caíam no fgTem e davam FALSE: "outra criatura" (StrictlyOther, 130 cartas) nunca batia ----------
+# Bolt Hound, Loyal Unicorn, Elspeth Tirel (ult), Genju (StrictlySelf), Celestial Regulator (HasCounters), Vanishing Verse (MonoColor), Outlaws' Fury (Outlaw), Kjeldoran Pride (EnchantedBy), Mace of Disruption (EquippedBy)...
+P.append(("if(p==='StrictlyOther')return", "if(p==='IsCommander')return !!c.cmd;",
+"""if(p==='StrictlyOther')return c.k!==ctx.src;if(p==='StrictlySelf')return c.k===ctx.src;if(p==='HasCounters')return !!(c.cnt||(c.mk&&Object.values(c.mk).some(v=>+v>0)));if(p==='MonoColor')return fgCores(c).size===1;
+  if(p==='Outlaw')return /\\b(Assassin|Mercenary|Pirate|Rogue|Warlock)\\b/.test(xInfo(c).tipo||'');if(p==='EnchantedBy'||p==='EquippedBy'){const sc=xAchaK(ctx.src);return !!sc&&sc.an===c.k;}
+  if(p==='IsCommander')return !!c.cmd;""", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
