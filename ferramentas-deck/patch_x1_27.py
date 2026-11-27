@@ -974,6 +974,22 @@ P.append(("if(p==='StrictlyOther')return", "if(p==='IsCommander')return !!c.cmd;
   if(p==='Outlaw')return /\\b(Assassin|Mercenary|Pirate|Rogue|Warlock)\\b/.test(xInfo(c).tipo||'');if(p==='EnchantedBy'||p==='EquippedBy'){const sc=xAchaK(ctx.src);return !!sc&&sc.an===c.k;}
   if(p==='IsCommander')return !!c.cmd;""", 'troca'))
 
+# ---------- L87. BUG: filtro "que aquele jogador controla" (ControlledBy TriggeredTarget/TriggeredDefendingPlayer/TriggeredPlayer, DefenderCtrl, TargetedPlayerCtrl, ControlledBy TargetedOrController) dava false: sem alvo legal / dano em ninguém ----------
+# Trygon Predator, Latulla's Orders, Shockmaw Dragon, Fiend Binder, Floral Spuzzem, Hellkite Whelp, Ancient Hellkite, Chandra Nalaar, Bonfire of the Damned, Flame Wave, Chandra's Flame Wave, Etrata...
+P.append(("if(m=p.match(/^ControlledBy (?:Spawner>)?", "if(p==='StrictlyOther')return",
+"""if(m=p.match(/^ControlledBy (?:Spawner>)?(TriggeredTarget|TriggeredDefendingPlayer|TriggeredPlayer|TriggeredActivator|TargetedOrController|Targeted|TargetedPlayer)$/)||p==='DefenderCtrl'||p==='TargetedPlayerCtrl'){if(c.k==='__x')return true;const T=(ctx&&ctx.tc)||X.__tcA||{},A=X.__alA||[],w=p==='DefenderCtrl'?'D':p==='TargetedPlayerCtrl'?'TargetedPlayer':m[1];let u='';
+    if(w==='TriggeredTarget'||w==='TriggeredDefendingPlayer'||w==='D'){const td=String(T.td||'');u=td.startsWith('P:')?td.slice(2):'';if(!u&&w!=='TriggeredTarget'){const a=xAchaK(w==='D'?ctx.src:T.tk||ctx.src);if(a&&a.atk)u=xDefDe(a);}}
+    else if(w==='TriggeredPlayer'||w==='TriggeredActivator')u=T.tp||T.tku||'';else{const t0=String(A.find(a=>a&&!String(a).startsWith('M#'))||'');u=t0.startsWith('P:')?t0.slice(2):(w==='TargetedPlayer'?'':(t0?xDonoK(t0):''));}
+    return !!u&&xDonoK(c.k)===u;}
+  if(p==='StrictlyOther')return""", 'troca'))
+P.append(("const al=[];X.__alA=al;", "async function xPedeAlvos(st,nome,k){const al=[];", "async function xPedeAlvos(st,nome,k){const al=[];X.__alA=al;", 'troca'))
+P.append(("X.__tcA=tc||null;let al;try{al=await xPedeAlvos(st,c.n,c.k);}finally{X.__tcA=null;}", "  const al=await xPedeAlvos(st,c.n,c.k);if(!al)return xLog(`gatilho de ${c.n} ficou sem alvo`);",
+"  X.__tcA=tc||null;let al;try{al=await xPedeAlvos(st,c.n,c.k);}finally{X.__tcA=null;}if(!al)return xLog(`gatilho de ${c.n} ficou sem alvo`);", 'troca'))
+P.append(("X.__tcA=it.tc||null;X.__alA=it.al||[];", "function xFaz(st,it,rest,nv){st=(st||[]).slice();", "function xFaz(st,it,rest,nv){st=(st||[]).slice();X.__tcA=it.tc||null;X.__alA=it.al||[];", 'troca'))
+
+P.append(("/ControlledBy|TargetedPlayerCtrl|DefenderCtrl/.test(", "const ev=(o,p)=>nv.push(Object.assign({id:xId(),de:me,para:p||'*'},o.op==='danoTodos'?{sn:it.nm||''}:{},o));",
+"const ev=(o,p)=>nv.push(Object.assign({id:xId(),de:me,para:p||'*'},o.op==='danoTodos'?{sn:it.nm||''}:{},/ControlledBy|TargetedPlayerCtrl|DefenderCtrl/.test(String(o.v||''))?{alA:it.al||[],tcA:it.tc||null}:{},o));", 'troca'))
+P.append(("if(v.alA)X.__alA=v.alA;", "function xEvAplica(v){const e=X.eu;", "function xEvAplica(v){const e=X.eu;if(v.alA)X.__alA=v.alA;if(v.tcA)X.__tcA=v.tcA;", 'troca'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
