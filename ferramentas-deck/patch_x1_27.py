@@ -527,6 +527,15 @@ P.append(("d.Defined==='TriggeredAttackers'&&d.IsCurse!=='True'", "if(!al&&d.Def
 P.append(("d.Defined==='You'&&/^target (opponent|player)$/.test(al||'')", "if(d.Defined==='Player'&&!al)return [{op:'ganhaJ',n,todos:1}];",
 "if(d.Defined==='Player'&&!al)return [{op:'ganhaJ',n,todos:1}];if(d.Defined==='You'&&/^target (opponent|player)$/.test(al||''))return put({op:'ganha',n,al},[]);", 'troca'))
 
+# ---------- L45. Quem leva o dano: a própria carta (Defined Self), o jogador do gatilho (TriggeredTarget = td), o controlador da encantada/equipada ----------
+# Psionic Entity, Sunflare Shaman, Goblin Kaboomist, Sword of War and Peace, Gremlin Infestation, Power Leak, Errant Minion...
+P.append(("/* dano: Self / td / controlador da anexada */", "    case 'DealDamage':{if(d.Defined==='TriggeredTargetController'",
+"""    case 'DealDamage':/* dano: Self / td / controlador da anexada */if(!al&&!d.DamageSource&&/^(Self|TriggeredTarget|EnchantedController|EquippedController)$/.test(d.Defined||'')&&!Object.keys(d).some(k=>/^(Remember|Condition|Unless|DamageMap|DividedAsYouChoose|ExcessSVar)/.test(k))){const n=N('NumDmg');if(n!=null)return [d.Defined==='Self'?{op:'dano',n,al:'',si:1}:d.Defined==='TriggeredTarget'?{op:'dano',n,al:'',td:1}:{op:'danoCtl',n}];}
+""", 'antes'))
+P.append(("case 'danoCtl':", "      case 'sacrEsta':{",
+"""      case 'danoCtl':{const a=(e.campo.find(q=>q.k===it.k)||{}).an,u=a&&xDonoK(a);if(!u){feito.push('não está anexada a nada');break;}if(u===me){e.vida-=n;feito.push(`${n} de dano em você`);break;}feito.push(`${n} de dano em ${xNomeU(u)}${xDanoF(it.k,'P:'+u,n,ev)}`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
