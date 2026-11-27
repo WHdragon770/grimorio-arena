@@ -1174,6 +1174,9 @@ P.append(("/ControlledBy|TargetedPlayerCtrl|DefenderCtrl|Attached|sameName|NotDe
 "/ControlledBy|TargetedPlayerCtrl|DefenderCtrl|Attached|sameName|NotDefinedTargeted|TriggeredTarget/.test(String(o.v||''))", 'troca'))
 P.append(("X.__itA=null;X.__alA=v.alA||[];X.__tcA=v.tcA||null;", "X.__itA=null;if(v.alA)X.__alA=v.alA;if(v.tcA)X.__tcA=v.tcA;", "X.__itA=null;X.__alA=v.alA||[];X.__tcA=v.tcA||null;", 'troca'))
 
+# ---------- L106. contas: Count$Bargain.A.B (igual Bargained) e Count$LastStateBattlefieldWithFallback V (= Count$Valid no campo): Torch the Tower, Jaws of Stone, Volcanic Wind ----------
+P.append(("Count\\$(?:Bargained|Bargain)\\.", "if(m=b.match(/^Count\\$Bargained\\.(\\d+)\\.(\\d+)$/))", "if(m=b.match(/^Count\\$LastStateBattlefieldWithFallback (.+)$/))return fgTodos().filter(c=>fgValid(c,m[1],ctx)).length;\n  if(m=b.match(/^Count\\$(?:Bargained|Bargain)\\.(\\d+)\\.(\\d+)$/))", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
