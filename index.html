@@ -5895,7 +5895,7 @@ function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.
     case 'Connive':return (!d.Defined||d.Defined==='Self')?[{op:'connive'}]:nao('quem conspira');
     case 'Proliferate':return [{op:'prolif'}];
     case 'Intensify':{const n=/^\d+$/.test(d.Amount||'1')?+(d.Amount||1):null;if(n==null)return nao('intensidade X');if(d.AllDefined){const mm=String(d.AllDefined).match(/^Card\.YouOwn\+named(.+)$/);return mm?[{op:'intens',n,nm:mm[1]}]:nao('intensificar '+d.AllDefined);}return (!d.Defined||d.Defined==='Self')?[{op:'intens',n}]:nao('intensificar '+d.Defined);}
-    case 'AddTurn':{const n=d.NumTurns==null?1:N('NumTurns');if(n==null)return nao('número de turnos');if(al&&/^(Player|Opponent)$/.test(d.ValidTgts||''))return put({op:'extra',n,al},[]);if(d.Defined&&d.Defined!=='You')return nao('turno extra pra outro');return [{op:'extra',n}];}
+    case 'AddTurn':{if(d.ExtraTurnDelayedTrigger)return nao('turno extra com efeito no fim dele');const n=d.NumTurns==null?1:N('NumTurns');if(n==null)return nao('número de turnos');if(al&&/^(Player|Opponent)$/.test(d.ValidTgts||''))return put({op:'extra',n,al},[]);if(d.Defined&&d.Defined!=='You')return nao('turno extra pra outro');return [{op:'extra',n}];}
     case 'SetState':return (d.Mode==='Transform'&&(!d.Defined||d.Defined==='Self'))?[{op:'transforma'}]:nao('estado '+(d.Mode||''));
     case 'Charm':{const ch=(d.Choices||'').split(',').map(x=>x.trim()).filter(Boolean),n=+(d.CharmNum||1),mn=d.MinCharmNum!=null?+d.MinCharmNum:n;
       return [{op:'modal',n,min:mn,ops:ch.map(x=>{const q=fgPP((ctx.sv||{})[x]||'');return {rot:String(q.d.SpellDescription||x).replace(/CARDNAME|NICKNAME/g,'esta carta'),st:q.api?fgCadeia(q.d,q.api,ctx):[{op:'nao',d:x}]};})}];}
