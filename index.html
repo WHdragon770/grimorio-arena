@@ -5533,6 +5533,8 @@ function fgConta2(b,ctx){let m;const e=X.eu||{campo:[],bib:[],cem:[],mao:[]};if(
   if(b==='Count$YouDrewThisTurn')return {q:'cmpT'};if(b==='PlayerCountPropertyYou$CardsDiscardedThisTurn')return {q:'dscT'};/* Count\$YouDrewThisTurn$ */
   if(m=b.match(/^Count\$LastStateBattlefieldWithFallback (.+)$/))return fgTodos().filter(c=>fgValid(c,m[1],ctx)).length;
   if(m=b.match(/^Count\$(?:Bargained|Bargain)\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return !!(c&&c.barg);},m[1],m[2]);
+  if(b==='PlayerCountPropertyYou$LandsPlayed')return (typeof xVez==='function'&&xVez())?(e.ter||0):0;
+  if(m=b.match(/^Count\$Presence_([A-Z][a-z]+)\.(\d+)\.(\d+)$/)){const T=m[1],s0=src();return sim(()=>[...e.campo,...e.mao].some(c=>c!==s0&&new RegExp('\\b'+T+'\\b').test(xInfo(c).tipo||'')),m[2],m[3]);}
   if(m=b.match(/^Count\$wasCastFromExile\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return !!(c&&c.orig==='exi');},m[1],m[2]);
   return null;}
 function fgConta(v,ctx,fundo){if(v==null||v==='')return 1;v=String(v).trim().replace(/^\+/,'');if(v==='AFLifeLost')return {q:'perdeu'};if(/^-?\d+$/.test(v))return +v;
