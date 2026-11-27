@@ -12,11 +12,11 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 3. Rode seu cob/tL1/mec e confira que nada caiu. Depois pode apagar este aviso e a pasta `ferramentas-deck/`.
 
 ## Números (medidor do Deck: todos os 34480 scripts do Forge, partes SP/AB/capítulo/gatilho sem op nao)
-- Antes (01d0d5e): 26629 (77.2%) · Agora: **28123 (81.6%)**, +1494 cartas
+- Antes (01d0d5e): 26629 (77.2%) · Agora: **28122 (81.6%)**, +1493 cartas
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (73 seções do patch)
+## O que mudou (74 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -90,6 +90,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L76.** Animada = criatura também em: filtro de poder/resistência/habilidade, maior poder, poder da própria carta, vínculo/toque mortal/infectar de quem causa dano, "criatura morreu", shroud/hexproof, sacrifício e P/R na tela (ex.: Mutavault, Hissing Quagmire (toque mortal), Restless Vents, Celestial Colonnade, Mishra's Factory, Lavaclaw Reaches...)
 - **L77.** BUG: "ponha todas as criaturas de todos os cemitérios no campo sob seu controle" (ChangeZoneAll GainControl) devolvia cada uma pro campo do próprio dono (ex.: Grimoire of the Dead, Rise of the Dread Marn?, Liliana's Contract?, Profane Command?...)
 - **L78.** BUG: "ponha todas ... no campo viradas" (ChangeZoneAll Tapped$ True) entravam desviradas (ex.: Planar Birth, Aftermath Analyst, Hedge Shredder, Splendid Reclamation?, Brought Back?, Wake the Dead?...)
+- **L79.** BUG: turno extra ignorava o número (NumTurns$ 2/X) e o jogador-alvo (ex.: Time Stretch, Teferi Master of Time (ult), Ral Zarek (X por moedas)?, Sage of Hours (X), Stitch in Time...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
@@ -116,3 +117,4 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L76 (resto do mesmo bug):** também passam a usar `xCri`: `fgProp` (poder/resistência ≥ N, `withX`, maior/menor poder), `fgConta` `Count$CardPower` da própria carta, `xDanoF` (vínculo/toque mortal/infectar de quem causa o dano e infectar em quem leva), `xMorre` ("uma criatura morreu": morbid, gatilhos de morte; o `cr0` é lido antes do reset), `xBlinda` (shroud/hexproof dado pela animação), `xSacr` ("sacrifique uma criatura") e `xC` (mostrar P/R do terreno animado na tela).
 - **Bug antigo corrigido (L77):** `ChangeZoneAll` de cemitério/exílio pro campo com `GainControl$ True` (Grimoire of the Dead) mandava o `zonas` pra cada jogador, e cada um botava as próprias cartas no próprio campo. Agora o `zonas` leva `gc`: as minhas vêm pro meu campo e os outros recebem `daZ`, tiram as cartas que batem e mandam via `recebe` (com `dono0`). Só pra filtro neutro (sem You/Opp/Ctrl/Remembered/Top...) e sem `ChangeNum`; o resto continua como antes.
 - **Bug antigo corrigido (L78):** `ChangeZoneAll` pro campo com `Tapped$ True` (Planar Birth, Aftermath Analyst, Hedge Shredder) entrava desvirado; agora o `zonas` leva `tap` e o `xZonas` respeita.
+- **Bug antigo corrigido (L79):** `AddTurn` virava sempre `{op:'extra'}` (1 turno, pra você): Time Stretch e o ultimate do Teferi, Master of Time davam 1 turno em vez de 2. Agora `extra` leva `n` (`NumTurns`) e `al` (jogador-alvo). Regressão honesta: Sage of Hours (X = marcadores removidos no custo / 5) agora fica parcial; antes dava 1 turno sempre.
