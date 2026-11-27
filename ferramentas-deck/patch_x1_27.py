@@ -751,6 +751,22 @@ P.append(("if(ok){if(nr)c.nRg=", "if(ok)xEfCarta(c,'destroi');}}", "if(ok){if(nr
 # Hunted Horror, Ox Drover, Forbidden Orchard, Cybernetica Datasmith, Prismari Command, Gravedig?, Brigid's Command...
 P.append(("test(al||'')?'alvo':ow==='Opponent'", "&&/^target (opponent|player)$/.test(al||'')?'ou':ow==='Opponent'", "&&/^target (opponent|player)$/.test(al||'')?'alvo':ow==='Opponent'", 'troca'))
 
+# ---------- L67. BUG: "você pode" (Optional) em sacrificar/moer/descartar/comprar era obrigatório; "descarte N a não ser que descarte um X" (UnlessType) descartava N sempre ----------
+# Yawgmoth Demon, God-Eternal Bontu, Crawling Sensation, Hedge Shredder, Glacial Dragonhunt, Evie Frye, Sibilant Spirit, Infiltration Lens; Compulsive Research, Thirst for Identity, Practical Research...
+P.append(("/* você pode (Optional) */", "  /* AtEOT em ficha/pump */",
+"""  /* você pode (Optional) */if(!ctx.__opq&&/^(Sacrifice|Mill|Discard|Draw)$/.test(api)&&(d.Optional==='True'||(api==='Draw'&&d.OptionalDecider==='You'))){ctx.__opq=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__opq;}if(r.some(o=>o.op==='nao'))return r;
+    let f=0;return r.map(o=>{if(f)return o;const ok=o.op==='sacrEu'||o.op==='sacrEsta'||o.op==='descarta'||(o.op==='mill'&&o.quem==='eu')||(o.op==='compra'&&o.quem==='eu');if(!ok)return o;f=1;return Object.assign({},o,{opq:1});});}
+  /* descarte a não ser */if(!ctx.__dun&&api==='Discard'&&d.UnlessType){ctx.__dun=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__dun;}if(r.length===1&&r[0].op==='descarta'&&fgSpecOk(d.UnlessType,ctx))return [Object.assign({},r[0],{op:'descUn',v:d.UnlessType})];return r;}
+""", 'antes'))
+P.append(("if(s.opq&&!XBOT){", "    const pa=xPrecisaAlvo(s),t=pa?(it.al||[])[j++]",
+"""    if(s.opq&&!XBOT){const tx={sacrEu:'sacrificar '+(s.d||'uma permanente'),sacrEsta:'sacrificar esta carta',mill:'moer',descarta:'descartar',compra:'comprar'}[s.op]||'fazer isso';const nn=typeof s.n==='number'?s.n:null;if(!confirm(`${it.nm}: você quer ${tx}${nn!=null&&s.op!=='sacrEsta'?' ('+nn+')':''}?`)){if(xPrecisaAlvo(s))j++;feito.push('escolheu não '+tx);continue;}}
+""", 'antes'))
+P.append(("case 'descUn':", "      case 'sacrEsta':{",
+"""      case 'descUn':{const L=e.mao.filter(c=>{try{return fgValid(c,s.v,{eu:me,src:'',sv:{}});}catch(er){return false;}}),res=st.slice(si+1),al2=(it.al||[]).slice(j),nm=it.nm,q=n;
+        setTimeout(async()=>{let fe=0;if(L.length&&(XBOT||confirm(`${nm}: descartar 1 ${s.v} em vez de ${q} cartas?`))){let c=L[0];if(!XBOT&&L.length>1){const k=await xEscolhe(`${nm}: descarte qual?`,L.map(c=>({c,lado:'Mão'})));c=L.find(x=>x.k===k)||L[0];}xDescarta.ult=[c];e.mao.splice(e.mao.indexOf(c),1);e.cem.push(c);xLog(`${nm}: descartou ${c.n}`);fe=1;}if(!fe)await xDescarta(q,nm);if(res.length)xFazDepois(res,Object.assign({},it,{al:al2}));else{xSobe();xPintaEu();}},300);
+        feito.push(`descarta ${q} a não ser que descarte 1 ${s.v}`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
