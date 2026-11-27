@@ -253,6 +253,35 @@ P.append(("case 'semDanoC':", "      case 'sacrEsta':{",
 """      case 'semDanoC':{const c=e.campo.find(q=>q.k===it.k);if(!c){feito.push('a criatura saiu');break;}c.nCD=(X.sala||{}).turno||0;feito.push(`${c.n} não causa dano de combate neste turno`);break;}
 """, 'antes'))
 
+# ---------- L19. Terrenos adicionais: "play an additional land on each of your turns" (Azusa, Exploration, Oracle of Mul Daya...) e AdjustLandPlays neste turno (Effect) ----------
+# Explore, Growth Spiral, Journey of Discovery, Summer Bloom, Azusa's Many Journeys, This World Belongs to Me, Way of the Paradox... + estáticas Azusa, Exploration, Dryad of the Ilysian Grove
+P.append(("function xTerMax(", "function xFimJogo(s,me){",
+"""/* quantos terrenos pode jogar neste turno: 1 + estáticas "additional land(s) on each of your turns" + efeito deste turno (e.terX) */
+function xTerMax(){const e=X.eu,t=(X.sala||{}).turno||0,W={an:1,one:1,two:2,three:3};let n=1+((e&&e.terX&&e.terX.t===t)?e.terX.n:0);for(const c of (e&&e.campo)||[]){if(c.tok&&!c.cp)continue;const m=xNorm(xInfo(c).tx||'',c.n).match(/You may play (an|one|two|three) additional lands? on each of your turns/i);if(m)n+=W[m[1].toLowerCase()];}return n;}
+""", 'antes'))
+P.append(("if(e.ter>=xTerMax())return xAv('Você já jogou", "if(e.ter>=1)return xAv('Você já jogou um terreno neste turno.')", "if(e.ter>=xTerMax())return xAv('Você já jogou os terrenos que pode neste turno.')", 'troca'))
+P.append(("ok=!xPode({inst:0})&&!(e.ter>=xTerMax())", "ok=!xPode({inst:0})&&!(e.ter>=1)", "ok=!xPode({inst:0})&&!(e.ter>=xTerMax())", 'troca'))
+P.append(("    if(e.ter<xTerMax()){", "    if(e.ter<1){const ts=e.mao.filter(", "    if(e.ter<xTerMax()){const ts=e.mao.filter(", 'troca'))
+P.append(("(st.AdjustLandPlays||'')&&!du", "        if(md==='CantBlockBy'&&st.ValidBlocker==='Creature.withoutHaste'",
+"""        if(md==='Continuous'&&st.Affected==='You'&&/^\\d+$/.test(st.AdjustLandPlays||'')&&!du&&Object.keys(st).every(k=>/^(Mode|Affected|AdjustLandPlays|Description|EffectZone)$/.test(k))){o.push({op:'terX',n:+st.AdjustLandPlays});continue;}
+""", 'antes'))
+P.append(("case 'terX':", "      case 'sacrEsta':{",
+"""      case 'terX':{const tn=(X.sala||{}).turno||0;if(!e.terX||e.terX.t!==tn)e.terX={t:tn,n:0};e.terX.n+=s.n;feito.push(`pode jogar ${s.n} terreno${s.n>1?'s':''} adicional${s.n>1?'is':''} neste turno`);break;}
+""", 'antes'))
+
+# ---------- L20. "Não pode ser regenerada neste turno" (Effect CantRegenerate): alvo da parte anterior, alvo próprio, a própria ----------
+# Carbonize, Disintegrate, Scorching Lava, Gravebind, Orcish Healer, Furnace Brood, Whippoorwill, Engulfing Flames, Clergy/Knight of the Holy Nimbus
+P.append(("md==='CantRegenerate'&&", "        if(md==='CantBlockBy'&&st.ValidBlocker==='Creature.withoutHaste'",
+"""        if(md==='CantRegenerate'&&/^Card\\.IsRemembered$/.test(st.ValidCard||'')&&!du&&Object.keys(st).every(k=>/^(Mode|ValidCard|Description|EffectZone)$/.test(k))){const ro=d.RememberObjects||'';if(ro==='Self'&&!al){o.push({op:'nRegen',al:'',si:1});continue;}if(ro==='Targeted'&&al){o.push({op:'nRegen',al});continue;}if(!al&&(ro==='ParentTarget'||ro==='Targeted')){o.push({op:'nRegen',al:'',mesmo:1});continue;}}
+""", 'antes'))
+P.append(("op==='nRegen')", "  else if(op==='vira')c.tap=1;else if(op==='desvira')c.tap=0;",
+"  else if(op==='nRegen')c.nRg=(X.sala||{}).turno||0;\n", 'antes'))
+P.append(("&&!xUmbra(c)){if(c.regen&&c.nRg!==", "&&!xUmbra(c)){if(c.regen){c.regen=0;", "&&!xUmbra(c)){if(c.regen&&c.nRg!==((X.sala||{}).turno||0)){c.regen=0;", 'troca'))
+P.append(("op==='destroiF'){if(c.regen&&c.nRg!==", "op==='destroiF'){if(c.regen){", "op==='destroiF'){if(c.regen&&c.nRg!==((X.sala||{}).turno||0)){", 'troca'))
+P.append(("case 'nRegen':", "      case 'sacrEsta':{",
+"""      case 'nRegen':{const k=t||it.k;if(!k){feito.push('sem a criatura');break;}xNoAlvo(k,'nRegen',0,ev);feito.push(`${xAlvoNome(k)} não pode ser regenerada neste turno`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
