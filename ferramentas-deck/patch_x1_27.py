@@ -657,7 +657,7 @@ P.append(("v.op==='exAteV'", "  else if(v.op==='aniq')xAniq(v);", "  else if(v.o
 P.append(("/* AtEOT em ficha/pump */", "function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.StackDescription||api)+(why?' ('+why+')':'')}];",
 """function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.StackDescription||api)+(why?' ('+why+')':'')}];
   /* AtEOT em ficha/pump */if((api==='Token'||api==='Pump')&&d.AtEOT){const f=/^(Your)?Exile(Combat)?$/.test(d.AtEOT)?'exi':/^(Your)?Sacrifice(Combat|Ctrl)?$/.test(d.AtEOT)?'sac':d.AtEOT==='Destroy'?'des':'';if(!f)return nao('fim do turno');const d2=Object.assign({},d);delete d2.AtEOT;const r=fgPasso0(d2,api,ctx);if(r.some(o=>o.op==='nao'))return r;
-    if(api==='Token'){if(!r.some(o=>o.op==='ficha'))return nao('fim do turno');for(const o of r)if(o.op==='ficha')o.fim=f;return r;}const p0=r.find(o=>o.op==='pump'||o.op==='kt');if(!p0)return nao('fim do turno');return [...r,p0.al?{op:'fimF',f,mesmo:1}:{op:'fimF',f,si:1}];}""", 'troca'))
+    if(api==='Token'){if(!r.some(o=>o.op==='ficha'))return nao('fim do turno');for(const o of r)if(o.op==='ficha')o.fim=f;return r;}const p0=r.find(o=>/^(pump|kt)(Pp)?$/.test(o.op));if(!p0)return nao('fim do turno');return [...r,p0.al?{op:'fimF',f,mesmo:1}:{op:'fimF',f,si:1}];}""", 'troca'))
 P.append(("xx&&xx.fim==='sac'?{sacF:1}", "...(xx&&xx.tkD?{tkD:xx.tkD}:{})});e.campo.push(...nov);",
 "...(xx&&xx.tkD?{tkD:xx.tkD}:{}),...(xx&&xx.fim==='sac'?{sacF:1}:xx&&xx.fim==='exi'?{exF:1}:xx&&xx.fim==='des'?{desF:1}:{})});e.campo.push(...nov);", 'troca'))
 P.append(("if(op==='fimF'){", "function xEfCarta(c,op,n,x){const i=xInfo(c);",
@@ -792,6 +792,19 @@ P.append(("op:'anexaFicha'", "return nao('ação Attach');}",
 "if(d.Defined==='Remembered'&&(!d.Object||d.Object==='Self')&&!d.ConditionDefined&&!al)return [{op:'anexaFicha'}];return nao('ação Attach');}", 'troca'))
 P.append(("case 'anexaFicha':", "      case 'auraFicha':{",
 """      case 'anexaFicha':{const eq=e.campo.find(q=>q.k===it.k),tk=e.campo.filter(q=>q.tok&&xInfo(q).cri).slice(-1)[0];if(!eq||!tk){feito.push('não deu pra anexar');break;}eq.an=tk.k;feito.push(`${eq.n} foi anexado a ${tk.n}`);break;}
+""", 'antes'))
+
+# ---------- L71. BUG: Pump/PumpAll perpétuo ou permanente (Duration Perpetual/Permanent) acabava no fim do turno ----------
+# Vladimir and Godfrey, Mace of Disruption, Davriel's Withering, Blighted Nightmare, Mycoid Resurrection, Begin Anew, By Elspeth's Command, Jaheira...
+P.append(("/* pump perpétuo */", "  /* AtEOT em ficha/pump */",
+"""  /* pump perpétuo */if((api==='Pump'||api==='PumpAll')&&(d.Duration==='Perpetual'||d.Duration==='Permanent')&&!d.PumpZone&&!d.LeaveBattlefield){const d2=Object.assign({},d);delete d2.Duration;const r=fgPasso0(d2,api,ctx);
+    if(r.length&&r.every(o=>o.op==='pump'&&!o.dbl||o.op==='kt'||o.op==='pumpTodos'&&!o.dbl&&!o.todasP))return r.map(o=>Object.assign({},o,{op:o.op==='pump'?'pumpPp':o.op==='kt'?'ktPp':'pumpTodosPp'}));}
+""", 'antes'))
+P.append(("else if(op==='pumpPp'){", "else if(op==='pumpN'){",
+"else if(op==='pumpPp'){c.pP=(c.pP||0)+(x.p||0);c.pT=(c.pT||0)+(x.t||0);}else if(op==='ktPp'){c.pK=[...new Set([...(c.pK||[]),...(x.kws||[])])];}else if(op==='pumpN'){", 'troca'))
+P.append(("case 'pumpPp':", "      case 'pumpN':case 'ktN':{",
+"""      case 'pumpPp':case 'ktPp':{const k=t||it.k;if(!k){feito.push('sem alvo');break;}if(s.op==='pumpPp')xNoAlvo(k,'pumpPp',0,ev,{p:s.p,t:s.t});else xNoAlvo(k,'ktPp',0,ev,{kws:s.kws||[s.kw]});feito.push(`${xAlvoNome(k)} ${s.op==='pumpPp'?(s.p>=0?'+':'')+s.p+'/'+(s.t>=0?'+':'')+s.t:'ganha '+(s.kws||[s.kw]).map(x=>KPT[x]||x).join(', ')} pra sempre`);break;}
+      case 'pumpTodosPp':{let q=0;e.campo.filter(c=>xCri(c)&&(!s.v||fgValid(c,s.v,{eu:me,src:it.k,sv:{}}))).forEach(c=>{c.pP=(c.pP||0)+(s.p||0);c.pT=(c.pT||0)+(s.t||0);if(s.kw&&s.kw.length)c.pK=[...new Set([...(c.pK||[]),...s.kw])];q++;});feito.push(`${q} criatura(s) suas ${s.p||s.t?(s.p>=0?'+':'')+s.p+'/'+(s.t>=0?'+':'')+s.t:''}${s.kw&&s.kw.length?' ganham '+s.kw.map(x=>KPT[x]||x).join(', '):''} pra sempre`);break;}
 """, 'antes'))
 
 
