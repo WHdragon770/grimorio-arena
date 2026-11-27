@@ -16,7 +16,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (60 seções do patch)
+## O que mudou (61 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -77,6 +77,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L63.** BUG: "se a criatura morrer neste turno, exile em vez disso" (ReplaceDyingDefined) era ignorado no dano e no pump (ex.: Reduce to Ashes, Magma Spray, Scorching Dragonfire, Wilt in the Heat, Lava Coil?, Fiery Temper?, Khaaaaaaaaaaaannn!, Pump: Feed the Swarm? ...)
 - **L64.** BUG: "volta do cemitério com marcador" (WithCountersType) era ignorado: +1/+1, -1/-1, marcador de habilidade, finalidade (ex.: Sand Golem, Generous Revival, Gallia, Persist, Aberrant Return, Metamorphosis Fanatic, Unbreakable Bond, Mirko, Rydia, Admiral Brass, Wolfbat, Season of the Burrow...)
 - **L65.** BUG: "não pode ser regenerada" (Destroy/DestroyAll NoRegen) era ignorado fora do gatilho (ex.: Fatal Blow, Death Bomb, Grotesque Hybrid, Wrath of God, Damnation, Day of Judgment, Terror, Doom Blade?, Smother, Incinerate (dano)...)
+- **L66.** Ficha pro jogador-alvo (TokenOwner Targeted/TargetedPlayer) ia pro "outro jogador" e não pro alvo escolhido (multiplayer) (ex.: Hunted Horror, Ox Drover, Forbidden Orchard, Cybernetica Datasmith, Prismari Command, Gravedig?, Brigid's Command...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
