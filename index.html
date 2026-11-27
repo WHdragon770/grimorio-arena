@@ -5982,6 +5982,10 @@ if(d.Defined&&d.Defined!=='You')return nao('grimório de outro');const v=d.Valid
     case 'FlipCoin':{if(Object.keys(d).some(k=>!/^(DB|SP|AB|Cost|SpellDescription|StackDescription|WinSubAbility|LoseSubAbility|SubAbility|AILogic|Defined)$/.test(k))||(d.Defined&&d.Defined!=='You'))return nao('ação FlipCoin');
       const ld=nm=>{if(!nm)return [];const q=fgPP((ctx.sv||{})[nm]||'');return q.api?fgCadeia(q.d,q.api,ctx):[{op:'nao',d:nm}];},w=ld(d.WinSubAbility),l=ld(d.LoseSubAbility);
       if([...w,...l].some(o=>o.op==='nao'))return [...w,...l].filter(o=>o.op==='nao');if([...w,...l].some(o=>xPrecisaAlvo(o)))return nao('alvo dentro da moeda');return [{op:'moeda',w,l}];}
+    case 'SacrificeAll':{if(Object.keys(d).some(k=>/^(Remember|Imprint|Condition|Unless)/.test(k)&&k!=='RememberSacrificed'))return nao('ação SacrificeAll');if(d.Controller&&d.Controller!=='You')return nao('quem sacrifica');
+      if(d.Defined==='Self'&&!d.ValidCards)return [{op:'sacrEsta'}];if(/^Remembered(LKI)?$/.test(d.Defined||'')&&!d.ValidCards)return [{op:'sacL',v:''}];
+      if(!d.Defined&&d.ValidCards){const m=String(d.ValidCards).match(/^(Card|Creature|Artifact|Permanent|Land|Enchantment)\.IsRemembered$/);if(m)return [{op:'sacL',v:m[1]==='Card'?'':m[1]}];const v=String(d.ValidCards);if(/YouCtrl/.test(v)&&!/OppCtrl|Remembered|Chosen|Targeted|Triggered/.test(v)&&fgSpecOk(v,ctx))return [{op:'sacV',v}];}
+      return nao('ação SacrificeAll');}
     case 'Cleanup':case 'StoreSVar':return [];
   }
   return nao('ação '+api);}
@@ -6282,6 +6286,7 @@ function xTurno(){const s=X.sala,e=X.eu,me=xUid();if(!s||!e)return;let mud=0;
   if(top&&s.rz&&s.rz!==top.id&&s.vez===me&&X.rzS!==s.rz+top.id){X.rzS=s.rz+top.id;const o={rz:'',pri:me,pp:0};Object.assign(s,o);xSala(o);}
   if(s.cb==='blq'&&s.vez!==me)X.foco=s.vez;
   if(s.cb==='blq'&&s.vez===me&&s.def&&s.def.every(u=>(s.bq||[]).includes(u)||xMorto(xPub(u)))&&X.dzF!==s.turno){X.dzF=s.turno;xSala({cb:'dano'});}
+  if(s.cb==='dano'&&s.vez===me&&X.__blqF!==s.turno+'.'+((s.cbX||{}).n||0)){X.__blqF=s.turno+'.'+((s.cbX||{}).n||0);setTimeout(xBlqGat,250);}
   if(xMax()>2&&s.turno&&xMorto(e)){if(!e.fora){e.fora=1;mud=1;xLog('🏳 saiu da partida');}
     if(s.vez===me&&!(s.pilha||[]).length&&!s.cb)xSala({vez:xProx(me),turno:(s.turno||0)+1,fase:0,cb:''});else if(s.pri===me&&!s.rz)setTimeout(xPassaPri,300);}
   xFimJogo(s,me);
@@ -7340,6 +7345,8 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
        case 'amass':{const tp=String(s.tp||'army').replace(/s$/,''),Tn=tp[0].toUpperCase()+tp.slice(1);let a=e.campo.find(q=>q.tok&&/Army/.test(q.n));if(!a){xFicha(Tn==='Army'?'Army':Tn+' Army',0,0,[],0,0,1,1);a=e.campo[e.campo.length-1];a.sk=0;}a.cnt=(a.cnt||0)+n;feito.push(`reuniu ${n}: ${a.n} com ${a.cnt} marcador(es)`);break;}
        case 'monarca':{const sm={u:me,id:xId()};X.sala.mon=sm;xSala({mon:sm});feito.push('você virou o monarca');break;}
       case 'goad':xNoAlvo(t||it.k,'goad',0,ev,{u:xUid(),tn:(X.sala||{}).turno});feito.push(`${xAlvoNome(t||it.k)} foi provocada`);break;
+      case 'sacL':case 'sacV':{const L=s.op==='sacL'?e.campo.filter(c=>(it.lemb||[]).some(q=>q.k===c.k)&&(!s.v||fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}}))):e.campo.filter(c=>{try{return fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}});
+        L.forEach(c=>xMorre(c));feito.push(L.length?'sacrificou '+L.map(c=>c.n).join(', '):'nada pra sacrificar');break;}
       case 'sacrEsta':{const c=e.campo.find(q=>q.k===it.k);if(c){xMorre(c);feito.push('sacrificou '+c.n);}break;}
       case 'sacrEu':if(s.rm&&si<st.length-1){const res=st.slice(si+1),al2=(it.al||[]).slice(j),s0=s;setTimeout(async()=>{const r=await xSacrEu(s0,it.nm,it.k);xFazDepois(res,Object.assign({},it,{rem:r||0,al:al2}));},300);feito.push(`sacrifica ${n} ${s.d||''}`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
         setTimeout(()=>xSacrEu(s,it.nm,it.k),300);feito.push(`sacrifica ${n} ${s.d||''}`);break;
@@ -7412,7 +7419,7 @@ function xFaz(st,it,rest,nv){st=(st||[]).slice();const e=X.eu,me=xUid(),ou=xOutr
       case 'mill':{const ua=s.quem==='alvo'?(String(t||'').startsWith('P:')?String(t).slice(2):ou):null;if(s.quem==='op'||ua&&ua!==me)ev({op:'mill',n},ua||ou);}if(s.quem==='op'||s.quem==='alvo'&&!(String(t||'')==='P:'+me));else{const ml=[];for(let q=0;q<n&&e.bib.length;q++){const c=e.bib.shift();e.cem.push(c);ml.push(c);}it.lemb=ml;}feito.push(`moeu ${n}`);break;}}
   xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);xVarre();return rest;}
 
-const xAtqTx=c=>{const m=xNorm(xInfo(c).tx,c.n).match(/^(?:[A-Za-z ]+ — )?Whenever this (?:card|creature) (?:enters(?: the battlefield)? or )?attacks( while saddled)?, ([^\n]+)$/im);return m&&(!m[1]||c.sela===(X.sala||{}).turno)?m[2]:'';};
+const xAtqTx=c=>{const m=xNorm(xInfo(c).tx,c.n).match(/^(?:[A-Za-z ]+ — )?(?:When|Whenever) this (?:card|creature) (?:enters(?: the battlefield)? or )?attacks(?: or blocks)?( while saddled)?, ([^\n]+)$/im);return m&&(!m[1]||c.sela===(X.sala||{}).turno)?m[2]:'';};
 async function xAtkOk(at){const e=X.eu;
   xLog(`atacou com ${at.map(c=>xNomeF(c)+' '+xPT(c).p+'/'+xPT(c).t).join(', ')} (total ${at.reduce((t,c)=>t+Math.max(0,xPT(c).p),0)})`);
   for(const c of at){const t=xNorm(xInfo(c).tx,c.n).replace(/\([^)]*\)/g,'');let m;
@@ -7523,6 +7530,10 @@ function xFichas(){const dl=bDlg('x1-fic');
   dl.showModal();}
 
 /* ---------- ações ---------- */
+/* gatilhos de bloqueio. tc.tk = a criatura do outro lado (atacante bloqueado / primeira bloqueadora) */
+const XBLQ=/^(?:[A-Za-z ]+ — )?(?:When|Whenever) this (?:card|creature) (?:attacks or )?blocks(?: or becomes blocked)?(?: (?:a|by a) creature)?, ([^\n]+)$/im,XFBL=/^(?:[A-Za-z ]+ — )?(?:When|Whenever) this (?:card|creature) (?:blocks or )?becomes blocked(?: by (?:a|one or more) creatures?)?, ([^\n]+)$/im;
+function xBlqMeus(at){const e=X.eu,s=X.sala||{};for(const b of e.campo.filter(c=>c.bl&&at.some(q=>q.k===c.bl))){const a=at.find(q=>q.k===b.bl),m=xNorm(xInfo(b).tx||'',b.n).match(XBLQ);if(m)setTimeout(()=>xGatTx(b,m[1],'bloqueou',Object.assign({},xTc(a)||{},{tk:a.k,tku:s.vez})),300);}}
+function xBlqGat(){const B=xOpCampos().flatMap(([cp,u])=>cp.filter(c=>c.bl).map(c=>({c,u})));for(const a of X.eu.campo.filter(c=>c.atk)){const bs=B.filter(b=>b.c.bl===a.k);if(!bs.length)continue;const tx=xNorm(xInfo(a).tx||'',a.n),m=tx.match(XFBL)||(/blocks or becomes blocked/i.test(tx)?tx.match(XBLQ):null);if(m)setTimeout(()=>xGatTx(a,m[1],'foi bloqueada',Object.assign({},xTc(bs[0].c)||{},{tk:bs[0].c.k,tku:bs[0].u})),300);}}
 function xFrase(z,op,n){const top=op==='topo'?'no topo':'no fundo';
   if(op==='campo')return z==='mao'?`pôs ${n} no campo sem pagar`:z==='cmdz'?`pôs o comandante ${n} no campo sem pagar`:z==='bib'?`pôs ${n} do grimório no campo`:`pôs ${n} no campo`;
   if(op==='cem')return z==='mao'?'descartou '+n:z==='bib'?`pôs ${n} do grimório no cemitério`:`pôs ${n} no cemitério`;
@@ -7610,6 +7621,7 @@ function xBotao(a){const e=X.eu,s=X.sala||{},me=xUid();if(a==='atktodas')return 
     for(const q of at)if(xPT(q).kw.has('menace')&&e.campo.filter(c=>c.bl===q.k).length===1)return xAv(q.n+' tem ameaçar: precisa de 2 ou mais bloqueadores, ou nenhum.');
     const bs=e.campo.filter(c=>c.bl);xLog(bs.length?'bloqueou: '+bs.map(c=>`${c.n} → ${(at.find(q=>q.k===c.bl)||{}).n}`).join(', '):'não bloqueou');
     if((s.bq||[]).includes(me))return;if(at.some(q=>!e.campo.some(c=>c.bl===q.k)))for(const j of e.campo.filter(c=>/^Whenever one or more creatures an opponent controls attack you and aren't blocked, that player draws three cards and gains control of this artifact\. Untap it\.?$/im.test(xNorm(xInfo(c).tx,c.n)))){e.campo.splice(e.campo.indexOf(j),1);j.tap=0;xEvia({op:'fazPra',st:[{op:'compra',n:3}],nm:j.n,para:s.vez});xEvia({op:'recebe',c:JSON.parse(JSON.stringify(j)),dn:j.dono0||me,eot:0,desv:1,para:s.vez});xLog(`${j.n}: atacantes não bloqueados; ${xNomeU(s.vez)} compra 3 e pega ${j.n}`);xSobe();}
+    xBlqMeus(at);
     const bq=[...(s.bq||[]),me];s.bq=bq;xSala((s.def||[me]).every(u=>bq.includes(u)||xMorto(xPub(u)))?{cb:'dano',bq}:{bq:xAU(me)});return;}
   if(a==='dano'){if(!xVez()||s.cb!=='dano')return;return xDano();}
   if(a==='livre')return;
