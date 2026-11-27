@@ -891,6 +891,14 @@ P.append(("v.op==='daZ'", "  else if(v.op==='daV'){",
 """  else if(v.op==='daZ'){const cx={eu:xUid(),src:'',sv:{}},z=e[v.og]||[],M=z.filter(c=>{try{return fgValid(c,v.v,cx);}catch(er){return false;}});for(const c of M){z.splice(z.indexOf(c),1);xEvia({op:'recebe',c:JSON.parse(JSON.stringify(xReset(c))),dn:xUid(),para:v.pa});}if(M.length)xLog(`${v.nm} (${xNomeU(v.de)}): ${M.length} carta(s) sua(s) foram pro campo dele`);xSobe();xPintaEu();}
   else if(v.op==='daV'){""", 'troca'))
 
+# ---------- L78. BUG: "ponha todas ... no campo viradas" (ChangeZoneAll Tapped$ True) entravam desviradas ----------
+# Planar Birth, Aftermath Analyst, Hedge Shredder, Splendid Reclamation?, Brought Back?, Wake the Dead?...
+P.append(("/* zonas virada */", "  /* AtEOT em ficha/pump */",
+"""  /* zonas virada */if(api==='ChangeZoneAll'&&d.Tapped==='True'&&d.Destination==='Battlefield'&&!ctx.__tpz){ctx.__tpz=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__tpz;}return r.map(o=>o.op==='zonas'&&o.ds==='campo'?Object.assign({},o,{tap:1}):o);}
+""", 'antes'))
+P.append(("M.forEach(c=>{c.tap=v.tap?1:0;", "const M=v.emb?xEmb(L):L;if(v.ds==='campo')M.forEach(c=>{c.tap=0;e.campo.push(c);xEntrou(c);});",
+"const M=v.emb?xEmb(L):L;if(v.ds==='campo')M.forEach(c=>{c.tap=v.tap?1:0;e.campo.push(c);xEntrou(c);});", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
