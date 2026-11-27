@@ -1097,6 +1097,24 @@ P.append(("/* L97 alvo descarta */", "if(df!=='You'&&!/^You$/.test(d.Defined||''
 P.append(("Count\\$IfCastInOwnMainPhase", "  if(m=b.match(/^Targeted\\$Valid (.+)$/)){",
 """  if(m=b.match(/^Count\\$IfCastInOwnMainPhase\\.(\\d+)\\.(\\d+)$/)){const s0=X.sala||{};const ok=s0.vez===xUid()&&(s0.fase===1||s0.fase===3);return fgMods(+(ok?m[1]:m[2]),md);}
 """, 'antes'))
+# ---------- L98. BUG: alvo jogador NUNCA é perguntado (xPedeAlvos pula target player/opponent); o padrão do motor é o oponente em foco (xOutro), como o mill faz ----------
+# (a) descQ/exMaoV/TargetedPlayerCtrl sem P: no al usam xOutro. (b) "All" com ValidTgts Player/Opponent (= as cartas que aquele jogador controla) pegava TODO MUNDO, inclusive as suas:
+#     Overwhelming Forces, Behold the Power of Destruction, Ajani Vengeant -7, Primeval Light, Marsh Casualties, Sleep... agora ValidCards ganha +TargetedPlayerCtrl.
+# (c) Dig/DigUntil com ValidTgts Opponent e sem Defined mexia no SEU grimório (Mind Funeral, Thoughtpicker Witch): recusado.
+P.append(("if(t0&&((s.so==='P')!==t0.startsWith('P:')))break;if(!t0&&s.so==='C')break;", "      case 'descQ':{if(s.so){const t0=String(ult||(it.al||[])[0]||'');if((s.so==='P')!==t0.startsWith('P:'))break;}const u=xQuemJ(s.q,it,ult);",
+"      case 'descQ':{if(s.so){const t0=String(ult||(it.al||[])[0]||'');if(t0&&((s.so==='P')!==t0.startsWith('P:')))break;if(!t0&&s.so==='C')break;}const u=xQuemJ(s.q,it,ult)||(s.q==='alvo'&&s.so==='P'?xOutro():'');", 'troca'))
+P.append(("(t0?xDonoK(t0):xOutro())", "else{const t0=String(A.find(a=>a&&!String(a).startsWith('M#'))||'');u=t0.startsWith('P:')?t0.slice(2):(w==='TargetedPlayer'?'':(t0?xDonoK(t0):''));}",
+"else{const t0=String(A.find(a=>a&&!String(a).startsWith('M#'))||'');u=t0.startsWith('P:')?t0.slice(2):(w==='TargetedPlayer'?(t0?'':xOutro()):(t0?xDonoK(t0):xOutro()));}", 'troca'))
+P.append(("u=p0?String(p0).slice(2):xOutro();", "u=p0?String(p0).slice(2):(s.al==='target opponent'?xOutro():'');", "u=p0?String(p0).slice(2):xOutro();", 'troca'))
+P.append(("/* L98 All do jogador alvo */", "function fgPasso(d,api,ctx){if(d.Defined==='TargetedCard')d=Object.assign({},d,{Defined:'Targeted'});",
+"""function fgPasso(d,api,ctx){if(d.Defined==='TargetedCard')d=Object.assign({},d,{Defined:'Targeted'});/* L98 All do jogador alvo */if(/^(DestroyAll|PumpAll|TapAll|UntapAll|PutCounterAll|SacrificeAll|AnimateAll|ChangeZoneAll|DamageAll)$/.test(api)&&/^(Player|Opponent)$/.test(d.ValidTgts||'')&&!d.Defined&&d.ValidCards&&!/TargetedPlayerCtrl|ControlledBy|YouCtrl|OppCtrl/.test(d.ValidCards)&&!(api==='ChangeZoneAll'||api==='DamageAll'))d=Object.assign({},d,{ValidCards:String(d.ValidCards).split(',').map(x=>x.trim()+(x.includes('.')?'+':'.')+'TargetedPlayerCtrl').join(',')});""", 'troca'))
+
+P.append(("/Player|Opponent/.test(v.replace(/TargetedPlayerCtrl/g,''))", "if(!v||/Player|Opponent/.test(v)||!fgSpecOk(v,ctx))return nao('quais');return [{op:'mataV',v}];}",
+"if(!v||/Player|Opponent/.test(v.replace(/TargetedPlayerCtrl/g,''))||!fgSpecOk(v,ctx))return nao('quais');return [{op:'mataV',v}];}", 'troca'))
+P.append(("['P:'+xOutro()]", "{alA:it.al||[],tcA:it.tc||null}", "{alA:[...(it.al||[]),...((it.al||[]).some(a=>String(a).startsWith('P:'))?[]:['P:'+xOutro()])],tcA:it.tc||null}", 'troca'))
+P.append(("/* L98 grimório do oponente */", "  /* AtEOT em ficha/pump */",
+"""  /* L98 grimório do oponente */if(/^(Dig|DigUntil)$/.test(api)&&d.ValidTgts==='Opponent'&&!d.Defined&&!ctx.__dgo){ctx.__dgo=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__dgo;}if(r.some(o=>o.op!=='nao'&&!(o.al&&/opponent/.test(o.al))))return [{op:'nao',d:(d.SpellDescription||api)+' (grimório do oponente)'}];return r;}
+""", 'antes'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
