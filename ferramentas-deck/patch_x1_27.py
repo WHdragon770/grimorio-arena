@@ -536,6 +536,16 @@ P.append(("case 'danoCtl':", "      case 'sacrEsta':{",
 """      case 'danoCtl':{const a=(e.campo.find(q=>q.k===it.k)||{}).an,u=a&&xDonoK(a);if(!u){feito.push('não está anexada a nada');break;}if(u===me){e.vida-=n;feito.push(`${n} de dano em você`);break;}feito.push(`${n} de dano em ${xNomeU(u)}${xDanoF(it.k,'P:'+u,n,ev)}`);break;}
 """, 'antes'))
 
+# ---------- L46. Ganhe o controle de todas até o fim do turno, com habilidades (AllValid + LoseControl EOT + AddKWs) ----------
+# Insurrection, Rowan Fearless Sparkmage, Mob Rule, Act of Treason em massa...
+P.append(("/* pega todas até o fim do turno */", "    case 'GainControl':{if(d.AllValid&&(!d.NewController",
+"""    case 'GainControl':/* pega todas até o fim do turno */if(d.AllValid&&(!d.NewController||d.NewController==='You')&&d.LoseControl==='EOT'&&!al&&!d.Defined&&!Object.keys(d).some(k=>/^(Remember|Condition|Unless)/.test(k))&&fgSpecOk(d.AllValid,ctx)){const kw=(d.AddKWs||'').split(' & ').filter(Boolean);if(kw.every(k=>FGKW[k]))return [{op:'pegaTodos',v:d.AllValid,desv:d.Untap==='True'?1:0,eot:1,kws:kw.map(k=>FGKW[k])}];}
+""", 'antes'))
+P.append(("ev({op:'daV',v:s.v,pa:me,desv:s.desv,eot:s.eot,kws:s.kws},u)", "for(const u of L)ev({op:'daV',v:s.v,pa:me,desv:s.desv},u);",
+"for(const u of L)ev({op:'daV',v:s.v,pa:me,desv:s.desv,eot:s.eot,kws:s.kws},u);", 'troca'))
+P.append(("eot:v.eot?1:0,desv:v.desv,kws:v.kws,para:v.pa", "xEvia({op:'recebe',c:JSON.parse(JSON.stringify(c)),dn:c.dono0||xUid(),eot:0,desv:v.desv,para:v.pa});",
+"xEvia({op:'recebe',c:JSON.parse(JSON.stringify(c)),dn:c.dono0||xUid(),eot:v.eot?1:0,desv:v.desv,kws:v.kws,para:v.pa});", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
