@@ -990,6 +990,16 @@ P.append(("X.__tcA=it.tc||null;X.__alA=it.al||[];", "function xFaz(st,it,rest,nv
 P.append(("/ControlledBy|TargetedPlayerCtrl|DefenderCtrl/.test(", "const ev=(o,p)=>nv.push(Object.assign({id:xId(),de:me,para:p||'*'},o.op==='danoTodos'?{sn:it.nm||''}:{},o));",
 "const ev=(o,p)=>nv.push(Object.assign({id:xId(),de:me,para:p||'*'},o.op==='danoTodos'?{sn:it.nm||''}:{},/ControlledBy|TargetedPlayerCtrl|DefenderCtrl/.test(String(o.v||''))?{alA:it.al||[],tcA:it.tc||null}:{},o));", 'troca'))
 P.append(("if(v.alA)X.__alA=v.alA;", "function xEvAplica(v){const e=X.eu;", "function xEvAplica(v){const e=X.eu;if(v.alA)X.__alA=v.alA;if(v.tcA)X.__tcA=v.tcA;", 'troca'))
+# ---------- L88. Mais filtros que dependem do contexto e davam false: ExiledWithSource, sameName (mesmo nome do alvo), NotDefinedTargeted, TriggeredTarget, Attached, IsRemembered ----------
+# Bag of Holding, Induced Amnesia, Worldgorger Dragon; Bile Blight, Echoing Courage/Decay; Flames of the Raze-Boar, Nova Flame, Waltz of Rage; Eaten by Spiders, Blastfire Bolt; Rebellion of the Flamekin, Mardu Charm, Doors of Durin...
+P.append(("if(p==='ExiledWithSource')", "if(p==='StrictlyOther')return",
+"""if(p==='ExiledWithSource'){if(c.k==='__x')return true;const s0=ctx.src||(X.__itA||{}).k;return !!c.exS&&c.exS===s0;}
+  if(p==='sameName'||p==='NotDefinedTargeted'||p==='Attached'||p==='TriggeredTarget'){if(c.k==='__x')return true;const A=(X.__alA||[]).filter(a=>a&&!/^[PSM][:#]/.test(String(a))),t0=xAchaK(A[0]);
+    if(p==='sameName')return !!t0&&t0.n===c.n;if(p==='NotDefinedTargeted')return !A.includes(c.k);if(p==='Attached')return !!c.an&&(c.an===A[0]||c.an===ctx.src);return String(((ctx&&ctx.tc)||X.__tcA||{}).td||'')===c.k;}
+  if(p==='IsRemembered'&&X.__itA&&c.k!=='__x'){const L=X.__itA.lemb||[];return L.some(q=>q===c.k||(q&&q.k===c.k));}
+  if(p==='StrictlyOther')return""", 'troca'))
+P.append(("X.__itA=it;", "X.__tcA=it.tc||null;X.__alA=it.al||[];", "X.__tcA=it.tc||null;X.__alA=it.al||[];X.__itA=it;", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
