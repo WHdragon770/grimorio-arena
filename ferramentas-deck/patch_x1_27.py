@@ -683,6 +683,17 @@ P.append(("case 'pumpN':", "      case 'sacrEsta':{",
       case 'pumpTodosN':{const tn=(X.sala||{}).turno||0;let q=0;e.campo.filter(c=>xCri(c)&&(!s.v||fgValid(c,s.v,{eu:me,src:it.k,sv:{}}))).forEach(c=>{c.tpN=(c.tpN||0)+(s.p||0);c.ttN=(c.ttN||0)+(s.t||0);if(s.kw&&s.kw.length)c.ktN=[...new Set([...(c.ktN||[]),...s.kw])];c.ateU=me;c.ateT=tn;q++;});feito.push(`${q} criatura(s) suas ${s.p||s.t?(s.p>=0?'+':'')+s.p+'/'+(s.t>=0?'+':'')+s.t:''}${s.kw&&s.kw.length?' ganham '+s.kw.map(x=>KPT[x]||x).join(', '):''} até o seu próximo turno`);break;}
 """, 'antes'))
 
+# ---------- L61. BUG: "ganhe o controle enquanto esta estiver no campo" (LoseControl LeavesPlay) era controle pra sempre ----------
+# Mind Flayer, Vodalian Mindsinger, Roil Elemental, Old Man of the Sea?, Rubinia Soulsinger?, Merieke Ri Berit...
+P.append(("h:/LeavesPlay/.test(lc)?1:0,", "{const o={op:'controle',eot:lc==='EOT'?1:0,", "{const o={op:'controle',h:/LeavesPlay/.test(lc)?1:0,eot:lc==='EOT'?1:0,", 'troca'))
+P.append(("kws:s.kws,h:s.h?it.k:''},u)", "ev({op:'entrega',k:t,pa:me,eot:s.eot,desv:s.desv,kws:s.kws},u)", "ev({op:'entrega',k:t,pa:me,eot:s.eot,desv:s.desv,kws:s.kws,h:s.h?it.k:''},u)", 'troca'))
+P.append(("kws:v.kws,h:v.h||'',para:v.pa});", "xEvia({op:'recebe',c:JSON.parse(JSON.stringify(c)),dn:c.dono0||xUid(),eot:v.eot,desv:v.desv,kws:v.kws,para:v.pa});",
+"xEvia({op:'recebe',c:JSON.parse(JSON.stringify(c)),dn:c.dono0||xUid(),eot:v.eot,desv:v.desv,kws:v.kws,h:v.h||'',para:v.pa});", 'troca'))
+P.append(("if(v.h)c.ctlH=v.h;else delete c.ctlH;", "if(v.kws&&v.kws.length)c.kt=[...new Set([...(c.kt||[]),...v.kws])];X.eu.campo.push(c);",
+"if(v.kws&&v.kws.length)c.kt=[...new Set([...(c.kt||[]),...v.kws])];if(v.h)c.ctlH=v.h;else delete c.ctlH;X.eu.campo.push(c);", 'troca'))
+P.append(("q.ctlH===k&&q.dono0", "const e=X.eu;if(!e||!k||!e.exi.some(q=>q.exAte===k))return;",
+"const e=X.eu;if(e&&k&&!rem){for(const q of e.campo.filter(q=>q.ctlH===k&&q.dono0)){e.campo.splice(e.campo.indexOf(q),1);const u=q.dono0;delete q.ctlH;xEvia({op:'recebe',c:JSON.parse(JSON.stringify(q)),dn:u,para:u});xLog(`${q.n} voltou pro dono (a carta que tomou o controle saiu)`);}}if(!e||!k||!e.exi.some(q=>q.exAte===k))return;", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
