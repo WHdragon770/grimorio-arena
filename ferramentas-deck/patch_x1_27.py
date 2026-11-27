@@ -1115,6 +1115,17 @@ P.append(("['P:'+xOutro()]", "{alA:it.al||[],tcA:it.tc||null}", "{alA:[...(it.al
 P.append(("/* L98 grimório do oponente */", "  /* AtEOT em ficha/pump */",
 """  /* L98 grimório do oponente */if(/^(Dig|DigUntil)$/.test(api)&&d.ValidTgts==='Opponent'&&!d.Defined&&!ctx.__dgo){ctx.__dgo=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__dgo;}if(r.some(o=>o.op!=='nao'&&!(o.al&&/opponent/.test(o.al))))return [{op:'nao',d:(d.SpellDescription||api)+' (grimório do oponente)'}];return r;}
 """, 'antes'))
+# ---------- L99. BUG (família do L98): xQuemJ('alvo') sem nenhum alvo escolhido devolvia '' → "jogador alvo cria/perde/ganha/recebe veneno" não fazia nada:
+# Hunted Horror, Forbidden Orchard, Dark Salvation, Gravedig, Brigid's Command, Prismari Command, Hunted Dragon/Troll/Phantasm, Atlantis Attacks, veneno/vidaFixa no alvo... agora cai no oponente em foco ----------
+P.append(("if(q==='alvo'&&!(ult||(it.al||[]).some(", "if(t0)return (X.eu.campo.some(c=>c.k===t0)?me:(xDonoK(t0)||''));}return '';}",
+"if(t0)return (X.eu.campo.some(c=>c.k===t0)?me:(xDonoK(t0)||''));}if(q==='alvo'&&!(ult||(it.al||[]).some(a=>a&&!String(a).startsWith('M#'))))return xOutro();return '';}", 'troca'))
+
+# ficha com ValidTgts$ Player sem IsCurse ("jogador alvo cria", Brigid's/Prismari Command, Dark Salvation, Gravedig): o padrão é você (pe:1)
+P.append(("/* L99 ficha pra você */", "  /* AtEOT em ficha/pump */",
+"""  /* L99 ficha pra você */if(api==='Token'&&d.ValidTgts==='Player'&&!d.IsCurse&&!ctx.__tpe){ctx.__tpe=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__tpe;}r.forEach(o=>{if(o.op==='ficha'&&o.dq==='alvo')o.pe=1;});return r;}
+""", 'antes'))
+P.append(("[(s.pe&&!(it.al||[]).some(a=>String(a).startsWith('P:')))?me:", "s.dq==='ou'?[ou]:[xQuemJ(s.dq,it,ult)],nm=[];",
+"s.dq==='ou'?[ou]:[(s.pe&&!(it.al||[]).some(a=>String(a).startsWith('P:')))?me:xQuemJ(s.dq,it,ult)],nm=[];", 'troca'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
