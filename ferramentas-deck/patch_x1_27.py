@@ -860,6 +860,12 @@ P.append(("xFilV(v.v,v.de,c=>{if(xCri(c))xEfCarta(c,'dano',v.n);});else xTodosDa
 "xFilV(v.v,v.de,c=>{if(xCri(c))xEfCarta(c,'dano',v.n);});else xTodosDano(v.n);X.__dsn='';}else if(v.op==='danoTodos')v.v?xFilV(v.v,v.de,c=>{if(xCri(c))xEfCarta(c,'dano',v.n);})", 'troca'))
 P.append(("else if(v.op==='autoDano'){for(const c of e.campo.slice())if(xCri(c)){", "else if(v.op==='autoDano'){for(const c of e.campo.slice())if(xInfo(c).cri){", "else if(v.op==='autoDano'){for(const c of e.campo.slice())if(xCri(c)){", 'troca'))
 
+P.append(('return c?{p:xCri(c)?xPT(c).p:0,t:xCri(c)?xPT(c).t:0,', 'return c?{p:xInfo(c).cri?xPT(c).p:0,t:xInfo(c).cri?xPT(c).t:0,', 'return c?{p:xCri(c)?xPT(c).p:0,t:xCri(c)?xPT(c).t:0,', 'troca'))
+P.append(('it.exc=c&&xCri(c)?', 'it.exc=c&&i.cri?', 'it.exc=c&&xCri(c)?', 'troca'))
+P.append(("xFilV(s.v,me,c=>{if(xCri(c))xEfCarta(c,'dano',n);});", "xFilV(s.v,me,c=>{if(xInfo(c).cri)xEfCarta(c,'dano',n);});", "xFilV(s.v,me,c=>{if(xCri(c))xEfCarta(c,'dano',n);});", 'troca'))
+P.append(('const c0=xAchaK(t||it.k);if(c0&&xCri(c0)){const v0=xPT(c0);', 'const c0=xAchaK(t||it.k);if(c0&&xInfo(c0).cri){const v0=xPT(c0);', 'const c0=xAchaK(t||it.k);if(c0&&xCri(c0)){const v0=xPT(c0);', 'troca'))
+P.append(("else if(q.op==='rpPumpVen'){if(u===me){const v=e.ven||0;e.campo.forEach(c=>{if(xCri(c)){", "else if(q.op==='rpPumpVen'){if(u===me){const v=e.ven||0;e.campo.forEach(c=>{if(xInfo(c).cri){", "else if(q.op==='rpPumpVen'){if(u===me){const v=e.ven||0;e.campo.forEach(c=>{if(xCri(c)){", 'troca'))
+P.append(("case 'autoDano':{for(const c of e.campo.slice())if(xCri(c)){", "case 'autoDano':{for(const c of e.campo.slice())if(xInfo(c).cri){", "case 'autoDano':{for(const c of e.campo.slice())if(xCri(c)){", 'troca'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
