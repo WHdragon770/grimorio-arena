@@ -12,11 +12,11 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 3. Rode seu cob/tL1/mec e confira que nada caiu. Depois pode apagar este aviso e a pasta `ferramentas-deck/`.
 
 ## Números (medidor do Deck: todos os 34480 scripts do Forge, partes SP/AB/capítulo/gatilho sem op nao)
-- Antes (01d0d5e): 26629 (77.2%) · Agora: **27676 (80.3%)**, +1047 cartas
-- Cartas dos decks: 1342 → 1344 de 1378
+- Antes (01d0d5e): 26629 (77.2%) · Agora: **27684 (80.3%)**, +1055 cartas
+- Cartas dos decks: 1342 → 1346 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (31 seções do patch)
+## O que mudou (33 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -48,9 +48,13 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L29.** Contas: NMinus.K (K menos o número), Count$Random.A.B, conjurada do cemitério, vida e mão do jogador do gatilho (TriggeredTarget) (ex.: The Stone Brain, Lolth, Stroke of Luck, Flametongue Kavu Avatar, Rainbow Knights, Ashuza's Breath, Increasing Savagery, Secrets of the Key, Scytheclaw, Quietus Spike, Sword of War and Peace, Shimian Specter...)
 - **L30.** TriggeredSource = a criatura que causou o dano (o gatilho "uma criatura sua causa dano de combate a um jogador" passa tk), e Defined "A & Self" vira duas partes (ex.: Stensia, White Widow, Yelena Belova, Vraska Swarm's Eminence, Conclave Sledge-Captain, Necropolis Regent, Quilled Greatwurm, X-23, Juniper Order Ranger, Captain America, Alaborn Zealot, Loyal Sentry)
 - **L31.** Gatilhos de emblema/efeito "no começo da sua manutenção" e "da sua etapa final" (antes só conjurou e início do combate) (ex.: Liliana, the Last Hope, Kiora, the Crashing Wave, Ajani, Adversary of Tyrants, Chandra, Awakened Inferno, Chandra, Fire of Kaladesh, Teyo, Tezzeret, Artifice Master, Garruk, Unleashed...)
+- **L33.** Ficha com P/T = quantos X você controla (TokenScript ..._total_artifacts etc.): antes virava 0/0 e morria. c.tkD guarda o filtro, xPT soma na hora (ex.: Urza's Saga (Construct), Hallowed Haunting, Sai Master Thopterist? (gnome soldier), Ezuri's Predation?, Treefolk total_forests/lands, Sculpture...)
+- **L34.** "Ganha {T}: Add X" (habilidade de mana dada por Animate): vai pra gan.mn e o xGanI soma no mana da carta (ex.: Urza's Saga (capítulo I), e quem dá habilidade de mana simples de virar)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
 - O limite de terreno por turno era fixo em 1 (Azusa, Exploration, Oracle of Mul Daya não funcionavam): agora é `xTerMax()` (L19), que soma as estáticas "additional land(s) on each of your turns" e os efeitos "neste turno".
 - A criatura não perdia habilidade nunca: agora `c.kD` (L16) tira as palavras-chave até o fim do turno, dentro do xPT.
 - **Bug antigo corrigido (L21):** `Count$Compare Y GE1.A.B` com Y que só se sabe na hora (alvo, marcadores) escolhia sempre o "senão" calado (fgCmp em objeto). Agora vira `{q:'cmp'}` e o rv resolve na hora; os resultados também podem ser SVar.
+- **Bug antigo corrigido (L32):** gatilho de emblema guardava as contas da hora em que ganhou o emblema (Liliana, the Last Hope dava sempre 2 zumbis). Agora o emblema guarda o script (`g.re`) e reprocessa na hora que dispara.
+- **Bug antigo corrigido (L33):** ficha com P/T variável (`..._total_artifacts`, Construct do Urza's Saga, Spirit do Hallowed Haunting) virava 0/0 e morria. Agora `c.tkD` guarda o filtro e o xPT soma na hora; a info vai junto no `fichaD`.
