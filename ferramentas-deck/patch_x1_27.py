@@ -1207,6 +1207,20 @@ P.append(("function xSacrRes(v,", "function xFazDepois(st,it){",
 P.append(("else if(v.op==='sacrRes')xSacrRes(v);", "else if(v.op==='ghRes'){", "else if(v.op==='sacrRes')xSacrRes(v);else if(v.op==='ghRes'){", 'troca'))
 P.append(("if(n===0&&s.n!==1){feito.push('nenhuma ficha');break;}", "      case 'ficha':if(s.dq){", "      case 'ficha':if(n===0&&s.n!==1){feito.push('nenhuma ficha');break;}if(s.dq){", 'troca'))
 
+# ---------- L110. mesmo bug do L109 no descarte do oponente com lembrado: Hellhole Rats (dano = MV do descartado) dava 0; Mishra's Command, Every Dream a Nightmare, Barbed Shocker... O descOp do oponente responde sacrRes com o que descartou ----------
+P.append(("function xEspera(s,st,si,it,j,falta,u0)", "function xSacrRes(v,tudo){",
+"""function xEspera(s,st,si,it,j,falta,u0){if(!(s.rm&&si<st.length-1)||falta<1)return '';const id=Math.random().toString(36).slice(2,10);X.__sacW=X.__sacW||{};X.__sacW[id]={res:st.slice(si+1),it:Object.assign({},it,{al:(it.al||[]).slice(j),ult0:u0||''}),falta,cs:[]};return id;}
+function xResp(v,L){if(v.rsp&&v.de&&v.de!==xUid())xEvia({op:'sacrRes',id:v.rsp,cs:(L||[]).map(c=>({n:c.n,k:c.k})),para:v.de});}
+""", 'antes'))
+P.append(("xDescartou(L.length);}xResp(v,L);xSobe();xPintaEu();}", "L.forEach(c=>e.cem.push(c));if(L.length){xLog(`descartou ao acaso: ${L.map(c=>c.n).join(', ')} (${v.nm})`);xDescartou(L.length);}xSobe();xPintaEu();}",
+"L.forEach(c=>e.cem.push(c));if(L.length){xLog(`descartou ao acaso: ${L.map(c=>c.n).join(', ')} (${v.nm})`);xDescartou(L.length);}xResp(v,L);xSobe();xPintaEu();}", 'troca'))
+P.append(("xResp(v,xDescarta.ult);", "if(L.length){xLog(`descartou a mão: ${L.length} carta(s) (${v.nm})`);xDescartou(L.length);}}else setTimeout(()=>xDescarta(v.n,v.nm).then(()=>{xSobe();xPintaEu();}),300);}",
+"if(L.length){xLog(`descartou a mão: ${L.length} carta(s) (${v.nm})`);xDescartou(L.length);}xResp(v,L);}else setTimeout(()=>{xDescarta.ult=[];xDescarta(v.n,v.nm).then(()=>{xResp(v,xDescarta.ult);xSobe();xPintaEu();});},300);}", 'troca'))
+P.append(("const rsp=xEspera(s,st,si,it,j,q.length+", "q=s.quem==='td'?[td||xOutro()].filter(u=>u&&u!==me):os;for(const u of q)ev({op:'descOp',n,nm:it.nm},u);",
+"""q=s.quem==='td'?[td||xOutro()].filter(u=>u&&u!==me):os;const rsp=xEspera(s,st,si,it,j,q.length+(s.quem==='todos'?1:0),ult);for(const u of q)ev({op:'descOp',n,nm:it.nm,rsp},u);if(rsp){if(s.quem==='todos')setTimeout(async()=>{xDescarta.ult=[];await xDescarta(n,it.nm);xSacrRes({id:rsp,cs:(xDescarta.ult||[]).slice()});},300);feito.push(`${s.quem==='todos'?'cada jogador':q.length>1?'cada oponente':'o oponente'} descarta ${n>=99?'a mão':n} (o resto depois)`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}""", 'troca'))
+P.append(("const rsp=xEspera(s,st,si,it,j,1,ult);", "if(u!==me){ev({op:'descOp',n,nm:it.nm,rnd:s.rnd},u);feito.push(tx);break;}",
+"if(u!==me){const rsp=xEspera(s,st,si,it,j,1,ult);ev({op:'descOp',n,nm:it.nm,rnd:s.rnd,rsp},u);feito.push(tx);if(rsp){xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}break;}", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
