@@ -282,6 +282,31 @@ P.append(("case 'nRegen':", "      case 'sacrEsta':{",
 """      case 'nRegen':{const k=t||it.k;if(!k){feito.push('sem a criatura');break;}xNoAlvo(k,'nRegen',0,ev);feito.push(`${xAlvoNome(k)} não pode ser regenerada neste turno`);break;}
 """, 'antes'))
 
+# ---------- L21. Contas: Compare com lado que só se sabe na hora (antes escolhia o "senão" calado) e resultados que são SVar; alvo bate no filtro (Targeted$Valid); vida do jogador-alvo; vida inicial ----------
+# Bring Low, Ray of Enfeeblement, Lithomantic Barrage, Cut Propulsion, Twenty-Toed Toad, Blood Lust, Shatterskull Smashing, Crater's Claws, Blood Tribute, Oketra's Last Mercy...
+P.append(("(-?\\d+|[A-Za-z]\\w*)\\.(-?\\d+|[A-Za-z]\\w*)\\.(-?\\d+|[A-Za-z]\\w*)$/)){",
+"""else if(m=base.match(/^Count\\$Compare (\\w+) (GE|GT|LE|LT|EQ|NE)(\\d+)\\.(\\d+)\\.(\\d+)$/)){const a=fgConta(m[1],ctx,(fundo||0)+1);if(a==null)return null;n=fgCmp(a,m[2]+m[3])?+m[4]:+m[5];}""",
+"""else if(m=base.match(/^Count\\$Compare (\\w+) (GE|GT|LE|LT|EQ|NE)(-?\\d+|[A-Za-z]\\w*)\\.(-?\\d+|[A-Za-z]\\w*)\\.(-?\\d+|[A-Za-z]\\w*)$/)){const F=q=>{const r=/^-?\\d+$/.test(q)?+q:fgConta(q,ctx,(fundo||0)+1);return r==='X'?{q:'X'}:r;};const a=F(m[1]),c=F(m[3]),x=F(m[4]),y=F(m[5]);if([a,c,x,y].some(q=>q==null))return null;
+    if([a,c,x,y].every(q=>typeof q==='number'))n=fgCmp(a,m[2]+c)?x:y;else{if(fgMods(1,mods)==null)return null;return {q:'cmp',a,o:m[2],c,x,y,md:mods};}}""", 'troca'))
+P.append(("b.match(/^Targeted\\$Valid (.+)$/)", "  if(b==='Count$TopOfLibraryCMC')return {q:'topoMV',md};",
+"""  if(m=b.match(/^Targeted\\$Valid (.+)$/)){if(!fgSpecOk(m[1],ctx))return null;return {q:'tgV',v:m[1],md};}
+  if(b==='TargetedPlayer$LifeTotal')return {q:'tpVida',md};
+  if(b==='Count$YourStartingLife')return 20;
+""", 'antes'))
+P.append(("v.q==='cmp'?", ":v.q==='remV'?",
+""":v.q==='cmp'?(()=>{const a=rv(v.a),c=rv(v.c);return fgCmp(a,v.o+c)?rv(v.x):rv(v.y);})():v.q==='tgV'?(()=>{const c=(it.al||[]).map(k=>typeof k==='string'&&xAchaK(k)).find(Boolean);if(!c)return 0;try{return fgValid(c,v.v,{eu:xDonoK(c.k)||me,src:it.k||'',sv:{}})?1:0;}catch(er){return 0;}})():v.q==='tpVida'?(()=>{const P=(it.al||[]).find(a=>String(a).startsWith('P:'));if(!P)return 0;const u=P.slice(2);return u===xUid()?X.eu.vida:(((X.ops||{})[u]||{}).vida||0);})()""", 'antes'))
+
+# ---------- L22. Contas do turno: Landfall (terreno seu entrou neste turno) e "quantas X morreram neste turno" com filtro (lista xTT().morL) ----------
+# Rest for the Weary, Tomb Hex, Mysteries of the Deep, Liliana's Standard Bearer, Season of Loss, Body Count, Caller of the Claw, Gadrak, Ember-Fist/Floating-Dream/Dripping-Tongue Zubera
+P.append(("(xTT().morL=xTT().morL||[]).push({c,eu:1})", "if(i.cri){xTT().mor++;", "if(i.cri){xTT().mor++;(xTT().morL=xTT().morL||[]).push({c,eu:1});", 'troca'))
+P.append(("(xTT().morL=xTT().morL||[]).push({c:(()=>", "else if(v.op==='morreu'&&(xTT().mor++,1))",
+"else if(v.op==='morreu'&&(xTT().mor++,(xTT().morL=xTT().morL||[]).push({c:(()=>{try{return Object.assign(xCarta(v.n),{k:v.k,tok:v.tok});}catch(er){return {n:v.n,k:v.k,tok:v.tok};}})(),eu:0}),1))", 'troca'))
+P.append(("b.match(/^Count\\$Landfall\\.", "  if(b==='Count$TopOfLibraryCMC')return {q:'topoMV',md};",
+"""  if(m=b.match(/^Count\\$Landfall\\.(\\d+)\\.(\\d+)$/))return fgMods(xTT().ent.some(c=>xInfo(c).land)?+m[1]:+m[2],md);
+  if(m=b.match(/^Count\\$ThisTurnEntered_Graveyard_from_Battlefield_(.+)$/)){const v=m[1];if(/OppCtrl|Opp|Remembered|Targeted|Triggered|Chosen/.test(v))return null;const so=/YouCtrl|YouOwn/.test(v),v2=v.replace(/[.+](YouCtrl|YouOwn)\\b/g,'');if(!fgSpecOk(v2,ctx))return null;
+    const L=(xTT().morL||[]).filter(z=>!so||z.eu);return fgMods(L.filter(z=>{try{return fgValid(z.c,v2,ctx);}catch(er){return false;}}).length,md);}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
