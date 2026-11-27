@@ -485,6 +485,14 @@ P.append(("case 'viraOu':", "      case 'sacrEsta':{",
 """      case 'viraOu':{const k=t||(s.anx?'':it.k);const c=k&&xAchaK(k);if(!c){feito.push('sem o permanente');break;}const meu=e.campo.includes(c);const vr=XBOT?(meu?!!0:!c.tap):confirm(`${it.nm}: OK = virar ${c.n}, Cancelar = desvirar`);const op=vr?'vira':'desvira';feito.push(`${vr?'virou':'desvirou'} ${xAlvoNome(k)}`);xNoAlvo(k,op,0,ev);break;}
 """, 'antes'))
 
+# ---------- L39. "Seus terrenos/criaturas não desviram na próxima desvirada" (Effect + ReplacementEffect Untap CantHappen em X.YouCtrl) ----------
+# Bontu's Last Reckoning, Kefnet's Last Word, Rhonas's Last Stand, Hazoret's Undying Fury, Oketra's Last Mercy...
+P.append(("/* não desviram (todas as suas X) */", "/* não desvira: Untap CantHappen no lembrado */",
+"""/* não desviram (todas as suas X) */if(d.ReplacementEffects&&!d.Triggers&&!d.StaticAbilities&&!d.Abilities&&!d.RememberObjects&&!String(d.ReplacementEffects).includes(',')&&d.Duration==='UntilTheEndOfYourNextUntap'){const re=String((ctx.sv||{})[d.ReplacementEffects]||''),mv=re.match(/ValidCard\\$ ([A-Za-z]+\\.YouCtrl)\\b/);if(/^\\s*Event\\$ Untap\\b/.test(re)&&/Layer\\$ CantHappen/.test(re)&&mv&&fgSpecOk(mv[1],ctx))return [{op:'nDesvV',v:mv[1]}];}/* não desvira: Untap CantHappen no lembrado */""", 'troca'))
+P.append(("case 'nDesvV':", "      case 'sacrEsta':{",
+"""      case 'nDesvV':{const L=e.campo.filter(c=>{try{return fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}});L.forEach(c=>c.nd=1);feito.push(`${L.length} permanente${L.length===1?'':'s'} seu${L.length===1?'':'s'} (${s.v.replace('.YouCtrl','')}) não desvira${L.length===1?'':'m'} na próxima etapa de desvirar`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
