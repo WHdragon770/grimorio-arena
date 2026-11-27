@@ -899,10 +899,10 @@ P.append(("/* zonas virada */", "  /* AtEOT em ficha/pump */",
 P.append(("M.forEach(c=>{c.tap=v.tap?1:0;", "const M=v.emb?xEmb(L):L;if(v.ds==='campo')M.forEach(c=>{c.tap=0;e.campo.push(c);xEntrou(c);});",
 "const M=v.emb?xEmb(L):L;if(v.ds==='campo')M.forEach(c=>{c.tap=v.tap?1:0;e.campo.push(c);xEntrou(c);});", 'troca'))
 
-# ---------- L79. BUG: turno extra ignorava o número (NumTurns$ 2/X) e o jogador-alvo ----------
+# ---------- L79. BUG: turno extra ignorava o número (NumTurns$ 2/X), o jogador-alvo e o "você perde o jogo no fim dele" (Final Fortune, Last Chance) ----------
 # Time Stretch, Teferi Master of Time (ult), Ral Zarek (X por moedas)?, Sage of Hours (X), Stitch in Time...
 P.append(("case 'AddTurn':{", "    case 'AddTurn':return [{op:'extra'}];",
-"""    case 'AddTurn':{const n=d.NumTurns==null?1:N('NumTurns');if(n==null)return nao('número de turnos');if(al&&/^(Player|Opponent)$/.test(d.ValidTgts||''))return put({op:'extra',n,al},[]);if(d.Defined&&d.Defined!=='You')return nao('turno extra pra outro');return [{op:'extra',n}];}""", 'troca'))
+"""    case 'AddTurn':{if(d.ExtraTurnDelayedTrigger)return nao('turno extra com efeito no fim dele');const n=d.NumTurns==null?1:N('NumTurns');if(n==null)return nao('número de turnos');if(al&&/^(Player|Opponent)$/.test(d.ValidTgts||''))return put({op:'extra',n,al},[]);if(d.Defined&&d.Defined!=='You')return nao('turno extra pra outro');return [{op:'extra',n}];}""", 'troca'))
 P.append(("const ux=String(t||'').startsWith('P:')", "      case 'extra':{const sx=X.sala||{};xSala({ext:Object.assign({},sx.ext,{[me]:((sx.ext||{})[me]||0)+1})});feito.push('vai jogar um turno extra');break;}",
 """      case 'extra':{const ux=String(t||'').startsWith('P:')?String(t).slice(2):me,nn=typeof n==='number'?n:1;if(!(nn>0)){feito.push('nenhum turno extra');break;}const sx=X.sala||{};xSala({ext:Object.assign({},sx.ext,{[ux]:((sx.ext||{})[ux]||0)+nn})});feito.push(`${ux===me?'vai jogar':xNomeU(ux)+' vai jogar'} ${nn>1?nn+' turnos extras':'um turno extra'}`);break;}""", 'troca'))
 
