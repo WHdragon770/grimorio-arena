@@ -1158,6 +1158,11 @@ P.append(("(ult||(s.op==='dano'&&!(it.al||[]).some(", "s.si?(it.k||''):s.mesmo?u
 P.append(("if(c.corT&&(c.corT.perm||", "function fgCores(c){const b=c.tok&&!c.cp?new Set(c.cor?String(c.cor).split(''):[]):new Set(String(xInfo(c).custo||'').match(/[WUBRG]/g)||[]);",
 "function fgCores(c){const b=c.tok&&!c.cp?new Set(c.cor?String(c.cor).split(''):[]):new Set(String(xInfo(c).custo||'').match(/[WUBRG]/g)||[]);if(c.corT&&(c.corT.perm||c.corT.t===((X.sala||{}).turno||0))){const n=new Set(String(c.corT.cor).split('').filter(Boolean));if(c.corT.ow)return n;n.forEach(x=>b.add(x));}", 'troca'))
 P.append(("'stun','nd','trd','corT']", "'stun','nd','trd'].forEach(q=>delete c[q])", "'stun','nd','trd','corT'].forEach(q=>delete c[q])", 'troca'))
+# ---------- L103. Pump com alvo que dava [] (ex.: "+X/+X" com X=0 na hora de ler) também levava o alvo: agora sai pump +0/+0 no alvo, que segura o alvo pros passos seguintes ----------
+P.append(("/* L103 pump vazio segura o alvo */", "  /* AtEOT em ficha/pump */",
+"""  /* L103 pump vazio segura o alvo */if(api==='Pump'&&d.ValidTgts&&!ctx.__pz){ctx.__pz=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__pz;}if(!r.length){const A=fgAlvo(d);if(A&&A.al)return [Object.assign({op:'pump',al:A.al,p:0,t:0},A.v?{v:A.v}:{})];}return r;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
