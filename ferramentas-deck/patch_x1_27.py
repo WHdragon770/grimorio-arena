@@ -1257,6 +1257,22 @@ P.append(("const k0t=new Set(e.campo.map(c=>c.k));xTodos(", "      case 'todos':
 P.append(("it.rem=mm+xContaOpV(", "if(s.perde&&mm){e.vida-=mm;feito.push(`você perdeu ${mm} de vida`);}ev({op:'mataV',v:s.v,de:me,perde:s.perde||0,ni:s.ni||0});",
 "if(s.perde&&mm){e.vida-=mm;feito.push(`você perdeu ${mm} de vida`);}it.rem=mm+xContaOpV(c=>fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}}));delete it.lemb;ev({op:'mataV',v:s.v,de:me,perde:s.perde||0,ni:s.ni||0});", 'troca'))
 
+# ---------- L116. mais "quantos foram" perdidos: zonas (Whirlpool Drake, Mindmoil: embaralhe a mão e compre igual), saiV escolhido (Barrel Down Sokenzan, First Responder, Abdel Adrian), mataV com TargetedPlayerCtrl (Overwhelming Forces); e "vire quantas criaturas quiser" (Tap CardChoices AnyNumber) virava A PRÓPRIA CARTA: Harmony of Nature, Marshaling the Troops, Devout Invocation, Jaddi Lifestrider, Orphans of the Wheat, Urge to Feed ----------
+P.append(("{const zn=xZonas(s);if(typeof zn==='number'", "if(s.quem==='eu'||s.quem==='todos')xZonas(s);for(const u of q)ev(Object.assign({},s,{op:'zonas'}),u);",
+"if(s.quem==='eu'||s.quem==='todos'){const zn=xZonas(s);if(typeof zn==='number'){it.rem=zn;delete it.lemb;}}for(const u of q)ev(Object.assign({},s,{op:'zonas'}),u);", 'troca'))
+P.append(("vaiD=si<st.length-1?{res:st.slice(si+1),al2:(it.al||[]).slice(j)}:null,ms1=[];", "const nm=it.nm,src=it.k;feito.push(`${s.n||1} permanente(s) seu(s) vão ${ZN}`);setTimeout(async()=>{for(let q=0;q<(s.n||1);q++){",
+"const nm=it.nm,src=it.k,vaiD=si<st.length-1?{res:st.slice(si+1),al2:(it.al||[]).slice(j)}:null,ms1=[];feito.push(`${s.n||1} permanente(s) seu(s) vão ${ZN}${vaiD?' (o resto depois)':''}`);setTimeout(async()=>{for(let q=0;q<(s.n||1);q++){", 'troca'))
+P.append(("ms1.push(c);xSai(c,s.z);", "xSai(c,s.z);xLog(`${nm}: ${c.n} foi ${ZN}`);}xSobe();xPintaEu();},50);break;}",
+"ms1.push(c);xSai(c,s.z);xLog(`${nm}: ${c.n} foi ${ZN}`);}xSobe();xPintaEu();if(vaiD)xFazDepois(vaiD.res,Object.assign({},it,{al:vaiD.al2,rem:ms1.length,lemb:ms1}));},50);if(vaiD){xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}break;}", 'troca'))
+P.append(("const alS=X.__alA;if(!(alS||[]).some(", "it.rem=mm+xContaOpV(c=>fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}}));",
+"{const alS=X.__alA;if(!(alS||[]).some(a=>String(a).startsWith('P:')))X.__alA=[...(alS||[]),'P:'+ou];it.rem=mm+xContaOpV(c=>fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}}));X.__alA=alS;}", 'troca'))
+P.append(("/* L116 vire quantas quiser */", "  /* AtEOT em ficha/pump */",
+"""  /* L116 vire quantas quiser */if(api==='Tap'&&d.CardChoices&&!d.ValidTgts){if(d.AnyNumber!=='True'||!/(^|[.+])YouCtrl\\b/.test(d.CardChoices)||/[^\\w.+,!]/.test(d.CardChoices))return [{op:'nao',d:'virar escolhidas'}];return [{op:'viraEsc',v:d.CardChoices}];}
+""", 'antes'))
+P.append(("case 'viraEsc':", "      case 'sacrEsta':{",
+"""      case 'viraEsc':{const L=e.campo.filter(c=>!c.tap&&(()=>{try{return fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}})()),res=st.slice(si+1),al2=(it.al||[]).slice(j);setTimeout(async()=>{let ks=L.map(c=>c.k);if(!XBOT&&L.length){ks=await xMarca(`${it.nm}: vire quantas quiser`,L.map(c=>({k:c.k,rot:c.n})),0,L.length)||[];}const M=L.filter(c=>ks.includes(c.k));M.forEach(c=>{c.tap=1;});xLog(`${it.nm}: virou ${M.length} (${M.map(c=>c.n).join(', ')||'nenhuma'})`);xSobe();xPintaEu();if(res.length)xFazDepois(res,Object.assign({},it,{al:al2,rem:M.length,lemb:M}));},300);feito.push('vire quantas criaturas quiser');xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
