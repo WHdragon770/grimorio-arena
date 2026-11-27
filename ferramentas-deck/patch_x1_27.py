@@ -778,6 +778,14 @@ P.append(("case 'descQ':", "      case 'sacrEsta':{",
 P.append(("v.op==='descOp'&&v.rnd", "  else if(v.op==='descOp'){if(v.n>=99){",
 "  else if(v.op==='descOp'&&v.rnd){const L=[];for(let q=0;q<v.n&&e.mao.length;q++)L.push(...e.mao.splice(Math.floor(Math.random()*e.mao.length),1));L.forEach(c=>e.cem.push(c));if(L.length){xLog(`descartou ao acaso: ${L.map(c=>c.n).join(', ')} (${v.nm})`);xDescartou(L.length);}xSobe();xPintaEu();}\n  else if(v.op==='descOp'){if(v.n>=99){", 'troca'))
 
+# ---------- L69. Comprar: cada oponente (Opponent/Player.Opponent/Player.Other), o jogador-alvo de antes (TargetedPlayer), "você e o do gatilho" ----------
+# Words of Wisdom, Archival Whorl, Valiant Batrider, Cut a Deal, Clockwork Fox, Master of the Feast, Memory Worm, Diviner Spirit, Black Widow, Tenuous Truce...
+P.append(("op:'compraOps'", "if(df!=='You'&&!al)return nao('quem compra');",
+"""if(!al&&/^(Opponent|Player\\.Opponent|Player\\.Other)$/.test(df))return [{op:'compraOps',n}];if(!al&&df==='TargetedPlayer')return [{op:'compraQ',n,q:'alvo'}];{const m2=df.match(/^(?:You & (Triggered\\w+)|(Triggered\\w+) & You)$/);const q2=m2&&fgQuemJ(m2[1]||m2[2]);if(!al&&q2&&q2!=='alvo')return [{op:'compra',n,quem:'eu'},{op:'compraQ',n,q:q2}];}if(df!=='You'&&!al)return nao('quem compra');""", 'troca'))
+P.append(("case 'compraOps':", "      case 'sacrEsta':{",
+"""      case 'compraOps':ev({op:'compra',n});feito.push(`cada oponente comprou ${n}`);break;
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
