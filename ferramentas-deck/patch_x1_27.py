@@ -559,6 +559,17 @@ P.append(("xEmbDispara('entra',c);", "function xEntrou(c){if(!X.eu.campo.include
 P.append(("xEmbDispara('morre',c);", "(xTT().morL=xTT().morL||[]).push({c,eu:1});", "(xTT().morL=xTT().morL||[]).push({c,eu:1});xEmbDispara('morre',c);", 'troca'))
 P.append(("xEmbDispara('ataca',c);", "    const tx=xAtqTx(c);if(!tx)continue;let al=[];", "    xEmbDispara('ataca',c);const tx=xAtqTx(c);if(!tx)continue;let al=[];", 'troca'))
 
+# ---------- L48. Sacrificar / veneno pelo jogador do gatilho (TriggeredTarget, TriggeredCardController, TriggeredAttackerController...) ----------
+# Demon of Loathing, Killmonger, Destructive Urge, Burning Sands, Funeral March, Necrogen Rotpriest, Marsh Viper, Pit Scorpion...
+P.append(("op:'sacrQ'", "if(df==='TriggeredPlayer'&&fgSpecOk(d.SacValid||'Permanent',ctx))return [{op:'sacrTP',n,v:d.SacValid||'Permanent'}];return nao('quem sacrifica');}",
+"if(df==='TriggeredPlayer'&&fgSpecOk(d.SacValid||'Permanent',ctx))return [{op:'sacrTP',n,v:d.SacValid||'Permanent'}];{const q=fgQuemJ(df);if(q&&q!=='alvo'&&!al&&!Object.keys(d).some(k=>/^(Unless|Remember|Condition)/.test(k))&&fgSpecOk(d.SacValid||'Permanent',ctx))return [{op:'sacrQ',n,v:d.SacValid||'Permanent',q}];}return nao('quem sacrifica');}", 'troca'))
+P.append(("op:'venQ'", "if(al==='target player'||al==='target opponent')return [{op:'veneno',n,quem:'alvo'}];return nao('quem');}",
+"if(al==='target player'||al==='target opponent')return [{op:'veneno',n,quem:'alvo'}];{const q=fgQuemJ(df);if(q&&q!=='alvo'&&!al)return [{op:'venQ',n,q}];}return nao('quem');}", 'troca'))
+P.append(("case 'sacrQ':", "      case 'sacrEsta':{",
+"""      case 'sacrQ':{const u=xQuemJ(s.q,it,ult);if(!u){feito.push('sem jogador pra sacrificar');break;}const o={op:'sacr',n,tipo:'v',v:s.v,nm:it.nm};if(u===me)xSacr(o);else ev(o,u);feito.push(`${u===me?'você':xNomeU(u)} sacrifica ${n} (${s.v})`);break;}
+      case 'venQ':{const u=xQuemJ(s.q,it,ult);if(!u){feito.push('sem jogador pro veneno');break;}if(u===me)e.ven=(e.ven||0)+n;else ev({op:'ven',n},u);feito.push(`${u===me?'você':xNomeU(u)} recebe ${n} marcador(es) de veneno`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
