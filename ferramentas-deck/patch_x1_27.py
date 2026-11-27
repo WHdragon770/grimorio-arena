@@ -1126,6 +1126,22 @@ P.append(("/* L99 ficha pra você */", "  /* AtEOT em ficha/pump */",
 """, 'antes'))
 P.append(("[(s.pe&&!(it.al||[]).some(a=>String(a).startsWith('P:')))?me:", "s.dq==='ou'?[ou]:[xQuemJ(s.dq,it,ult)],nm=[];",
 "s.dq==='ou'?[ou]:[(s.pe&&!(it.al||[]).some(a=>String(a).startsWith('P:')))?me:xQuemJ(s.dq,it,ult)],nm=[];", 'troca'))
+# ---------- L100. custo opcional "pague N de energia: quando fizer, ..." (ImmediateTrigger Cost$ PayEnergy<N>): Riddle Gate Gargoyle, Filigree Racer, Guide of Souls... ----------
+P.append(("if(m=uc.match(/^PayEnergy<(\\d+)>$/))", "  if(m=uc.match(/^Mill<(\\d+)>$/))return {t:'mill',n:+m[1]};return null;}",
+"  if(m=uc.match(/^Mill<(\\d+)>$/))return {t:'mill',n:+m[1]};if(m=uc.match(/^PayEnergy<(\\d+)>$/))return +m[1]>0?{t:'energia',n:+m[1]}:null;return null;}", 'troca'))
+P.append(("C=(K.t==='descR'||K.t==='mill'||K.t==='energia')?[]:", "const Z=K.t==='desc'?e.mao:K.t==='exiCem'?e.cem:e.campo,C=(K.t==='descR'||K.t==='mill')?[]:",
+"const Z=K.t==='desc'?e.mao:K.t==='exiCem'?e.cem:e.campo,C=(K.t==='descR'||K.t==='mill'||K.t==='energia')?[]:", 'troca'))
+P.append(("const pode=K.t==='energia'?", "const pode=K.t==='mill'?e.bib.length>=K.n:", "const pode=K.t==='energia'?((e.pc||{}).energy||0)>=K.n:K.t==='mill'?e.bib.length>=K.n:", 'troca'))
+P.append(("mill:'moer',energia:'pagar energia:'}", "exiCem:'exilar do cemitério',mill:'moer'}[K.t]", "exiCem:'exilar do cemitério',mill:'moer',energia:'pagar energia:'}[K.t]", 'troca'))
+P.append(("else if(K.t==='energia'){e.pc=", "else if(K.t==='descR'){for(let q=0;q<K.n&&e.mao.length;q++)",
+"else if(K.t==='energia'){e.pc=Object.assign({},e.pc,{energy:((e.pc||{}).energy||0)-K.n});}else if(K.t==='descR'){for(let q=0;q<K.n&&e.mao.length;q++)", 'troca'))
+
+# ---------- L101. BUG (só contra o bot): XBOT é a string "1", então pode/quer = "1" e o (quer===!!s.sw) dava false: o bot PAGAVA o custo e o efeito NÃO acontecia (pagaK e pagaOu de descarte) ----------
+P.append(("pode=!!(e.mao.length>0&&(XBOT||confirm(", "pode=e.mao.length>0&&(XBOT||confirm(`${it.nm}: descartar uma carta? (se não, ${s.sw?'o efeito não acontece':'acontece o efeito'})`));",
+"pode=!!(e.mao.length>0&&(XBOT||confirm(`${it.nm}: descartar uma carta? (se não, ${s.sw?'o efeito não acontece':'acontece o efeito'})`)));", 'troca'))
+P.append(("const quer=!!(pode&&(XBOT||confirm(", "const quer=pode&&(XBOT||confirm(`${it.nm}: ${rot}? (se não, ${s.sw?'o efeito não acontece':'acontece o efeito'})`));",
+"const quer=!!(pode&&(XBOT||confirm(`${it.nm}: ${rot}? (se não, ${s.sw?'o efeito não acontece':'acontece o efeito'})`)));", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
