@@ -427,6 +427,30 @@ P.append(("let ops=g.ops;if(g.re)", "function xGatEmb(em,g,c){const al=await xPe
 "function xGatEmb(em,g,c){let ops=g.ops;if(g.re){try{const r=fgCadeia(g.re.d,g.re.api,{eu:xUid(),src:'',sv:g.re.sv||{}});if(!r.some(o=>o.op==='nao'))ops=r;}catch(er){}}const al=await xPedeAlvos(ops,em.nm,'');", 'troca'))
 P.append(("nm:em.nm,img:'',k:'',al,ops}", "nm:em.nm,img:'',k:'',al,ops:g.ops}", "nm:em.nm,img:'',k:'',al,ops}", 'troca'))
 
+# ---------- L33. Ficha com P/T = quantos X você controla (TokenScript ..._total_artifacts etc.): antes virava 0/0 e morria. c.tkD guarda o filtro, xPT soma na hora ----------
+# Urza's Saga (Construct), Hallowed Haunting, Sai Master Thopterist? (gnome soldier), Ezuri's Predation?, Treefolk total_forests/lands, Sculpture...
+P.append(("/* ficha com P/T = quantos X */", "function fgFicha(ts,n){const o=[];for(const t of ts.split(',')){",
+"""function fgFicha(ts,n){const o=[];for(const t of ts.split(',')){/* ficha com P/T = quantos X */{const p=t.split('_'),it=p.indexOf('total');if(p.length>=5&&it>3&&it<p.length-1&&/^(\\d+|x)$/.test(p[1])&&/^(\\d+|x)$/.test(p[2])){const tipos=p.slice(it+1).map(w=>w.replace(/s$/,'')).map(w=>w[0].toUpperCase()+w.slice(1)).join(',');const r=fgFicha([p[0],p[1]==='x'?'0':p[1],p[2]==='x'?'0':p[2],...p.slice(3,it)].join('_'),n);if(r&&r.length===1){r[0].tkD=tipos;o.push(r[0]);continue;}}}""", 'troca'))
+P.append(("function xFicha(n,p,t,kw,art,mana,q,quieto,xx){", "function xFicha(n,p,t,kw,art,mana,q,quieto){", "function xFicha(n,p,t,kw,art,mana,q,quieto,xx){", 'troca'))
+P.append(("sk:p==null?0:1,...(xx&&xx.tkD?{tkD:xx.tkD}:{})}", "mana:mana?1:0,sk:p==null?0:1});e.campo.push(...nov);", "mana:mana?1:0,sk:p==null?0:1,...(xx&&xx.tkD?{tkD:xx.tkD}:{})});e.campo.push(...nov);", 'troca'))
+P.append(("if(u===me){xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1,s);", "if(u===me){xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1);", "if(u===me){xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1,s);", 'troca'))
+P.append(("ficha saiu');break;}\n        xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1,s);", "ficha saiu');break;}\n        xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1);", "ficha saiu');break;}\n        xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1,s);", 'troca'))
+P.append(("else ev({op:'fichaD',nome:s.nome,p:s.p,t:s.t,kw:s.kw,art:s.art,mana:s.mana,n,tkD:s.tkD}", "else ev({op:'fichaD',nome:s.nome,p:s.p,t:s.t,kw:s.kw,art:s.art,mana:s.mana,n}", "else ev({op:'fichaD',nome:s.nome,p:s.p,t:s.t,kw:s.kw,art:s.art,mana:s.mana,n,tkD:s.tkD}", 'troca'))
+P.append(("L0.u!==me){ev({op:'fichaD',nome:s.nome,p:s.p,t:s.t,kw:s.kw,art:s.art,mana:s.mana,n,tkD:s.tkD}", "L0.u!==me){ev({op:'fichaD',nome:s.nome,p:s.p,t:s.t,kw:s.kw,art:s.art,mana:s.mana,n}", "L0.u!==me){ev({op:'fichaD',nome:s.nome,p:s.p,t:s.t,kw:s.kw,art:s.art,mana:s.mana,n,tkD:s.tkD}", 'troca'))
+P.append(("xFicha(v.nome,v.p,v.t,v.kw,v.art,v.mana,v.n,1,v)", "v.op==='fichaD')xFicha(v.nome,v.p,v.t,v.kw,v.art,v.mana,v.n,1);", "v.op==='fichaD')xFicha(v.nome,v.p,v.t,v.kw,v.art,v.mana,v.n,1,v);", 'troca'))
+P.append(("if(c.tkD){const L=xLadoCampo(c)", "  if(c.sspt){kw.add('menace');kw.add('nbloq');}",
+"  if(c.tkD){const L=xLadoCampo(c)||[],q=L.filter(l=>{try{return fgValid(l,c.tkD,{eu:'',src:'',sv:{}});}catch(er){return false;}}).length;p+=q;t+=q;}\n", 'antes'))
+
+# ---------- L34. "Ganha {T}: Add X" (habilidade de mana dada por Animate): vai pra gan.mn e o xGanI soma no mana da carta ----------
+# Urza's Saga (capítulo I), e quem dá habilidade de mana simples de virar
+P.append(("T=[],A=[],tx=[],MN=[],TM=", "const sv=ctx.sv||{},T=[],A=[],tx=[],TM=", "const sv=ctx.sv||{},T=[],A=[],tx=[],MN=[],TM=", 'troca'))
+P.append(("/* mana dada */", "for(const nm of String(d.Abilities||'').split(',').map(x=>x.trim()).filter(Boolean)){const q=fgPP(sv[nm]||'');if(q.k!=='AB'||!q.api||q.api==='Mana'",
+"for(const nm of String(d.Abilities||'').split(',').map(x=>x.trim()).filter(Boolean)){const q=fgPP(sv[nm]||'');/* mana dada */if(q.k==='AB'&&q.api==='Mana'&&String(q.d.Cost||'').trim()==='T'&&/^[WUBRGC]+$/.test(q.d.Produced||'')&&/^\\d*$/.test(q.d.Amount||'')&&Object.keys(q.d).every(k=>/^(AB|Cost|Produced|Amount|SpellDescription)$/.test(k))){MN.push(q.d.Produced.repeat(+(q.d.Amount||1)));tx.push(fgDescr(q.d,sv));continue;}if(q.k!=='AB'||!q.api||q.api==='Mana'", 'troca'))
+P.append(("[...T.concat(A,MN).join('§')]", "const gan={id:'g'+[...T.concat(A).join('§')]", "const gan={id:'g'+[...T.concat(A,MN).join('§')]", 'troca'))
+P.append(("T,A,sv:vs,mn:MN}", "tx:tx.join('\\n'),T,A,sv:vs}", "tx:tx.join('\\n'),T,A,sv:vs,mn:MN}", 'troca'))
+P.append(("g.mn&&g.mn.length?", "o=Object.assign({},o0,{tx:(o0.tx?o0.tx+'\\n':'')+g.tx.replace(/CARDNAME|NICKNAME/g,c.n)});",
+"o=Object.assign({},o0,{tx:(o0.tx?o0.tx+'\\n':'')+g.tx.replace(/CARDNAME|NICKNAME/g,c.n)},g.mn&&g.mn.length?{mana:[...new Set([...(o0.mana||[]),...g.mn])]}:{});", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
