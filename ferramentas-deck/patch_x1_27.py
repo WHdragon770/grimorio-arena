@@ -668,6 +668,21 @@ P.append(("case 'fimF':", "      case 'sacrEsta':{",
 
 P.append(("q.desF);", "xLog(`fim do turno: sacrificou ${sf.length} ficha(s) temporária(s)`);xVarre();}",
 "xLog(`fim do turno: sacrificou ${sf.length} ficha(s) temporária(s)`);xVarre();}{const df=e.campo.filter(q=>q.desF);if(df.length){df.forEach(q=>{delete q.desF;xEfCarta(q,'destroi',0);});xLog(`fim do turno: destruiu ${df.map(q=>q.n).join(', ')}`);xVarre();}}", 'troca'))
+# ---------- L60. BUG: Pump/PumpAll "até o seu próximo turno" (Duration UntilYourNextTurn) acabava no fim do turno ----------
+# Liliana the Last Hope, Blue Dragon, Wasp Shrinking Savior, Rootwise Survivor?, For the Common Good, Karvanista, Mouth of the Storm...
+P.append(("/* até o seu próximo turno */", "  /* AtEOT em ficha/pump */",
+"""  /* até o seu próximo turno */if((api==='Pump'||api==='PumpAll')&&d.Duration==='UntilYourNextTurn'){const d2=Object.assign({},d);delete d2.Duration;const r=fgPasso0(d2,api,ctx);
+    if(r.length&&r.every(o=>o.op==='pump'&&!o.dbl||o.op==='kt'||o.op==='pumpTodos'&&!o.dbl&&!o.todasP))return r.map(o=>Object.assign({},o,{op:o.op==='pump'?'pumpN':o.op==='kt'?'ktN':'pumpTodosN'}));}
+""", 'antes'))
+P.append(("else if(op==='pumpN'){", "else if(op==='pumpProx'){c.tpN=(c.tpN||0)+x.p;c.ateU=x.u;c.ateT=x.tn;}",
+"else if(op==='pumpProx'){c.tpN=(c.tpN||0)+x.p;c.ateU=x.u;c.ateT=x.tn;}else if(op==='pumpN'){c.tpN=(c.tpN||0)+(x.p||0);c.ttN=(c.ttN||0)+(x.t||0);c.ateU=x.u;c.ateT=x.tn;}else if(op==='ktN'){c.ktN=[...new Set([...(c.ktN||[]),...(x.kws||[])])];c.ateU=x.u;c.ateT=x.tn;}", 'troca'))
+P.append(("+(c.tt||0)+(c.ttN||0)+(c.pT||0)", "+(c.cnt||0)+(c.tt||0)+(c.pT||0)", "+(c.cnt||0)+(c.tt||0)+(c.ttN||0)+(c.pT||0)", 'troca'))
+P.append(("c.tpN=0;c.ttN=0;", "c.tpN=0;c.naN=0;c.ateU='';c.gd='';c.ktN=null;", "c.tpN=0;c.ttN=0;c.naN=0;c.ateU='';c.gd='';c.ktN=null;", 'troca'))
+P.append(("case 'pumpN':", "      case 'sacrEsta':{",
+"""      case 'pumpN':case 'ktN':{const k=t||it.k;if(!k){feito.push('sem alvo');break;}const tn=(X.sala||{}).turno||0;if(s.op==='pumpN')xNoAlvo(k,'pumpN',0,ev,{p:s.p,t:s.t,u:me,tn});else xNoAlvo(k,'ktN',0,ev,{kws:s.kws||[s.kw],u:me,tn});feito.push(`${xAlvoNome(k)} ${s.op==='pumpN'?(s.p>=0?'+':'')+s.p+'/'+(s.t>=0?'+':'')+s.t:'ganha '+(s.kws||[s.kw]).map(x=>KPT[x]||x).join(', ')} até o seu próximo turno`);break;}
+      case 'pumpTodosN':{const tn=(X.sala||{}).turno||0;let q=0;e.campo.filter(c=>xCri(c)&&(!s.v||fgValid(c,s.v,{eu:me,src:it.k,sv:{}}))).forEach(c=>{c.tpN=(c.tpN||0)+(s.p||0);c.ttN=(c.ttN||0)+(s.t||0);if(s.kw&&s.kw.length)c.ktN=[...new Set([...(c.ktN||[]),...s.kw])];c.ateU=me;c.ateT=tn;q++;});feito.push(`${q} criatura(s) suas ${s.p||s.t?(s.p>=0?'+':'')+s.p+'/'+(s.t>=0?'+':'')+s.t:''}${s.kw&&s.kw.length?' ganham '+s.kw.map(x=>KPT[x]||x).join(', '):''} até o seu próximo turno`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
