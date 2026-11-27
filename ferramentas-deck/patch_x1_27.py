@@ -1241,6 +1241,22 @@ P.append(("const ml=[];for(let q=0;q<v.n&&e.bib.length;q++){const c=e.bib.shift(
 P.append(("const rsp=xEspera(s,st,si,it,j,1,'P:'+(ua||ou));", "if(s.quem==='op'||ua&&ua!==me)ev({op:'mill',n},ua||ou);}",
 "if(s.quem==='op'||ua&&ua!==me){const rsp=xEspera(s,st,si,it,j,1,'P:'+(ua||ou));ev({op:'mill',n,rsp},ua||ou);if(rsp){feito.push(`${xNomeU(ua||ou)} mói ${n}`);xLog(`${it.nm} resolveu: ${feito.join(' · ')} (o resto depois)`);return rest;}}}", 'troca'))
 
+# ---------- L115. BUG: "o que voltou/foi destruído" não era lembrado: Reanimate perdia 0 de vida, Mirkwood Elk ganhava 0, Fumigate/Righteous Fury ganhavam 0, Death Begets Life comprava 0 ----------
+# doCemAlvo: o xDoCem devolve as cartas e o resto continua com lemb; todos/mataV: it.rem = destruídas suas + as do oponente que batem (pela visão do campo dele; não desconta indestrutível)
+P.append(("const ms0=[];for(let q=0;q<(s.n||1)&&L.length;q++){", "if(!L.length)return xLog(`${nm}: nada no cemitério pra voltar`);\n  for(let q=0;q<(s.n||1)&&L.length;q++){",
+"if(!L.length){xLog(`${nm}: nada no cemitério pra voltar`);return [];}\n  const ms0=[];for(let q=0;q<(s.n||1)&&L.length;q++){", 'troca'))
+P.append(("ms0.push(c);xLog(`${c.n} voltou do cemitério", "else e.mao.push(c);xLog(`${c.n} voltou do cemitério (${nm})`);}\n  xSobe();xTudo();}",
+"else e.mao.push(c);ms0.push(c);xLog(`${c.n} voltou do cemitério (${nm})`);}\n  xSobe();xTudo();return ms0;}", 'troca'))
+P.append(("if(si<st.length-1){const res=st.slice(si+1),al2=(it.al||[]).slice(j);setTimeout(async()=>{const ms=(await xDoCem(s2,it.nm))||[];", "      case 'doCemAlvo':{const s2=s.cnt!=null?Object.assign({},s,{cnt:+rv(s.cnt)||0}):s;setTimeout(()=>xDoCem(s2,it.nm),300);}",
+"      case 'doCemAlvo':{const s2=s.cnt!=null?Object.assign({},s,{cnt:+rv(s.cnt)||0}):s;if(si<st.length-1){const res=st.slice(si+1),al2=(it.al||[]).slice(j);setTimeout(async()=>{const ms=(await xDoCem(s2,it.nm))||[];xFazDepois(res,Object.assign({},it,{al:al2,lemb:ms,rem:ms.length}));},300);feito.push(`volta ${n} do cemitério pr${s.dest==='campo'?'o campo':'a mão'} (o resto depois)`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}setTimeout(()=>xDoCem(s2,it.nm),300);}", 'troca'))
+P.append(("function xContaOpV(", "function xSacrRes(v,tudo){",
+"""function xContaOpV(f){let n=0;for(const u of Object.keys(X.ops||{}))for(const c of ((X.ops[u]||{}).campo||[])){try{if(f(c,u))n++;}catch(er){}}return n;}
+""", 'antes'))
+P.append(("const k0t=new Set(e.campo.map(c=>c.k));xTodos(", "      case 'todos':xTodos(s.tipo,s.nr);ev({op:'todos',tipo:s.tipo,nr:s.nr?1:0});",
+"""      case 'todos':{const k0t=new Set(e.campo.map(c=>c.k));xTodos(s.tipo,s.nr);const mi=[...k0t].filter(k=>!e.campo.some(c=>c.k===k)).length,ok=c=>{const i=xInfo(c),tp=i.tipo||'';return s.tipo==='creatures'?xCri(c):s.tipo==='artifacts'?/Artifact/.test(tp)||!!c.art:s.tipo==='enchantments'?/Enchantment/.test(tp):s.tipo==='lands'?!!i.land:s.tipo==='planeswalkers'?!!i.pw:!i.land;};it.rem=mi+xContaOpV(ok);delete it.lemb;}ev({op:'todos',tipo:s.tipo,nr:s.nr?1:0});""", 'troca'))
+P.append(("it.rem=mm+xContaOpV(", "if(s.perde&&mm){e.vida-=mm;feito.push(`você perdeu ${mm} de vida`);}ev({op:'mataV',v:s.v,de:me,perde:s.perde||0,ni:s.ni||0});",
+"if(s.perde&&mm){e.vida-=mm;feito.push(`você perdeu ${mm} de vida`);}it.rem=mm+xContaOpV(c=>fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}}));delete it.lemb;ev({op:'mataV',v:s.v,de:me,perde:s.perde||0,ni:s.ni||0});", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
