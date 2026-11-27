@@ -451,6 +451,17 @@ P.append(("T,A,sv:vs,mn:MN}", "tx:tx.join('\\n'),T,A,sv:vs}", "tx:tx.join('\\n')
 P.append(("g.mn&&g.mn.length?", "o=Object.assign({},o0,{tx:(o0.tx?o0.tx+'\\n':'')+g.tx.replace(/CARDNAME|NICKNAME/g,c.n)});",
 "o=Object.assign({},o0,{tx:(o0.tx?o0.tx+'\\n':'')+g.tx.replace(/CARDNAME|NICKNAME/g,c.n)},g.mn&&g.mn.length?{mana:[...new Set([...(o0.mana||[]),...g.mn])]}:{});", 'troca'))
 
+# ---------- L35. Condições "se {C} foi gasto pra conjurar" (ConditionManaSpent: c.msC guarda as cores gastas) e "se é sua fase principal" (ConditionPhases Main1/Main2, ConditionPlayerTurn, Addendum) ----------
+# Boros Fury-Shield, Firespout, Repel Intruders, River's Grasp, Invert the Skies, Torrent of Souls, Moraug, Waves of Aggression, Full Throttle, Precognitive Perception, Arrester's Zeal, Unbreakable Formation...
+P.append(("c.msC=ms0?'':(r.cor||[]).join('');", "c.cvg=ms0?0:(r.cor||[]).length;", "c.cvg=ms0?0:(r.cor||[]).length;c.msC=ms0?'':(r.cor||[]).join('');", 'troca'))
+P.append(("/* condição: mana gasta / fase principal */", "function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.StackDescription||api)+(why?' ('+why+')':'')}];",
+"""function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.StackDescription||api)+(why?' ('+why+')':'')}];
+  /* condição: mana gasta / fase principal */if(!d.__cnd&&(d.ConditionManaSpent||d.ConditionPhases)){const ck=Object.keys(d).filter(k=>/^Condition/.test(k)&&k!=='ConditionDescription'),FZ={Main1:1,Main2:3};
+    const ok=ck.every(k=>(k==='ConditionManaSpent'&&/^[WUBRG]$/.test(d[k]))||(k==='ConditionPhases'&&String(d[k]).split(',').every(x=>FZ[x.trim()]))||(k==='ConditionPlayerTurn'&&d[k]==='True')||(k==='ConditionDefined'&&d[k]==='Self'&&d.ConditionPresent==='Card.wasCast')||(k==='ConditionPresent'&&d[k]==='Card.wasCast'&&d.ConditionDefined==='Self'));
+    if(ok){const d2=Object.assign({},d,{__cnd:1});for(const k of ck)delete d2[k];const r=fgPasso(d2,api,ctx);if(r.some(o=>o.op==='nao'))return r;return [{op:'se',d:'n',q:{q:'cnd',ms:d.ConditionManaSpent||'',ph:d.ConditionPhases?String(d.ConditionPhases).split(',').map(x=>FZ[x.trim()]):null,vz:d.ConditionPlayerTurn==='True'?1:0},cmp:'GE1',st:r}];}}""", 'troca'))
+P.append(("v.q==='cnd'?", ":v.q==='remV'?",
+""":v.q==='cnd'?(()=>{const S=X.sala||{};if(v.vz&&S.vez!==me)return 0;if(v.ph&&!v.ph.includes(S.fase||0))return 0;if(v.ms){const c=it.c||xAchaK(it.k)||{};if(!String(c.msC||'').includes(v.ms))return 0;}return 1;})()""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
