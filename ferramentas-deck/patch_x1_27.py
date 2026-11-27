@@ -880,6 +880,17 @@ P.append(("const i=xInfo(c),kw=xCri(c)?xPT(c).kw:i.kws;if(kw.has('shroud'))", "c
 P.append(("v.tipo==='cp'?(xCri(c)||xInfo(c).pw):v.tipo==='creature'?xCri(c):v.tipo==='permanent'?true:v.tipo==='nc'?!xCri(c)&&!xInfo(c).land:", "v.tipo==='cp'?(xInfo(c).cri||xInfo(c).pw):v.tipo==='creature'?xInfo(c).cri:v.tipo==='permanent'?true:v.tipo==='nc'?!xInfo(c).cri&&!xInfo(c).land:", "v.tipo==='cp'?(xCri(c)||xInfo(c).pw):v.tipo==='creature'?xCri(c):v.tipo==='permanent'?true:v.tipo==='nc'?!xCri(c)&&!xInfo(c).land:", 'troca'))
 P.append(('  if(cp){const i=xInfo(c);\n    if(i.cri||xCri(c)){const v=xPT(c);', '  if(cp){const i=xInfo(c);\n    if(i.cri){const v=xPT(c);', '  if(cp){const i=xInfo(c);\n    if(i.cri||xCri(c)){const v=xPT(c);', 'troca'))
 
+# ---------- L77. BUG: "ponha todas as criaturas de todos os cemitérios no campo sob seu controle" (ChangeZoneAll GainControl) devolvia cada uma pro campo do próprio dono ----------
+# Grimoire of the Dead, Rise of the Dread Marn?, Liliana's Contract?, Profane Command?...
+P.append(("/* zonas sob seu controle */", "  /* AtEOT em ficha/pump */",
+"""  /* zonas sob seu controle */if(api==='ChangeZoneAll'&&d.GainControl==='True'&&d.Destination==='Battlefield'&&!ctx.__gcz){ctx.__gcz=1;let r;try{r=fgPasso0(d,api,ctx);}finally{delete ctx.__gcz;}if(r.length===1&&r[0].op==='zonas'&&/^(cem|exi)$/.test(r[0].og)&&r[0].quem==='todos'&&!d.ChangeNum&&!/You|Opp|Ctrl|Own|Remembered|Exiled|Top|Chosen|Targeted|Defender/.test(r[0].v||''))return [Object.assign({},r[0],{gc:1})];return r;}
+""", 'antes'))
+P.append(("if(s.gc&&s.quem==='todos'){", "      case 'zonas':{if(s.ate){",
+"      case 'zonas':{if(s.gc&&s.quem==='todos'){xZonas(s);for(const u of Object.keys(X.ops||{}))ev({op:'daZ',og:s.og,v:s.v,pa:me,nm:it.nm},u);feito.push(`${s.v} de ${s.og==='cem'?'todos os cemitérios':'todos os exílios'} vêm pro seu campo`);break;}if(s.ate){", 'troca'))
+P.append(("v.op==='daZ'", "  else if(v.op==='daV'){",
+"""  else if(v.op==='daZ'){const cx={eu:xUid(),src:'',sv:{}},z=e[v.og]||[],M=z.filter(c=>{try{return fgValid(c,v.v,cx);}catch(er){return false;}});for(const c of M){z.splice(z.indexOf(c),1);xEvia({op:'recebe',c:JSON.parse(JSON.stringify(xReset(c))),dn:xUid(),para:v.pa});}if(M.length)xLog(`${v.nm} (${xNomeU(v.de)}): ${M.length} carta(s) sua(s) foram pro campo dele`);xSobe();xPintaEu();}
+  else if(v.op==='daV'){""", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
