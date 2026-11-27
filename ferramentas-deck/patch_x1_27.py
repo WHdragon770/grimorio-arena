@@ -185,6 +185,33 @@ P.append(("k:(s.al||s.mesmo)?(t||''):''", "k:s.al?(t||''):''", "k:(s.al||s.mesmo
 
 P.append(("feito.push((s.al||s.mesmo)?`dano de combate de", "feito.push(s.al?`dano de combate de ${xAlvoNome(t)} prevenido neste turno`", "feito.push((s.al||s.mesmo)?`dano de combate de ${xAlvoNome(t)} prevenido neste turno`", 'troca'))
 
+# ---------- L13. Gatilhos de bloqueio: "Whenever this creature blocks" (ao confirmar os bloqueios), "becomes blocked" (lado do atacante), "attacks or blocks" ----------
+# Cinder Wall, Fog Elemental, Clockwork Beetle, Sawtooth Ogre, Wall of Tears, Phantom Whelp, Kaijin..., atacantes com "becomes blocked"
+P.append(("function xBlqGat(", "function xFrase(",
+"""/* gatilhos de bloqueio. tc.tk = a criatura do outro lado (atacante bloqueado / primeira bloqueadora) */
+const XBLQ=/^(?:[A-Za-z ]+ — )?(?:When|Whenever) this (?:card|creature) (?:attacks or )?blocks(?: or becomes blocked)?(?: (?:a|by a) creature)?, ([^\\n]+)$/im,XFBL=/^(?:[A-Za-z ]+ — )?(?:When|Whenever) this (?:card|creature) (?:blocks or )?becomes blocked(?: by (?:a|one or more) creatures?)?, ([^\\n]+)$/im;
+function xBlqMeus(at){const e=X.eu,s=X.sala||{};for(const b of e.campo.filter(c=>c.bl&&at.some(q=>q.k===c.bl))){const a=at.find(q=>q.k===b.bl),m=xNorm(xInfo(b).tx||'',b.n).match(XBLQ);if(m)setTimeout(()=>xGatTx(b,m[1],'bloqueou',Object.assign({},xTc(a)||{},{tk:a.k,tku:s.vez})),300);}}
+function xBlqGat(){const B=xOpCampos().flatMap(([cp,u])=>cp.filter(c=>c.bl).map(c=>({c,u})));for(const a of X.eu.campo.filter(c=>c.atk)){const bs=B.filter(b=>b.c.bl===a.k);if(!bs.length)continue;const tx=xNorm(xInfo(a).tx||'',a.n),m=tx.match(XFBL)||(/blocks or becomes blocked/i.test(tx)?tx.match(XBLQ):null);if(m)setTimeout(()=>xGatTx(a,m[1],'foi bloqueada',Object.assign({},xTc(bs[0].c)||{},{tk:bs[0].c.k,tku:bs[0].u})),300);}}
+""", 'antes'))
+P.append(("xBlqMeus(at);", "    const bq=[...(s.bq||[]),me];s.bq=bq;xSala((s.def||[me]).every(",
+"    xBlqMeus(at);\n", 'antes'))
+P.append(("X.__blqF!==", "  if(s.cb==='blq'&&s.vez===me&&s.def&&s.def.every(u=>(s.bq||[]).includes(u)||xMorto(xPub(u)))&&X.dzF!==s.turno){X.dzF=s.turno;xSala({cb:'dano'});}",
+"\n  if(s.cb==='dano'&&s.vez===me&&X.__blqF!==s.turno+'.'+((s.cbX||{}).n||0)){X.__blqF=s.turno+'.'+((s.cbX||{}).n||0);setTimeout(xBlqGat,250);}", 'depois'))
+P.append(("(?:When|Whenever) this (?:card|creature) (?:enters(?: the battlefield)? or )?attacks(?: or blocks)?", "Whenever this (?:card|creature) (?:enters(?: the battlefield)? or )?attacks( while saddled)?, ([^\\n]+)$/im", "(?:When|Whenever) this (?:card|creature) (?:enters(?: the battlefield)? or )?attacks(?: or blocks)?( while saddled)?, ([^\\n]+)$/im", 'troca'))
+
+# ---------- L14. SacrificeAll: a própria carta, as lembradas, ou todas as suas que batem no filtro ----------
+# Fog Elemental, Mardu Blazebringer, Dorothea, Time Elemental, Doom Foretold, Callous Sell-Sword, Professor Onyx, Rite of Ruin, Death Pit Offering...
+P.append(("case 'SacrificeAll':{", "    case 'Cleanup':case 'StoreSVar':return [];",
+"""    case 'SacrificeAll':{if(Object.keys(d).some(k=>/^(Remember|Imprint|Condition|Unless)/.test(k)&&k!=='RememberSacrificed'))return nao('ação SacrificeAll');if(d.Controller&&d.Controller!=='You')return nao('quem sacrifica');
+      if(d.Defined==='Self'&&!d.ValidCards)return [{op:'sacrEsta'}];if(/^Remembered(LKI)?$/.test(d.Defined||'')&&!d.ValidCards)return [{op:'sacL',v:''}];
+      if(!d.Defined&&d.ValidCards){const m=String(d.ValidCards).match(/^(Card|Creature|Artifact|Permanent|Land|Enchantment)\\.IsRemembered$/);if(m)return [{op:'sacL',v:m[1]==='Card'?'':m[1]}];const v=String(d.ValidCards);if(/YouCtrl/.test(v)&&!/OppCtrl|Remembered|Chosen|Targeted|Triggered/.test(v)&&fgSpecOk(v,ctx))return [{op:'sacV',v}];}
+      return nao('ação SacrificeAll');}
+""", 'antes'))
+P.append(("case 'sacL':", "      case 'sacrEsta':{",
+"""      case 'sacL':case 'sacV':{const L=s.op==='sacL'?e.campo.filter(c=>(it.lemb||[]).some(q=>q.k===c.k)&&(!s.v||fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}}))):e.campo.filter(c=>{try{return fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}});
+        L.forEach(c=>xMorre(c));feito.push(L.length?'sacrificou '+L.map(c=>c.n).join(', '):'nada pra sacrificar');break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
