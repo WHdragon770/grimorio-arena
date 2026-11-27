@@ -12,11 +12,11 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 3. Rode seu cob/tL1/mec e confira que nada caiu. Depois pode apagar este aviso e a pasta `ferramentas-deck/`.
 
 ## Números (medidor do Deck: todos os 34480 scripts do Forge, partes SP/AB/capítulo/gatilho sem op nao)
-- Antes (01d0d5e): 26629 (77.2%) · Agora: **27501 (79.8%)**, +872 cartas
+- Antes (01d0d5e): 26629 (77.2%) · Agora: **27553 (79.9%)**, +924 cartas
 - Cartas dos decks: 1342 → 1344 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (22 seções do patch)
+## O que mudou (24 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -39,6 +39,8 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L20.** "Não pode ser regenerada neste turno" (Effect CantRegenerate): alvo da parte anterior, alvo próprio, a própria (ex.: Carbonize, Disintegrate, Scorching Lava, Gravebind, Orcish Healer, Furnace Brood, Whippoorwill, Engulfing Flames, Clergy/Knight of the Holy Nimbus)
 - **L21.** Contas: Compare com lado que só se sabe na hora (antes escolhia o "senão" calado) e resultados que são SVar; alvo bate no filtro (Targeted$Valid); vida do jogador-alvo; vida inicial (ex.: Bring Low, Ray of Enfeeblement, Lithomantic Barrage, Cut Propulsion, Twenty-Toed Toad, Blood Lust, Shatterskull Smashing, Crater's Claws, Blood Tribute, Oketra's Last Mercy...)
 - **L22.** Contas do turno: Landfall (terreno seu entrou neste turno) e "quantas X morreram neste turno" com filtro (lista xTT().morL) (ex.: Rest for the Weary, Tomb Hex, Mysteries of the Deep, Liliana's Standard Bearer, Season of Loss, Body Count, Caller of the Claw, Gadrak, Ember-Fist/Floating-Dream/Dripping-Tongue Zubera)
+- **L23.** Exilar a própria carta e devolver (pode voltar transformada / virada): Flickering Spirit, Dion, sagas que viram criatura (Fable of the Mirror-Breaker, Era of Enlightenment, Jugan Defends the Temple...) (ex.: self blink com RememberChanged + DBReturn Defined Remembered Exile→Battlefield (Transformed/Tapped/GainControl))
+- **L24.** Destroy da criatura do gatilho (TriggeredTarget = quem levou o dano) e NoRegen nos Defined gerais; o gatilho "deals damage to a creature" agora passa a criatura (ex.: Voracious Cobra, Sporogenic Infection, Death Pits of Rath, Toxin Sliver, Phage the Untouchable, Cosmic Horror, Aether Storm, Creepy Doll...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
