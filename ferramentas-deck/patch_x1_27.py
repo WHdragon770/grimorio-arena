@@ -1090,6 +1090,13 @@ P.append(("if(!nm)return al?[{op:'alvoB'", "const nm=ok?d.TrueSubAbility:d.False
 "const nm=ok?d.TrueSubAbility:d.FalseSubAbility;if(!nm)return al?[{op:'alvoB',al,v:d.ValidTgts}]:[];const q=fgPP((ctx.sv||{})[nm]||'');if(!q.api)return nao('passo '+nm);return [...(al?[{op:'alvoB',al,v:d.ValidTgts}]:[]),...fgCadeia(q.d,q.api,ctx)];}", 'troca'))
 P.append(("case 'alvoB':", "      case 'sacrEsta':{", "      case 'alvoB':break;\n", 'antes'))
 
+# ---------- L97. BUG: "jogador alvo descarta" (Discard com ValidTgts Player/Opponent e sem Defined) virava descarta = QUEM LANÇOU descartava: Haunting Hymn, Mind Burst, Cabal Inquisitor, Triumph of Cruelty, Mind Rot... ----------
+P.append(("/* L97 alvo descarta */", "if(df!=='You'&&!/^You$/.test(d.Defined||''))return nao('descarte de outro jogador');",
+"""/* L97 alvo descarta */if(al&&/^(Player|Opponent)$/.test(d.ValidTgts||'')&&(!d.Defined||/^Targeted(Player)?$/.test(d.Defined))){if(d.RememberDiscarded||d.DiscardValid||(d.Mode&&!/^(TgtChoose|Hand|Random)$/.test(d.Mode)))return nao('descarte do alvo');const n=d.Mode==='Hand'?99:d.NumCards==null?1:N('NumCards');if(n==null||(typeof n!=='number'&&n!=='X'))return nao('número');return [{op:'descQ',n,q:'alvo',so:'P',rnd:d.Mode==='Random'?1:0,al}];}""", 'antes'))
+
+P.append(("Count\\$IfCastInOwnMainPhase", "  if(m=b.match(/^Targeted\\$Valid (.+)$/)){",
+"""  if(m=b.match(/^Count\\$IfCastInOwnMainPhase\\.(\\d+)\\.(\\d+)$/)){const s0=X.sala||{};const ok=s0.vez===xUid()&&(s0.fase===1||s0.fase===3);return fgMods(+(ok?m[1]:m[2]),md);}
+""", 'antes'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
