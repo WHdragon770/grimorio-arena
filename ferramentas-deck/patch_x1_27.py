@@ -734,6 +734,19 @@ P.append(("'kwM','kwC','fin','mkN',", "'kwM','mkN',", "'kwM','kwC','fin','mkN',"
 P.append(("if(c.fin&&!c.tok){", "function xMorre(c){const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;if(c.exM&&c.exM===",
 "function xMorre(c){const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;if(c.fin&&!c.tok){delete c.fin;xLog(`${c.n} tinha marcador de finalidade: foi exilada em vez de morrer`);return xSai(c,'exi');}if(c.exM&&c.exM===", 'troca'))
 
+# ---------- L65. BUG: "não pode ser regenerada" (Destroy/DestroyAll NoRegen) era ignorado fora do gatilho ----------
+# Fatal Blow, Death Bomb, Grotesque Hybrid, Wrath of God, Damnation, Day of Judgment, Terror, Doom Blade?, Smother, Incinerate (dano)...
+P.append(("/* destruir sem regenerar */", "  /* AtEOT em ficha/pump */",
+"""  /* destruir sem regenerar */if((api==='Destroy'||api==='DestroyAll')&&d.NoRegen==='True'){const d2=Object.assign({},d);delete d2.NoRegen;const r=fgPasso0(d2,api,ctx);if(r.some(o=>o.op==='nao'))return r;return r.map(o=>o.op==='destroi'&&o.al?Object.assign({},o,{nr:1}):o.op==='todos'?Object.assign({},o,{nr:1}):o);}
+""", 'antes'))
+P.append(("if(s.nr){const t0=(it.al||[])[j];if(s.al&&t0", "    const pa=xPrecisaAlvo(s),t=pa?(it.al||[])[j++]",
+"""    if(s.nr){const t0=(it.al||[])[j];if(s.al&&t0&&!/^[PS]:/.test(t0))xNoAlvo(t0,'nRegen',0,ev);}
+""", 'antes'))
+
+P.append(("xTodos(s.tipo,s.nr);", "case 'todos':xTodos(s.tipo);ev({op:'todos',tipo:s.tipo});", "case 'todos':xTodos(s.tipo,s.nr);ev({op:'todos',tipo:s.tipo,nr:s.nr?1:0});", 'troca'))
+P.append(("xTodos(v.tipo,v.nr);", "v.op==='todos')xTodos(v.tipo);", "v.op==='todos')xTodos(v.tipo,v.nr);", 'troca'))
+P.append(("function xTodos(tipo,nr){", "function xTodos(tipo){", "function xTodos(tipo,nr){", 'troca'))
+P.append(("if(ok){if(nr)c.nRg=", "if(ok)xEfCarta(c,'destroi');}}", "if(ok){if(nr)c.nRg=(X.sala||{}).turno||0;xEfCarta(c,'destroi');}}}", 'troca'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
