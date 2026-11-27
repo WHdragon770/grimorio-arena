@@ -1060,6 +1060,18 @@ P.append(("if(xt.bh){const b=xt.bh", "if(xt.cas&&e.campo.includes(xt.cas)){xMorr
 
 P.append(("if(/^BeholdExile</.test(d.Cost||''))continue;", "      const ruim=Object.keys(d).find(k=>!FGRED_OK.has(k));if(ruim){",
 "      if(/^BeholdExile</.test(d.Cost||''))continue;const ruim=Object.keys(d).find(k=>!FGRED_OK.has(k));if(ruim){", 'troca'))
+# ---------- L93. "o oponente revela a mão, você escolhe uma carta e exila" (ChangeZone Hand → Exile, Chooser You, alvo jogador): Tidehollow Sculler, e com Duration UntilHostLeavesPlay ----------
+P.append(("/* L93 exila da mão do alvo */", "  /* AtEOT em ficha/pump */",
+"""  /* L93 exila da mão do alvo */if(api==='ChangeZone'&&d.Origin==='Hand'&&d.Destination==='Exile'&&d.Chooser==='You'&&/^(Opponent|Player)$/.test(d.ValidTgts||'')&&(d.DefinedPlayer||'Targeted')==='Targeted'&&/^\\d+$/.test(d.ChangeNum||'1')&&(!d.Duration||d.Duration==='UntilHostLeavesPlay')&&!d.SubAbility&&!Object.keys(d).some(k=>/^(Remember|Imprint|Reveal|Mandatory|Hidden|ExileFaceDown|WithCounters)/.test(k)))return [Object.assign({op:'exMaoV',vd:d.ChangeType||'Card',n:+(d.ChangeNum||1),al:d.ValidTgts==='Opponent'?'target opponent':'target player'},d.Duration?{ate:1}:{})];
+""", 'antes'))
+P.append(("case 'exMaoV':", "      case 'sacrEsta':{",
+"""      case 'exMaoV':{const p0=(it.al||[]).find(a=>String(a).startsWith('P:')),u=p0?String(p0).slice(2):(s.al==='target opponent'?xOutro():'');if(!u){feito.push('sem jogador alvo');break;}const v={op:'descV',vd:s.vd,n:s.n,nm:it.nm,z:'exi',s:it.k||'',ate:s.ate?1:0};if(u===me)xDescV(v);else ev(v,u);if(s.ate){const h=e.campo.find(q=>q.k===it.k);if(h)h.exO=1;}feito.push(`${u===me?'você':xNomeU(u)} revela a mão e exila ${s.n} carta(s)${s.ate?' até '+it.nm+' sair':''}`);break;}
+""", 'antes'))
+P.append(("if(v.z==='exi'){", "for(const c of L){e.mao.splice(e.mao.indexOf(c),1);e.cem.push(c);}xLog(`descartou ${L.map(c=>c.n).join(', ')||'nada'} (${v.nm})`);if(L.length&&typeof xDescartou==='function')xDescartou(L.length);",
+"if(v.z==='exi'){for(const c of L){e.mao.splice(e.mao.indexOf(c),1);if(v.s){c.exS=v.s;if(v.ate)c.exAteM=v.s;}e.exi.push(c);}xLog(`exilou ${L.map(c=>c.n).join(', ')||'nada'} da sua mão (${v.nm})`);}else{for(const c of L){e.mao.splice(e.mao.indexOf(c),1);e.cem.push(c);}xLog(`descartou ${L.map(c=>c.n).join(', ')||'nada'} (${v.nm})`);if(L.length&&typeof xDescartou==='function')xDescartou(L.length);}", 'troca'))
+P.append(("e.exi.filter(q=>q.exAteM===k)", "if(!e||!k||!e.exi.some(q=>q.exAte===k))return;",
+"{const Lm=e&&k?e.exi.filter(q=>q.exAteM===k):[];for(const q of Lm){e.exi.splice(e.exi.indexOf(q),1);delete q.exAteM;delete q.exS;e.mao.push(q);xLog(`${q.n} voltou pra sua mão (a carta que a exilou saiu)`);}if(Lm.length&&typeof xSobe==='function'){xSobe();xPintaEu();}}if(!e||!k||!e.exi.some(q=>q.exAte===k))return;", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
