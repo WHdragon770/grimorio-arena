@@ -467,6 +467,15 @@ P.append(("else if(n==='X')pz={g:'X'};", "if(typeof n==='number')pz={g:n};}else 
 P.append(("s.pz.g==='X'?{g:it.x||0}:{}", "if(s.pz){p.pz=Object.assign({nm:it.nm},s.pz);feito.push(s.pz.mao?", "if(s.pz){p.pz=Object.assign({nm:it.nm},s.pz,s.pz.g==='X'?{g:it.x||0}:{});feito.push(s.pz.mao?", 'troca'))
 P.append(("o dono paga {${s.pz.g==='X'?(it.x||0):s.pz.g}}", "`${p.nm}: o dono paga {${s.pz.g}} ou ela é anulada`", "`${p.nm}: o dono paga {${s.pz.g==='X'?(it.x||0):s.pz.g}} ou ela é anulada`", 'troca'))
 
+# ---------- L37. Anexar o Equipamento alvo a esta criatura (Attach Defined Self, Object Targeted) e "anexe esta ao alvo da parte anterior" (Object ParentTarget) ----------
+# Sokka Swordmaster, Cloud Ex-SOLDIER, Captain America First Avenger, Armory Automaton, Shagrat, Frodo Determined Hero; Aura Finesse, Magnetic Theft (Object ParentTarget)
+P.append(("op:'equipaEsta'", "return put({op:'anexaAlvo',al},[]);return nao('ação Attach');}",
+"return put({op:'anexaAlvo',al},[]);if(al&&d.Defined==='Self'&&d.Object==='Targeted'&&/^(Equipment|Aura)\\b/.test(d.ValidTgts||'')&&!d.ConditionDefined)return put({op:'equipaEsta',al},[]);if(al&&d.Object==='ParentTarget'&&!d.Defined&&!d.ConditionDefined)return put({op:'anexaPai',al},[]);return nao('ação Attach');}", 'troca'))
+P.append(("case 'equipaEsta':", "      case 'sacrEsta':{",
+"""      case 'equipaEsta':{const eq=e.campo.find(q=>q.k===t),cr=e.campo.find(q=>q.k===it.k);if(!eq||!cr){feito.push('não deu pra anexar (precisa ser sua e estar no campo)');break;}eq.an=cr.k;feito.push(`${eq.n} foi anexado a ${cr.n}`);break;}
+      case 'anexaPai':{const eq=e.campo.find(q=>q.k===(it.al||[])[0]);if(!eq||!t||eq.k===t||!/\\b(Equipment|Aura)\\b/.test(xInfo(eq).tipo||'')||!xExiste(t)){feito.push('não deu pra anexar');break;}eq.an=t;feito.push(`${eq.n} foi anexado a ${xAlvoNome(t)}`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
