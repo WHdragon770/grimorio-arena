@@ -996,6 +996,7 @@ P.append(("if(p==='ExiledWithSource')", "if(p==='StrictlyOther')return",
 """if(p==='ExiledWithSource'){if(c.k==='__x')return true;const s0=ctx.src||(X.__itA||{}).k;return !!c.exS&&c.exS===s0;}
   if(p==='sameName'||p==='NotDefinedTargeted'||p==='Attached'||p==='TriggeredTarget'){if(c.k==='__x')return true;const A=(X.__alA||[]).filter(a=>a&&!/^[PSM][:#]/.test(String(a))),t0=xAchaK(A[0]);
     if(p==='sameName')return !!t0&&t0.n===c.n;if(p==='NotDefinedTargeted')return !A.includes(c.k);if(p==='Attached')return !!c.an&&(c.an===A[0]||c.an===ctx.src);return String(((ctx&&ctx.tc)||X.__tcA||{}).td||'')===c.k;}
+  if(m=p.match(/^AttachedTo (.+)$/)){if(c.k==='__x')return true;if(!c.an)return false;if(m[1]==='Targeted'){const A=(X.__alA||[]).filter(a=>a&&!/^[PSM][:#]/.test(String(a)));return c.an===A[0];}const h=xAchaK(c.an);return !!h&&fgValid(h,m[1],ctx);}
   if(p==='IsRemembered'&&X.__itA&&c.k!=='__x'){const L=X.__itA.lemb||[];return L.some(q=>q===c.k||(q&&q.k===c.k));}
   if(p==='StrictlyOther')return""", 'troca'))
 P.append(("X.__itA=it;", "X.__tcA=it.tc||null;X.__alA=it.al||[];", "X.__tcA=it.tc||null;X.__alA=it.al||[];X.__itA=it;", 'troca'))
