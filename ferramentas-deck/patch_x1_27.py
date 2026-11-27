@@ -1142,6 +1142,22 @@ P.append(("pode=!!(e.mao.length>0&&(XBOT||confirm(", "pode=e.mao.length>0&&(XBOT
 P.append(("const quer=!!(pode&&(XBOT||confirm(", "const quer=pode&&(XBOT||confirm(`${it.nm}: ${rot}? (se não, ${s.sw?'o efeito não acontece':'acontece o efeito'})`));",
 "const quer=!!(pode&&(XBOT||confirm(`${it.nm}: ${rot}? (se não, ${s.sw?'o efeito não acontece':'acontece o efeito'})`)));", 'troca'))
 
+# ---------- L102. BUG: Animate só de cor ("vira branca até o fim do turno") saía [] e LEVAVA O ALVO junto: o "vire aquela criatura" seguinte (mesmo) ficava sem alvo. Niveous Wisps, Cerulean Wisps, Indigo Faerie, Cloudchaser Kestrel... ----------
+# + dano "àquele jogador" depois de alvo jogador (que nunca é perguntado): Structural Collapse, Hit, Hellhole Rats, Aggressive Sabotage → cai no oponente em foco
+P.append(("/* L102 só cor */", "  /* AtEOT em ficha/pump */",
+"""  /* L102 só cor */if(api==='Animate'&&d.Colors&&!d.TgtZone&&!['Power','Toughness','Types','Keywords','Abilities','Triggers','RemoveAllAbilities','staticAbilities','RemoveKeywords','RemoveCardTypes','RemoveCreatureTypes','sVars','Replacements','HiddenKeywords','AtEOT','RememberObjects'].some(k=>d[k]!=null)&&(!d.Duration||d.Duration==='Permanent')&&(!d.TargetMax||d.TargetMax==='1')){const CN={White:'W',Blue:'U',Black:'B',Red:'R',Green:'G'},cs=String(d.Colors).split(',').map(x=>CN[x.trim()]);if(cs.every(Boolean)){const A=fgAlvo(d),o={op:'corT',cor:cs.join(''),ow:d.OverwriteColors==='True'?1:0,perm:d.Duration==='Permanent'?1:0};if(A&&A.al)return [Object.assign(o,{al:A.al},A.v?{v:A.v}:{})];if(!d.Defined||d.Defined==='Self')return [Object.assign(o,{si:1})];if(d.Defined==='Targeted')return [Object.assign(o,{mesmo:1})];}}
+""", 'antes'))
+P.append(("case 'corT':", "      case 'sacrEsta':{",
+"""      case 'corT':{const k=t||(s.si?it.k:'');if(!k||!xExiste(k)){feito.push('sem alvo');break;}xNoAlvo(k,'corT',0,ev,{cor:s.cor,ow:s.ow,perm:s.perm});const CN={W:'branca',U:'azul',B:'preta',R:'vermelha',G:'verde'};feito.push(`${xAlvoNome(k)} fica ${s.cor.split('').map(x=>CN[x]).join(' e ')}${s.ow?'':' (além das cores dela)'}${s.perm?'':' até o fim do turno'}`);break;}
+""", 'antes'))
+P.append(("if(op==='corT'){", "function xEfCarta(c,op,n,x){const i=xInfo(c);",
+"function xEfCarta(c,op,n,x){const i=xInfo(c);if(op==='corT'){c.corT={cor:(x||{}).cor||'',ow:(x||{}).ow?1:0,perm:(x||{}).perm?1:0,t:(X.sala||{}).turno||0};return;}", 'troca'))
+P.append(("(ult||(s.op==='dano'&&!(it.al||[]).some(", "s.si?(it.k||''):s.mesmo?ult:''",
+"s.si?(it.k||''):s.mesmo?(ult||(s.op==='dano'&&!(it.al||[]).some(a=>a&&!String(a).startsWith('M#'))?'P:'+ou:'')):''", 'troca'))
+
+P.append(("if(c.corT&&(c.corT.perm||", "function fgCores(c){const b=c.tok&&!c.cp?new Set(c.cor?String(c.cor).split(''):[]):new Set(String(xInfo(c).custo||'').match(/[WUBRG]/g)||[]);",
+"function fgCores(c){const b=c.tok&&!c.cp?new Set(c.cor?String(c.cor).split(''):[]):new Set(String(xInfo(c).custo||'').match(/[WUBRG]/g)||[]);if(c.corT&&(c.corT.perm||c.corT.t===((X.sala||{}).turno||0))){const n=new Set(String(c.corT.cor).split('').filter(Boolean));if(c.corT.ow)return n;n.forEach(x=>b.add(x));}", 'troca'))
+P.append(("'stun','nd','trd','corT']", "'stun','nd','trd'].forEach(q=>delete c[q])", "'stun','nd','trd','corT'].forEach(q=>delete c[q])", 'troca'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
