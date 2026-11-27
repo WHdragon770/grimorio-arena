@@ -16,7 +16,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (61 seções do patch)
+## O que mudou (62 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -78,6 +78,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L64.** BUG: "volta do cemitério com marcador" (WithCountersType) era ignorado: +1/+1, -1/-1, marcador de habilidade, finalidade (ex.: Sand Golem, Generous Revival, Gallia, Persist, Aberrant Return, Metamorphosis Fanatic, Unbreakable Bond, Mirko, Rydia, Admiral Brass, Wolfbat, Season of the Burrow...)
 - **L65.** BUG: "não pode ser regenerada" (Destroy/DestroyAll NoRegen) era ignorado fora do gatilho (ex.: Fatal Blow, Death Bomb, Grotesque Hybrid, Wrath of God, Damnation, Day of Judgment, Terror, Doom Blade?, Smother, Incinerate (dano)...)
 - **L66.** Ficha pro jogador-alvo (TokenOwner Targeted/TargetedPlayer) ia pro "outro jogador" e não pro alvo escolhido (multiplayer) (ex.: Hunted Horror, Ox Drover, Forbidden Orchard, Cybernetica Datasmith, Prismari Command, Gravedig?, Brigid's Command...)
+- **L67.** BUG: "você pode" (Optional) em sacrificar/moer/descartar/comprar era obrigatório; "descarte N a não ser que descarte um X" (UnlessType) descartava N sempre (ex.: Yawgmoth Demon, God-Eternal Bontu, Crawling Sensation, Hedge Shredder, Glacial Dragonhunt, Evie Frye, Sibilant Spirit, Infiltration Lens; Compulsive Research, Thirst for Identity, Practical Research...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
@@ -95,3 +96,4 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **Bug antigo corrigido (L63):** "se a criatura morrer neste turno, exile em vez disso" (`ReplaceDyingDefined$ Targeted` em DealDamage/Pump: Magma Spray, Scorching Dragonfire, Reduce to Ashes...) era ignorado. Agora o op leva `exM`, o alvo ganha `c.exM` (turno) antes do dano e o `xMorre` exila no lugar.
 - **Bug antigo corrigido (L64):** "volta do cemitério com marcador" (`WithCountersType` em doCem/doCemAlvo) era ignorado. Agora o op leva `wc` e o `xWc` põe +1/+1 ou -1/-1 (`cnt`), atordoamento (`stun`), marcador de habilidade (`kwC`, novo, somado no xPT) ou finalidade (`fin`, novo: o `xMorre` exila no lugar). Persist volta 1/1, Metamorphosis Fanatic dá vínculo com a vida.
 - **Bug antigo corrigido (L65):** "não pode ser regenerada" (`NoRegen$ True` em Destroy/DestroyAll: Wrath of God, Damnation, Terror...) só era lido no gatilho do L24. Agora o `destroi` com alvo leva `nr` (marca `nRg` no alvo antes) e o `todos` passa `nr` pro `xTodos` em todos os jogadores.
+- **Bug antigo corrigido (L67):** "você pode" (`Optional$ True` / `OptionalDecider$ You`) em sacrificar/moer/descartar/comprar era obrigatório. Agora o op leva `opq` e, pra pessoa, um `confirm` antes do passo (recusar pula e conta como "não fez"; o bot sempre faz). E "descarte N a não ser que descarte um X" (`UnlessType`: Compulsive Research, Thirst for Identity...) descartava N sempre; agora é `descUn` (descarta 1 do tipo se tiver e quiser).
