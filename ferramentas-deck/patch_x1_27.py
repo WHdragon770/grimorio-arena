@@ -476,6 +476,15 @@ P.append(("case 'equipaEsta':", "      case 'sacrEsta':{",
       case 'anexaPai':{const eq=e.campo.find(q=>q.k===(it.al||[])[0]);if(!eq||!t||eq.k===t||!/\\b(Equipment|Aura)\\b/.test(xInfo(eq).tipo||'')||!xExiste(t)){feito.push('não deu pra anexar');break;}eq.an=t;feito.push(`${eq.n} foi anexado a ${xAlvoNome(t)}`);break;}
 """, 'antes'))
 
+# ---------- L38. Virar ou desvirar o alvo (TapOrUntap): lê como Tap e deixa escolher na hora (bot: vira a do oponente, desvira a sua) ----------
+# Pestermite, Hidden Strings, Niblis of the Breath, Granite Witness, Twiddle, Trickster Mage, Faerie Dragon, Inverted Iceberg, Sword of the Paruns, Tideforce Elemental...
+P.append(("case 'TapOrUntap':{", "    case 'Cleanup':case 'StoreSVar':return [];",
+"""    case 'TapOrUntap':{const r=fgPasso0(Object.assign({},d,{AB:'Tap'}),'Tap',ctx);if(r.some(o=>o.op==='nao')||!r.every(o=>o.op==='vira'))return r.some(o=>o.op==='nao')?r:nao('ação TapOrUntap');return r.map(o=>Object.assign({},o,{op:'viraOu'}));}
+""", 'antes'))
+P.append(("case 'viraOu':", "      case 'sacrEsta':{",
+"""      case 'viraOu':{const k=t||(s.anx?'':it.k);const c=k&&xAchaK(k);if(!c){feito.push('sem o permanente');break;}const meu=e.campo.includes(c);const vr=XBOT?(meu?!!0:!c.tap):confirm(`${it.nm}: OK = virar ${c.n}, Cancelar = desvirar`);const op=vr?'vira':'desvira';feito.push(`${vr?'virou':'desvirou'} ${xAlvoNome(k)}`);xNoAlvo(k,op,0,ev);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
