@@ -1001,6 +1001,20 @@ P.append(("if(p==='ExiledWithSource')", "if(p==='StrictlyOther')return",
   if(p==='StrictlyOther')return""", 'troca'))
 P.append(("X.__itA=it;", "X.__tcA=it.tc||null;X.__alA=it.al||[];", "X.__tcA=it.tc||null;X.__alA=it.al||[];X.__itA=it;", 'troca'))
 
+# ---------- L89. BUG: "todas as criaturas"/"as criaturas dos oponentes" (pumpTodos sem YouCtrl) só mexia no MEU campo: Massacre Wurm, Shrivel, Suicidal Charge, Dinosaur Stampede... (223 cartas) ----------
+# agora manda evento pumpTodosV e cada mesa aplica nas suas (ctx.eu = quem lançou, então OppCtrl bate certo). + PumpAll com proteção de cor e "não desvira" (Akroma's Will, Cone of Cold, Teroh's Vanguard)
+P.append(("if(!/YouCtrl|YouOwn/.test(s.v||'')&&!s.so)ev({op:'pumpTodosV'", "      case 'pumpTodos':e.campo.filter(c=>(s.todasP||xCri(c))&&(!s.v||fgValid(c,s.v,{eu:me,src:it.k,sv:{}}))).forEach(c=>{",
+"      case 'pumpTodos':if(!/YouCtrl|YouOwn/.test(s.v||'')&&!s.so)ev({op:'pumpTodosV',p:s.p,t:s.t,kw:s.kw||[],v:s.v||'',dbl:s.dbl||'',todasP:s.todasP||0,pr:s.pr||null,nd:s.nd||0,src:it.k||''});e.campo.filter(c=>(s.todasP||xCri(c))&&(!s.v||fgValid(c,s.v,{eu:me,src:it.k,sv:{}}))).forEach(c=>{if(s.pr)c.prT=[...new Set([...(c.prT||[]),...s.pr])];if(s.nd)xEfCarta(c,'nDesv',0);", 'troca'))
+P.append(("else if(v.op==='pumpTodosV'){", "  else if(v.op==='pumpVen'){",
+"""  else if(v.op==='pumpTodosV'){let q=0;for(const c of e.campo.slice()){let ok=false;try{ok=(v.todasP||xCri(c))&&(!v.v||fgValid(c,v.v,{eu:v.de,src:v.src||'',sv:{}}));}catch(er){}if(!ok)continue;q++;const v0=v.dbl?xPT(c):null;c.tp=(c.tp||0)+(v0&&/p/.test(v.dbl)?v0.p:v.p);c.tt=(c.tt||0)+(v0&&/t/.test(v.dbl)?v0.t:v.t);if(v.kw&&v.kw.length)c.kt=[...new Set([...(c.kt||[]),...v.kw])];if(v.pr)c.prT=[...new Set([...(c.prT||[]),...v.pr])];if(v.nd)xEfCarta(c,'nDesv',0);}
+    if(q)xLog(`${q} criatura(s) sua(s) ${v.p||v.t?(v.p>=0?'+':'')+v.p+'/'+(v.t>=0?'+':'')+v.t:''}${v.kw&&v.kw.length?' ganham '+v.kw.join(', '):''} até o fim do turno`);xVarre();xSobe();xPintaEu();}
+  else if(v.op==='pumpVen'){""", 'troca'))
+P.append(("const CPr={'each color':", "const kw=(d.KW||'').split(' & ').filter(Boolean);if(kw.some(k=>!FGKW[k]))return nao('habilidade pra todos');\n      return [{op:'pumpTodos',p:a,t:b,kw:kw.map(k=>FGKW[k]),v:d.ValidCards||'Creature.YouCtrl'}];}",
+"""const CPr={'each color':['W','U','B','R','G'],white:['W'],blue:['U'],black:['B'],red:['R'],green:['G']};let kw=(d.KW||'').split(' & ').filter(Boolean),pr=[],nd=0;kw=kw.filter(k=>{const m=k.match(/^Protection from (each color|white|blue|black|red|green)$/i);if(m){pr.push(...CPr[m[1].toLowerCase()]);return false;}if(k==="HIDDEN This card doesn't untap during your next untap step."){nd=1;return false;}return true;});if(kw.some(k=>!FGKW[k]))return nao('habilidade pra todos');
+      return [Object.assign({op:'pumpTodos',p:a,t:b,kw:kw.map(k=>FGKW[k]),v:d.ValidCards||'Creature.YouCtrl'},pr.length?{pr:[...new Set(pr)]}:{},nd?{nd:1}:{})];}""", 'troca'))
+
+P.append(("'suas criaturas':'criaturas ('+s.v+')'}", "if(s.kw&&s.kw.length)c.kt=[...new Set([...(c.kt||[]),...s.kw])];});feito.push(`suas criaturas",
+"if(s.kw&&s.kw.length)c.kt=[...new Set([...(c.kt||[]),...s.kw])];});feito.push(`${/YouCtrl|YouOwn/.test(s.v||'')||s.so?'suas criaturas':'criaturas ('+s.v+')'}", 'troca'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
