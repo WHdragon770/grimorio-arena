@@ -945,6 +945,15 @@ P.append(("case 'ktEsc':", "      case 'pumpN':case 'ktN':{",
 P.append(("if(s.trf){c.face=1;c.sk=xInfo(c).cri?1:0;}if(s.atq)xAtq(c);setTimeout", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.atq)xAtq(c);setTimeout(()=>xEntrou(c),450);", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.trf){c.face=1;c.sk=xInfo(c).cri?1:0;}if(s.atq)xAtq(c);setTimeout(()=>xEntrou(c),450);", 'troca'))
 P.append(("if(s.trf){c.face=1;c.sk=xInfo(c).cri?1:0;}if(s.atq)xAtq(c);if(s.cnt){", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.atq)xAtq(c);if(s.cnt){", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.trf){c.face=1;c.sk=xInfo(c).cri?1:0;}if(s.atq)xAtq(c);if(s.cnt){", 'troca'))
 
+# ---------- L84. BUG: número de modos que depende de algo (CharmNum$ Count$Compare ..., Delirium, Kicked) virava NaN: a escolha ficava sem limite; e "se você controla um comandante" (IsCommander) não era lido ----------
+# Jeska's Will, Kamahl's Will, Weave the Nightmare, Will of the Mardu, Klauth's Will, Collective Override, Let's Play a Game, Prophetic Titan, Inscription of Insight...
+P.append(("if(p==='IsCommander')return !!c.cmd;", "if(p==='Other')return c.k!==ctx.src;", "if(p==='IsCommander')return !!c.cmd;if(p==='Other')return c.k!==ctx.src;", 'troca'))
+P.append(("cn=/^\\d+$/.test(String(d.CharmNum||1))?null:d.CharmNum", "case 'Charm':{const ch=(d.Choices||'').split(',').map(x=>x.trim()).filter(Boolean),n=+(d.CharmNum||1),mn=d.MinCharmNum!=null?+d.MinCharmNum:n;\n      return [{op:'modal',n,min:mn,",
+"""case 'Charm':{const ch=(d.Choices||'').split(',').map(x=>x.trim()).filter(Boolean),cn=/^\\d+$/.test(String(d.CharmNum||1))?null:d.CharmNum,n=cn?ch.length:+(d.CharmNum||1),mn=d.MinCharmNum==null?(cn?1:n):/^\\d+$/.test(d.MinCharmNum)?+d.MinCharmNum:0;
+      return [{op:'modal',n,min:mn,...(cn?{cn,csv:ctx.sv||{}}:{}),""", 'troca'))
+P.append(("if(md.cn){try{", "const mx=Math.min(md.n,it.length),mn=Math.min(md.min,mx);",
+"if(md.cn){try{const r=fgConta(md.cn,{eu:xUid(),src:'',sv:md.csv||{}});if(typeof r==='number'&&r>=0)md=Object.assign({},md,{n:r,min:Math.min(md.min,r)});}catch(er){}}const mx=Math.min(md.n,it.length),mn=Math.min(md.min,mx);", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
