@@ -1072,6 +1072,12 @@ P.append(("if(v.z==='exi'){", "for(const c of L){e.mao.splice(e.mao.indexOf(c),1
 P.append(("e.exi.filter(q=>q.exAteM===k)", "if(!e||!k||!e.exi.some(q=>q.exAte===k))return;",
 "{const Lm=e&&k?e.exi.filter(q=>q.exAteM===k):[];for(const q of Lm){e.exi.splice(e.exi.indexOf(q),1);delete q.exAteM;delete q.exS;e.mao.push(q);xLog(`${q.n} voltou pra sua mão (a carta que a exilou saiu)`);}if(Lm.length&&typeof xSobe==='function'){xSobe();xPintaEu();}}if(!e||!k||!e.exi.some(q=>q.exAte===k))return;", 'troca'))
 
+# ---------- L94. "destrói/devolve aquela criatura no fim do combate" (DelayedTrigger EndCombat lembrando TriggeredTarget/Attacker/Blocker): Basiliscos, Venomous Dragonfly, Ohran Viper, Aether Membrane, Wall of Tears... ----------
+# os gatilhos de bloqueio e de dano em criatura põem a outra criatura em tc.tk, e o atrasa guarda o tc → DelayTriggerRemembered vira TriggeredCard (tk)
+P.append(("/* L94 atrasado fim do combate */", "  /* AtEOT em ficha/pump */",
+"""  /* L94 atrasado fim do combate */if(api==='DelayedTrigger'&&d.Mode==='Phase'&&d.Phase==='EndCombat'&&/^Triggered(Target|Attacker|Blocker|Card)(LKICopy)?$/.test(d.RememberObjects||'')&&(!d.ValidPlayer||/^(Player|You)$/.test(d.ValidPlayer))&&!d.SubAbility&&!d.ThisTurn){const ex=fgPP((ctx.sv||{})[d.Execute]||'');if(ex.api&&/^DelayTriggerRemembered(LKI)?$/.test(ex.d.Defined||'')&&!ex.d.SubAbility&&!/DelayTrigger/.test(JSON.stringify(Object.assign({},ex.d,{Defined:''})))){const st=fgCadeia(Object.assign({},ex.d,{Defined:'TriggeredCard'}),ex.api,ctx);if(!st.some(o=>o.op==='nao'||o.si)&&st.every(o=>o.tk))return [{op:'atrasa',ph:'EndC',st}];}}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
