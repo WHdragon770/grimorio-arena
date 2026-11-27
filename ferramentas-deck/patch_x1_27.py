@@ -617,6 +617,24 @@ P.append(("case 'danoQ':", "      case 'sacrEsta':{",
 """      case 'danoQ':{const u=xQuemJ(s.q,it,ult);if(!u||!(n>0)){feito.push(u?'sem dano':'sem jogador pro dano');break;}xNoAlvo('P:'+u,'dano',n,ev);feito.push(`${n} de dano em ${u===me?'você':xNomeU(u)}`);break;}
 """, 'antes'))
 
+# ---------- L55. PlayerCountOpponents$Highest (CardsInHand / LifeTotal / Valid X.YouCtrl): o maior entre os oponentes ----------
+# Beza the Bounding Spring, Teachings of the Archaics, Sunset Revelry, Scholar of New Horizons, Claim Jumper, Emeritus of Truce...
+P.append(("b.match(/^PlayerCountOpponents\\$Highest", "  if(m=b.match(/^TriggeredTarget\\$(LifeTotal|CardsInHand)$/))return {q:'tdJ',",
+"""  if(b==='PlayerCountOpponents$HighestCardsInHand')return {q:'opMax',f:'nm',md};if(b==='PlayerCountOpponents$HighestLifeTotal')return {q:'opMax',f:'vida',md};
+  if(m=b.match(/^PlayerCountOpponents\\$HighestValid (.+)$/)){if(!/YouCtrl/.test(m[1])||/Remembered|Targeted|Triggered|Chosen/.test(m[1])||!fgSpecOk(m[1],ctx))return null;return {q:'opMax',f:'v',v:m[1],md};}
+  if(m=b.match(/^TriggeredTarget\\$(LifeTotal|CardsInHand)$/))return {q:'tdJ',""", 'troca'))
+P.append(("v.q==='opMax'?", ":v.q==='rand'?",
+""":v.q==='opMax'?Math.max(0,...xOpsL().filter(u=>!xMorto(X.ops[u])).map(u=>{const o=X.ops[u]||{};if(v.f==='vida')return o.vida||0;if(v.f==='nm')return o.nm||0;return (o.campo||[]).filter(c=>{try{return fgValid(c,v.v,{eu:u,src:'',sv:{}});}catch(er){return false;}}).length;}))""", 'antes'))
+
+# ---------- L56. BUG: condição comparando com outra SVar (ConditionSVarCompare GTY) descartava o passo calado; e conta só da execução também ----------
+# Claim Jumper, Scholar of New Horizons, Knight of the White Orchid, Weathered Wayfarer?, Gift of Estates, Land Tax?...
+P.append(("/* compara com outra SVar */", "function fgPasso(d,api,ctx){/* Defined A & Self */",
+"""function fgPasso(d,api,ctx){/* compara com outra SVar */if(d.ConditionCheckSVar){const cv=k=>{let r=null;try{r=fgConta(k,ctx);}catch(er){}return r==='X'?{q:'X'}:r;};const a=cv(d.ConditionCheckSVar),m=String(d.ConditionSVarCompare||'GE1').match(/^(LT|LE|EQ|GE|GT|NE)(.+)$/);
+    if(m){const nu=/^-?\\d+$/.test(m[2]),c=nu?+m[2]:cv(m[2]);if(c!=null&&c!=='X'&&a!=null&&a!=='X'&&(typeof a==='object'||typeof c==='object')){const d2=Object.assign({},d);delete d2.ConditionCheckSVar;delete d2.ConditionSVarCompare;const r=fgPasso(d2,api,ctx);if(r.some(o=>o.op==='nao'))return r;return [{op:'se',d:'n',q:{q:'cmp',a,o:m[1],c,x:1,y:0,md:[]},cmp:'GE1',st:r}];}
+      if(!nu&&typeof c==='number')d=Object.assign({},d,{ConditionSVarCompare:m[1]+c});}}/* Defined A & Self */""", 'troca'))
+P.append(("typeof n==='object')return null;const r0=fgCmp(", "if(d.ConditionCheckSVar!=null){const n=fgConta(d.ConditionCheckSVar,ctx);if(n==null||n==='X')return null;if(!fgCmp(n,d.ConditionSVarCompare||'GE1'))return false;}",
+"if(d.ConditionCheckSVar!=null){const n=fgConta(d.ConditionCheckSVar,ctx);if(n==null||n==='X'||typeof n==='object')return null;const r0=fgCmp(n,d.ConditionSVarCompare||'GE1');if(r0===null)return null;if(!r0)return false;}", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
