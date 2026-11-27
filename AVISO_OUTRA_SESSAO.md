@@ -12,11 +12,11 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 3. Rode seu cob/tL1/mec e confira que nada caiu. Depois pode apagar este aviso e a pasta `ferramentas-deck/`.
 
 ## Números (medidor do Deck: todos os 34480 scripts do Forge, partes SP/AB/capítulo/gatilho sem op nao)
-- Antes (01d0d5e): 26629 (77.2%) · Agora: **27599 (80.0%)**, +970 cartas
+- Antes (01d0d5e): 26629 (77.2%) · Agora: **27623 (80.1%)**, +994 cartas
 - Cartas dos decks: 1342 → 1344 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (26 seções do patch)
+## O que mudou (28 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -43,6 +43,8 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L24.** Destroy da criatura do gatilho (TriggeredTarget = quem levou o dano) e NoRegen nos Defined gerais; o gatilho "deals damage to a creature" agora passa a criatura (ex.: Voracious Cobra, Sporogenic Infection, Death Pits of Rath, Toxin Sliver, Phage the Untouchable, Cosmic Horror, Aether Storm, Creepy Doll...)
 - **L25.** Seek (Alchemy): N cartas aleatórias do grimório que batem no filtro vão pra mão (ex.: Oasis of Renewal, Surge of Acclaim, Gate to Seatower, Soulstealer Axe, Blightwing Whelp, Frenzied Geistblaster, Excogitator Sphinx, Skyshroud Lookout, Hollowhenge Wrangler...)
 - **L26.** Olhar/revelar o topo (PeekAndReveal) lembrando a carta, e as partes seguintes: "se a lembrada é X" e mover a lembrada do grimório (ex.: Mudbutton Clanger, Kithkin Zephyrnaut, Plane-Merge Elf, Wolf-Skull Shaman, Risen Reef, Skyclave Aerialist, Brutal/Callous/Feral Deceiver, Bucolic Ranch, Squeaking Pie Grubfellows...)
+- **L27.** "Você pode pagar <custo>; quando fizer, ..." (ImmediateTrigger): custos de carta (devolver, descartar, exilar do cemitério, virar, moer, sacrificar N) e mana híbrida (ex.: Undead Butler, Doombot Harbinger?, Kroxa and Kunoros, Dokuchi Silencer, Tether Technician, Meanders Guide, Sutina, The Fire Nation Drill, Spider-Man To the Rescue, Rodolf Duskbringer, Slinza, Evereth...)
+- **L28.** Suspeito (Suspected): c.sspt → ameaça e não pode bloquear, sai quando muda de zona ou "deixa de ser suspeito" (ex.: Repeat Offender, It Doesn't Add Up, Caught Red-Handed, Person of Interest, Rubblebelt Braggart, Frantic Scapegoat, Hot Pursuit, Absolving Lammasu, Incriminating Impetus, Reasonable Doubt, Clandestine Meddler...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
