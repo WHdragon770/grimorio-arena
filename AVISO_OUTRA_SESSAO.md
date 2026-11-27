@@ -16,7 +16,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (67 seções do patch)
+## O que mudou (68 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -84,6 +84,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L70.** "crie uma ficha e anexe este Equipamento a ela" (Attach Defined$ Remembered depois de Token RememberTokens) (ex.: Field-Tested Frying Pan, Midnight Angel Armor, Citizen's Crowbar, Shining Armor?, Kaldra Compleat?...)
 - **L71.** BUG: Pump/PumpAll perpétuo ou permanente (Duration Perpetual/Permanent) acabava no fim do turno (ex.: Vladimir and Godfrey, Mace of Disruption, Davriel's Withering, Blighted Nightmare, Mycoid Resurrection, Begin Anew, By Elspeth's Command, Jaheira...)
 - **L72.** BUG: "exile todas ... até esta carta sair do campo" (ChangeZoneAll Duration UntilHostLeavesPlay) exilava pra sempre (ex.: Temporary Lockdown, Consulate Crackdown, Aligned Hedron Network, Planar Guide?...)
+- **L73.** BUG: Pump "enquanto você controlar esta" (AsLongAsControl) e "enquanto esta ficar virada" (UntilUntaps) acabava no fim do turno (ex.: Aegis Angel, Kyodai Soul of Kamigawa, Tale of Tinúviel, Ashnod's Battle Gear, Endoskeleton, Spirit Shield, Flamestick/Pearlspear/Frightshroud Courier...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
@@ -104,3 +105,4 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **Bug antigo corrigido (L67):** "você pode" (`Optional$ True` / `OptionalDecider$ You`) em sacrificar/moer/descartar/comprar era obrigatório. Agora o op leva `opq` e, pra pessoa, um `confirm` antes do passo (recusar pula e conta como "não fez"; o bot sempre faz). E "descarte N a não ser que descarte um X" (`UnlessType`: Compulsive Research, Thirst for Identity...) descartava N sempre; agora é `descUn` (descarta 1 do tipo se tiver e quiser).
 - **Bug antigo corrigido (L71):** Pump/PumpAll com `Duration$ Perpetual` ou `Permanent` (Davriel's Withering, Vladimir and Godfrey, Mace of Disruption, Blighted Nightmare, Jaheira...) acabava no fim do turno. Agora vira `pumpPp`/`ktPp`/`pumpTodosPp`, que gravam nos campos perpétuos `pP/pT/pK` (não zeram no fim do turno). Fica de fora quem tem `PumpZone` (mão/grimório) ou `LeaveBattlefield`.
 - **Bug antigo corrigido (L72):** `ChangeZoneAll` campo→exílio com `Duration$ UntilHostLeavesPlay` (Temporary Lockdown, Consulate Crackdown, Aligned Hedron Network) exilava pra sempre. Agora o `zonas` leva `ate`, cada exilada ganha `exAte` = fonte (inclusive no campo dos outros, via `h` no evento) e a fonte não exila a si mesma; o `xExAteVolta` do L58 devolve tudo quando ela sai.
+- **Bug antigo corrigido (L73):** Pump com `Duration$ AsLongAsControl` (Aegis Angel, Kyodai, Tale of Tinúviel) ou `UntilUntaps` (Ashnod's Battle Gear, Endoskeleton, Spirit Shield, os Couriers) acabava no fim do turno. Agora é `pumpH`: a carta guarda `hB=[{s:fonte,m:'ctl'|'tap',p,t,kws}]` e o `xHB` (chamado no `xPT`) só soma enquanto a fonte estiver em algum campo (e virada, no `tap`); quando não vale mais, sai da lista.
