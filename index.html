@@ -6362,7 +6362,7 @@ function xTc(c){try{const v=xPT(c);return {p:v.p,t:v.t,mv:xMVc(c),cnt:c.cnt||0,m
 function xGatCampo(re,rot,f,menos,tc){let n=0;const rg=new RegExp(re.source,re.flags.replace('g','')+'g');for(const c of X.eu.campo.slice()){if(c===menos||(c.tok&&!c.cp))continue;for(const m of (c.harn?xNorm(xInfo(c).tx,c.n).replace(/^∞ —\s*/gm,''):xNorm(xInfo(c).tx,c.n)).matchAll(rg))if(!f||f(m,c)){n++;const q=n;setTimeout(()=>xGatTx(c,m[m.length-1],rot,tc),300+q*150);}}return n;}
 const XCOR={white:'W',blue:'U',black:'B',red:'R',green:'G'};
 function xFiltro(f,c){const i=xInfo(c);f=String(f||'').toLowerCase().replace(/\b(a|an|another|other|your first|one or more|nontoken)\b/g,' ').replace(/\s+/g,' ').trim();if(!f||f==='permanent')return true;
-  return f.split(' or ').some(w=>w.trim().split(' ').every(x=>{if(!x)return true;if(x==='noncreature')return !i.cri;if(x==='creature'||x==='creatures')return i.cri;if(x==='land'||x==='lands')return i.land;if(x==='nonland')return !i.land;if(x==='historic')return /Artifact|Legendary|Saga/.test(i.tipo);
+  return f.split(' or ').some(w=>w.trim().split(' ').every(x=>{if(!x)return true;if(x==='noncreature')return !xCri(c);if(x==='creature'||x==='creatures')return xCri(c);if(x==='land'||x==='lands')return i.land;if(x==='nonland')return !i.land;if(x==='historic')return /Artifact|Legendary|Saga/.test(i.tipo);
     if(XCOR[x])return String(i.custo).includes('{'+XCOR[x]);if(x==='multicolored')return new Set((String(i.custo).match(/[WUBRG]/g)||[])).size>1;if(x==='colorless')return !/[WUBRG]/.test(String(i.custo));
     if(i.cri&&/^Changeling\b/im.test(i.tx||'')&&!/^(artifacts?|enchantments?|legendary|basic|snow|tokens?|instants?|sorcery|sorceries|planeswalkers?|spells?|cards?|permanents?|equipment|auras?|vehicles?)$/.test(x))return true;
     return new RegExp('\\b'+x.replace(/s$/,'').replace(/[^a-z-]/g,''),'i').test(i.tipo+(c.tok?' '+c.n:''));}));}
@@ -6660,7 +6660,7 @@ async function xCascata(c){const e=X.eu,mv=xMVc(c),ex=[];let a=null;
   xEmb(ex);e.bib.push(...ex);xSobe();xPintaEu();}
 function xAchaK(k){return [...((X.eu||{}).campo||[]),...xOpCampos().flatMap(([c])=>c)].find(c=>c.k===k);}
 function xAlvos(tp,menos){const l=[];if(tp==='player')return xAlvosEf('target player','');for(const [cp,lado] of [[(X.eu||{}).campo||[],'Seu'],...xOpCampos().map(([c,u])=>[c,xMax()>2?xNomeU(u):'Oponente'])])for(const c of cp){if(c.k===menos||c.an)continue;const i=xInfo(c);
-  const ok=tp==='creature'?i.cri:tp==='land'?i.land:tp==='artifact'?/Artifact/.test(i.tipo||'')||c.art:tp==='enchantment'?/Enchantment/.test(i.tipo||''):true;if(ok)l.push({c,lado});}return l;}
+  const ok=tp==='creature'?xCri(c):tp==='land'?i.land:tp==='artifact'?/Artifact/.test(i.tipo||'')||c.art:tp==='enchantment'?/Enchantment/.test(i.tipo||''):true;if(ok)l.push({c,lado});}return l;}
 let XQE=Promise.resolve();
 /* escolha de opções em texto: itens [{k,rot,on}], devolve lista de k (null = cancelou) */
 function xMarca(tit,it,mn,mx){if(XBOT)return Promise.resolve(it.filter(o=>o.on).slice(0,mx).map(o=>o.k).concat(it.filter(o=>!o.on).map(o=>o.k)).slice(0,Math.max(mn,it.filter(o=>o.on).length)));
@@ -6815,7 +6815,7 @@ function xPJBloq(u,src,dano){for(const q of xPJ(u)){if(q.kw==='tudo')return true
 function xBlinda(c,lado,src){if(lado!=='Seu'&&c.hxC&&src&&[...xCorFonte(src)].some(q=>c.hxC.includes(q)))return true;const i=xInfo(c),kw=i.cri?xPT(c).kw:i.kws;if(kw.has('shroud'))return true;if(lado!=='Seu'&&kw.has('hexproof'))return true;
   if(i.prot&&i.prot.size){if(i.prot.has('*'))return true;if(src)for(const q of xCorFonte(src))if(i.prot.has(q))return true;}return false;}
 function xAlvosEf(al,src){const me=xUid(),ou=xOutro(),l=[];
-  const ok=(c,lado)=>{const i=xInfo(c),cri=i.cri,pw=i.pw,art=/Artifact/.test(i.tipo||'')||!!c.art,en=/Enchantment/.test(i.tipo||''),ld=i.land;
+  const ok=(c,lado)=>{const i=xInfo(c),cri=xCri(c),pw=i.pw,art=/Artifact/.test(i.tipo||'')||!!c.art,en=/Enchantment/.test(i.tipo||''),ld=i.land;
     if(xBlinda(c,lado,src))return false;
     switch(al){case 'any target':case 'target creature or planeswalker':return cri||pw;case 'target creature or player':return cri;case 'target player or planeswalker':case 'target planeswalker':return pw;
       case 'target creature an opponent controls':case "target creature you don't control":return cri&&lado!=='Seu';case 'target creature you control':return cri&&lado==='Seu';
@@ -6897,7 +6897,7 @@ function xEfCarta(c,op,n,x){const i=xInfo(c);if(op==='exMorre'){c.exM=(X.sala||{
   else if(op==='anima'){c.ani={p:x.p,t:x.t,kw:x.kws||[],cri:x.cri,perm:x.perm};if(x.sem)Object.assign(c.ani,{sem:1,tp:x.tp||'',ct:x.ct||'',rt:x.rt||0,rc:x.rc||0});if(x.gan)c.ani.gan=x.gan;if(x.cor!=null){c.ani.cor=x.cor;c.ani.ow=x.ow?1:0;}}
   else if(op==='kt')c.kt=[...new Set([...(c.kt||[]),...(x.kws||[x.kw])])];
   else if(op==='pumpProx'){c.tpN=(c.tpN||0)+x.p;c.ateU=x.u;c.ateT=x.tn;}else if(op==='pumpPp'){c.pP=(c.pP||0)+(x.p||0);c.pT=(c.pT||0)+(x.t||0);}else if(op==='ktPp'){c.pK=[...new Set([...(c.pK||[]),...(x.kws||[])])];}else if(op==='pumpH'){c.hB=[...(c.hB||[]),{s:x.s,m:x.m,p:x.p||0,t:x.t||0,kws:x.kws||[]}];}else if(op==='pumpN'){c.tpN=(c.tpN||0)+(x.p||0);c.ttN=(c.ttN||0)+(x.t||0);c.ateU=x.u;c.ateT=x.tn;}else if(op==='ktN'){c.ktN=[...new Set([...(c.ktN||[]),...(x.kws||[])])];c.ateU=x.u;c.ateT=x.tn;}else if(op==='naoAtaca'){c.naN=1;c.ateU=x.u;c.ateT=x.tn;}else if(op==='goad'){c.gd=x.u;c.ateU=x.u;c.ateT=x.tn;}
-  else if(op==='dano'){if(xGidS(c,n))return;if(xPvD(c,null,null,0)){xLog(`dano em ${c.n} prevenido`);return;}n=xEscD(c,null,n);if(!(n>0))return;if(i.cri&&X.eu&&X.eu.campo.includes(c)&&X.eu.surT&&X.eu.surT===((X.sala||{}).turno||0)&&X.__dsn&&xSurBR(X.__dsn)){xLog(`Surge of Salvation: dano de ${X.__dsn} em ${c.n} prevenido`);return;}if(i.pw&&!i.cri){c.mk=Object.assign({},c.mk);c.mk.lealdade=(c.mk.lealdade||0)-n;}else if(i.cri){c.dn=(c.dn||0)+n;xTomouDano(c,n);}}
+  else if(op==='dano'){if(xGidS(c,n))return;if(xPvD(c,null,null,0)){xLog(`dano em ${c.n} prevenido`);return;}n=xEscD(c,null,n);if(!(n>0))return;if(i.cri&&X.eu&&X.eu.campo.includes(c)&&X.eu.surT&&X.eu.surT===((X.sala||{}).turno||0)&&X.__dsn&&xSurBR(X.__dsn)){xLog(`Surge of Salvation: dano de ${X.__dsn} em ${c.n} prevenido`);return;}if(i.pw&&!i.cri&&!(c.ani&&c.ani.cri)){c.mk=Object.assign({},c.mk);c.mk.lealdade=(c.mk.lealdade||0)-n;}else if(i.cri||(c.ani&&c.ani.cri)){c.dn=(c.dn||0)+n;xTomouDano(c,n);}}
   xVarre();}
 function xManaC(c){const i=xInfo(c);if(/any of the exiled card's colors/i.test(i.tx||'')){const ex=[X.eu,...Object.values(X.ops||{})].filter(Boolean).flatMap(q=>q.exi||[]).find(q=>q.exS===c.k);const L=ex?[...xCorFonte(ex.n)]:[];return L.length?L:null;}return i.mana;}
 function xDaMul(a){const tx=String(xInfo(a).tx||'');if(!/for each land on the battlefield with the same name as the exiled card/i.test(tx))return 1;const ex=[X.eu,...Object.values(X.ops||{})].filter(Boolean).flatMap(q=>q.exi||[]).find(q=>q.exS===a.k);if(!ex)return 0;let n=0;for(const [cp] of fgCampos())n+=cp.filter(q=>q.n===ex.n&&xInfo(q).land).length;return n;}
@@ -6913,7 +6913,7 @@ function xZonas(v){const e=X.eu,ok=c=>{try{return fgValid(c,v.v,{eu:xUid(),src:'
   else{const L=e[v.og].filter(ok);e[v.og]=e[v.og].filter(c=>!L.includes(c));n=L.length;const M=v.emb?xEmb(L):L;if(v.ds==='campo')M.forEach(c=>{c.tap=0;e.campo.push(c);xEntrou(c);});else e[v.ds].push(...M);}
   if(v.ds==='bib'&&v.emb&&v.og!=='campo')e.bib=xEmb(e.bib);xVarre();return n;}
 function xCada(o,f){for(const c of X.eu.campo.slice())if(xFiltro(f,c))xEfCarta(c,o);}
-function xTodosDano(n,menos){for(const c of X.eu.campo.slice())if(c.k!==menos&&xInfo(c).cri)xEfCarta(c,'dano',n);}
+function xTodosDano(n,menos){for(const c of X.eu.campo.slice())if(c.k!==menos&&xCri(c))xEfCarta(c,'dano',n);}
 function xNoAlvo(t,op,n,ev,x){if(!t)return;if(t.startsWith('P:')){if(op!=='dano')return;if(xPJBloq(t.slice(2),'',1)){xLog(`${xNomeU(t.slice(2))} tem proteção: dano prevenido`);return;}if(xPvD(null,t.slice(2),null,0)){xLog(`dano em ${xNomeU(t.slice(2))} prevenido`);return;}n=xEscD(null,t.slice(2),n);if(!(n>0))return;if(t.slice(2)===xUid()){X.eu.vida-=n;xDnT(n);}else ev({op:'vida',d:-n},t.slice(2));return;}
   const c=X.eu.campo.find(q=>q.k===t);if(c)return xEfCarta(c,op,n,x);const du=xDonoK(t);if(du)ev({op:'carta',k:t,o:op,n:n||0,x:x||null,sn:op==='dano'?(X.__dsn||''):''},du);}
 async function xAniq(v){const e=X.eu,pe=c=>(c.tok?0:xInfo(c).land?1:2)*100+(xInfo(c).cri?xPT(c).p:0);
@@ -6991,13 +6991,13 @@ function xEvAplica(v){const e=X.eu;
   else if(v.op==='descOp'){if(v.n>=99){const L=e.mao.splice(0);L.forEach(c=>e.cem.push(c));if(L.length){xLog(`descartou a mão: ${L.length} carta(s) (${v.nm})`);xDescartou(L.length);}}else setTimeout(()=>xDescarta(v.n,v.nm).then(()=>{xSobe();xPintaEu();}),300);}
   else if(v.op==='cntV'){xFilV(v.v,v.de,c=>{c.cnt=(c.cnt||0)+v.n;});xVarre();xSobe();xPintaEu();}
   else if(v.op==='vidaFixa'){e.vida=v.n;xLog(`sua vida virou ${v.n}`);xSobe();xPintaEu();}
-  else if(v.op==='autoDano'){for(const c of e.campo.slice())if(xInfo(c).cri){const p=xPT(c).p;if(p>0)xEfCarta(c,'dano',p);}xVarre();xSobe();xPintaEu();}
+  else if(v.op==='autoDano'){for(const c of e.campo.slice())if(xCri(c)){const p=xPT(c).p;if(p>0)xEfCarta(c,'dano',p);}xVarre();xSobe();xPintaEu();}
   else if(v.op==='pumpVen'){const n=e.ven||0;if(n){e.campo.forEach(c=>{if(xInfo(c).cri){c.tp=(c.tp||0)-n;c.tt=(c.tt||0)-n;}});xLog(`suas criaturas ganharam -${n}/-${n} até o fim do turno`);}xVarre();xSobe();xPintaEu();}
   else if(v.op==='mortoVivo'){xMortoVivo(v.v,v.vs,v.nm);xSobe();xPintaEu();}
   else if(v.op==='fazPra'){xFazDepois(v.st||[],{nm:v.nm,k:'',al:[],tc:{},sc:{}});}
   else if(v.op==='cemTira'){const ix=e.cem.findIndex(q=>q.k===v.k);if(ix>=0){const c=e.cem.splice(ix,1)[0];if(v.z==='topo')e.bib.unshift(c);else if(v.z==='fundo')e.bib.push(c);else if(v.z==='campo'){}else e.exi.push(c);xLog(`${c.n} saiu do seu cemitério (${v.nm})`);}}
   else if(v.op==='perdeJogo'){e.vida=0;xLog(`perdeu o jogo (${v.nm||'efeito'})`);}
-  else if(v.op==='aoZona'){X.eu[v.z].push(v.c);xLog(`${v.c.n} voltou pro seu ${v.z==='cem'?'cemitério':v.z==='mao'?'mão':v.z==='bib'?'grimório':'exílio'}`);}else if(v.op==='fichaD')xFicha(v.nome,v.p,v.t,v.kw,v.art,v.mana,v.n,1,v);else if(v.op==='todos')xTodos(v.tipo,v.nr);else if(v.op==='mataV'){let nn=0;xFilV(v.v,v.de,c=>{xEfCarta(c,v.ni?'destroiF':'destroi');if(!e.campo.includes(c))nn++;});if(v.perde&&nn){e.vida-=nn;xLog(`perdeu ${nn} de vida (${nn} criatura(s) destruída(s))`);}}else if(v.op==='desviraV')xFilV(v.v,v.de,c=>{c.tap=0;});else if(v.op==='viraV')xFilV(v.v,v.de,c=>{c.tap=1;if(v.stun)c.stun=(c.stun||0)+v.stun;});else if(v.op==='cada')xCada(v.o,v.f);else if(v.op==='danoTodos'&&v.sn){X.__dsn=v.sn;if(v.v)xFilV(v.v,v.de,c=>{if(xInfo(c).cri)xEfCarta(c,'dano',v.n);});else xTodosDano(v.n);X.__dsn='';}else if(v.op==='danoTodos')v.v?xFilV(v.v,v.de,c=>{if(xInfo(c).cri)xEfCarta(c,'dano',v.n);}):xTodosDano(v.n);
+  else if(v.op==='aoZona'){X.eu[v.z].push(v.c);xLog(`${v.c.n} voltou pro seu ${v.z==='cem'?'cemitério':v.z==='mao'?'mão':v.z==='bib'?'grimório':'exílio'}`);}else if(v.op==='fichaD')xFicha(v.nome,v.p,v.t,v.kw,v.art,v.mana,v.n,1,v);else if(v.op==='todos')xTodos(v.tipo,v.nr);else if(v.op==='mataV'){let nn=0;xFilV(v.v,v.de,c=>{xEfCarta(c,v.ni?'destroiF':'destroi');if(!e.campo.includes(c))nn++;});if(v.perde&&nn){e.vida-=nn;xLog(`perdeu ${nn} de vida (${nn} criatura(s) destruída(s))`);}}else if(v.op==='desviraV')xFilV(v.v,v.de,c=>{c.tap=0;});else if(v.op==='viraV')xFilV(v.v,v.de,c=>{c.tap=1;if(v.stun)c.stun=(c.stun||0)+v.stun;});else if(v.op==='cada')xCada(v.o,v.f);else if(v.op==='danoTodos'&&v.sn){X.__dsn=v.sn;if(v.v)xFilV(v.v,v.de,c=>{if(xCri(c))xEfCarta(c,'dano',v.n);});else xTodosDano(v.n);X.__dsn='';}else if(v.op==='danoTodos')v.v?xFilV(v.v,v.de,c=>{if(xCri(c))xEfCarta(c,'dano',v.n);}):xTodosDano(v.n);
   else if(v.op==='anulada')e.cem.push(v.c);
   else if(v.op==='exNome'){const q=xExNome(e,v.nm,v.zs);xLog(`${q} cópia(s) de ${v.nm} exiladas (${v.zs.join('/')})`);}
   else if(v.op==='mill'){for(let q=0;q<v.n&&e.bib.length;q++)e.cem.push(e.bib.shift());}
