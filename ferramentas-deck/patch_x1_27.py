@@ -1169,6 +1169,11 @@ P.append(("src:(X.__itA&&X.__itA.k)||''", "function xFilV(v,de,f){let n=0;for(co
 "function xFilV(v,de,f){let n=0;for(const c of X.eu.campo.slice()){let ok=false;try{ok=fgValid(c,v,{eu:de,src:(X.__itA&&X.__itA.k)||'',sv:{}});", 'troca'))
 P.append(("X.__itA=null;if(v.alA)", "function xEvAplica(v){const e=X.eu;if(v.alA)X.__alA=v.alA;", "function xEvAplica(v){const e=X.eu;X.__itA=null;if(v.alA)X.__alA=v.alA;", 'troca'))
 
+# ---------- L105. evento com filtro de contexto: o X.__alA/X.__tcA só era trocado se o evento trouxesse alA/tcA (senão ficava o VELHO, de outra mágica); e Attached/sameName/NotDefinedTargeted/TriggeredTarget não mandavam alA ----------
+P.append(("/ControlledBy|TargetedPlayerCtrl|DefenderCtrl|Attached|sameName|NotDefinedTargeted|TriggeredTarget/", "/ControlledBy|TargetedPlayerCtrl|DefenderCtrl/.test(String(o.v||''))",
+"/ControlledBy|TargetedPlayerCtrl|DefenderCtrl|Attached|sameName|NotDefinedTargeted|TriggeredTarget/.test(String(o.v||''))", 'troca'))
+P.append(("X.__itA=null;X.__alA=v.alA||[];X.__tcA=v.tcA||null;", "X.__itA=null;if(v.alA)X.__alA=v.alA;if(v.tcA)X.__tcA=v.tcA;", "X.__itA=null;X.__alA=v.alA||[];X.__tcA=v.tcA||null;", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
