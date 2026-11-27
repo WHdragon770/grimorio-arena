@@ -747,6 +747,10 @@ P.append(("xTodos(s.tipo,s.nr);", "case 'todos':xTodos(s.tipo);ev({op:'todos',ti
 P.append(("xTodos(v.tipo,v.nr);", "v.op==='todos')xTodos(v.tipo);", "v.op==='todos')xTodos(v.tipo,v.nr);", 'troca'))
 P.append(("function xTodos(tipo,nr){", "function xTodos(tipo){", "function xTodos(tipo,nr){", 'troca'))
 P.append(("if(ok){if(nr)c.nRg=", "if(ok)xEfCarta(c,'destroi');}}", "if(ok){if(nr)c.nRg=(X.sala||{}).turno||0;xEfCarta(c,'destroi');}}}", 'troca'))
+# ---------- L66. Ficha pro jogador-alvo (TokenOwner Targeted/TargetedPlayer) ia pro "outro jogador" e não pro alvo escolhido (multiplayer) ----------
+# Hunted Horror, Ox Drover, Forbidden Orchard, Cybernetica Datasmith, Prismari Command, Gravedig?, Brigid's Command...
+P.append(("test(al||'')?'alvo':ow==='Opponent'", "&&/^target (opponent|player)$/.test(al||'')?'ou':ow==='Opponent'", "&&/^target (opponent|player)$/.test(al||'')?'alvo':ow==='Opponent'", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
