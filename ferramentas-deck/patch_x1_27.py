@@ -817,6 +817,24 @@ P.append(("case 'zonas':{if(s.ate){", "      case 'zonas':{const os=",
 P.append(("if(v.h&&v.ds==='exi'){", "  if(v.og==='campo'){for(const c of e.campo.slice())if(ok(c)){n++;xSai(c,v.ds);}}",
 "  if(v.og==='campo'){for(const c of e.campo.slice())if(ok(c)&&c.k!==v.h){n++;const k0=c.k;xSai(c,v.ds);if(v.h&&v.ds==='exi'){const z=e.exi.find(q=>q.k===k0)||e.exi[e.exi.length-1];if(z)z.exAte=v.h;}}}", 'troca'))
 
+# ---------- L73. BUG: Pump "enquanto você controlar esta" (AsLongAsControl) e "enquanto esta ficar virada" (UntilUntaps) acabava no fim do turno ----------
+# Aegis Angel, Kyodai Soul of Kamigawa, Tale of Tinúviel, Ashnod's Battle Gear, Endoskeleton, Spirit Shield, Flamestick/Pearlspear/Frightshroud Courier...
+P.append(("/* pump preso à fonte */", "  /* AtEOT em ficha/pump */",
+"""  /* pump preso à fonte */if(api==='Pump'&&(d.Duration==='AsLongAsControl'||d.Duration==='UntilUntaps')&&!d.AtEOT){const d2=Object.assign({},d);delete d2.Duration;const r=fgPasso0(d2,api,ctx);if(r.some(o=>o.op==='nao'))return r;
+    if(r.length&&r.every(o=>o.op==='pump'&&!o.dbl||o.op==='kt')){const m=d.Duration==='UntilUntaps'?'tap':'ctl';return r.map(o=>Object.assign({},o,{op:'pumpH',m,p:o.op==='pump'?o.p:0,t:o.op==='pump'?o.t:0,kws:o.op==='kt'?(o.kws||[o.kw]):(o.kw||[])}));}return nao('enquanto durar a fonte');}
+""", 'antes'))
+P.append(("for(const b of xHB(c)){", "(c.kwC||[]).forEach(x=>kw.add(x));",
+"(c.kwC||[]).forEach(x=>kw.add(x));for(const b of xHB(c)){p+=b.p||0;t+=b.t||0;(b.kws||[]).forEach(x=>kw.add(x));}", 'troca'))
+P.append(("const xHB=c=>", "function xLadoCampo(c){",
+"""const xHB=c=>{if(!c.hB||!c.hB.length)return [];const ach=k=>((X.eu||{}).campo||[]).find(x=>x.k===k)||xOpCampos().map(([cp])=>cp.find(x=>x.k===k)).find(Boolean);c.hB=c.hB.filter(b=>{const q=ach(b.s);return q&&(b.m!=='tap'||q.tap);});return c.hB;};
+function xLadoCampo(c){""", 'troca'))
+P.append(("'kwC','fin','hB',", "'kwC','fin',", "'kwC','fin','hB',", 'troca'))
+P.append(("else if(op==='pumpH'){", "else if(op==='pumpN'){",
+"else if(op==='pumpH'){c.hB=[...(c.hB||[]),{s:x.s,m:x.m,p:x.p||0,t:x.t||0,kws:x.kws||[]}];}else if(op==='pumpN'){", 'troca'))
+P.append(("case 'pumpH':", "      case 'pumpN':case 'ktN':{",
+"""      case 'pumpH':{const k=t||it.k;if(!k){feito.push('sem alvo');break;}xNoAlvo(k,'pumpH',0,ev,{s:it.k,m:s.m,p:s.p,t:s.t,kws:s.kws});feito.push(`${xAlvoNome(k)} ${s.p||s.t?(s.p>=0?'+':'')+s.p+'/'+(s.t>=0?'+':'')+s.t+' ':''}${s.kws&&s.kws.length?'ganha '+s.kws.map(x=>KPT[x]||x).join(', ')+' ':''}${s.m==='tap'?'enquanto '+it.nm+' ficar virada':'enquanto você controlar '+it.nm}`);break;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
