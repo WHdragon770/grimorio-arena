@@ -493,6 +493,20 @@ P.append(("case 'nDesvV':", "      case 'sacrEsta':{",
 """      case 'nDesvV':{const L=e.campo.filter(c=>{try{return fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}});L.forEach(c=>c.nd=1);feito.push(`${L.length} permanente${L.length===1?'':'s'} seu${L.length===1?'':'s'} (${s.v.replace('.YouCtrl','')}) não desvira${L.length===1?'':'m'} na próxima etapa de desvirar`);break;}
 """, 'antes'))
 
+# ---------- L40. "Moa N; você pode pôr um X dentre elas na mão/no campo" (ChangeZone Hidden, ChangeType X.IsRemembered, origem cemitério/exílio) ----------
+# Ainok Wayfarer, Sparring Dummy, First Contact, Scout the City, Oko Lorwyn Liege, Cache Grab, Something Worth Saving, Seed of Hope, Rapid Rescue, Barrowgoyf, Tetzin, Tomakul Scrapsmith, T'Chaka...
+P.append(("/* lembradas pra mão */", "    case 'ChangeZone':/* exila e volta a própria */",
+"""    case 'ChangeZone':/* lembradas pra mão */if(!al&&!d.Defined&&d.Hidden==='True'&&/^(Graveyard|Graveyard,Exile|Exile,Graveyard)$/.test(d.Origin||'')&&/^(Hand|Battlefield)$/.test(d.Destination||'')&&/IsRemembered/.test(d.ChangeType||'')&&!/EACH|&|IsImprinted|Chosen|Triggered|Targeted/.test(d.ChangeType)&&!Object.keys(d).some(k=>/^(Remember|Imprint|Condition|Unless|DefinedPlayer|Chooser|Forget)/.test(k)&&!/^(RememberChanged|ForgetOtherRemembered)$/.test(k))){
+      const v=String(d.ChangeType).replace(/\\.IsRemembered\\+/g,'.').replace(/\\+IsRemembered\\b/g,'').replace(/\\.IsRemembered\\b/g,'');const n=d.ChangeNum==null?1:N('ChangeNum');if(typeof n==='number'&&fgSpecOk(v,ctx))return [{op:'lembEsV',v,n,z:d.Destination==='Hand'?'mao':'campo',tap:d.Tapped==='True'?1:0,lc:d.RememberChanged==='True'?(d.ForgetOtherRemembered==='True'?2:1):0}];}
+""", 'antes'))
+P.append(("case 'lembEsV':", "      case 'sacrEsta':{",
+"""      case 'lembEsV':{const ok=c=>{try{return fgValid(c,s.v,{eu:me,src:it.k||'',sv:{}});}catch(er){return false;}},L=(it.lemb||[]).filter(c=>(e.cem.includes(c)||e.exi.includes(c))&&ok(c)),nm=it.nm,q=Math.max(0,+n||0),res=st.slice(si+1),al2=(it.al||[]).slice(j),s0=s;
+        const poe=c=>{const z=e.cem.includes(c)?e.cem:e.exi;z.splice(z.indexOf(c),1);if(s0.z==='campo'){xReset(c);c.tap=s0.tap?1:0;c.sk=xInfo(c).cri?1:0;e.campo.push(c);setTimeout(()=>xEntrou(c),300);}else e.mao.push(c);};
+        const fim=P=>{if(P.length)xLog(`${nm}: pôs ${P.map(c=>c.n).join(', ')} ${s0.z==='mao'?'na mão':'no campo'}`);const lb=s0.lc===2?P:s0.lc===1?[...(it.lemb||[]),...P]:(it.lemb||[]);if(res.length)xFazDepois(res,Object.assign({},it,{al:al2,lemb:lb}));else{xSobe();xPintaEu();}};
+        setTimeout(async()=>{const P=[];for(let z=0;z<q;z++){const R=L.filter(c=>!P.includes(c));if(!R.length)break;let c;if(XBOT)c=R[0];else{const k=await xEscolhe(`${nm}: pôr qual ${s0.z==='mao'?'na mão':'no campo'}? (feche pra não pôr)`,R.map(c=>({c,lado:'Cemitério'})));c=R.find(x=>x.k===k);}if(!c)break;poe(c);P.push(c);}fim(P);},300);
+        feito.push(L.length?'escolhe dentre as cartas':'nenhuma carta assim entre elas');xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
