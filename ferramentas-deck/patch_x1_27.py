@@ -652,6 +652,22 @@ P.append(("function xExAteVolta(k,rem){", "function xExAteVolta(k){const e=X.eu;
 "function xExAteVolta(k,rem){if(!rem&&k){const h=X.eu&&X.eu.campo.find(q=>q.k===k);if(h&&h.exO){delete h.exO;xEvia({op:'exAteV',k});}}const e=X.eu;", 'troca'))
 P.append(("v.op==='exAteV'", "  else if(v.op==='aniq')xAniq(v);", "  else if(v.op==='aniq')xAniq(v);\n  else if(v.op==='exAteV')xExAteVolta(v.k,1);", 'troca'))
 
+# ---------- L59. BUG: "exile/sacrifique no fim do turno" (AtEOT) era ignorado em fichas e no Pump: a ficha ficava pra sempre ----------
+# Geist of Saint Traft, Daring Piracy, War Effort, Angelic Favor, Faerie Aerie, L'Rell, Invocation of Saint Traft, Pyric Salamander, Deathknell Kami, Fatal Frenzy, Lowland Oaf...
+P.append(("/* AtEOT em ficha/pump */", "function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.StackDescription||api)+(why?' ('+why+')':'')}];",
+"""function fgPasso0(d,api,ctx){const nao=why=>[{op:'nao',d:(d.SpellDescription||d.StackDescription||api)+(why?' ('+why+')':'')}];
+  /* AtEOT em ficha/pump */if((api==='Token'||api==='Pump')&&d.AtEOT){const f=/^(Your)?Exile(Combat)?$/.test(d.AtEOT)?'exi':/^(Your)?Sacrifice(Combat|Ctrl)?$/.test(d.AtEOT)?'sac':d.AtEOT==='Destroy'?'des':'';if(!f)return nao('fim do turno');const d2=Object.assign({},d);delete d2.AtEOT;const r=fgPasso0(d2,api,ctx);if(r.some(o=>o.op==='nao'))return r;
+    if(api==='Token'){if(!r.some(o=>o.op==='ficha'))return nao('fim do turno');for(const o of r)if(o.op==='ficha')o.fim=f;return r;}const p0=r.find(o=>o.op==='pump'||o.op==='kt');if(!p0)return nao('fim do turno');return [...r,p0.al?{op:'fimF',f,mesmo:1}:{op:'fimF',f,si:1}];}""", 'troca'))
+P.append(("xx&&xx.fim==='sac'?{sacF:1}", "...(xx&&xx.tkD?{tkD:xx.tkD}:{})});e.campo.push(...nov);",
+"...(xx&&xx.tkD?{tkD:xx.tkD}:{}),...(xx&&xx.fim==='sac'?{sacF:1}:xx&&xx.fim==='exi'?{exF:1}:xx&&xx.fim==='des'?{desF:1}:{})});e.campo.push(...nov);", 'troca'))
+P.append(("if(op==='fimF'){", "function xEfCarta(c,op,n,x){const i=xInfo(c);",
+"function xEfCarta(c,op,n,x){const i=xInfo(c);if(op==='fimF'){if(x&&x.f==='sac')c.sacF=1;else if(x&&x.f==='des')c.desF=1;else c.exF=1;return;}", 'troca'))
+P.append(("case 'fimF':", "      case 'sacrEsta':{",
+"""      case 'fimF':{if(!t){feito.push('sem alvo');break;}xNoAlvo(t,'fimF',0,ev,{f:s.f});feito.push(`${xAlvoNome(t)} vai ser ${s.f==='sac'?'sacrificada':s.f==='des'?'destruída':'exilada'} no fim do turno`);break;}
+""", 'antes'))
+
+P.append(("q.desF);", "xLog(`fim do turno: sacrificou ${sf.length} ficha(s) temporária(s)`);xVarre();}",
+"xLog(`fim do turno: sacrificou ${sf.length} ficha(s) temporária(s)`);xVarre();}{const df=e.campo.filter(q=>q.desF);if(df.length){df.forEach(q=>{delete q.desF;xEfCarta(q,'destroi',0);});xLog(`fim do turno: destruiu ${df.map(q=>q.n).join(', ')}`);xVarre();}}", 'troca'))
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
