@@ -1235,6 +1235,12 @@ P.append(("if(s.rm)it.rem=q;feito.push(`${u===me?'você':xNomeU(u)} comprou ${q}
 P.append(("if(s.rm)it.lemb=L.slice();feito.push(tx+", "L.forEach(c=>e.cem.push(c));if(L.length)xDescartou(L.length);feito.push(tx+(L.length?': '+L.map(c=>c.n).join(', '):''));break;}setTimeout(()=>xDescarta(n,it.nm).then(()=>{xSobe();xPintaEu();}),300);feito.push(tx);break;}",
 "L.forEach(c=>e.cem.push(c));if(L.length)xDescartou(L.length);if(s.rm)it.lemb=L.slice();feito.push(tx+(L.length?': '+L.map(c=>c.n).join(', '):''));break;}{const rsp=xEspera(s,st,si,it,j,1,'P:'+me);setTimeout(()=>{xDescarta.ult=[];xDescarta(n,it.nm).then(()=>{if(rsp)xSacrRes({id:rsp,cs:(xDescarta.ult||[]).slice()});xSobe();xPintaEu();});},300);feito.push(tx);if(rsp){xLog(`${it.nm} resolveu: ${feito.join(' · ')} (o resto depois)`);return rest;}}break;}", 'troca'))
 
+# ---------- L114. mill do OPONENTE com lembrado (Mindshrieker: +X/+X pelo MV da carta moída do alvo) dava 0: o mill do oponente responde sacrRes ----------
+P.append(("const ml=[];for(let q=0;q<v.n&&e.bib.length;q++){const c=e.bib.shift();e.cem.push(c);ml.push(c);}xResp(v,ml);", "else if(v.op==='mill'){for(let q=0;q<v.n&&e.bib.length;q++)e.cem.push(e.bib.shift());}",
+"else if(v.op==='mill'){const ml=[];for(let q=0;q<v.n&&e.bib.length;q++){const c=e.bib.shift();e.cem.push(c);ml.push(c);}xResp(v,ml);}", 'troca'))
+P.append(("const rsp=xEspera(s,st,si,it,j,1,'P:'+(ua||ou));", "if(s.quem==='op'||ua&&ua!==me)ev({op:'mill',n},ua||ou);}",
+"if(s.quem==='op'||ua&&ua!==me){const rsp=xEspera(s,st,si,it,j,1,'P:'+(ua||ou));ev({op:'mill',n,rsp},ua||ou);if(rsp){feito.push(`${xNomeU(ua||ou)} mói ${n}`);xLog(`${it.nm} resolveu: ${feito.join(' · ')} (o resto depois)`);return rest;}}}", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
