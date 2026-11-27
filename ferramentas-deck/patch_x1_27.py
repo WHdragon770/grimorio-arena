@@ -954,6 +954,16 @@ P.append(("cn=/^\\d+$/.test(String(d.CharmNum||1))?null:d.CharmNum", "case 'Char
 P.append(("if(md.cn){try{", "const mx=Math.min(md.n,it.length),mn=Math.min(md.min,mx);",
 "if(md.cn){try{const r=fgConta(md.cn,{eu:xUid(),src:'',sv:md.csv||{}});if(typeof r==='number'&&r>=0)md=Object.assign({},md,{n:r,min:Math.min(md.min,r)});}catch(er){}}const mx=Math.min(md.n,it.length),mn=Math.min(md.min,mx);", 'troca'))
 
+# ---------- L85. BUG: filtros do Forge em minúscula que o fgProp não conhecia caíam no fgAv e davam TRUE (aceitava qualquer carta) ----------
+# Fatal Blow / Ogre Siegebreaker / Orzhov Euthanist (wasDealtDamageThisTurn), War Machine / Avenging Arsenal (modified), Whiplash (equipped), Blessed Reversal (attackingYou), Breeches (inZoneBattlefield), Slimefoot's Survey (hasABasicLandType), Rishadan Brigand (canProduceMana), Clockwork Steed (attackedThisCombat)...
+P.append(("if(p==='wasDealtDamageThisTurn')", "  if(m=p.match(/^named(.+)$/))return fgN(c.n)===m[1];",
+"""  if(p==='wasDealtDamageThisTurn')return !!c.dn||c.dnT===((X.sala||{}).turno||0);if(p==='inZoneBattlefield'||p==='inRealZoneBattlefield')return c.k==='__x'||xExiste(c.k);
+  if(p==='modified')return !!(c.cnt||(c.mk&&Object.values(c.mk).some(v=>+v>0))||fgTodos().some(q=>q.an===c.k&&(xInfo(q).equip||xInfo(q).aura)));if(p==='equipped')return fgTodos().some(q=>q.an===c.k&&xInfo(q).equip);
+  if(p==='attackingYou')return !!c.atk&&c.alv==='P:'+(ctx&&ctx.eu||xUid());if(p==='attackedThisCombat')return !!c.atk;if(p==='faceDown')return !!c.fd;
+  if(p==='hasABasicLandType')return /\\b(Plains|Island|Swamp|Mountain|Forest)\\b/.test(xInfo(c).tipo||'');if(p==='canProduceMana')return !!(xInfo(c).land||xManaC(c));
+  if(m=p.match(/^named(.+)$/))return fgN(c.n)===m[1];""", 'troca'))
+P.append(("c.dnT=(X.sala||{}).turno||0;c.dn=(c.dn||0)+n;", "else if(i.cri||(c.ani&&c.ani.cri)){c.dn=(c.dn||0)+n;", "else if(i.cri||(c.ani&&c.ani.cri)){c.dnT=(X.sala||{}).turno||0;c.dn=(c.dn||0)+n;", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
