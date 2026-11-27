@@ -412,6 +412,21 @@ P.append(("/* Defined A & Self */", "function fgPasso(d,api,ctx){",
 P.append(("xFiltro(m[1],a.c),null,{dano:a.hp,p:xPT(a.c).p,td:'P:'+a.hu,tk:a.c.k", "xFiltro(m[1],a.c),null,{dano:a.hp,p:xPT(a.c).p,td:'P:'+a.hu});",
 "xFiltro(m[1],a.c),null,{dano:a.hp,p:xPT(a.c).p,td:'P:'+a.hu,tk:a.c.k,tku:xUid()});", 'troca'))
 
+# ---------- L31. Gatilhos de emblema/efeito "no começo da sua manutenção" e "da sua etapa final" (antes só conjurou e início do combate) ----------
+# Liliana, the Last Hope, Kiora, the Crashing Wave, Ajani, Adversary of Tyrants, Chandra, Awakened Inferno, Chandra, Fire of Kaladesh, Teyo, Tezzeret, Artifice Master, Garruk, Unleashed...
+P.append(("L.push({m:r.Phase==='Upkeep'?'manut':'fim'", "L.push({m:'combate',ops,desc,uma:r.OneOff==='True'?1:0});else return nao(emb?'gatilho do emblema':'efeito com Triggers');",
+"L.push({m:'combate',ops,desc,uma:r.OneOff==='True'?1:0});else if(r.Mode==='Phase'&&/^(End of Turn|Upkeep)$/.test(r.Phase||'')&&(!r.ValidPlayer||r.ValidPlayer==='You'))L.push({m:r.Phase==='Upkeep'?'manut':'fim',ops,desc,uma:r.OneOff==='True'?1:0});else return nao(emb?'gatilho do emblema':'efeito com Triggers');", 'troca'))
+P.append(("xAtrasado('End');xEmbDispara('fim');", "e.fimT=s.turno;xAtrasado('End');", "e.fimT=s.turno;xAtrasado('End');xEmbDispara('fim');", 'troca'))
+P.append(("setTimeout(()=>xEmbDispara('manut'),820);", "setTimeout(()=>xAtrasado('Upkeep'),760);", "setTimeout(()=>xAtrasado('Upkeep'),760);setTimeout(()=>xEmbDispara('manut'),820);", 'troca'))
+
+# ---------- L32. Gatilho de emblema recalcula as contas na hora que dispara (antes ficava o valor da hora em que ganhou o emblema: Liliana, the Last Hope "2 + zumbis") ----------
+P.append(("L.push({re:{d:ex.d,api:ex.api,sv:ctx.sv},m:'cast',", "L.push({m:'cast',", "L.push({re:{d:ex.d,api:ex.api,sv:ctx.sv},m:'cast',", 'troca'))
+P.append(("L.push({re:{d:ex.d,api:ex.api,sv:ctx.sv},m:'combate',", "L.push({m:'combate',ops", "L.push({re:{d:ex.d,api:ex.api,sv:ctx.sv},m:'combate',ops", 'troca'))
+P.append(("L.push({re:{d:ex.d,api:ex.api,sv:ctx.sv},m:r.Phase", "L.push({m:r.Phase==='Upkeep'?'manut':'fim'", "L.push({re:{d:ex.d,api:ex.api,sv:ctx.sv},m:r.Phase==='Upkeep'?'manut':'fim'", 'troca'))
+P.append(("let ops=g.ops;if(g.re)", "function xGatEmb(em,g,c){const al=await xPedeAlvos(g.ops,em.nm,'');",
+"function xGatEmb(em,g,c){let ops=g.ops;if(g.re){try{const r=fgCadeia(g.re.d,g.re.api,{eu:xUid(),src:'',sv:g.re.sv||{}});if(!r.some(o=>o.op==='nao'))ops=r;}catch(er){}}const al=await xPedeAlvos(ops,em.nm,'');", 'troca'))
+P.append(("nm:em.nm,img:'',k:'',al,ops}", "nm:em.nm,img:'',k:'',al,ops:g.ops}", "nm:em.nm,img:'',k:'',al,ops}", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
