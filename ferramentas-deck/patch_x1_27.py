@@ -694,6 +694,16 @@ P.append(("if(v.h)c.ctlH=v.h;else delete c.ctlH;", "if(v.kws&&v.kws.length)c.kt=
 P.append(("q.ctlH===k&&q.dono0", "const e=X.eu;if(!e||!k||!e.exi.some(q=>q.exAte===k))return;",
 "const e=X.eu;if(e&&k&&!rem){for(const q of e.campo.filter(q=>q.ctlH===k&&q.dono0)){e.campo.splice(e.campo.indexOf(q),1);const u=q.dono0;delete q.ctlH;xEvia({op:'recebe',c:JSON.parse(JSON.stringify(q)),dn:u,para:u});xLog(`${q.n} voltou pro dono (a carta que tomou o controle saiu)`);}}if(!e||!k||!e.exi.some(q=>q.exAte===k))return;", 'troca'))
 
+# ---------- L62. BUG: dano dividido entre alvos (DividedAsYouChoose) dava o total em CADA alvo (Arc Lightning 3+3+3) ----------
+# Arc Lightning, Forked Lightning, Fireball?, Fiery Justice, Cone of Flame?, Ignite Disorder, Rolling Thunder?, Inferno Titan...
+P.append(("/* dano dividido */", "  /* AtEOT em ficha/pump */",
+"""  /* dano dividido */if(api==='DealDamage'&&d.DividedAsYouChoose!=null){const d2=Object.assign({},d);delete d2.DividedAsYouChoose;const r=fgPasso0(d2,api,ctx);const L=r.filter(o=>o.op==='dano'&&o.al);if(L.length>1&&r.every(o=>o.op==='dano'))return r.map(o=>Object.assign({},o,{op:'danoDiv'}));return r;}
+""", 'antes'))
+P.append(("if(s.op==='danoDiv'){", "    const pa=xPrecisaAlvo(s),t=pa?(it.al||[])[j++]",
+"""    if(s.op==='danoDiv'){if(it.dvR==null)it.dvR=s.n==='X'?(it.x||0):(+(typeof s.n==='object'?rv(s.n):s.n)||0);const rest=st.slice(si+1).filter(o=>o.op==='danoDiv').length,t0=(it.al||[])[j],nx=(it.al||[]).slice(j+1,j+1+rest).filter(Boolean).length;let q=0;
+      if(t0&&it.dvR>0){if(!nx)q=it.dvR;else if(XBOT)q=Math.max(1,Math.ceil(it.dvR/(nx+1)));else{const r=prompt(`${it.nm}: quanto dos ${it.dvR} de dano vai em ${xAlvoNome(t0)}? (sobra pelo menos 1 pra cada um dos outros ${nx} alvo(s))`,String(Math.max(1,it.dvR-nx)));q=Math.max(1,Math.min(it.dvR-nx,parseInt(r,10)||1));}}it.dvR-=q;s=Object.assign({},s,{op:'dano',n:q});}
+""", 'antes'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
