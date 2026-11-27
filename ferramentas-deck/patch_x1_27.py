@@ -1195,6 +1195,18 @@ P.append(("const k0=new Set(e.campo.map(c=>c.k));xFicha(", 'xFicha(s.nome,s.p,s.
 P.append(("if(u===me){const k1=new Set(", 'if(u===me){xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1,s);xFichaPos(e,n,s);}',
 'if(u===me){const k1=new Set(e.campo.map(c=>c.k));xFicha(s.nome,s.p,s.t,s.kw,s.art,s.mana,n,1,s);if(s.rm)it.lemb=[...(it.lemb||[]),...e.campo.filter(c=>!k1.has(c.k))];xFichaPos(e,n,s);}', 'troca'))
 
+# ---------- L109. BUG: "o oponente sacrifica X; você ganha/cria igual ao sacrificado" (sacr com rm) perdia o lembrado (o sacrifício é no outro jogador, por evento): Tribute to Hunger ganhava 0, Syphon Flesh criava 0 (e o xFicha com 0 criava 1!). Agora o oponente responde sacrRes com o que sacrificou e o resto continua ----------
+P.append(("const rsp=(s.rm&&si<st.length-1)", "for(const u of q)ev({op:'sacr',n,tipo:s.tipo,nm:it.nm,maior:s.maior||'',descSe:s.descSe||0},u);if(s.quem==='each player')xSacr({n,tipo:s.tipo,nm:it.nm,descSe:s.descSe||0});",
+"""const rsp=(s.rm&&si<st.length-1)?Math.random().toString(36).slice(2,10):'';if(rsp){X.__sacW=X.__sacW||{};X.__sacW[rsp]={res:st.slice(si+1),it:Object.assign({},it,{al:(it.al||[]).slice(j)}),falta:q.length+(s.quem==='each player'?1:0),cs:[]};}for(const u of q)ev({op:'sacr',n,tipo:s.tipo,nm:it.nm,maior:s.maior||'',descSe:s.descSe||0,rsp},u);if(s.quem==='each player')xSacr({n,tipo:s.tipo,nm:it.nm,descSe:s.descSe||0}).then(cs=>{if(rsp)xSacrRes({id:rsp,cs});});if(rsp){if(!q.length&&s.quem!=='each player')xSacrRes({id:rsp,cs:[]},1);feito.push(`${s.quem==='each player'?'cada jogador':q.length>1?'cada oponente':'o oponente'} sacrifica ${n} ${s.tipo==='creature'?'criatura':'permanente'}${n>1?'s':''} (o resto depois)`);xLog(`${it.nm} resolveu: ${feito.join(' · ')}`);return rest;}""", 'troca'))
+P.append(("const cs0=[];for(let j=0;j<v.n;j++)", "for(let j=0;j<v.n;j++){let L=e.campo.filter(ok);if(!L.length){if(v.descSe", "const cs0=[];for(let j=0;j<v.n;j++){let L=e.campo.filter(ok);if(!L.length){if(v.descSe", 'troca'))
+P.append(("cs0.push({n:c.n,k:c.k});xMorre(c);}", "if(!c)c=L.sort((a,b)=>pe(a)-pe(b))[0];xLog(`sacrificou ${c.n} (${v.nm})`);xMorre(c);}\n  xVarre();xSobe();xTudo();}",
+"if(!c)c=L.sort((a,b)=>pe(a)-pe(b))[0];xLog(`sacrificou ${c.n} (${v.nm})`);cs0.push({n:c.n,k:c.k});xMorre(c);}\n  xVarre();xSobe();xTudo();if(v.rsp&&v.de&&v.de!==xUid())xEvia({op:'sacrRes',id:v.rsp,cs:cs0,para:v.de});return cs0;}", 'troca'))
+P.append(("function xSacrRes(v,", "function xFazDepois(st,it){",
+"""function xSacrRes(v,tudo){const W=(X.__sacW||{})[v.id];if(!W)return;W.cs.push(...(v.cs||[]));if(--W.falta<=0||tudo){delete X.__sacW[v.id];xFazDepois(W.res,Object.assign({},W.it,{rem:W.cs.length,lemb:W.cs.slice()}));}}
+""", 'antes'))
+P.append(("else if(v.op==='sacrRes')xSacrRes(v);", "else if(v.op==='ghRes'){", "else if(v.op==='sacrRes')xSacrRes(v);else if(v.op==='ghRes'){", 'troca'))
+P.append(("if(n===0&&s.n!==1){feito.push('nenhuma ficha');break;}", "      case 'ficha':if(s.dq){", "      case 'ficha':if(n===0&&s.n!==1){feito.push('nenhuma ficha');break;}if(s.dq){", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
