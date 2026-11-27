@@ -1225,6 +1225,12 @@ P.append(("const rsp=xEspera(s,st,si,it,j,1,ult);", "if(u!==me){ev({op:'descOp',
 P.append(("const t0=s.mesmo?String(t||''):'';if(t0.startsWith('P:')&&t0.slice(2)!==me){ev({op:'vida',d:n}", "      case 'ganha':e.vida+=n;feito.push(`ganhou ${n} de vida`);break;",
 "      case 'ganha':{const t0=s.mesmo?String(t||''):'';if(t0.startsWith('P:')&&t0.slice(2)!==me){ev({op:'vida',d:n},t0.slice(2));feito.push(`${xNomeU(t0.slice(2))} ganhou ${n} de vida`);break;}}e.vida+=n;feito.push(`ganhou ${n} de vida`);break;", 'troca'))
 
+# ---------- L112. BUG: sacrTP ("aquele jogador sacrifica X; se não sacrificar, ...") perdia o lembrado até no próprio jogador: Woebringer Demon se sacrificava TODA manutenção, Cruel Reality sempre fazia perder 5, Curse Artifact sempre 2 de dano, Doom Foretold sempre todas as punições ----------
+P.append(("const rsp=xEspera(s,st,si,it,j,1,'P:'+u);", "      case 'sacrTP':{const u=(it.tc||{}).tp||me,o={op:'sacr',n,tipo:'v',v:s.v,nm:it.nm};if(u===me)xSacr(o);else ev(o,u);feito.push(`${u===me?'você':xNomeU(u)} sacrifica ${n} (${s.v})`);break;}",
+"      case 'sacrTP':{const u=(it.tc||{}).tp||me,rsp=xEspera(s,st,si,it,j,1,'P:'+u);/* const rsp=xEspera(s,st,si,it,j,1,'P:'+u); */const o={op:'sacr',n,tipo:'v',v:s.v,nm:it.nm,rsp};if(u===me)xSacr(o).then(cs=>{if(rsp)xSacrRes({id:rsp,cs});});else ev(o,u);feito.push(`${u===me?'você':xNomeU(u)} sacrifica ${n} (${s.v})`);if(rsp){xLog(`${it.nm} resolveu: ${feito.join(' · ')} (o resto depois)`);return rest;}break;}", 'troca'))
+P.append(("if(s.rm)it.rem=q;feito.push(`${u===me?'você':xNomeU(u)} comprou ${q}`)", "else ev({op:'compra',n:q},u);feito.push(`${u===me?'você':xNomeU(u)} comprou ${q}`);break;}",
+"else ev({op:'compra',n:q},u);if(s.rm)it.rem=q;feito.push(`${u===me?'você':xNomeU(u)} comprou ${q}`);break;}", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
