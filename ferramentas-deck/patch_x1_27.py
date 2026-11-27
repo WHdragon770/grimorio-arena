@@ -462,6 +462,11 @@ P.append(("/* condição: mana gasta / fase principal */", "function fgPasso0(d,
 P.append(("v.q==='cnd'?", ":v.q==='remV'?",
 """:v.q==='cnd'?(()=>{const S=X.sala||{};if(v.vz&&S.vez!==me)return 0;if(v.ph&&!v.ph.includes(S.fase||0))return 0;if(v.ms){const c=it.c||xAchaK(it.k)||{};if(!String(c.msC||'').includes(v.ms))return 0;}return 1;})()""", 'antes'))
 
+# ---------- L36. Anular "a menos que pague X" com o X da mágica (Power Sink, Overrule, Martyr of Frost, Rethink, Logic Knot...) ----------
+P.append(("else if(n==='X')pz={g:'X'};", "if(typeof n==='number')pz={g:n};}else if(uc==='Discard<1/Hand>')pz={mao:1};", "if(typeof n==='number')pz={g:n};else if(n==='X')pz={g:'X'};}else if(uc==='Discard<1/Hand>')pz={mao:1};", 'troca'))
+P.append(("s.pz.g==='X'?{g:it.x||0}:{}", "if(s.pz){p.pz=Object.assign({nm:it.nm},s.pz);feito.push(s.pz.mao?", "if(s.pz){p.pz=Object.assign({nm:it.nm},s.pz,s.pz.g==='X'?{g:it.x||0}:{});feito.push(s.pz.mao?", 'troca'))
+P.append(("o dono paga {${s.pz.g==='X'?(it.x||0):s.pz.g}}", "`${p.nm}: o dono paga {${s.pz.g}} ou ela é anulada`", "`${p.nm}: o dono paga {${s.pz.g==='X'?(it.x||0):s.pz.g}} ou ela é anulada`", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
