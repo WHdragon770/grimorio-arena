@@ -717,6 +717,23 @@ P.append(("if(op==='exMorre'){", "function xEfCarta(c,op,n,x){const i=xInfo(c);"
 P.append(("if(c.exM&&c.exM===", "function xMorre(c){const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;",
 "function xMorre(c){const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;if(c.exM&&c.exM===((X.sala||{}).turno||0)){delete c.exM;xLog(`${c.n} seria morta: foi exilada no lugar`);return xSai(c,'exi');}", 'troca'))
 
+# ---------- L64. BUG: "volta do cemitério com marcador" (WithCountersType) era ignorado: +1/+1, -1/-1, marcador de habilidade, finalidade ----------
+# Sand Golem, Generous Revival, Gallia, Persist, Aberrant Return, Metamorphosis Fanatic, Unbreakable Bond, Mirko, Rydia, Admiral Brass, Wolfbat, Season of the Burrow...
+P.append(("/* volta com marcador */", "  /* AtEOT em ficha/pump */",
+"""  /* volta com marcador */if(api==='ChangeZone'&&d.WithCountersType){const ty=String(d.WithCountersType),ok=/^(P1P1|M1M1|FINALITY|STUN)$/.test(ty)||!!FGKW[ty];let am=d.WithCountersAmount==null?1:/^\\d+$/.test(d.WithCountersAmount)?+d.WithCountersAmount:(()=>{try{return fgConta(d.WithCountersAmount,ctx);}catch(er){return null;}})();const d2=Object.assign({},d);delete d2.WithCountersType;delete d2.WithCountersAmount;const r=fgPasso0(d2,api,ctx);if(r.some(o=>o.op==='nao'))return r;
+    const L=r.filter(o=>(o.op==='doCem'||o.op==='doCemAlvo')&&o.dest==='campo');if(!L.length)return r;if(!ok||typeof am!=='number')return r;if(!(am>0))return r;return r.map(o=>L.includes(o)?Object.assign({},o,{wc:{t:ty,n:am}}):o);}
+""", 'antes'))
+P.append(("function xWc(c,w){", "async function xDoCem(s,nm){",
+"""function xWc(c,w){if(!w||!c)return;if(w.t==='P1P1')c.cnt=(c.cnt||0)+w.n;else if(w.t==='M1M1')c.cnt=(c.cnt||0)-w.n;else if(w.t==='FINALITY')c.fin=1;else if(w.t==='STUN')c.stun=(c.stun||0)+w.n;else if(FGKW[w.t])c.kwC=[...new Set([...(c.kwC||[]),FGKW[w.t]])];xLog(`${c.n} entrou com ${w.n} marcador(es) ${w.t==='P1P1'?'+1/+1':w.t==='M1M1'?'-1/-1':w.t==='FINALITY'?'de finalidade':w.t==='STUN'?'de atordoamento':'de '+(KPT[FGKW[w.t]]||w.t)}`);}
+async function xDoCem(s,nm){""", 'troca'))
+P.append(("if(s.wc)xWc(c,s.wc);if(s.cnt){", "e.campo.push(c);if(s.cnt){", "e.campo.push(c);if(s.wc)xWc(c,s.wc);if(s.cnt){", 'troca'))
+P.append(("e.campo.push(c);if(s.wc)xWc(c,s.wc);setTimeout(()=>xEntrou(c),450);}else e.mao.push(c);feito.push(`${c.n} voltou do cemitério pr", "e.campo.push(c);setTimeout(()=>xEntrou(c),450);}else e.mao.push(c);feito.push(`${c.n} voltou do cemitério pr",
+"e.campo.push(c);if(s.wc)xWc(c,s.wc);setTimeout(()=>xEntrou(c),450);}else e.mao.push(c);feito.push(`${c.n} voltou do cemitério pr", 'troca'))
+P.append(("(c.kwC||[]).forEach(x=>kw.add(x));", "(c.kwM||[]).forEach(x=>kw.add(x));", "(c.kwM||[]).forEach(x=>kw.add(x));(c.kwC||[]).forEach(x=>kw.add(x));", 'troca'))
+P.append(("'kwM','kwC','fin','mkN',", "'kwM','mkN',", "'kwM','kwC','fin','mkN',", 'troca'))
+P.append(("if(c.fin&&!c.tok){", "function xMorre(c){const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;if(c.exM&&c.exM===",
+"function xMorre(c){const e=X.eu,ix=e.campo.indexOf(c);if(ix<0)return;if(c.fin&&!c.tok){delete c.fin;xLog(`${c.n} tinha marcador de finalidade: foi exilada em vez de morrer`);return xSai(c,'exi');}if(c.exM&&c.exM===", 'troca'))
+
 
 def aplica(s):
     feitos, pulados, falhou = [], [], []
