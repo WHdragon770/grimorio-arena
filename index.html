@@ -5528,7 +5528,8 @@ function fgConta2(b,ctx){let m;const e=X.eu||{campo:[],bib:[],cem:[],mao:[]};if(
     const v=m[1].replace(/\.YouCtrl\b|\+YouCtrl\b/g,'');return xTT().conj.filter(c=>fgValid(c,v,ctx)).length;}
   if(m=b.match(/^Count\$Kicked\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return !!(c&&(c.kick||c.mkN));},m[1],m[2]);
   if(m=b.match(/^Count\$(Delirium|Threshold|Hellbent|Metalcraft)\.(\d+)\.(\d+)$/))return sim(()=>fgCondX('Condition',m[1],ctx),m[2],m[3]);
-  if(m=b.match(/^Count\$Bargained\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return !!(c&&c.barg);},m[1],m[2]);
+  if(m=b.match(/^Count\$LastStateBattlefieldWithFallback (.+)$/))return fgTodos().filter(c=>fgValid(c,m[1],ctx)).length;
+  if(m=b.match(/^Count\$(?:Bargained|Bargain)\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return !!(c&&c.barg);},m[1],m[2]);
   if(m=b.match(/^Count\$wasCastFromExile\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return !!(c&&c.orig==='exi');},m[1],m[2]);
   return null;}
 function fgConta(v,ctx,fundo){if(v==null||v==='')return 1;v=String(v).trim().replace(/^\+/,'');if(v==='AFLifeLost')return {q:'perdeu'};if(/^-?\d+$/.test(v))return +v;
