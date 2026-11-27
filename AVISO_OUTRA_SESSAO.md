@@ -12,7 +12,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 3. Rode seu cob/tL1/mec e confira que nada caiu. Depois pode apagar este aviso e a pasta `ferramentas-deck/`.
 
 ## Números (medidor do Deck: todos os 34480 scripts do Forge, partes SP/AB/capítulo/gatilho sem op nao)
-- Antes (01d0d5e): 26629 (77.2%) · Agora: **27937 (81.0%)**, +1308 cartas
+- Antes (01d0d5e): 26629 (77.2%) · Agora: **27980 (81.1%)**, +1351 cartas
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
