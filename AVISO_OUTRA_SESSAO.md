@@ -16,7 +16,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - Cartas dos decks: 1342 → 1347 de 1378
 - Mesa de execução dos 24 decks: igual antes e depois, 0 travam. Todas as cartas novas executam sem travar.
 
-## O que mudou (74 seções do patch)
+## O que mudou (75 seções do patch)
 - **L1.** Gatilho atrasado no fim do combate (EndC) e no próximo final de turno de qualquer jogador (EndP) (ex.: Cinder Wall, Fog Elemental, Clockwork Beetle, Windscouter, Wicker Warcrawler...: só quando a cadeia usa a própria carta (sem "lembrado" do gatilho).)
 - **L2.** Jogador definido pelo Forge perde vida / compra: controlador do alvo, jogador do gatilho, controlador da carta do gatilho (ex.: Hideous End, Liliana's Defeat, Vapor Snag, One Thousand Lashes, Doom Foretold, Curse of Wizardry, Gwafa Hazid, Dream Fracture, Super Intelligence...)
 - **L3.** Dono da ficha definido pelo Forge: jogador alvo, cada oponente, cada jogador, jogador do gatilho (ex.: Hunted Dragon/Troll, Gravedig, Emeritus of Truce, Ashling's Command, Grismold, Elephant Resurgence, Questing Phelddagrif, Gonti, Dovescape...)
@@ -91,6 +91,7 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **L77.** BUG: "ponha todas as criaturas de todos os cemitérios no campo sob seu controle" (ChangeZoneAll GainControl) devolvia cada uma pro campo do próprio dono (ex.: Grimoire of the Dead, Rise of the Dread Marn?, Liliana's Contract?, Profane Command?...)
 - **L78.** BUG: "ponha todas ... no campo viradas" (ChangeZoneAll Tapped$ True) entravam desviradas (ex.: Planar Birth, Aftermath Analyst, Hedge Shredder, Splendid Reclamation?, Brought Back?, Wake the Dead?...)
 - **L79.** BUG: turno extra ignorava o número (NumTurns$ 2/X) e o jogador-alvo (ex.: Time Stretch, Teferi Master of Time (ult), Ral Zarek (X por moedas)?, Sage of Hours (X), Stitch in Time...)
+- **L80.** BUG: "ponha no campo virada e atacando" (ChangeZone Attacking$ True) entrava parada (ex.: Minion of the Mighty, Arni Metalbrow, Preeminent Captain, Paladin Elizabeth Taggerdy, Warcry Phoenix, Nemesis Phoenix, Phoenix Chick, Grim Reaper?, Alesha...)
 
 ## Achados
 - O motor não disparava gatilho de bloqueio: agora dispara (L13) "When/Whenever this creature blocks" ao confirmar os bloqueios e "becomes blocked" do lado de quem ataca; "attacks or blocks" também vale no gatilho de ataque.
@@ -118,3 +119,4 @@ O `index.html` publicado **mudou fora do seu local.html**: são os commits "X1 (
 - **Bug antigo corrigido (L77):** `ChangeZoneAll` de cemitério/exílio pro campo com `GainControl$ True` (Grimoire of the Dead) mandava o `zonas` pra cada jogador, e cada um botava as próprias cartas no próprio campo. Agora o `zonas` leva `gc`: as minhas vêm pro meu campo e os outros recebem `daZ`, tiram as cartas que batem e mandam via `recebe` (com `dono0`). Só pra filtro neutro (sem You/Opp/Ctrl/Remembered/Top...) e sem `ChangeNum`; o resto continua como antes.
 - **Bug antigo corrigido (L78):** `ChangeZoneAll` pro campo com `Tapped$ True` (Planar Birth, Aftermath Analyst, Hedge Shredder) entrava desvirado; agora o `zonas` leva `tap` e o `xZonas` respeita.
 - **Bug antigo corrigido (L79):** `AddTurn` virava sempre `{op:'extra'}` (1 turno, pra você): Time Stretch e o ultimate do Teferi, Master of Time davam 1 turno em vez de 2. Agora `extra` leva `n` (`NumTurns`) e `al` (jogador-alvo). Regressão honesta: Sage of Hours (X = marcadores removidos no custo / 5) agora fica parcial; antes dava 1 turno sempre.
+- **Bug antigo corrigido (L80):** `ChangeZone` com `Attacking$ True` ("ponha no campo virada e atacando": Minion of the Mighty, Arni Metalbrow, Preeminent Captain, Warcry/Nemesis Phoenix, Alesha...) entrava só virada. Agora `tutor`/`doCem`/`doCemAlvo` levam `atq` e o `xAtq(c)` marca `atk=2` e `alv` igual ao dos outros atacantes (ou o outro jogador), só na fase de combate do seu turno.
