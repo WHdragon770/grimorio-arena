@@ -6942,7 +6942,7 @@ function xTomouDano(c,n){if(!c||!(n>0)||!X.eu||!X.eu.campo.includes(c))return;co
   for(const [cp] of [[X.eu.campo],...xOpCampos()])for(const a of cp)if(/^Whenever a creature is dealt damage, (?:this enchantment|CARDNAME|[^,\n]+?) deals that much damage to that creature's controller\.?$/im.test(xNorm(xInfo(a).tx,a.n))){X.eu.vida-=n;xLog(`${a.n}: ${c.n} tomou ${n} de dano, você toma ${n}`);xSobe();}
   xGatCampo(/^Whenever (?:a|an|another) ([^,\n]+?) you control is dealt damage, ([^\n]+)$/im,'tomou dano',(m,q)=>!(/another/i.test(m[0])&&q===c)&&xFiltro(m[1],c),null,tc);
   xGatCampo(/^Whenever (?:this [a-z]+|[^,\n]+?) is dealt damage, ([^\n]+)$/im,'tomou dano',(m,q)=>q===c&&!/you control is dealt|each|^Whenever (?:a|an|another) /i.test(m[0]),null,tc);}
-function xFilV(v,de,f){let n=0;for(const c of X.eu.campo.slice()){let ok=false;try{ok=fgValid(c,v,{eu:de,src:'',sv:{}});}catch(er){}if(ok){n++;f(c);}}return n;}
+function xFilV(v,de,f){let n=0;for(const c of X.eu.campo.slice()){let ok=false;try{ok=fgValid(c,v,{eu:de,src:(X.__itA&&X.__itA.k)||'',sv:{}});}catch(er){}if(ok){n++;f(c);}}return n;}
 function xTodos(tipo,nr){const e=X.eu;for(const c of e.campo.slice()){const i=xInfo(c),art=/Artifact/.test(i.tipo||'')||!!c.art,en=/Enchantment/.test(i.tipo||'');
   const ok=tipo==='creatures'?xCri(c):tipo==='artifacts'?art:tipo==='enchantments'?en:tipo==='lands'?i.land:tipo==='planeswalkers'?i.pw:!i.land;if(ok){if(nr)c.nRg=(X.sala||{}).turno||0;xEfCarta(c,'destroi');}}}
 function xZonas(v){const e=X.eu,ok=c=>{try{return fgValid(c,v.v,{eu:xUid(),src:'',sv:{}});}catch(er){return false;}};let n=0;
@@ -6961,7 +6961,7 @@ async function xSacr(v){const e=X.eu,ok=c=>v.tipo==='v'?(()=>{try{return fgValid
   for(let j=0;j<v.n;j++){let L=e.campo.filter(ok);if(!L.length){if(v.descSe&&j===0&&e.mao.length){xLog(`não tinha o que sacrificar: descarta uma carta (${v.nm})`);await xDescarta(1,v.nm);}break;}if(v.maior){const f=c=>v.maior==='mv'?xMVc(c):xPT(c).p,mx=Math.max(...L.map(f));L=L.filter(c=>f(c)===mx);}let c=null;if(!XBOT&&L.length>1){const k=await xEscolhe(`${v.nm}: sacrifique ${v.tipo==='creature'?'uma criatura':v.tipo==='nc'?'um permanente não criatura e não terreno':'um permanente'} (fechar = o mais fraco)`,L.map(q=>({c:q,lado:'Seu'})));c=L.find(q=>q.k===k);}
     if(!c)c=L.sort((a,b)=>pe(a)-pe(b))[0];xLog(`sacrificou ${c.n} (${v.nm})`);xMorre(c);}
   xVarre();xSobe();xTudo();}
-function xEvAplica(v){const e=X.eu;if(v.alA)X.__alA=v.alA;if(v.tcA)X.__tcA=v.tcA;
+function xEvAplica(v){const e=X.eu;X.__itA=null;if(v.alA)X.__alA=v.alA;if(v.tcA)X.__tcA=v.tcA;
   if(v.op==='compra'){for(let q=0;q<v.n;q++)if(e.bib.length)e.mao.push(e.bib.shift());}
   else if(v.op==='vida')e.vida+=(v.sk&&v.d<0)?-xDnT(xEscF(v.sk,-v.d,v.de)):v.d;
   else if(v.op==='carta'){const c=e.campo.find(q=>q.k===v.k);if(c){X.__dsn=v.sn||'';xEfCarta(c,v.o,v.n,v.x);X.__dsn='';}}
