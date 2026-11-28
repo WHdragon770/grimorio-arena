@@ -828,6 +828,32 @@ kbd{display:inline-block;padding:0 5px;border:1px solid var(--linha);border-bott
 .x1-plac{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.x1-quem{display:grid;margin-right:6px}.x1-quem small{color:var(--fraco)}
 .x1-pt{display:inline-grid;grid-template-columns:auto auto auto;align-items:center;gap:4px;background:var(--sup2);border-radius:10px;padding:4px 8px}
 .x1-pt b{font-size:1.35rem;min-width:2ch;text-align:center}.x1-pt small{grid-column:1/-1;text-align:center;color:var(--fraco);font-size:.7rem}
+.dgchip{cursor:pointer;border:1px solid color-mix(in srgb,var(--ouro) 45%,transparent)}.dgchip b{font-size:1rem}.dgchip:hover{background:var(--hover)}
+.dgm{position:relative;margin:10px 0 6px;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--ouro) 8%,var(--sup2)),var(--sup) 75%);border:1px solid var(--linha);border-radius:14px;overflow:hidden}
+.dgm svg{position:absolute;inset:0;width:100%;height:100%}.dgm line{stroke:var(--linha);stroke-width:2;stroke-dasharray:4 4}.dgm line.on{stroke:var(--ouro);stroke-dasharray:none}
+.dgs{position:absolute;transform:translateX(-50%);box-sizing:border-box;padding:7px 9px;background:var(--sup);border:1px solid var(--linha);border-radius:10px;display:flex;flex-direction:column;gap:2px;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.dgs b{font-size:.78rem;line-height:1.15;color:var(--tinta);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dgs small{font-size:.68rem;line-height:1.2;color:var(--suave);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.dgm.mini .dgs{padding:4px 7px;justify-content:center}.dgm.mini .dgs b{font-size:.68rem}
+.dgs.fim{border-color:var(--ouro);background:color-mix(in srgb,var(--ouro) 10%,var(--sup))}.dgs.fim b{color:var(--ouro)}
+.dgs.ja{border-color:color-mix(in srgb,var(--ouro) 55%,var(--linha))}
+.dgs.tem{box-shadow:0 0 0 2px var(--ouro),0 6px 18px var(--sombra,rgba(0,0,0,.4))}
+.dgs.novo{animation:dgPul 1.1s ease-in-out 3}
+.dgs.pode{cursor:pointer;border-color:var(--ouro);box-shadow:0 0 0 2px color-mix(in srgb,var(--ouro) 60%,transparent),0 0 16px color-mix(in srgb,var(--ouro) 40%,transparent);animation:dgPul 1.6s ease-in-out infinite}.dgs.pode:hover,.dgs.pode:focus-visible{transform:translateX(-50%) scale(1.05);outline:none}
+@keyframes dgPul{50%{box-shadow:0 0 0 4px var(--ouro),0 0 22px color-mix(in srgb,var(--ouro) 70%,transparent)}}
+.dgp{position:absolute;top:4px;right:5px;display:flex;gap:2px}
+.dgp i,.dgleg i,.dgavt>i{font-style:normal;display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--pc);color:#15130f;font-weight:700;font-size:.7rem;box-shadow:0 0 0 2px var(--sup),0 2px 6px rgba(0,0,0,.5)}
+.dgm.mini .dgp i{width:16px;height:16px;font-size:.6rem}
+.dgcab{display:flex;align-items:center;gap:10px}.dgcab>div{display:flex;flex-direction:column;min-width:0}.dgcab b{font-size:1rem}.dgcab small{color:var(--fraco);font-size:.74rem}
+.dgic{font-size:1.5rem;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;background:var(--sup2);border:1px solid var(--linha)}
+.dgabas{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 12px}.dgabas button{border-radius:999px;padding:6px 12px}.dgabas button.on{background:var(--ouro);color:var(--sobre-ouro);border-color:var(--ouro)}.dgabas em{font-style:normal;font-weight:700;margin-left:4px}
+.dgleg{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:.8rem;color:var(--suave);margin:6px 2px 2px}.dgleg span{display:inline-flex;align-items:center;gap:6px}
+.dgnota{margin:8px 0 0}
+.dgesc{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:12px;padding:6px 0}
+.dgcard{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--linha);border-radius:14px;background:var(--sup2)}.dgcard>button{margin-top:auto}.dgcard.trava{opacity:.55}.dgcard.trava .nota{text-align:center;margin:auto 0 0}
+#x1-dgav{position:fixed;right:16px;bottom:16px;z-index:60;width:min(340px,calc(100vw - 32px));padding:12px 14px;background:var(--sup);border:1px solid var(--ouro);border-radius:16px;box-shadow:0 14px 40px rgba(0,0,0,.5);cursor:pointer;transform:translateY(140%);opacity:0;transition:transform .35s cubic-bezier(.2,.9,.3,1.2),opacity .25s;pointer-events:none}
+#x1-dgav.on{transform:none;opacity:1;pointer-events:auto}#x1-dgav .dgx{position:absolute;top:6px;right:6px}#x1-dgav>small{display:block;text-align:center;font-size:.7rem}
+.dgavt{display:flex;gap:10px;align-items:center;padding-right:26px}.dgavt>div{display:flex;flex-direction:column}.dgavt b{font-size:.86rem}.dgavt small{color:var(--suave);font-size:.76rem}
+@media (prefers-reduced-motion:reduce){.dgs.novo,.dgs.pode{animation:none}#x1-dgav{transition:none}}
 .x1-pt button{min-height:30px;width:30px;padding:0;border-radius:8px}.x1-pt.vd b{color:var(--bom)}.x1-pt.vn b{color:#9c6bff}.x1-pt.dcm b{color:var(--mau)}
 .x1-zonas{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.x1-zonas>span{padding:6px 10px;background:var(--sup2);border-radius:8px;color:var(--suave)}
 .x1-campo{display:grid;gap:8px;min-height:130px;padding:10px;border-radius:10px;background:var(--bg)}
@@ -5533,7 +5559,7 @@ function fgConta2(b,ctx){let m;const e=X.eu||{campo:[],bib:[],cem:[],mao:[]};if(
   if(b==='Count$YouDrewThisTurn')return {q:'cmpT'};if(b==='PlayerCountPropertyYou$CardsDiscardedThisTurn')return {q:'dscT'};/* Count\$YouDrewThisTurn$ */
   if(m=b.match(/^Count\$LastStateBattlefieldWithFallback (.+)$/))return fgTodos().filter(c=>fgValid(c,m[1],ctx)).length;
   if(m=b.match(/^Count\$(?:Bargained|Bargain)\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return !!(c&&c.barg);},m[1],m[2]);
-  if(b==='Count$TotalCommanderCastFromCommandZone')return e.imp||0;if(b==='PlayerCountPlayers$Amount')return Math.max(2,((X.sala||{}).jog||[]).length);
+  if(b==='Count$TotalCommanderCastFromCommandZone')return e.imp||0;if(b==='PlayerCountPlayers$Amount')return Math.max(2,((X.sala||{}).jog||[]).length);if(/^PlayerCountPlayers\$HighestValidGraveyard Card(\.YouOwn)?$/.test(b))return Math.max((e.cem||[]).length,...Object.values(X.ops||{}).map(o=>((o&&o.cem)||[]).length));
   if(b==='PlayerCountPropertyYou$LandsPlayed')return (typeof xVez==='function'&&xVez())?(e.ter||0):0;
   if(m=b.match(/^Count\$Presence_([A-Z][a-z]+)\.(\d+)\.(\d+)$/)){const T=m[1],s0=src();return sim(()=>[...e.campo,...e.mao].some(c=>c!==s0&&new RegExp('\\b'+T+'\\b').test(xInfo(c).tipo||'')),m[2],m[3]);}
   if(m=b.match(/^Count\$wasCastFromExile\.(\d+)\.(\d+)$/))return sim(()=>{const c=src();return !!(c&&c.orig==='exi');},m[1],m[2]);
@@ -6345,14 +6371,14 @@ function xAplica(e,r){e.pool=r.pool;r.tap.forEach(([c])=>c.tap=1);if(r.vida)e.vi
 /* ---------- sincronizar ---------- */
 function xGanhouVida(n){{const tu=(X.sala||{}).turno;if(X.eu.vgtT!==tu){X.eu.vgtT=tu;X.eu.vgt=0;}X.eu.vgt+=n;}for(const c of X.eu.campo.slice()){if(c.tok&&!c.cp)continue;const m=xNorm(xInfo(c).tx,c.n).match(/Whenever you gain life, ([^\n]+)/i);if(m)xGatTx(c,m[1],'ganhou vida',{vida:n});}}
 function xSobe(){clearTimeout(X.tm);X.tm=setTimeout(()=>{xVidaT(X.eu);const e=X.eu;if(!e||!X.cod)return;if(e.__vv!=null&&e.vida<e.__vv)e.vpT=(X.sala||{}).turno||0;if(e.__vv!=null&&e.vida>e.__vv)xGanhouVida(e.vida-e.__vv);e.__vv=e.vida;const me=xUid(),r=xRef();
-  r.collection('pub').doc(me).set(xLimpo({nome:e.nome,deck:e.deck,vida:e.vida,ven:e.ven,anjoT:e.anjoT||0,surT:e.surT||0,vpT:e.vpT||0,dnT:e.dnT||null,pc:e.pc||{},dc:e.dc,imp:e.imp,mull:e.mull,nb:e.bib.length,nm:e.mao.length,campo:e.campo,cem:e.cem,exi:e.exi,cmdz:e.cmdz,pool:e.pool,ter:e.ter,tv:e.tv,tl:e.tl,gv:e.gv,fv:e.fv,evs:e.evs,prevC:e.prevC||[],prevD:e.prevD||[],escD:e.escD||[],atr:e.atr||[],emb:e.emb||[],protJ:e.protJ||[],tvO:e.tvO||0,mm:e.mm||[],ts:Date.now()})).catch(er=>xAv('Não sincronizou ('+(er.code||'erro')+')'));
+  r.collection('pub').doc(me).set(xLimpo({nome:e.nome,deck:e.deck,vida:e.vida,ven:e.ven,anjoT:e.anjoT||0,surT:e.surT||0,vpT:e.vpT||0,dnT:e.dnT||null,pc:e.pc||{},dc:e.dc,imp:e.imp,mull:e.mull,nb:e.bib.length,nm:e.mao.length,campo:e.campo,cem:e.cem,exi:e.exi,cmdz:e.cmdz,pool:e.pool,ter:e.ter,tv:e.tv,tl:e.tl,gv:e.gv,fv:e.fv,evs:e.evs,prevC:e.prevC||[],prevD:e.prevD||[],escD:e.escD||[],atr:e.atr||[],emb:e.emb||[],protJ:e.protJ||[],tvO:e.tvO||0,mm:e.mm||[],dg:e.dg||null,dgOk:e.dgOk||0,dgV:e.dgV||null,ts:Date.now()})).catch(er=>xAv('Não sincronizou ('+(er.code||'erro')+')'));
   r.collection('priv').doc(me).set(xLimpo({bib:e.bib,mao:e.mao,ts:Date.now()})).catch(()=>{});},200);}
 function xLog(t){if(!X.cod)return;xRef().collection('log').add({uid:xUid(),nome:X.eu?X.eu.nome:ctNome(xEuU()),t:String(t).slice(0,300),ts:Date.now()}).catch(()=>{});}
 function xSaiLocal(){if(!XBOT){const fs=document.querySelectorAll('.x1-botfr');if(fs.length){fs.forEach(f=>f.remove());window.__xmk=null;}}X.un.forEach(f=>{try{f();}catch(e){}});X.un=[];X.cod='';X.sala=null;X.eu=null;X.ops={};X.foco='';X.log=[];}
 function xTudo(){xPintaFase();xPintaOp();xPintaEu();}
 function xOuve(){const r=xRef(),me=xUid();
   X.un.push(r.onSnapshot(s=>{X.sala=s.data()||null;if(!X.eu)return xPinta();xTurno();xTudo();}));
-  X.un.push(r.collection('pub').onSnapshot(q=>{X.ops={};q.forEach(d=>{if(d.id!==me)X.ops[d.id]=d.data();});if(xVarre())xSobe();xTudo();if(X.lst&&X.lst.z.startsWith('op'))xListaPinta();},()=>{}));
+  X.un.push(r.collection('pub').onSnapshot(q=>{X.ops={};q.forEach(d=>{if(d.id!==me)X.ops[d.id]=d.data();});xDgVigia();if(xVarre())xSobe();xTudo();if(X.lst&&X.lst.z.startsWith('op'))xListaPinta();},()=>{}));
   X.un.push(r.collection('log').orderBy('ts','desc').limit(80).onSnapshot(q=>{X.log=q.docs.map(d=>d.data()).reverse();xPintaLog();},()=>{}));}
 async function xCriaBot(nb){nb=nb===3?3:1;const sel=$('#x1-botdeck'),ds=BK.lst.filter(d=>d.cmd&&d.c&&d.c.length);if(!ds.length)return xAv('Monte um deck com comandante primeiro (Meus decks).');
   let id=sel?sel.value:'';if(!id||id==='?')id=ds[Math.random()*ds.length|0].id;window.__xmk=xMock();const me=xUid()||(CT.u?CT.u.uid:'voce');
@@ -7846,7 +7872,7 @@ function xVida(campo,d){const e=X.eu;const de=X.vt[campo]?X.vt[campo].de:e[campo
   const rot={vida:'vida',ven:'veneno',dc:'dano de comandante recebido'}[campo];
   X.vt[campo]={de,tm:setTimeout(()=>{const a=e[campo];delete X.vt[campo];if(a!==de)xLog(`${rot}: ${de} → ${a}`);},1500)};xSobe();xPintaEu();}
 async function xAtkTodas(){const e=X.eu;if(!e)return;const L=e.campo.filter(c=>!c.atk&&xPodeAtk(c));if(!L.length)return xAv('Nenhuma criatura pode atacar agora.');const us=xOpsL().filter(u=>!xMorto(X.ops[u]));let u=us[0]||xOutro();if(us.length>1&&!XBOT){const q=await xMarca('Atacar com todas: qual jogador?',us.map((x,j)=>({k:x,rot:(X.ops[x]||{}).nome||'jogador',on:j===0?1:0})),1,1);if(!q)return;u=q[0];}for(const c of L)await xAcao('campo',c.k,'atk:P:'+u);xLog(`atacou com todas (${L.length}) em ${xNomeU(u)}`);xSobe();xTudo();}
-function xBotao(a){const e=X.eu,s=X.sala||{},me=xUid();if(a==='atktodas')return xAtkTodas();
+function xBotao(a){const e=X.eu,s=X.sala||{},me=xUid();if(String(a).startsWith('dg:'))return xDgVer(a.slice(3)||me);if(a==='atktodas')return xAtkTodas();
   if(a==='auto'){X.auto=X.auto?0:1;X.autoI=(s.turno||0)+'.'+(s.fase||0)+'.'+s.vez;if(X.auto)xLog('⏩ automático até a etapa Final');return xPintaFase();}
   if(a==='criar')return xCria();if(a==='criar4')return xCria(4);if(a==='bot')return xCriaBot();if(a==='bot3')return xCriaBot(3);if(a==='comecar')return xComeca();
   if(a==='link'){const u=location.origin+location.pathname+'#x1/'+X.cod;navigator.clipboard.writeText(u).then(()=>bToast('Link copiado: '+u),()=>prompt('Copie o link:',u));return;}
@@ -7921,8 +7947,8 @@ function xCampo(l,z,op){const top=l.filter(c=>!(c.an&&xExiste(c.an)));
   const r=[f(cri,' cri','Criaturas'),ter.length||ou.length?`<div class="x1-fila ter" aria-label="Terrenos e outras permanentes">${grp(ter)}${grp(ou)}</div>`:''];return (op?r.reverse():r).join('')||'<p class="nota">Campo vazio.</p>';}
 function xPoolH(p,meu){const l=['W','U','B','R','G','C'].filter(k=>(p||{})[k]>0);return `<span class="x1-pool" title="Mana solta (some ao mudar de fase)"><small>Mana</small>${l.map(k=>`<span>${SV(k)}${p[k]>1?'×'+p[k]:''}</span>`).join('')||'<span class="fraca">0</span>'}${meu&&l.length?'<button data-x="limpa" title="Esvaziar">✕</button>':''}</span>`;}
 const PCN={energy:'energia',experience:'experiência',rad:'radiação',ticket:'bilhete'};
-function xPlacar(e,meu){const x=(k,rot,cl)=>(e[k]||0)>0?`<span class="x1-pt ${cl}" title="${rot}"><b>${e[k]}</b><small>${rot}</small></span>`:'';
-  return `<div class="x1-plac"><span class="x1-av${meu?' eu':''}" title="Vida"><i>${h((e.nome||'?').trim()[0]||'?').toUpperCase()}</i><b class="x1-vida">${e.vida||0}</b></span><div class="x1-quem"><b>${h(e.nome)}</b><small>${h(e.deck||'')}</small></div>${x('ven','veneno','vn')}${x('dc','dano cmd','dcm')}${Object.entries(e.pc||{}).filter(q=>q[1]>0).map(([k,v])=>`<span class="x1-pt pc" title="${h(PCN[k]||k)}"><b>${v}</b><small>${h(PCN[k]||k)}</small></span>`).join('')}${xPoolH(e.pool,meu)}</div>`;}
+function xPlacar(e,meu,u){const x=(k,rot,cl)=>(e[k]||0)>0?`<span class="x1-pt ${cl}" title="${rot}"><b>${e[k]}</b><small>${rot}</small></span>`:'';
+  return `<div class="x1-plac"><span class="x1-av${meu?' eu':''}" title="Vida"><i>${h((e.nome||'?').trim()[0]||'?').toUpperCase()}</i><b class="x1-vida">${e.vida||0}</b></span><div class="x1-quem"><b>${h(e.nome)}</b><small>${h(e.deck||'')}</small></div>${x('ven','veneno','vn')}${x('dc','dano cmd','dcm')}${Object.entries(e.pc||{}).filter(q=>q[1]>0).map(([k,v])=>`<span class="x1-pt pc" title="${h(PCN[k]||k)}"><b>${v}</b><small>${h(PCN[k]||k)}</small></span>`).join('')}${xDgChip(e,u)}${xPoolH(e.pool,meu)}</div>`;}
 function xPintaFase(){const el=$('#x1-fase');if(!el)return;const s=X.sala||{},me=xUid(),eu=s.vez===me,f=s.fase||0,e=X.eu||{},o=X.op;
   if(!s.turno){const nj=(s.jog||[]).length,np=Object.keys(X.ops||{}).length+(X.eu?1:0),pr=X.eu&&o&&np>=nj,mx=xMax();
     el.innerHTML=`<div class="x1-fz"><span>${pr?(mx>2?`${np} na mesa${np<mx?` (cabem ${mx}, dá pra esperar mais)`:''}.`:'Os dois estão na mesa.')+' Quem quiser, faz mulligan agora.':mx>2?`Mesão: ${np} de ${mx} prontos. Esperando o pessoal escolher o deck.`:'Esperando os dois escolherem o deck.'}</span><span class="x1-esp"></span>${pr?'<button class="prim" data-x="sorteia">🎲 Sortear quem começa</button>':''}</div>`;return;}
@@ -7941,7 +7967,7 @@ function xPintaFase(){const el=$('#x1-fase');if(!el)return;const s=X.sala||{},me
   if(!xMorto(e)||xMax()<3)ac+=`<button class="x1-auto${X.auto?' on':''}" data-x="auto" title="Igual ao Encerrar turno do Arena: passa prioridade e fases sozinho, deixa os efeitos resolverem e para na etapa Final (sua ou do oponente). Bloqueio e escolhas obrigatórias ainda perguntam.">${X.auto?'⏸ Automático (parar)':'⏩ Deixar acontecer'}</button>`;
   const mg=s.mag&&Date.now()-s.mag.ts<120000?`<span class="x1-mag" data-xf="${h(s.mag.n)}">✨ ${h(xNomeU(s.mag.de))} conjurou <b>${h(s.mag.n)}</b></span>`:'';
   el.innerHTML=`<div class="x1-fz${eu?' eu':''}"><b>Turno ${s.turno} · ${eu?'Sua vez':'vez de '+h(xNomeU(s.vez))}</b><ol class="x1-fs">${FASES.map((n,j)=>`<li class="${j===f?'on':j<f?'ja':''}">${n}</li>`).join('')}</ol><span class="x1-esp"></span>${ac}</div>${P.length?`<div class="x1-pilha"><small>Pilha (o último resolve primeiro)</small>${P.map(p=>`<span class="x1-pi${p.de===me?' eu':''}" data-xf="${h(p.nm)}">${p.img?`<img src="${h(p.img)}" alt="">`:''}<b>${h(p.nm)}</b><small>${p.tipo==='mag'?'mágica':p.tipo==='etb'||p.tipo==='atq'?'gatilho':'habilidade'} de ${h(xNomeU(p.de))}${(p.al||[]).length?' → '+p.al.map(t=>h(xAlvoNome(t))).join(', '):''}</small></span>`).join('')}</div>`:''}${dica||mg?`<p class="x1-dica">${dica}${mg}</p>`:''}`;}
-function xOpH(o,u){return `<div class="x1-barra">${xPlacar(o)}<div class="x1-zonas"><span>✋ Mão <b>${o.nm}</b></span><span>📚 Grimório <b>${o.nb}</b></span><button data-x="opcem">🪦 Cemitério <b>${(o.cem||[]).length}</b></button><button data-x="opexi">✖ Exílio <b>${(o.exi||[]).length}</b></button></div></div>
+function xOpH(o,u){return `<div class="x1-barra">${xPlacar(o,0,u||xOutro())}<div class="x1-zonas"><span>✋ Mão <b>${o.nm}</b></span><span>📚 Grimório <b>${o.nb}</b></span><button data-x="opcem">🪦 Cemitério <b>${(o.cem||[]).length}</b></button><button data-x="opexi">✖ Exílio <b>${(o.exi||[]).length}</b></button></div></div>
    ${(o.cmdz||[]).length?`<div class="x1-cmd"><small>Zona de comando · imposto +${(o.imp||0)*2}</small>${o.cmdz.map(c=>xC(c,'opcmdz')).join('')}</div>`:''}<div class="x1-campo">${xCampo(o.campo||[],'opcampo',1)}</div>`;}
 function xPintaOps(el){const s=X.sala||{},me=xUid(),j=s.jog||[],i=Math.max(0,j.indexOf(me)),f=xOutro(),L=[];
   for(let q=1;q<xMax();q++){const u=j[(i+q)%Math.max(j.length,1)];L.push(q<j.length&&u!==me?u:'');}
@@ -7957,7 +7983,7 @@ function xPintaLog(){const el=$('#x1-log');if(!el)return;const me=xUid();
   el.innerHTML=X.log.map(l=>`<p class="${l.uid===me?'eu':''}"><b>${h(l.nome)}</b> ${xSym(h(l.t))}</p>`).join('')||'<p class="fraca">Nada ainda. Tudo que vocês fizerem aparece aqui.</p>';el.scrollTop=el.scrollHeight;}
 function xPintaEu(){const e=X.eu,el=$('#x1-eu');if(!el||!e)return;const s=X.sala||{};
   el.innerHTML=`<div class="x1-campo">${xCampo(e.campo,'campo')}</div>
-   <div class="x1-barra">${xPlacar(e,1)}<div class="x1-zonas">
+   <div class="x1-barra">${xPlacar(e,1,xUid())}<div class="x1-zonas">
     <button data-x="ficha">✚ Ficha</button><button data-x="cem">🪦 Cemitério <b>${e.cem.length}</b></button><button data-x="exi">✖ Exílio <b>${e.exi.length}</b></button>
     <span>📚 Grimório <b>${e.bib.length}</b></span>${s.turno?'':'<button data-x="mull">↻ Mulligan</button>'}<button data-x="livre" data-xl>⚙ Efeitos</button></div></div>
    ${e.cmdz.length?`<div class="x1-cmd"><small>Zona de comando · imposto +${e.imp*2}</small>${e.cmdz.map(c=>xC(c,'cmdz')).join('')}</div>`:''}
@@ -8125,12 +8151,13 @@ async function xCastigo(v){const e=X.eu;let pagou=0;
   else if(v.alt==='sac'){const L=e.campo.filter(c=>xInfo(c).cri||xInfo(c).land||fgTem(c,'Artifact'));if(L.length&&(XBOT?e.vida<=v.n+2:confirm(`${v.nm}: sacrificar artefato, criatura ou terreno pra não perder ${v.n} de vida?`))){await xSacrEu({n:1,v:'Artifact,Creature,Land',d:'um artefato, criatura ou terreno'},v.nm,'');pagou=1;}}
   if(!pagou){e.vida-=v.n;xLog(`perdeu ${v.n} de vida (${v.nm})`);}xSobe();xTudo();}
 async function xVenture(nm,und){const e=X.eu;let d=e.dg;
-  if(und&&(!d||!FGDG[d.d]))d=e.dg={d:'Undercity',r:0};
-  else if(!d||!FGDG[d.d]){const ns=Object.keys(FGDG).filter(x=>x!=='Undercity'),q=XBOT?['0']:await xMarca(`${nm}: escolha a masmorra`,ns.map((x,i)=>({k:String(i),rot:`${FGDGPT[x]} (${FGDG[x].length} salas)`})),1,1);if(!q)return;
-    d=e.dg={d:ns[+q[0]],r:0};}
-  else{const sa=FGDG[d.d][d.r][2];let r=sa[0];if(sa.length>1&&!XBOT){const q=await xMarca(`${FGDGPT[d.d]}: escolha a próxima sala`,sa.map(x=>({k:String(x),rot:FGDG[d.d][x][0]+': '+FGDG[d.d][x][1]})),1,1);if(q)r=+q[0];}d.r=r;}
+  if(und&&(!d||!FGDG[d.d]))d=e.dg={d:'Undercity',r:0,p:[0]};
+  else if(!d||!FGDG[d.d]){const n=XBOT?Object.keys(FGDG)[0]:await xDgEscolhe(nm);if(!n||!FGDG[n])return;d=e.dg={d:n,r:0,p:[0]};}
+  else{const sa=FGDG[d.d][d.r][2];let r=sa[0];if(sa.length>1&&!XBOT){const q=await xDgSala(d);if(q!=null)r=q;}d.p=(d.p||[d.r]).concat(r);d.r=r;}
   const [sala,tx,sai]=FGDG[d.d][d.r];xLog(`${FGDGPT[d.d]}: entrou em ${sala} (${tx})`);
+  e.dgV={d:d.d,r:d.r,id:xId(),fim:sai.length?0:1};
   if(!sai.length){e.dgOk=(e.dgOk||0)+1;e.dg=null;xLog(`completou ${FGDGPT[d.d]}`);}
+  xDgAviso(xUid(),e.dgV);
   if(sala==='Throne of the Dead Three'){await xTrono();xSobe();xTudo();return;}
   xGatTx({n:sala,k:'',img:''},tx,'sala da masmorra');xSobe();xTudo();}
 async function xTrono(){const e=X.eu,s=X.sala||{},top=e.bib.slice(0,10);xLog('Trono dos Três Mortos: revelou '+(top.map(c=>c.n).join(', ')||'nada'));
@@ -8139,6 +8166,57 @@ async function xTrono(){const e=X.eu,s=X.sala||{},top=e.bib.slice(0,10);xLog('Tr
   xEmb(e.bib);xLog('embaralhou o grimório');}
 /* iniciativa: quem pega explora a Cidade Subterrânea; dano de combate rouba; manutenção explora de novo */
 function xIniPega(){const me=xUid(),id=xId();X.iniV=id;if(X.sala)X.sala.ini={u:me,id};xSala({ini:{u:me,id}});xLog('você pegou a iniciativa');setTimeout(()=>xVenture('Iniciativa',1),350);}
+
+/* ---------- ficha da masmorra: mapa com as salas, peça de cada jogador, aviso ao entrar ---------- */
+const FGDGTX={'Cave Entrance':'Vidência 1.','Goblin Lair':'Cria um Goblin 1/1 vermelho.','Mine Tunnels':'Cria um Tesouro.','Storeroom':'Criatura alvo ganha um marcador +1/+1.','Dark Pool':'Cada oponente perde 1 de vida e você ganha 1.','Fungi Cavern':'Criatura alvo recebe -4/-0 até o seu próximo turno.','Temple of Dumathoin':'Compre uma carta.',
+ 'Yawning Portal':'Ganhe 1 de vida.','Dungeon Level':'Vidência 1.','Goblin Bazaar':'Cria um Tesouro.','Twisted Caverns':'Criatura alvo não pode atacar até o seu próximo turno.','Lost Level':'Vidência 2.','Runestone Caverns':'Exila as 2 do topo. Pode jogá-las neste turno.',"Muiral's Graveyard":'Cria dois Esqueletos 1/1 pretos.','Deep Mines':'Vidência 3.',"Mad Wizard's Lair":'Compre três cartas.',
+ 'Trapped Entry':'Cada jogador perde 1 de vida.','Veils of Fear':'Cada jogador perde 2 de vida, a menos que descarte uma carta.','Oubliette':'Descarte uma carta e sacrifique um artefato, uma criatura e um terreno.','Sandfall Cell':'Cada jogador perde 2, a menos que sacrifique artefato, criatura ou terreno.','Cradle of the Death God':'Cria The Atropal, Deus 4/4 preto com toque mortífero.',
+ 'Secret Entrance':'Busca um terreno básico pra mão.','Forge':'Criatura alvo ganha dois marcadores +1/+1.','Lost Well':'Vidência 2.','Trap!':'Jogador alvo perde 5 de vida.','Arena':'Provoca a criatura alvo.','Stash':'Cria um Tesouro.','Archives':'Compre uma carta.','Catacombs':'Cria um Esqueleto 4/1 preto com ameaçar.','Throne of the Dead Three':'Revela 10. Uma criatura entra com 3 marcadores +1/+1 e resistência a magia.'};
+const FGDGCOR=['#e8b24a','#5ca8d8','#e0694c','#62b377','#b58ad8','#d8d0b8'];
+const FGDGIC={'Lost Mine of Phandelver':'⛏','Dungeon of the Mad Mage':'🧙','Tomb of Annihilation':'💀','Undercity':'🏛'};
+function xDgNiv(nm){const S=FGDG[nm],L=S.map(()=>0);for(let i=0;i<S.length;i++)for(const j of S[i][2])L[j]=Math.max(L[j],L[i]+1);return L;}
+function xDgCor(u){const j=((X.sala||{}).jog)||[];const i=j.indexOf(u);return FGDGCOR[(i<0?0:i)%FGDGCOR.length];}
+function xDgGente(){const me=xUid(),L=[];if(X.eu)L.push({u:me,o:X.eu});for(const [u,o] of Object.entries(X.ops||{}))if(o)L.push({u,o});return L.map(({u,o})=>({u,nome:u===me?'Você':(o.nome||'Jogador'),ini:((o.nome||'?').trim()[0]||'?').toUpperCase(),cor:xDgCor(u),d:o.dg&&FGDG[o.dg.d]?o.dg:null,ok:o.dgOk||0,eu:u===me}));}
+/* mapa: op.novo = sala que acabou de entrar (pulsa), op.pode = salas clicáveis, op.mini = versão compacta */
+function xDgMapa(nm,op={}){const S=FGDG[nm],L=xDgNiv(nm),nl=Math.max(...L)+1,rh=op.mini?58:96,bh=op.mini?40:70,H=nl*rh,me=xUid(),G=xDgGente();
+  const por=[];L.forEach((l,i)=>(por[l]=por[l]||[]).push(i));const P=S.map((_,i)=>{const n=por[L[i]].length,q=por[L[i]].indexOf(i);return {x:(q+.5)/n*100,y:L[i]*rh+(rh-bh)/2,w:100/n-3};});
+  const eu=G.find(g=>g.eu),vis=new Set(eu&&eu.d&&eu.d.d===nm?(eu.d.p||[eu.d.r]):[]);
+  let ln='';S.forEach((s,i)=>s[2].forEach(j=>{const a=P[i],b=P[j],on=vis.has(i)&&vis.has(j);ln+=`<line x1="${a.x}" y1="${a.y+bh}" x2="${b.x}" y2="${b.y}" class="${on?'on':''}" vector-effect="non-scaling-stroke"/>`;}));
+  const sl=S.map((s,i)=>{const pc=G.filter(g=>g.d&&g.d.d===nm&&g.d.r===i),fim=!s[2].length,pd=(op.pode||[]).includes(i);
+    return `<div class="dgs${fim?' fim':''}${vis.has(i)?' ja':''}${pc.length?' tem':''}${op.novo===i?' novo':''}${pd?' pode':''}" ${pd?`data-dgr="${i}" role="button" tabindex="0"`:''} style="left:${P[i].x}%;top:${P[i].y}px;height:${bh}px;width:min(${P[i].w}%,220px)"><b>${fim?'★ ':''}${h(s[0])}</b>${op.mini?'':`<small>${h(FGDGTX[s[0]]||s[1])}</small>`}${pc.length?`<span class="dgp">${pc.map(g=>`<i style="--pc:${g.cor}" title="${h(g.nome)}">${h(g.ini)}</i>`).join('')}</span>`:''}</div>`;}).join('');
+  return `<div class="dgm${op.mini?' mini':''}" style="height:${H}px"><svg viewBox="0 0 100 ${H}" preserveAspectRatio="none" aria-hidden="true">${ln}</svg>${sl}</div>`;}
+function xDgCab(nm){const S=FGDG[nm];return `<div class="dgcab"><span class="dgic">${FGDGIC[nm]||'🗝'}</span><div><b>${h(FGDGPT[nm]||nm)}</b><small>${h(nm)} · ${S.length} salas · prêmio: ${h(S[S.length-1][0])}</small></div></div>`;}
+function xDgLeg(){const G=xDgGente();return `<div class="dgleg">${G.map(g=>`<span><i style="--pc:${g.cor}">${h(g.ini)}</i>${h(g.nome)}: ${g.d?`${h(FGDGPT[g.d.d])}, sala ${h(FGDG[g.d.d][g.d.r][0])}`:'fora da masmorra'}${g.ok?` · <b>${g.ok}</b> completa${g.ok>1?'s':''}`:''}</span>`).join('')}</div>`;}
+/* ver todas: abas com as 4 masmorras */
+function xDgVer(u){const G=xDgGente(),g=G.find(x=>x.u===u)||G.find(x=>x.d)||G[0],ns=Object.keys(FGDG);let at=(g&&g.d&&g.d.d)||ns[0];const dl=bDlg('x1-dgv');
+  const pinta=()=>{dl.innerHTML=`<div class="b-dlgtop"><h3>🗝 Masmorras</h3><button class="b-x" data-xfecha aria-label="Fechar">✕</button></div>
+   <div class="dgabas">${ns.map(n=>{const k=G.filter(x=>x.d&&x.d.d===n).length;return `<button class="${n===at?'on':''}" data-dga="${h(n)}">${FGDGIC[n]} ${h(FGDGPT[n])}${k?` <em>${k}</em>`:''}</button>`;}).join('')}</div>
+   ${xDgCab(at)}${at==='Undercity'?'<p class="nota dgnota">A Cidade Subterrânea só entra pela iniciativa (ou carta que diga "venture into Undercity").</p>':''}${xDgMapa(at)}${xDgLeg()}`;};
+  pinta();dl.onclick=ev=>{const a=ev.target.closest('[data-dga]');if(a){at=a.dataset.dga;pinta();return;}if(ev.target.closest('[data-xfecha]'))dl.close();};if(!dl.open)dl.showModal();}
+/* escolher a masmorra (as 4 na tela, Cidade Subterrânea travada fora da iniciativa) */
+function xDgEscolhe(nm){const p=XQE.then(()=>new Promise(res=>{const dl=bDlg('x1-dge');dl.style.width='min(1180px,calc(100vw - 32px))';let ok=0;const ns=Object.keys(FGDG);
+  dl.innerHTML=`<div class="b-dlgtop"><h3>${h(nm)}: escolha a masmorra</h3><button class="b-x" data-xfecha aria-label="Fechar">✕</button></div>
+   <div class="dgesc">${ns.map(n=>{const tr=n==='Undercity';return `<div class="dgcard${tr?' trava':''}">${xDgCab(n)}${xDgMapa(n,{mini:1})}${tr?'<p class="nota">Só pela iniciativa</p>':`<button class="b-pri" data-dgn="${h(n)}">Entrar ▶</button>`}</div>`;}).join('')}</div>`;
+  const fim=v=>{ok=1;dl.onclose=()=>res(v);dl.close();};
+  dl.onclick=ev=>{const b=ev.target.closest('[data-dgn]');if(b)return fim(b.dataset.dgn);if(ev.target.closest('[data-xfecha]'))dl.close();};dl.onclose=()=>{if(!ok)res(null);};dl.showModal();}));XQE=p.catch(()=>{});return p;}
+/* escolher a próxima sala clicando no mapa */
+function xDgSala(d){const p=XQE.then(()=>new Promise(res=>{const dl=bDlg('x1-dge');dl.style.width='';let ok=0;const sa=FGDG[d.d][d.r][2];
+  dl.innerHTML=`<div class="b-dlgtop"><h3>${FGDGIC[d.d]} ${h(FGDGPT[d.d])}: escolha a próxima sala</h3><button class="b-x" data-xfecha aria-label="Fechar">✕</button></div>
+   <p class="nota dgnota">Toque numa das salas brilhando.</p>${xDgMapa(d.d,{pode:sa})}${xDgLeg()}`;
+  const fim=v=>{ok=1;dl.onclose=()=>res(v);dl.close();};
+  dl.onclick=ev=>{const b=ev.target.closest('[data-dgr]');if(b)return fim(+b.dataset.dgr);if(ev.target.closest('[data-xfecha]'))dl.close();};
+  dl.onkeydown=ev=>{const b=ev.target.closest&&ev.target.closest('[data-dgr]');if(b&&(ev.key==='Enter'||ev.key===' ')){ev.preventDefault();fim(+b.dataset.dgr);}};
+  dl.onclose=()=>{if(!ok)res(null);};dl.showModal();}));XQE=p.catch(()=>{});return p;}
+/* aviso na tela quando alguém (você ou oponente) entra numa sala */
+function xDgAviso(u,v){if(XBOT||!v||!FGDG[v.d])return;const S=FGDG[v.d],sala=S[v.r],me=u===xUid(),nome=me?'Você':xNomeU(u);
+  let t=document.getElementById('x1-dgav');if(!t){t=document.createElement('div');t.id='x1-dgav';t.setAttribute('role','status');document.body.appendChild(t);}
+  t.innerHTML=`<button class="b-x dgx" aria-label="Fechar">✕</button><div class="dgavt"><i style="--pc:${xDgCor(u)}">${h((nome||'?')[0].toUpperCase())}</i><div><b>${h(nome)} ${v.fim?'completou':'entrou em'} ${FGDGIC[v.d]} ${h(FGDGPT[v.d])}</b><small>${h(sala[0])}: ${h(FGDGTX[sala[0]]||sala[1])}</small></div></div>${xDgMapa(v.d,{mini:1,novo:v.r})}<small class="fraca">Toque pra ver o mapa inteiro</small>`;
+  t.className='on';clearTimeout(t._tm);const so=()=>{t._tm=setTimeout(()=>{if(document.querySelector('dialog[open]'))return so();t.className='';},6000);};so();
+  t.onclick=ev=>{t.className='';if(ev.target.closest('.dgx'))return;xDgVer(u);};}
+function xDgVigia(){X.dgVisto=X.dgVisto||{};for(const [u,o] of Object.entries(X.ops||{})){const v=o&&o.dgV;if(!(u in X.dgVisto)){X.dgVisto[u]=v?v.id:0;continue;}if(v&&X.dgVisto[u]!==v.id){X.dgVisto[u]=v.id;xDgAviso(u,v);}}}
+/* ficha no placar */
+function xDgChip(e,u){const d=e.dg&&FGDG[e.dg.d]?e.dg:null,ok=e.dgOk||0;if(!d&&!ok)return '';
+  return `<span class="x1-pt dgchip" data-x="dg:${h(u||'')}" role="button" tabindex="0" title="Ver a masmorra">${d?`<b>${FGDGIC[d.d]} ${d.r+1}/${FGDG[d.d].length}</b><small>${h(FGDG[d.d][d.r][0])}</small>`:`<b>🏆 ${ok}</b><small>masmorra${ok>1?'s':''}</small>`}</span>`;}
 
 /* ---------- ARENA VISUAL v2: animações da mesa ---------- */
 const XV={snap:null,raf:0,turno:null,vez:null,fase:null,np:null,pri:1,vida:null,fila:[],tp:0};
